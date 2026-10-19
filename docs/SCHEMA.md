@@ -238,3 +238,18 @@ Ostaje:
     lanac s nacionalnom cijenom ili ga treba isključiti?
 10. **Pokrivenost**: koliko dana povijesti vrijedi držati (trend, `best_price_30` sami izračunati)?
     Svaka arhiva ima oko 123 MB.
+
+## Dnevno ažuriranje (`scripts/update.py`)
+
+- Popis arhiva: `https://api.cijene.dev/v0/list` → `{"archives": [{"date", "url", "size", "updated"}]}`.
+  Obrazac URL-a je stabilan: `https://api.cijene.dev/v0/archive/YYYY-MM-DD.zip`, a arhiva za dan D
+  objavljuje se oko 22 h (20.10. u 13 h još nije postojala, 404). Ako popis nije dostupan, skripta
+  ispituje obrazac URL-a za zadnjih 7 dana.
+- Tijek: preuzimanje (`data/raw/<datum>.zip`, provjera veličine) → raspakiravanje u svježu mapu →
+  izgradnja u privremenu bazu → provjera prema prethodnoj arhivi (pad broja lanaca ili redaka cijena
+  > 20 % prekida, izlaz 2) → povijest → `os.replace` (atomarno).
+- Nove tablice: `clean.archive_stats (date, chain, n_stores, n_products, n_prices)` i
+  `clean.price_history (date, chain, store_id, product_id, price, special_price, price_eff,
+  price_per_unit, per_unit)`, za zadnjih 30 dana (`--keep-days`).
+- Izlazni kodovi: 0 uspjeh ili već učitano, 1 greška, 2 provjera nije prošla.
+- `uv run python scripts/update.py --print-schedule` ispisuje cron i systemd timer; ništa se ne instalira.
