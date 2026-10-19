@@ -2,7 +2,8 @@
 
 Analizirana arhiva: `https://api.cijene.dev/v0/archive/2026-10-19.zip` (123 MB zip, ~250 MB DuckDB).
 Skripte: `scripts/explore.py` (pregled CSV-ova), `scripts/load.py` (učitavanje u DuckDB),
-`scripts/probe_queries.py` (probni upiti).
+`scripts/build_clean.py` (čiste tablice), `scripts/probe_queries.py` (probni upiti iz Koraka 0),
+`scripts/make_fixture.py` (fixture za testove). Odluke o čišćenju: [DECISIONS.md](DECISIONS.md).
 
 ## Struktura arhive
 
@@ -42,18 +43,82 @@ Svaki redak u `prices` ima odgovarajući proizvod i trgovinu (provjereno: 0 siro
 | akcijska cijena | `prices.special_price` | prazno ili `0.00` znači da akcije nema |
 | sidrena cijena | `prices.anchor_price` | cijena na dan 2.5.2025. (NN 75/2025) |
 | najniža cijena u 30 dana | `prices.best_price_30` | većina lanaca je ne popunjava |
-| datum | **nema stupca** | datum je samo u nazivu arhive; loader dodaje `price_date` |
+| datum | **nema stupca** | datum je samo u nazivu arhive; loader dodaje `date` (DATE) |
 
 ## DuckDB (`data/mealmeter.duckdb`)
 
-Učitano sirovo, bez normalizacije (`scripts/load.py`):
+```
+uv run python scripts/load.py data/raw/extracted 2026-10-19 data/mealmeter.duckdb   # sirove tablice
+uv run python scripts/build_clean.py                                                 # schema clean
+```
+
+### Sirove tablice (schema `main`, bez normalizacije)
 
 - `stores(chain, store_id, type, address, city, zipcode)`: 1.512 redaka
 - `products(chain, product_id, barcode, name, brand, category, unit, quantity)`: 477.526 redaka
-- `prices(chain, store_id, product_id, price, unit_price, best_price_30, anchor_price, special_price, price_date)`: 17.316.247 redaka
+- `prices(chain, store_id, product_id, price, unit_price, best_price_30, anchor_price, special_price, date)`: 17.316.247 redaka
 
 Svi identifikatori su `VARCHAR` (zbog vodećih nula). Cijene su `DECIMAL(10,2)`, a svaka neprazna
 vrijednost se uspješno parsirala.
+
+### Čiste tablice (schema `clean`, nad njima radi pretraga)
+
+**`clean.stores`** (1.512 redaka)
+
+| stupac | opis |
+|---|---|
+| chain, store_id, type, zipcode | kao u sirovim podacima |
+| address | Spar: bez sufiksa „87001 Spar“ |
+| city | izvorni grad; 2 Kauflandove trgovine popunjene iz adrese |
+| scope | `national` (dm, Lorenco: `store_id = 'all'`) ili `local` |
+| city_norm | `norm_text(city)`: mala slova, bez dijakritika |
+| city_canonical | grad nakon aliasa (Sesvete → Zagreb, Kaštel Stari → Kaštela) |
+| city_key | `norm_text(city_canonical)`, ključ za pretragu |
+
+**`clean.city_alias`** `(alias_norm, city)`: 19 aliasa, izvor je `CITY_ALIASES` u `normalize.py`.
+
+**`clean.products`** (477.526 redaka)
+
+| stupac | opis |
+|---|---|
+| chain, product_id, barcode, name, brand, category, unit, quantity | kao u sirovim podacima |
+| ean_norm | normalizirani EAN-13/EAN-8 (11/12/14 znamenki → EAN-13), NULL ako kod nije valjan |
+| ean_valid | kontrolna znamenka ispravna (446.394 + 7.189 = 453.583 proizvoda) |
+| ean_global | valjan i nije kod ograničene upotrebe (vaga/in-store: 7.189 nije globalno); grupira se samo po njima. 219.343 različitih globalnih EAN-ova |
+| name_norm | naziv: mala slova, bez dijakritika, `đ`/`dj` → `d`, interpunkcija → razmak |
+| pack_amount, pack_unit | gramatura: količina u `g`, `ml` ili `kom` |
+| pack_source | `name` (301.306), `unit` (Lidl, 6.142), `ean` (naslijeđeno od istog EAN-a, 19.656), NULL (150.422; uglavnom neprehrambeno i roba na vagu) |
+| unit_hint | `kg`/`l`: na što se (vjerojatno) odnosi lančev `unit_price` (iz `quantity`/`unit`) |
+
+**`clean.prices`** (16.401.076 redaka; iz 17.316.247 uklonjeno 907.165 duplikata i 8.006 redaka bez cijene)
+
+| stupac | opis |
+|---|---|
+| chain, store_id, product_id | jedinstveno (bez duplikata) |
+| date | DATE, dan iz naziva arhive |
+| price, special_price, unit_price, best_price_30, anchor_price | kao u sirovim podacima, ali `0.00` → NULL |
+| price_eff | cijena koju kupac plaća: `coalesce(special_price, price)` |
+| is_special | `special_price IS NOT NULL` |
+| price_per_unit, per_unit | cijena po `kg` / `l` / `kom` |
+| unit_confidence | `high` (iz gramature), `low` (iz lančevog `unit_price`), NULL. Ukupno 73,1 % high, 3,0 % low, 23,9 % bez cijene po jedinici |
+
+Kontrola gramature: naša cijena po kg/l (`high`) slaže se s lančevim `unit_price` (unutar 5 %) u
+84–97 % slučajeva kod većine lanaca (Konzum 95,8 %, Tommy 96,6 %, Lidl 92,2 %). Niske vrijednosti
+kod Branke (7,5 %), Stanića (14,7 %) i Žabca (4,4 %) potvrđuju da je njihov `unit_price` zapravo
+cijena pakiranja. Metro (66 %) prodaje kutije porcija („20G PODRAVKA DŽEM“ za 15,81 €).
+
+## Funkcije pretrage (`src/mealmeter/search.py`)
+
+- `find_products(query, city=None, limit=10)`: grupe proizvoda (po EAN-u ili po lancu i nazivu) s
+  poljima `id, ean, name, brand, pack, n_chains, n_stores, chains, price_min/max,
+  price_per_unit_min/max, per_unit, unit_confidence, any_special, has_national, date, date_hr`
+  i `note` kad grupa uključuje nacionalnu cijenu.
+- `get_prices(identifier, city=None, limit=50)`: identifier je EAN ili `lanac:product_id`. Po
+  trgovini vraća `chain, store_id, address, city, scope, product_id, ean, name, price_eff,
+  is_special, special_price, anchor_price, best_price_30, price_per_unit, per_unit,
+  unit_confidence, date, date_hr` i `note` za nacionalne cijene.
+- CLI: `uv run python -m mealmeter.cli find "brašno glatko" --city Osijek` i
+  `uv run python -m mealmeter.cli prices 3850104223624 --city Osijek` (`--json` za strojni izlaz).
 
 ## Zaključci
 
@@ -124,22 +189,22 @@ vrijednost se uspješno parsirala.
 
 ## Otvorena pitanja
 
-1. **Datum**: `prices` nema datum. Smijemo li pretpostaviti da su sve cijene iz arhive `D` važile na dan `D`?
-   Mape u zipu imaju vremena 21:30–21:57, pa je moguće da je ovo stanje s kraja dana.
+Riješeno u Koraku 1 (vidi [DECISIONS.md](DECISIONS.md)): datum (1), duplikati (3), normalizacija
+EAN-a (4), dm/Lorenco (6), gradovi i aliasi (7), Roto 0.00 (8: izbačeno), dijakritika u pretrazi (9).
+Ostaje:
+
 2. **Eurospin `price` vs. `special_price`**: drugačija semantika od ostalih lanaca. Je li to namjerno
    u cijene.dev ili greška u scraperu? Treba li to prijaviti uzvodno?
-3. **Duplikati**: kad se `unit_price`/`anchor_price` razlikuju za isti (store, product), koji red je točan?
-   Za sada uzimamo `min()`.
-4. **Normalizacija EAN-a**: treba li 11-znamenkaste kodove nadopuniti nulom na 12 znamenki, a EAN-13
-   koji počinju s `0` svesti na UPC? Na taj način se dodatno povezuju proizvodi među lancima.
-5. **Gramatura**: treba li `quantity` parsirati po lancu, uzimati gramaturu iz naziva ili kombinirati
-   oboje? Što kad se dva izvora ne slažu (Metro, Boso)?
-6. **dm i Lorenco** nemaju trgovine. Treba li ih prikazivati za svaki grad (ima li Lorenco uopće
-   nacionalnu prodaju?) ili ih isključiti iz pretrage po gradu?
-7. **Gradovi**: trebaju li „Sesvete“ i „Zagreb-Dubrava“ ulaziti u „Zagreb“? Treba li nam mapiranje
-   grad → županija ili poštanski broj za „u blizini“?
-8. **Roto `price = 0.00`** (4 %): je li proizvod nedostupan ili je cijena nepoznata? Takve retke za sada isključujemo.
-9. **Pretraga po nazivu**: kratice i nedostatak dijakritike (`BRAŠ.PŠ.`, `BRASNO`, `POD.` = Podravka)
-   traže normalizaciju (strip_accents, rječnik kratica) ili fuzzy/FTS pretragu.
+5. **Gramatura**: naziv je primarni izvor. Treba li dodati `quantity` kao treći izvor (srednja
+   pouzdanost)? Treba li tumačiti `10/1` kod jaja (10 komada) i Metroove kutije porcija
+   („40/1 24G“)? Danas se oboje preskače.
+7. **„U blizini“**: treba li mapiranje grad → županija ili poštanski broj, da manji grad bez
+   trgovina dobije rezultate iz susjednog?
+9. **Kratice u nazivima**: `BRAŠ.PŠ.` se sada pronalazi preko istog EAN-a kao „brašno“, ali proizvodi
+   bez EAN-a s kraticama se ne pronalaze. Treba li rječnik kratica ili fuzzy/FTS pretraga?
+11. **Relevantnost**: „mlijeko“ vraća i čokoladno i sojino mlijeko na istoj razini. Treba li
+    rječnik kategorija ili sinonima?
+12. **Lorenco** ima besmislene sidrene cijene i 46 % `unit_price = 0`. Je li to uopće maloprodajni
+    lanac s nacionalnom cijenom ili ga treba isključiti?
 10. **Pokrivenost**: koliko dana povijesti vrijedi držati (trend, `best_price_30` sami izračunati)?
     Svaka arhiva ima oko 123 MB.

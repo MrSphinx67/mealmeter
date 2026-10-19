@@ -1,2 +1,1 @@
-def main() -> None:
-    print("Hello from mealmeter!")
+"""Mealmeter: cijene namirnica u hrvatskim trgovinama (podaci: cijene.dev)."""
