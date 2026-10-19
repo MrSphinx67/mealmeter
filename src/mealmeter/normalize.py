@@ -201,3 +201,36 @@ def canonical_city(city: str | None) -> str | None:
     if city is None:
         return None
     return CITY_ALIASES.get(norm_text(city), city.strip())
+
+
+# --- Kategorije ----------------------------------------------------------------
+
+# (grupa, uzorci na početku riječi u norm_text(category)); prvo pravilo koje pogodi pobjeđuje.
+# Uzorci su u normaliziranom obliku: "dječja" -> "decja", "za djecu" -> "za decu".
+_CATEGORY_RULES = [
+    ("djeca", r"decj|decij|decu\b|deca\b|bebe|dojenc"),
+    ("ljubimci", r"ljubim|za pse|za macke"),
+    ("igracke", r"igrack"),
+    ("sunce", r"suncanj|zastita od sunca|spf"),
+    ("higijena", r"toaletn|higijen|tampon|ulosc|pelen|usta zubi|njega usana|zubn"),
+    ("kozmetika", r"kozmet|njega|sampon|tijelo|lice\b|kosa\b|mirisi|parfem|drogerij|dekorativ"),
+    ("kucanstvo", r"kucanstv|kucn|kucansk|domacinstv|sredstva za|sred za|cisc|ciisc|deterg|omeksiv|rublj|"
+                  r"posud|oprema|ambalaz|papirna|skolsk|uredsk|tekstil|obuc|uradi sam|svijec|neprehrana|"
+                  r"poklon|uredenje|foto\b|tisak|duhan|cigaret|zice|spuzve|krpe|gel za rublje"),
+    ("hrana", r"hran|namirnic|meso|mesn|mlijec|mlijek|sir|povrc|voc|kruh|pekar|tjestenin|riza|zitaric|"
+              r"zacin|konzerv|slatk|slan|grickal|keks|cokolad|bombon|smrz|svjez|delikat|riba|ulje|ocat|"
+              r"dorucak|kolac|kiselin|juhe|umaci|deserti|prehrana|program|tuna|odjel"),
+    ("pice", r"pic|sok|vod|vino|pivo|zestok|pjenus|napitc|kava|caj"),
+]
+
+
+def category_group(category: str | None) -> str | None:
+    """Normalizirana skupina kategorije lanca: hrana, pice, kozmetika, higijena, kucanstvo, djeca,
+    sunce, igracke, ljubimci, ostalo; None ako lanac ne daje kategoriju."""
+    if not category:
+        return None
+    text = norm_text(category)
+    for group, pattern in _CATEGORY_RULES:
+        if re.search(r"(^| )(?:" + pattern + ")", text):
+            return group
+    return "ostalo"

@@ -12,6 +12,8 @@ import yaml
 from mealmeter.normalize import norm_text
 
 STAPLES_PATH = Path(__file__).with_name("staples.yaml")
+# Skupine kategorija (normalize.category_group) čiji se proizvodi nikad ne vežu za namirnicu
+NONFOOD_GROUPS = ("kozmetika", "higijena", "kucanstvo", "djeca", "sunce", "igracke", "ljubimci")
 UNITS = ("kg", "l", "kom")
 
 
@@ -145,10 +147,13 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
     from mealmeter.build import _temp_table  # izbjegava kružni import
 
     staples = staples or load_staples()
+    # excluded: pogađa must_not_match -> cijela grupa (EAN) ispada iz namirnice.
+    # drop_reason: samo ovaj proizvod ispada (npr. neprehrambena kategorija lanca), grupa ostaje.
     con.execute("""
         CREATE OR REPLACE TABLE clean.product_staples (
-          chain VARCHAR, product_id VARCHAR, staple VARCHAR, excluded BOOLEAN)
+          chain VARCHAR, product_id VARCHAR, staple VARCHAR, excluded BOOLEAN, drop_reason VARCHAR)
     """)
+    nonfood = ", ".join(f"'{g}'" for g in NONFOOD_GROUPS)
     for st in staples.values():
         excl = "regexp_matches(name_norm, ?)" if st.exclude_regex else "false"
         params = ([st.exclude_regex] if st.exclude_regex else []) + [st.match_regex]
@@ -163,7 +168,8 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
             params.append(st.loose_regex)
         con.execute(
             f"""INSERT INTO clean.product_staples
-                SELECT chain, product_id, '{st.key}', {excl}
+                SELECT chain, product_id, '{st.key}', {excl},
+                       CASE WHEN category_group IN ({nonfood}) THEN 'kategorija:' || category_group END
                 FROM clean.products WHERE regexp_matches(name_norm, ?) {loose}""",
             params,
         )
@@ -171,7 +177,7 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
     rows = con.execute("""
         SELECT s.chain, s.product_id, s.staple, p.name
         FROM clean.product_staples s JOIN clean.products p USING (chain, product_id)
-        WHERE NOT s.excluded
+        WHERE NOT s.excluded AND s.drop_reason IS NULL
     """).fetchall()
 
     def attr_rows():
@@ -185,7 +191,9 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
     con.execute("CREATE OR REPLACE TABLE clean.product_attrs AS SELECT * FROM attrs_tmp")
     return {
         "staples": len(staples),
-        "matched": con.execute("SELECT count(*) FROM clean.product_staples WHERE NOT excluded").fetchone()[0],
+        "matched": con.execute(
+            "SELECT count(*) FROM clean.product_staples WHERE NOT excluded AND drop_reason IS NULL").fetchone()[0],
         "excluded": con.execute("SELECT count(*) FROM clean.product_staples WHERE excluded").fetchone()[0],
+        "dropped": con.execute("SELECT count(*) FROM clean.product_staples WHERE drop_reason IS NOT NULL").fetchone()[0],
         "attrs": con.execute("SELECT count(*) FROM clean.product_attrs").fetchone()[0],
     }

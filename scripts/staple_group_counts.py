@@ -17,7 +17,7 @@ rows = con.execute("""
     ),
     s AS (
       SELECT ps.staple, g.gkey, bool_or(NOT ps.excluded) AS ok, bool_or(ps.excluded) AS bad
-      FROM clean.product_staples ps JOIN g USING (chain, product_id) GROUP BY ALL
+      FROM clean.product_staples ps JOIN g USING (chain, product_id) WHERE ps.drop_reason IS NULL GROUP BY ALL
     )
     SELECT staple, count(*) FILTER (WHERE ok AND NOT bad), count(*) FILTER (WHERE bad)
     FROM s GROUP BY staple ORDER BY staple

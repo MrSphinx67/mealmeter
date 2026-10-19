@@ -118,7 +118,8 @@ def find_products(
     if staple:
         hit_parts.append("""
             SELECT g.gkey FROM g JOIN clean.product_staples ps USING (chain, product_id)
-            WHERE ps.staple = ? GROUP BY g.gkey HAVING bool_or(NOT ps.excluded) AND NOT bool_or(ps.excluded)""")
+            WHERE ps.staple = ? AND ps.drop_reason IS NULL
+            GROUP BY g.gkey HAVING bool_or(NOT ps.excluded) AND NOT bool_or(ps.excluded)""")
         hit_params.append(staple.key)
         for attr, value in (attributes or {}).items():
             hit_parts.append("""
@@ -130,7 +131,8 @@ def find_products(
     # "pogodak" za izbor prikaznog naziva i relevantnost
     if staple:
         name_hit_sql = """EXISTS (SELECT 1 FROM clean.product_staples ps WHERE ps.chain = p.chain
-                              AND ps.product_id = p.product_id AND ps.staple = ? AND NOT ps.excluded)"""
+                              AND ps.product_id = p.product_id AND ps.staple = ? AND NOT ps.excluded
+                              AND ps.drop_reason IS NULL)"""
         name_hit_params = [staple.key]
         # razina 0 ako je riječ namirnice među prve tri riječi u većini naziva grupe, inače 1
         # (prosjek: jedan lanac s nazivom "CEDEVITA KIDS BANANA" ne čini Cedevitu bananom)
@@ -146,6 +148,14 @@ def find_products(
                  )) ELSE 0 END"""
         coverage_params = likes
         cov_col = "cov.cov_max"
+
+    # članovi grupe koje namirnica odbacuje (npr. neprehrambena kategorija lanca) ne ulaze u cijene
+    if staple:
+        drop_sql = """NOT EXISTS (SELECT 1 FROM clean.product_staples d WHERE d.chain = p.chain
+                      AND d.product_id = p.product_id AND d.staple = ? AND d.drop_reason IS NOT NULL)"""
+        drop_params = [staple.key]
+    else:
+        drop_sql, drop_params = "TRUE", []
 
     best = "x.unit_confidence = pick.conf AND x.per_unit = pick.per_unit"
     sql = f"""
@@ -166,7 +176,7 @@ def find_products(
           JOIN clean.prices c USING (chain, product_id)
           JOIN clean.stores s USING (chain, store_id)
           JOIN clean.chains ch USING (chain)
-          WHERE {city_sql}
+          WHERE {city_sql} AND {drop_sql}
         ),
         -- relevantnost grupe po različitim proizvodima (ne po broju trgovina)
         cov AS (
@@ -218,7 +228,7 @@ def find_products(
         LIMIT ?
     """
     params = (
-        hit_params + name_hit_params + coverage_params + city_params
+        hit_params + name_hit_params + coverage_params + city_params + drop_params
         + [staple.unit if staple else None, tokens[0] if tokens else "", limit]
     )
     cur = con.execute(sql, params)

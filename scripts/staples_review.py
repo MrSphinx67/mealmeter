@@ -47,7 +47,7 @@ GROUPS_SQL = """
     )
     SELECT count(DISTINCT gkey) FILTER (WHERE ok AND NOT bad), count(DISTINCT gkey) FILTER (WHERE bad)
     FROM (SELECT g.gkey, bool_or(NOT ps.excluded) ok, bool_or(ps.excluded) bad
-          FROM g JOIN clean.product_staples ps USING (chain, product_id) WHERE ps.staple = ? GROUP BY g.gkey)
+          FROM g JOIN clean.product_staples ps USING (chain, product_id) WHERE ps.staple = ? AND ps.drop_reason IS NULL GROUP BY g.gkey)
 """
 EXCLUDED_SQL = """
     WITH g AS (
@@ -58,7 +58,7 @@ EXCLUDED_SQL = """
            arg_max(g.name_norm, length(g.name)) FILTER (WHERE ps.excluded) AS name_norm,
            count(DISTINCT g.chain) AS n_chains
     FROM g JOIN clean.product_staples ps USING (chain, product_id)
-    WHERE ps.staple = ? GROUP BY g.gkey HAVING bool_or(ps.excluded)
+    WHERE ps.staple = ? AND ps.drop_reason IS NULL GROUP BY g.gkey HAVING bool_or(ps.excluded)
     ORDER BY n_chains DESC, name LIMIT 10
 """
 

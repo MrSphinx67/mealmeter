@@ -11,6 +11,7 @@ from mealmeter.staples import build_staples
 from mealmeter.normalize import (
     CITY_ALIASES,
     canonical_city,
+    category_group,
     norm_text,
     normalize_ean,
     parse_pack,
@@ -114,25 +115,25 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
 
     # --- proizvodi ---
     def product_rows():
-        q = "SELECT chain, product_id, barcode, name, unit, quantity FROM products"
-        for chain, pid, barcode, name, unit, quantity in con.execute(q).fetchall():
+        q = "SELECT chain, product_id, barcode, name, unit, quantity, category FROM products"
+        for chain, pid, barcode, name, unit, quantity, category in con.execute(q).fetchall():
             ean, valid, glob = normalize_ean(barcode)
             pack, source = parse_pack(name), "name"
             if pack is None and (pack := parse_pack_unit_field(unit)):
                 source = "unit"
             amount, pack_unit = pack or (None, None)
             yield (chain, pid, ean, valid, glob, norm_text(name), amount, pack_unit,
-                   source if pack else None, unit_hint(unit, quantity))
+                   source if pack else None, unit_hint(unit, quantity), category_group(category))
 
     _temp_table(con, "product_derived", {
         "chain": "VARCHAR", "product_id": "VARCHAR", "ean_norm": "VARCHAR", "ean_valid": "BOOLEAN",
         "ean_global": "BOOLEAN", "name_norm": "VARCHAR", "pack_amount": "DOUBLE", "pack_unit": "VARCHAR",
-        "pack_source": "VARCHAR", "unit_hint": "VARCHAR",
+        "pack_source": "VARCHAR", "unit_hint": "VARCHAR", "category_group": "VARCHAR",
     }, product_rows())
     con.execute("""
         CREATE OR REPLACE TABLE clean.products AS
         SELECT r.chain, r.product_id, r.barcode, d.ean_norm, d.ean_valid, d.ean_global,
-               r.name, d.name_norm, r.brand, r.category, r.unit, r.quantity,
+               r.name, d.name_norm, r.brand, r.category, d.category_group, r.unit, r.quantity,
                d.pack_amount, d.pack_unit, d.pack_source, d.unit_hint
         FROM products r JOIN product_derived d USING (chain, product_id)
     """)
