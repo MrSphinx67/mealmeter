@@ -245,6 +245,7 @@ mlijeko:
   plausible_per_unit: [0.5, 4]
   attributes:
     mast:
+      "0": '(?<![\d.])0(?:\.0)?\s*(%|mm)'
       "0.5": '(?<![\d.])0?\.5\s*(%|mm)'
       "0.9": '(?<![\d.])0?\.9\s*(%|mm)'
       "1.5": '\b1\.5\s*(%|mm)'
@@ -256,7 +257,7 @@ mlijeko:
       trajno: '\btrajn|\buht\b'
       svjeze: '\bsvjez|\bsvj\.'
     laktoza:
-      bez: 'bez laktoze|\blf\b|laktoze free'
+      bez: 'bez laktoze|\blf\b|laktoze free|lagano jutro'
   loose_produce: false
 
 jogurt:
@@ -384,19 +385,28 @@ jaja:
   name: jaja
   synonyms: [jaja, jaje, kokošja jaja, kokosja jaja]
   must_match: [jaja\b, jaje\b]
-  must_not_match: [cokolad, zlic, caj, dekorativ, kinder, tije\b, tijest, slicic, iznenad, koleda,
+  must_not_match: [desert, quark, igrac, coko, rocher, pistacij, golden, plisan, ferrero, witor,
+                   cokolad, zlic, caj, dekorativ, kinder, tije\b, tijest, slicic, iznenad, koleda,
                    cok\b, boja, uskrs, usk\b, uskr\b, set\b, mini\b, kremom, tjestenin, rezanc, mlinc,
                    barilla, tagliatell, milka, salvet, punjen, rezac, marodi, luneta, plava\b, ukras,
                    kalup, prah, ljesnjak, kokos\b, sorini, socado, jajima, pasta, majonez, tj\b, tjest,
                    fidelin, fuz, surl, keks, misura, polje\b, klara\b, bez\b, od svj, liker, puding,
                    krem\b, sendvic, salata, pasteta, namaz, jaja s\b, sa jajima, s jajima]
   unit: kom
+  plausible_per_unit: [0.1, 1.5]
+  max_pack: 30
+  min_pack: 4
+  group_by: velicina
+  # broj komada: "10/1", "10 KOM" (ne "-18/1-", to je broj pakiranja u kartonu)
+  count_regex: '(?<![\d-])(\d+)\s*/\s*1\b(?!\s*-)|(\d+)\s*kom'
+  compare_by: count
   attributes:
     velicina:
-      xl: '\bxl\b'
-      l: '\bl\b|razred\s*l\b|\(l\)'
-      m: '\bm\b|razred\s*m\b|\(m\)'
-      s: '\bs\b|razred\s*s\b|\(s\)'
+      xl: '(?:^|[\s(])xl(?=[\s)]|$)'
+      l: '(?:^|[\s(])l(?=[\s)]|$)'
+      m: '(?:^|[\s(])m(?=[\s)]|$)'
+      # "s" je i prijedlog ("JAJE S IGRAČKOM"), pa samo uz razred/vel./kl. ili u zagradi
+      s: '(?:razred|raz\.|vel\.?|velicina|kl\.?)\s*s\b|\(s\)|(?:^|\s)s\s+(?:razred|raz\b|kl\b)'
     uzgoj:
       slobodni: '\bslobodn'
       podni: '\bpodn'
@@ -438,6 +448,10 @@ krumpir:
                    medaljon, stapic, panir, gulas, restan, pomfrit, chips, juha, smrz, tijest, rosti]
   unit: kg
   attributes:
+    namjena:
+      kuhanje: 'za kuhanje|\bkuhanj'
+      pecenje: 'za pecenje|\bpecenj|\bpomfrit|\bprzenj'
+      salata: 'za salatu|\bsalat'
     vrsta:
       mladi: '\bmlad'
       crveni: '\bcrven'
@@ -622,12 +636,12 @@ riza:
     vrsta:
       basmati: '\bbasmati'
       jasmin: '\bjasmin'
-      arborio: '\barborio|\bcarnaroli|\brizot|\boriginario'
+      arborio: '\barborio'
+      carnaroli: '\bcarnaroli'
+      originario: '\boriginario|\bokrugl|\bokr\.|kratko zrno|kratkog zrna'
       parboiled: '\bparboil'
-      integralna: '\bintegral|\bsmed|\bbrown'
-      dugo_zrno: 'dugo zrno|dugo zrna|\bdugozrn|long grain'
-      okrugla: '\bokrugl|kratko zrno|okruglo zrno'
-      sushi: '\bsushi'
+      integralna: '\bintegral|\bintegr\.|\bsmed|\bbrown'
+      dugo_zrno: 'dugo zrno|dugog zrna|dugoga zrna|dugo zrna|\bdugo z\.|\bdugozrn|long grain'
   loose_produce: false
 
 tjestenina:

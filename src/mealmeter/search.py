@@ -172,9 +172,9 @@ def find_products(
         drop_sql, drop_params = "TRUE", []
 
     # cijena po jedinici: kg/l/kom iz clean.prices, ili po vrećici (compare_by: pack) iz n_units
-    if staple and staple.compare_by == "pack":
+    if staple and staple.compare_by in ("pack", "count"):
         ppu_sql = "round(c.price_eff / nullif(psu.n_units, 0), 2)"
-        per_unit_sql = "CASE WHEN psu.n_units > 0 THEN 'vrecica' END"
+        per_unit_sql = f"CASE WHEN psu.n_units > 0 THEN '{staple.compare_unit}' END"
         conf_sql = "CASE WHEN psu.n_units > 0 THEN 'high' END"
     else:
         ppu_sql, per_unit_sql, conf_sql = "c.price_per_unit", "c.per_unit", "c.unit_confidence"
@@ -187,11 +187,11 @@ def find_products(
         suspect_sql = "false"
     clearance_sql = "NOT p.clearance" if staple and not include_clearance else "TRUE"
 
+    gkey_expr, gkey_join = _gkey_sql(staple)
     best = "x.unit_confidence = pick.conf AND x.per_unit = pick.per_unit AND NOT x.price_suspect"
     sql = f"""
         WITH g AS (
-          SELECT *, CASE WHEN ean_global THEN ean_norm ELSE chain || ':' || name_norm END AS gkey
-          FROM clean.products p
+          SELECT p.*, {gkey_expr} AS gkey FROM clean.products p {gkey_join}
         ),
         hit AS ({hit_sql}),
         x AS (
@@ -229,7 +229,8 @@ def find_products(
         )
         SELECT
           x.gkey AS _gkey,
-          CASE WHEN bool_or(x.ean_global) THEN any_value(x.ean_norm) FILTER (WHERE x.ean_global)
+          CASE WHEN x.gkey LIKE '{staple.key if staple and staple.group_by else "-"}:%' THEN x.gkey
+               WHEN bool_or(x.ean_global) THEN any_value(x.ean_norm) FILTER (WHERE x.ean_global)
                ELSE min(x.chain || ':' || x.product_id) END AS id,
           any_value(x.ean_norm) FILTER (WHERE x.ean_global) AS ean,
           -- naziv koji odgovara upitu i sam nosi gramaturu; od takvih najduži (najmanje kratica)
@@ -248,6 +249,7 @@ def find_products(
           pick.conf AS unit_confidence,
           -- izvor gramature za odabrani raspon: name / unit / ean, ili unit_price kad je confidence low
           CASE WHEN pick.conf = 'low' THEN 'unit_price'
+               WHEN pick.conf = 'high' AND '{staple.compare_by if staple else "unit"}' = 'count' THEN 'name'
                ELSE mode(x.pack_source) FILTER (WHERE {best}) END AS pack_source,
           string_agg(DISTINCT x.chain, ', ' ORDER BY x.chain) FILTER (WHERE x.data_quality = 'suspect') AS suspect_chains,
           count(*) FILTER (WHERE x.price_suspect) AS n_price_suspect,
@@ -286,32 +288,58 @@ def find_products(
             row["pantry"] = staple.pantry
         out.append(_with_date(row))
     if staple and out:
-        _attach_attributes(con, staple.key, out)
+        _attach_attributes(con, staple, out)
     for row in out:
         row.pop("_gkey")
     return out
 
 
-def _attach_attributes(con: duckdb.DuckDBPyConnection, staple_key: str, rows: list[dict]) -> None:
-    """Atributi grupe = najčešća vrijednost svakog atributa među proizvodima u grupi."""
+def _gkey_sql(staple) -> tuple[str, str]:
+    """SQL za ključ grupe (alias p) i potreban JOIN.
+
+    Zadano: globalni EAN, inače lanac + normalizirani naziv. Namirnica s group_by (jaja) grupira
+    po vrijednosti atributa ("jaja:m"), jer se uspoređuje klasa, a ne pojedini EAN.
+    """
+    base = "CASE WHEN p.ean_global THEN p.ean_norm ELSE p.chain || ':' || p.name_norm END"
+    if not (staple and staple.group_by):
+        return base, ""
+    join = f"""LEFT JOIN clean.product_attrs gb ON gb.chain = p.chain AND gb.product_id = p.product_id
+               AND gb.staple = '{staple.key}' AND gb.attr = '{staple.group_by}'"""
+    return f"CASE WHEN gb.value IS NOT NULL THEN '{staple.key}:' || gb.value ELSE {base} END", join
+
+
+def _attach_attributes(con: duckdb.DuckDBPyConnection, staple, rows: list[dict]) -> None:
+    """Atributi grupe = najčešća vrijednost svakog atributa među proizvodima u grupi.
+
+    attribute_sources daje za svaki atribut jedan naziv proizvoda iz kojeg je vrijednost izvučena.
+    """
     keys = [r["_gkey"] for r in rows]
     placeholders = ", ".join("?" for _ in keys)
+    gkey_expr, gkey_join = _gkey_sql(staple)
     found = con.execute(
         f"""
-        SELECT gkey, attr, mode(value) FROM (
-          SELECT CASE WHEN p.ean_global THEN p.ean_norm ELSE p.chain || ':' || p.name_norm END AS gkey,
-                 pa.attr, pa.value
-          FROM clean.products p JOIN clean.product_attrs pa USING (chain, product_id)
+        SELECT gkey, attr, value, name FROM (
+          SELECT {gkey_expr} AS gkey, pa.attr, pa.value, p.name
+          FROM clean.products p {gkey_join}
+          JOIN clean.product_attrs pa ON pa.chain = p.chain AND pa.product_id = p.product_id
           WHERE pa.staple = ?
-        ) WHERE gkey IN ({placeholders}) GROUP BY gkey, attr
+        ) WHERE gkey IN ({placeholders})
         """,
-        [staple_key, *keys],
+        [staple.key, *keys],
     ).fetchall()
-    by_key: dict[str, dict] = {}
-    for gkey, attr, value in found:
-        by_key.setdefault(gkey, {})[attr] = value
+    counts: dict[tuple, dict[str, int]] = {}
+    sources: dict[tuple, str] = {}
+    for gkey, attr, value, name in found:
+        counts.setdefault((gkey, attr), {}).setdefault(value, 0)
+        counts[(gkey, attr)][value] += 1
+        sources.setdefault((gkey, attr, value), name)
     for r in rows:
-        r["attributes"] = by_key.get(r["_gkey"], {})
+        r["attributes"], r["attribute_sources"] = {}, {}
+        for (gkey, attr), by_value in counts.items():
+            if gkey == r["_gkey"]:
+                value = max(sorted(by_value), key=by_value.get)
+                r["attributes"][attr] = value
+                r["attribute_sources"][attr] = sources[(gkey, attr, value)]
 
 
 def get_prices(

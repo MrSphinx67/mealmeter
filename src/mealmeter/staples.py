@@ -35,14 +35,23 @@ class Staple:
     sachet_g: float | None = None
     sachet_g_by: dict[str, dict[str, float]] = field(default_factory=dict, hash=False, compare=False)
     pantry: bool = False
+    count_regex: str | None = None
+    group_by: str | None = None
 
     @property
     def compare_unit(self) -> str:
-        """Jedinica u kojoj se uspoređuje cijena: kg/l/kom ili "vrecica" (compare_by: pack)."""
-        return "vrecica" if self.compare_by == "pack" else self.unit
+        """Jedinica u kojoj se uspoređuje cijena: kg/l/kom, "vrecica" (pack) ili "kom" (count)."""
+        return {"pack": "vrecica", "count": "kom"}.get(self.compare_by, self.unit)
 
-    def units_in_pack(self, pack_amount: float | None, pack_unit: str | None, attrs: dict[str, str]) -> float | None:
-        """Broj jedinica usporedbe u pakiranju kad to nije kg/l (npr. vrećica od 7 g)."""
+    def units_in_pack(
+        self, name: str, pack_amount: float | None, pack_unit: str | None, attrs: dict[str, str]
+    ) -> float | None:
+        """Broj jedinica usporedbe u pakiranju kad to nije kg/l: vrećice od sachet_g grama
+        (compare_by: pack) ili komadi iz naziva po count_regex, npr. "10/1", "10 KOM" (count)."""
+        if self.compare_by == "count":
+            if self.count_regex and (m := re.search(self.count_regex, attr_text(name))):
+                return float(next(g for g in m.groups() if g))
+            return pack_amount if pack_unit == "kom" else None
         if self.compare_by != "pack" or not pack_amount or pack_unit != "g":
             return None
         size = self.sachet_g
@@ -122,12 +131,18 @@ def load_staples(path: Path = STAPLES_PATH) -> dict[str, Staple]:
             sachet_g=d.get("sachet_g"),
             sachet_g_by=d.get("sachet_g_by") or {},
             pantry=bool(d.get("pantry", False)),
+            count_regex=d.get("count_regex"),
+            group_by=d.get("group_by"),
         )
+        if st.group_by and st.group_by not in attrs:
+            raise ValueError(f"{key}: group_by {st.group_by} nije definiran atribut")
+        if st.compare_by == "count" and not st.count_regex:
+            raise ValueError(f"{key}: compare_by: count traži count_regex")
         for attr, value in st.default_exclude_variants:
             if value not in attrs.get(attr, {}):
                 raise ValueError(f"{key}: default_exclude_variants {attr}={value} nije definiran atribut")
-        if st.compare_by not in ("unit", "pack") or (st.compare_by == "pack" and not st.sachet_g):
-            raise ValueError(f"{key}: compare_by mora biti unit ili pack (uz sachet_g)")
+        if st.compare_by not in ("unit", "pack", "count") or (st.compare_by == "pack" and not st.sachet_g):
+            raise ValueError(f"{key}: compare_by mora biti unit, pack (uz sachet_g) ili count")
         # Svi regexi se moraju dati kompilirati (Python re je nadskup RE2 za ove uzorke)
         re.compile(st.match_regex)
         if st.exclude_regex:
@@ -214,12 +229,12 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
     # pravila namirnica kao tablica (za SQL i pregled)
     con.execute("""
         CREATE OR REPLACE TABLE clean.staple_rules (
-          staple VARCHAR PRIMARY KEY, name VARCHAR, unit VARCHAR, compare_unit VARCHAR,
+          staple VARCHAR PRIMARY KEY, name VARCHAR, unit VARCHAR, compare_by VARCHAR, compare_unit VARCHAR,
           ppu_min DOUBLE, ppu_max DOUBLE, min_pack DOUBLE, max_pack DOUBLE,
           pantry BOOLEAN, loose_produce BOOLEAN)
     """)
-    con.executemany("INSERT INTO clean.staple_rules VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [
-        (st.key, st.name, st.unit, st.compare_unit,
+    con.executemany("INSERT INTO clean.staple_rules VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [
+        (st.key, st.name, st.unit, st.compare_by, st.compare_unit,
          *(st.plausible_per_unit or (None, None)), st.min_pack, st.max_pack, st.pantry, st.loose_produce)
         for st in staples.values()
     ])
@@ -229,6 +244,7 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
         FROM clean.products p, clean.staple_rules r
         WHERE p.chain = ps.chain AND p.product_id = ps.product_id AND r.staple = ps.staple
           AND ps.drop_reason IS NULL AND NOT ps.excluded AND p.pack_amount IS NOT NULL
+          AND r.compare_by <> 'count'
           AND (p.pack_amount < r.min_pack OR p.pack_amount > r.max_pack)
     """)
 
@@ -241,7 +257,7 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
     for chain, pid, key, name, amount, pack_unit in rows:
         attrs = extract_attributes(staples[key], name)
         attr_rows += [(chain, pid, key, a, v) for a, v in attrs.items()]
-        if (n := staples[key].units_in_pack(amount, pack_unit, attrs)) is not None:
+        if (n := staples[key].units_in_pack(name, amount, pack_unit, attrs)) is not None:
             unit_rows.append((chain, pid, key, n))
 
     _temp_table(con, "attrs_tmp", {
@@ -257,6 +273,16 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
         UPDATE clean.product_staples ps SET n_units = u.n_units FROM units_tmp u
         WHERE u.chain = ps.chain AND u.product_id = ps.product_id AND u.staple = ps.staple
     """)
+    # compare_by: count (jaja): raspon pakiranja vrijedi za broj komada
+    counted = [st.key for st in staples.values() if st.compare_by == "count"]
+    if counted:
+        con.execute(f"""
+            UPDATE clean.product_staples ps SET drop_reason = 'pakiranje'
+            FROM clean.staple_rules r
+            WHERE r.staple = ps.staple AND ps.staple IN ({", ".join(f"'{k}'" for k in counted)})
+              AND ps.drop_reason IS NULL AND NOT ps.excluded AND ps.n_units IS NOT NULL
+              AND (ps.n_units < r.min_pack OR ps.n_units > r.max_pack)
+        """)
     return {
         "staples": len(staples),
         "matched": con.execute(

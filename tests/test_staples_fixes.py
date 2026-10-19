@@ -228,7 +228,7 @@ def test_clearance(name, expected):
     ("brasno", 1000, {}, None),
 ])
 def test_sachet_units(key, amount, attrs, expected):
-    assert S[key].units_in_pack(amount, "g", attrs) == expected
+    assert S[key].units_in_pack("", amount, "g", attrs) == expected
 
 
 def test_new_staple_fields():
@@ -274,3 +274,71 @@ def test_pack_range_drops_products(tmp_path, monkeypatch):
     rows = c.execute("""SELECT p.pack_amount, ps.drop_reason FROM clean.product_staples ps
                         JOIN clean.products p USING (chain, product_id) WHERE ps.staple = 'brasno'""").fetchall()
     assert rows and all((r[1] == "pakiranje") == (r[0] < 2000) for r in rows if r[0])
+
+
+# --- 4. atributi --------------------------------------------------------------
+
+@pytest.mark.parametrize("name,vrsta", [
+    ("Riso Scotti riža originario okr.zrno 1kg", "originario"),  # originario nije arborio
+    ("Riso Scotti riža oro dugog zrna 1kg", "dugo_zrno"),  # oro nije parboiled
+    ("Riso Scotti riža arborio dugo zrno 1kg", "arborio"),
+    ("Riso Scotti riža carnaroli 500g", "carnaroli"),
+    ("RIŽA BASMATI 1 KG (20) SHAZIA", "basmati"),
+    ("RIŽA JASMINE PURE THAI 1 KG (12)", "jasmin"),
+    ("RIŽA DUGO ZRNO PARBOIL.500g BEN'S", "parboiled"),
+    ("BEN'S ORIGINAL RIŽA INTEGR.500g", "integralna"),
+    ("RIŽA BIJELA 800 g VREĆICA ZLATO POLJE", None),
+])
+def test_rice_variety(name, vrsta):
+    assert extract_attributes(S["riza"], name).get("vrsta") == vrsta
+
+
+def test_rice_varieties_exactly():
+    assert list(S["riza"].attributes["vrsta"]) == [
+        "basmati", "jasmin", "arborio", "carnaroli", "originario", "parboiled", "integralna", "dugo_zrno"]
+
+
+@pytest.mark.parametrize("name,expected", [
+    ("MLIJEKO LAGANO JUTRO 0% 1L DUKAT", {"mast": "0", "laktoza": "bez"}),
+    ("DUKAT MLIJEKO LAGANO JUTRO 0%MM 1L", {"mast": "0", "laktoza": "bez"}),
+    ("MLIJEKO LAGANO JUTRO0,0% MM", {"mast": "0", "laktoza": "bez"}),
+    ("MLIJEKO LAGANO JUTRO 1,5% 1L DUKAT", {"mast": "1.5", "laktoza": "bez"}),  # linija bez laktoze
+    ("MLIJEKO TRAJNO 2.8% 1L BOCA DUKAT", {"mast": "2.8"}),
+])
+def test_milk_fat_zero_and_lactose(name, expected):
+    got = extract_attributes(S["mlijeko"], name)
+    assert expected.items() <= got.items()
+    if "laktoza" not in expected:
+        assert "laktoza" not in got
+
+
+@pytest.mark.parametrize("name,size,count", [
+    ("JAJA S RAZRED 10/1 PODNI UZGOJ GALA", "s", 10),
+    ("JAJA M 10/1 PODN.UZ. GALA", "m", 10),
+    ("JAJA KL. A RAZ. L 10/1 GALA", "l", 10),
+    ("JAJA XL RAZRED 10/1 PODNI UZGOJ VRANA", "xl", 10),
+    ("N-JAJA PERFA AKLASARAZRED M 10KOM -18/1", "m", 10),  # -18/1 je karton
+    ("JAJA SVJEŽA L 10/1 KOKA TOMCRO (18)", "l", 10),
+    ("SVJEŽA JAJA RAZL. VEL. BIO 6/1", None, 6),
+])
+def test_egg_size_and_count(name, size, count):
+    st = S["jaja"]
+    assert extract_attributes(st, name).get("velicina") == size
+    assert st.units_in_pack(name, None, None, {}) == count
+
+
+def test_eggs_compare_by_class():
+    st = S["jaja"]
+    assert st.compare_by == "count" and st.compare_unit == "kom" and st.group_by == "velicina"
+    assert name_match(st, "DESERT QUARK MAXI JAJE S IGRAČ 160g") == "excluded"
+    assert name_match(st, "COKO.JAJE ROCHER 212,5 G FERRERO") == "excluded"
+
+
+@pytest.mark.parametrize("name,namjena", [
+    ("KRUMPIR PAK. ZA KUHANJE 2,5 kg", "kuhanje"),
+    ("KRUMPIR PAK. ZA PEČENJE 2,5 kg", "pecenje"),
+    ("KRUMPIR PAK. ZA SALATU 2,5 kg", "salata"),
+    ("KRUMPIR LIČKI 2,5 kg AGROVEL.", None),
+])
+def test_potato_purpose(name, namjena):
+    assert extract_attributes(S["krumpir"], name).get("namjena") == namjena
