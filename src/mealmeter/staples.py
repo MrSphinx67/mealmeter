@@ -114,6 +114,20 @@ def resolve_ingredient(text: str | None, staples: dict[str, Staple] | None = Non
     return None
 
 
+def name_match(staple: Staple, name: str) -> str | None:
+    """Kako pravila namirnice vide jedan naziv: "match", "excluded" ili None (nije kandidat).
+
+    Provjerava samo must_match/must_not_match (bez loose_produce i kategorije), za testove i
+    pregled; build to radi u SQL-u istim uzorcima.
+    """
+    text = norm_text(name) or ""
+    if not re.search(staple.match_regex, text):
+        return None
+    if staple.exclude_regex and re.search(staple.exclude_regex, text):
+        return "excluded"
+    return "match"
+
+
 def extract_attributes(staple: Staple, name: str) -> dict[str, str]:
     """Atributi iz naziva; za svaki atribut pobjeđuje prva vrijednost čiji regex pogodi."""
     text = attr_text(name)
