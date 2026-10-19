@@ -78,9 +78,10 @@ _UNITS = {
 }
 # Duže varijante prve, da 'kg' ne bude pročitan kao 'k' + 'g'
 _UNIT = "(" + "|".join(sorted(_UNITS, key=len, reverse=True)) + ")"
-# Broj ne smije biti nastavak drugog broja ("1.5" -> ne "5") ni dio "PAL=112KOM";
-# točka iza slova je kratica ("UG.190 g" -> 190 g), a ne decimalni separator
-_PRE = r"(?<![\d=])(?<!\d[.,])"
+# Broj ne smije biti nastavak drugog broja ("1.5" -> ne "5"), dio "PAL=112KOM" ni nazivnik
+# razlomka ("JAJA 10/1 L" je veličina L, ne 1 litra); točka iza slova je kratica
+# ("UG.190 g" -> 190 g), a ne decimalni separator
+_PRE = r"(?<![\d=/])(?<!\d[.,])"
 _POST = r"(?![a-zčćšžđ])"
 
 _MULTI = re.compile(_PRE + r"(\d+)\s*[x×*]\s*" + _NUM + r"\s*" + _UNIT + r"\.?" + _POST, re.I)

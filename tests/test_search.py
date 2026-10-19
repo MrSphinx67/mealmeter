@@ -1,28 +1,8 @@
-from pathlib import Path
-
-import duckdb
 import pytest
 
-from mealmeter.build import build_clean, load_raw
 from mealmeter.search import find_products, get_prices, resolve_city
 
-FIXTURE = Path(__file__).parent / "fixtures" / "archive"
 PODRAVKA_1KG = "3850104223624"
-
-
-@pytest.fixture(scope="module")
-def built(tmp_path_factory):
-    db = tmp_path_factory.mktemp("db") / "test.duckdb"
-    c = duckdb.connect(str(db))
-    load_raw(c, FIXTURE, "2026-10-19")
-    stats = build_clean(c)
-    yield c, stats
-    c.close()
-
-
-@pytest.fixture
-def con(built):
-    return built[0]
 
 
 def q(con, sql, *params):

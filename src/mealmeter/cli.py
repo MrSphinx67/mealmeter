@@ -1,6 +1,7 @@
 """Mali CLI za isprobavanje pretrage.
 
     python -m mealmeter.cli find "brašno glatko" --city Osijek
+    python -m mealmeter.cli find --ingredient brasno --attr tip=glatko --city Osijek
     python -m mealmeter.cli prices 3850104223624 --city Osijek
 """
 
@@ -35,7 +36,13 @@ def _table(rows: list[list[str]], headers: list[str]) -> str:
 
 
 def cmd_find(args) -> None:
-    res = search.find_products(args.query, city=args.city, limit=args.limit)
+    attrs = dict(a.split("=", 1) for a in args.attr) if args.attr else None
+    try:
+        res = search.find_products(
+            args.query, city=args.city, limit=args.limit, ingredient=args.ingredient, attributes=attrs
+        )
+    except ValueError as e:
+        sys.exit(str(e))
     if args.json:
         print(json.dumps(res, ensure_ascii=False, indent=2))
         return
@@ -59,8 +66,14 @@ def cmd_find(args) -> None:
         ]
         for r in res
     ]
+    headers = ["id", "naziv", "marka", "pakiranje", "cijena €", "€ po jedinici", "pouzdanost", "lanaca", "trgovina"]
+    if res[0]["ingredient"]:
+        headers.append("atributi")
+        for row, r in zip(rows, res):
+            row.append(", ".join(f"{k}={v}" for k, v in r["attributes"].items()))
+        print(f"Namirnica: {res[0]['ingredient']}")
     print(f"Cijene na dan {res[0]['date_hr']}\n")
-    print(_table(rows, ["id", "naziv", "marka", "pakiranje", "cijena €", "€ po jedinici", "pouzdanost", "lanaca", "trgovina"]))
+    print(_table(rows, headers))
     if any(r.get("note") for r in res):
         print(f"\n* uključuje nacionalnu cijenu. {search.NATIONAL_NOTE}")
 
@@ -100,7 +113,9 @@ def main(argv: list[str] | None = None) -> None:
     sub = ap.add_subparsers(required=True)
 
     f = sub.add_parser("find", help="pronađi proizvode po nazivu")
-    f.add_argument("query")
+    f.add_argument("query", nargs="?", help="slobodan upit; sinonim namirnice (npr. 'mlijeko') koristi rječnik")
+    f.add_argument("--ingredient", help="osnovna namirnica iz staples.yaml (npr. brasno)")
+    f.add_argument("--attr", action="append", metavar="IME=VRIJEDNOST", help="atribut namirnice, npr. tip=glatko")
     f.add_argument("--city")
     f.add_argument("--limit", type=int, default=10)
     f.add_argument("--json", action="store_true")

@@ -1,0 +1,1057 @@
+# Rječnik osnovnih namirnica (prvi prijedlog, generiran uz pomoć podataka; čeka pregled).
+#
+# Pravila podudaranja (provjerava ih clean.product_staples pri buildu):
+#   synonyms        nazivi koje korisnik može upisati (hr; velika slova i dijakritika nisu bitni)
+#   must_match      barem jedan uzorak mora se pojaviti na POČETKU neke riječi u name_norm
+#                   (mala slova, bez dijakritika, đ/dj -> d, interpunkcija -> razmak).
+#                   Uzorak je RE2 regex (DuckDB, bez lookarounda); prefiks je dovoljan ("brasn" pogađa brasno/brasna),
+#                   za kraj riječi napiši \b.
+#   must_not_match  nijedan uzorak se ne smije pojaviti na početku riječi (isti oblik),
+#                   uz zajedničke iz _defaults (osim ako namirnica ima no_defaults: true)
+#   unit            jedinica usporedbe cijene: kg | l | kom
+#   attributes      ime -> {vrijednost: regex}. Python re (smije lookbehind), na "attr tekst": mala slova,
+#                   bez dijakritika, đ/dj -> d, zarez -> točka, interpunkcija ostaje
+#                   ("Mlijeko 2,8%MM" -> "mlijeko 2.8%mm"). Prva vrijednost koja pogodi pobjeđuje.
+#   loose_produce   svježe voće/povrće. Dodatno pravilo: riječ namirnice je prva ili druga riječ
+#                   naziva, a proizvod je bez globalnog EAN-a (vaga/PLU), bez gramature ili >= 500 g,
+#                   i nije tekućina (inače "banana" pogađa bombone i sokove s okusom banane)
+#
+# Grupa proizvoda (isti EAN) pripada namirnici ako barem jedan njezin naziv prolazi pravila,
+# a nijedan ne pogađa must_not_match.
+
+_defaults:
+  must_not_match:
+    # hrana za ljubimce
+    - macke
+    - macak
+    - pse\b
+    - psa\b
+    - felix
+    - whiskas
+    - friskies
+    - pedigree
+    - gourmet
+    # kozmetika i kućanstvo
+    - sampon
+    - gel\b
+    - sapun
+    - nivea
+    - afrodita
+    - tijelo
+    - body
+    - usne
+    - kosu
+    - losion
+    - balzam
+    - kupk
+    - svijec
+    - salvet
+    - naljepnic
+    - igrack
+    # grickalice
+    - cips
+    - chips
+    - flips
+    - kreker
+    - snack
+    - smoki
+    - grickal
+    # gotova jela, namazi, juhe
+    - juha
+    - noodl
+    - hummus
+    - humus
+    - tramezzin
+    - bruschett
+    - grisin
+    - gyoza
+    # hrana za ljubimce (marke)
+    - kitekat
+    - darling
+    - vitakraft
+    - kony\b
+    - psi\b
+    - kitty
+    - buddy
+    - poesie
+    - mousse
+    # vrt, dekoracije
+    - sjemensk
+    - klice\b
+    - umj\b
+    # dječja hrana
+    - kasica
+    - hipp
+    - bebivita
+    - nutrino
+
+brasno:
+  name: brašno
+  synonyms: [brašno, brasno, pšenično brašno, psenicno brasno]
+  must_match: [brasn, bras\b]
+  must_not_match: [toast, brasnom, kokos, rizin, heljd, zob, badem, slanut, kestenj, chia, lanen, konoplj, mix\b,
+                   mjesavin, smjes, keks, kruh, pecivo, palacink, tortilj, napolitank]
+  unit: kg
+  attributes:
+    tip:
+      glatko: '\bglatk|\bgl\.'
+      ostro: '\bostr'
+      polubijelo: '\bpolubijel'
+      integralno: '\bintegral|\bcrn'
+    vrsta:
+      psenicno: '\bpsen'
+      pirovo: '\bpir'
+      razeno: '\braz'
+      kukuruzno: '\bkukuruz'
+    oznaka:
+      t400: '\bt\s*-?\s*400'
+      t550: '\bt\s*-?\s*550|\btip\s*550'
+      t850: '\bt\s*-?\s*850'
+      t1100: '\bt\s*-?\s*1100'
+      "00": '\btip\s*00\b|\(00\)'
+  loose_produce: false
+
+secer:
+  name: šećer
+  synonyms: [šećer, secer]
+  must_match: [secer\b]
+  must_not_match: [kukur, natreen, nescafe, 3u1, sladil, bez\b, vanilin, manje\b, dodan, napitak, keks, bombon, vata, sirup, sok\b, cola, pepsi,
+                   cokolad, kukuruz, bonduelle, cimet, rum\b, limun, aroma]
+  unit: kg
+  attributes:
+    vrsta:
+      u_prahu: 'u prahu'
+      smedi: '\bsmed|\bdemerara|\btrsk'
+      kocke: '\bkock'
+      bijeli: '\bbijel|\bkristal'
+  loose_produce: false
+
+sol:
+  name: sol
+  synonyms: [sol, kuhinjska sol]
+  must_match: [sol\b]
+  must_not_match: [ambre, sprej, spf, sun\b, mlijeko, elephant, flat\b, chilli, chili, papar, set\b, mlinac, posuda, kutija, bocic, doza, finish, somat, perilic, ocat,
+                   ulje, kupanje, naocal, suncan, med\b, soljenk]
+  unit: kg
+  attributes:
+    vrsta:
+      morska: '\bmorsk'
+      himalajska: '\bhimalaj'
+      kamena: '\bkamen'
+      jodirana: '\bjodir'
+    zrno:
+      sitna: '\bsitn'
+      krupna: '\bkrupn'
+  loose_produce: false
+
+ulje:
+  name: ulje (suncokretovo/biljno)
+  synonyms: [ulje, suncokretovo ulje, biljno ulje, jestivo ulje]
+  must_match: [ulje\b]
+  must_not_match: [incun, filet, maslin, masl\b, mas\b, tuna, sardin, fileti, skus, usne, kosu, baby, argan, etericn,
+                   spreju, bucin, kokos, palmin, sezam, lanen, ocat, set\b, kozm, motor, lampe, masaz]
+  unit: l
+  attributes:
+    vrsta:
+      suncokretovo: '\bsuncokret|\bsunc\b'
+      repicino: '\brepic|\buljane repice'
+      biljno: '\bbiljn|\bbilj\b'
+  loose_produce: false
+
+maslinovo_ulje:
+  name: maslinovo ulje
+  synonyms: [maslinovo ulje, maslinovo]
+  must_match: [maslinovo ulje, ulje maslinovo, masl ulje, ulje masl, ekstra devicansko, extra devicansko,
+               extra virgin]
+  must_not_match: [grissin, okus, tartuf, umak, kruh, pecivo, kreker, tuna, sardin, fileti, skus, inci, masline\b, rajcic, ocat, set\b, sapun, krema]
+  unit: l
+  attributes:
+    kvaliteta:
+      ekstra_djevicansko: '\bekstra|\bextra|\beks\.|\bekst'
+      djevicansko: '\bdevic|\bdev\.'
+  loose_produce: false
+
+maslac:
+  name: maslac
+  synonyms: [maslac, puter, butter]
+  must_match: [maslac, puter\b, butter\b, markenbutter]
+  must_not_match: [peanut, snickers, kikiriki, kokic, keks, croissant, kroasan, shea, kakao, namaz, mikrovaln, smokic,
+                   caj\b, pop\b, crunchy, bobi, buttons, slani stapic, biskvit, popcorn, tijest]
+  unit: kg
+  attributes:
+    vrsta:
+      slani: '\bslan|\bs morskom'
+      neslani: '\bneslan'
+  loose_produce: false
+
+margarin:
+  name: margarin
+  synonyms: [margarin]
+  must_match: [margarin, margo\b, rama\b]
+  must_not_match: [kolac]
+  unit: kg
+  loose_produce: false
+
+mlijeko:
+  name: mlijeko
+  synonyms: [mlijeko, kravlje mlijeko]
+  must_match: [mlijek]
+  must_not_match: [cokolad, cok\b, kakao, sojin, soja, zob, rizin, riza\b, bademov, badem, kokos, kozje,
+                   vanilij, jagod, banan, kava\b, kave\b, napitak, napolitank, keks, kras\b, bijela cokolada,
+                   prahu, zamjen, zamj\b, nan\b, junior, kiselo, jogurt, sir\b, sladoled, puding, kroasan,
+                   croissant, bombon, cokoladic, med\b, sun\b, suncanje, disney, dorina, ciste, cisti,
+                   pjena za, ukrasn, proteinsk, kefir, kondenz, lgg\b, aktiv]
+  unit: l
+  attributes:
+    mast:
+      "0.5": '(?<![\d.])0?\.5\s*(%|mm)'
+      "0.9": '(?<![\d.])0?\.9\s*(%|mm)'
+      "1.5": '\b1\.5\s*(%|mm)'
+      "2.8": '\b2\.8\s*(%|mm)'
+      "3.2": '\b3\.2\s*(%|mm)'
+      "3.5": '\b3\.5\s*(%|mm)'
+      "3.8": '\b3\.8\s*(%|mm)'
+    vrsta:
+      trajno: '\btrajn|\buht\b'
+      svjeze: '\bsvjez|\bsvj\.'
+    laktoza:
+      bez: 'bez laktoze|\blf\b|laktoze free'
+  loose_produce: false
+
+jogurt:
+  name: jogurt
+  synonyms: [jogurt, tekući jogurt, tekuci jogurt]
+  must_match: [jogurt]
+  must_not_match: [vocn, voce, jagod, visnj, borovnic, sumsko, vanilij, smoothie, protein, cokolad, keks,
+                   musli, zitaric, kokos, breskv, mango, banan, jabuk, ananas, lesnjak, kava\b, aroma,
+                   jogobella, frutek]
+  unit: kg
+  attributes:
+    vrsta:
+      grcki: '\bgrck'
+      tekuci: '\btekuc|\btek\.'
+      cvrsti: '\bcvrst'
+    mast:
+      "0.1": '(?<![\d.])0?\.1\s*(%|mm)'
+      "0.9": '(?<![\d.])0?\.9\s*(%|mm)'
+      "1.5": '\b1\.5\s*(%|mm)'
+      "2.8": '\b2\.8\s*(%|mm)'
+      "3.2": '\b3\.2\s*(%|mm)'
+  loose_produce: false
+
+kiselo_vrhnje:
+  name: kiselo vrhnje
+  synonyms: [kiselo vrhnje, vrhnje kiselo]
+  must_match: [kiselo vrhnje, vrhnje kiselo, kis vrhnje, vrhnje kis, mileram]
+  must_not_match: [luk\b, vlasac, umak, namaz]
+  unit: kg
+  attributes:
+    mast:
+      "12": '\b12\s*(%|mm)'
+      "20": '\b20\s*(%|mm)'
+  loose_produce: false
+
+vrhnje_za_kuhanje:
+  name: vrhnje za kuhanje
+  synonyms: [vrhnje za kuhanje, kuhinjsko vrhnje]
+  must_match: [vrhnje za kuhanje, vrhnje za kuh, vrh za kuh, kuhinjsko vrhnje, vrhnje kuhanje]
+  must_not_match: [luk\b]
+  unit: l
+  loose_produce: false
+
+slatko_vrhnje:
+  name: slatko vrhnje
+  synonyms: [slatko vrhnje, vrhnje za šlag, vrhnje za slag]
+  must_match: [slatko vrhnje, vrhnje slatko, vrhnje za slag, slag vrhnje, vrhnje za tuc]
+  must_not_match: [pjena, sprej, prah, cokolad]
+  unit: l
+  loose_produce: false
+
+svjezi_sir:
+  name: svježi sir
+  synonyms: [svježi sir, svjezi sir, kravlji sir]
+  must_match: [svjezi sir, sir svjezi, svj sir, sir svj, zrnati sir, sirni namaz svjezi]
+  must_not_match: [mascarpone, vrhnje, burek, strudl, pita, savijac, palacink, krem\b, sunka, luk\b, vlasac, paprik,
+                   bucin, sirni\b, snack]
+  unit: kg
+  attributes:
+    mast:
+      posni: '\bposn|\blight'
+      masni: '\bmasn|\bpunomas'
+  loose_produce: false
+
+tvrdi_sir:
+  name: tvrdi sir (gauda, trapist, edamac)
+  synonyms: [tvrdi sir, gauda, gouda, trapist, edamac, edamer, polutvrdi sir]
+  must_match: [gauda, gouda, trapist, edamac, edamer, tvrdi sir, sir tvrdi, polutvrdi, polutv\b, tilzit]
+  must_not_match: [krem\b, topljen, namaz, cips, kreker, sunka, burek, pita, ribani\b]
+  unit: kg
+  attributes:
+    vrsta:
+      gauda: '\bgauda|\bgouda'
+      trapist: '\btrapist'
+      edamac: '\bedam'
+      tilzit: '\btilzit'
+    oblik:
+      narezani: '\bnarez|\brez\.|\bslice|\bsnite'
+  loose_produce: false
+
+mozzarella:
+  name: mozzarella
+  synonyms: [mozzarella, mocarela]
+  must_match: [mozzarel, mozarel, mocarel]
+  must_not_match: [krem\b, mozzarellom, pizza, stapic, panir, salata, sendvic, tost]
+  unit: kg
+  attributes:
+    oblik:
+      ribana: '\bribal|\bribani|\bgrated'
+      kuglica: '\bmini|\bkuglic|\bperle'
+  loose_produce: false
+
+parmezan:
+  name: parmezan
+  synonyms: [parmezan, parmigiano, grana padano]
+  must_match: [parmezan, parmigian, grana padano]
+  must_not_match: [cips, kreker, umak, pesto]
+  unit: kg
+  attributes:
+    oblik:
+      ribani: '\bribani|\bgrated|\brib\.'
+  loose_produce: false
+
+jaja:
+  name: jaja
+  synonyms: [jaja, jaje, kokošja jaja, kokosja jaja]
+  must_match: [jaja\b, jaje\b]
+  must_not_match: [tije\b, tijest, slicic, iznenad, koleda, cokolad, cok\b, boja, uskrs, usk\b, uskr\b, set\b, mini\b, kremom, tjestenin, rezanc,
+                   mlinc, barilla, tagliatell, kinder, milka, salvet, punjen, rezac, marodi, luneta,
+                   plava\b, ukras, kalup, prah, ljesnjak, kokos\b, sorini, gala\b, socado, jajima, pasta,
+                   majonez, tj\b, tjest, fidelin, fuz, surl, keks, misura, polje\b, klara\b, bez\b, od svj,
+                   liker, puding, krem\b, sendvic, salata, pasteta, namaz, jaja s\b, sa jajima, s jajima]
+  unit: kom
+  attributes:
+    velicina:
+      xl: '\bxl\b'
+      l: '\bl\b|razred\s*l\b|\(l\)'
+      m: '\bm\b|razred\s*m\b|\(m\)'
+      s: '\bs\b|razred\s*s\b|\(s\)'
+    uzgoj:
+      slobodni: '\bslobodn'
+      podni: '\bpodn'
+      bio: '\bbio\b|\beko\b|\bekol'
+  loose_produce: false
+
+luk:
+  name: luk (crveni/žuti)
+  synonyms: [luk, crveni luk, žuti luk, zuti luk, kapula]
+  must_match: [luk\b, kapula]
+  must_not_match: [presa, gnjecil, dinst, termick, smrz, ledo\b, kock, rezani, cesnjak, vrhnje, sir\b, med\b, senf, kikiriki, przeni, granul, pasta, pecivo, bruschett,
+                   karameliz, majonez, rings, zacin, tuba, umak, salat, prsten, masline, sendvic, krem\b,
+                   namaz, svinjsk, rukavac, poriluk, vlasac, kapulic, srdel, sardin, baguett, stapic, naljev,
+                   octu, ocat, kis\b, kisel, srebrn, srebni, marinir, pohan, kolut, fileti]
+  unit: kg
+  attributes:
+    vrsta:
+      mladi: '\bmlad'
+      crveni: '\bcrven|\bljubicast'
+      zuti: '\bzut|\bsrebren'
+      bijeli: '\bbijel'
+  loose_produce: true
+
+cesnjak:
+  name: češnjak
+  synonyms: [češnjak, cesnjak, bijeli luk]
+  must_match: [cesnjak, cesnjaka]
+  must_not_match: [tabasco, prelje, granul, umak, zacin, vegeta, presa, rolls, pasta, posipac, sampon, derma, mlinac, sir\b,
+                   bruschett, crispy, masline, kruh, papar, prahu, ulje, tost, maslac, namaz, chips]
+  unit: kg
+  loose_produce: true
+
+krumpir:
+  name: krumpir
+  synonyms: [krumpir, krompir, kumpir]
+  must_match: [krumpir]
+  must_not_match: [bombon, haribo, umak, valjusc, krumpiric, sweet, pire, ledo, porcij, njoki, pita, vegeta, kriske, kroket, kruh, ploske, gnjecil, wedges,
+                   batat, slatki, peceni, salata, burek, twist, frites, pommes, zacin, aviko, pecivo,
+                   medaljon, stapic, panir, gulas, restan, pomfrit, chips, juha, smrz, tijest, rosti]
+  unit: kg
+  attributes:
+    vrsta:
+      mladi: '\bmlad'
+      crveni: '\bcrven'
+      zuti: '\bzut'
+      bijeli: '\bbijel'
+  loose_produce: true
+
+rajcica:
+  name: rajčica (svježa)
+  synonyms: [rajčica, rajcica, paradajz, pomidor]
+  must_match: [rajcic, paradajz, pomidor]
+  must_not_match: [pas\b, tramezz, pasir, umak, sjecka, juha, pelat, koncentr, konc\b, krem\b, tuba, tuna, lim\b, limenk,
+                   staklo, susen, sardin, sok\b, bosiljak, bosiljk, polpa, masline, mesne, pasta, ketchup,
+                   kecap, pizza, sir\b, chips, grah, punjen, brik, salsa, pesto, povrcem, ulju]
+  unit: kg
+  attributes:
+    vrsta:
+      cherry: '\bcherry|\bcheri|\bkoktel|\bmini'
+      sljiva: '\bsljiv|\bdatter'
+      grozd: '\bgrozd|\bgrapolo'
+  loose_produce: true
+
+pasirana_rajcica:
+  name: pasirana rajčica
+  synonyms: [pasirana rajčica, pasirana rajcica, passata, rajčica pasirana]
+  must_match: [pasirana rajcica, rajcica pasirana, pasir rajcica, rajcica pasir, passata, polpa]
+  must_not_match: [bosiljak, bosiljk, umak, luk\b, cesnjak, ljut, origano, papric]
+  unit: kg
+  loose_produce: false
+
+koncentrat_rajcice:
+  name: koncentrat rajčice
+  synonyms: [koncentrat rajčice, koncentrat rajcice, pire od rajčice]
+  must_match: [koncentrat rajcic, rajcica koncentrat, konc rajcic, rajcica konc, dupli konc]
+  must_not_match: [juha, sok\b, deterd, omeksiv, prasak, sredstvo, gel\b, kava, caj\b, voc]
+  unit: kg
+  loose_produce: false
+
+mrkva:
+  name: mrkva
+  synonyms: [mrkva, mrkvu, mrkve]
+  must_match: [mrkv]
+  must_not_match: [kitekat, keks, pasteta, hr\b, mac\b, tamnj, sun\b, grasak, sok\b, jajima, naranca, jabuka, piletin, hrana, toco, tjestenin, rezanc, nektar,
+                   limun, pekmez, sjeme, govedin, kocka, pice, juha, salata, mix\b, smrz, ledo, ribana]
+  unit: kg
+  loose_produce: true
+
+paprika:
+  name: paprika (svježa)
+  synonyms: [paprika, babura, svježa paprika]
+  must_match: [paprik, babur]
+  must_not_match: [paprikas, raznjic, jalapeno, purec, piletin, svinjsk, mljeven, mlj\b, slatka, zacin, zac\b, tucan, masline, filet, punjen, punj\b, pecen,
+                   rezan, namaz, gulas, dimljen, prah, sir\b, ajvar, pasta, umak, salam, kobas, sardin,
+                   delko, kotanyi, safram, vegeta, maestro, zvijezda, zorela, fant, kisel, lim\b, staklo,
+                   juha, krem\b, pomfrit]
+  unit: kg
+  attributes:
+    boja:
+      crvena: '\bcrven'
+      zuta: '\bzut'
+      zelena: '\bzelen'
+    vrsta:
+      babura: '\bbabur'
+      rog: '\brog\b|\broga\b'
+      ljuta: '\bljut'
+  loose_produce: true
+
+krastavac:
+  name: krastavac (svježi)
+  synonyms: [krastavac, krastavci, svježi krastavac]
+  must_match: [krastav]
+  must_not_match: [octu, droga, neto, sirup, monin, rial, kisel, kis\b, delikates, delik\b, del\b, masa\b, mase\b, ocijed, ocj\b, salatar, salatni,
+                   staklo, pasterizir, sok\b, sjeme, namaz, lim\b, limun, kornison, salata, sendvic, toco,
+                   doora, vitaminka, zorela, podravka, zvijezda, giana, natureta, campo]
+  unit: kg
+  loose_produce: true
+
+tikvica:
+  name: tikvica
+  synonyms: [tikvica, tikvice]
+  must_match: [tikvic]
+  must_not_match: [strukl, mjesavin, sjeme, ledo, rizoto, cvijet, bulgur, piletin, kozic, pasta, namaz, krema,
+                   hummus, kvinoj, ukrasn, noz\b, donut, pecen, porcij]
+  unit: kg
+  loose_produce: true
+
+kupus:
+  name: kupus (svježi)
+  synonyms: [kupus, glavica kupusa]
+  must_match: [kupus]
+  must_not_match: [posud, kisel, kis\b, salata, sarmu, sjeme, pritiskiv, rezac, noz\b, dinstan, julienne, sal\b,
+                   rez\b, rezani, ribani, mix\b, povrce, vac\b, vak\b]
+  unit: kg
+  attributes:
+    vrsta:
+      crveni: '\bcrven'
+      bijeli: '\bbijel'
+      kineski: '\bkinesk'
+      mladi: '\bmlad'
+  loose_produce: true
+
+kiseli_kupus:
+  name: kiseli kupus
+  synonyms: [kiseli kupus]
+  must_match: [kiseli kupus, kupus kiseli, kis kupus, kupus kis, kiselo zelje]
+  must_not_match: [sal\b, premium, salata, sarma\b, gotov]
+  unit: kg
+  attributes:
+    oblik:
+      glavice: '\bglav'
+      rezani: '\brezan|\brez\.'
+  loose_produce: false
+
+zelena_salata:
+  name: zelena salata
+  synonyms: [zelena salata, salata, matovilac, rikola, rukola]
+  must_match: [zelena salata, salata zelena, ledena salata, salata ledena, kristal salata, matovilac,
+               rikola, rukola, radic, endivij, lollo, puterica, salata glavica]
+  must_not_match: [krumpir, tuna, piletin, grah, kupus, mix\b, pesto, umak, prelje, dresing, ulje, sjeme,
+                   rezana, sendvic, tjestenin]
+  unit: kg
+  loose_produce: true
+
+spinat:
+  name: špinat
+  synonyms: [špinat, spinat, blitva]
+  must_match: [spinat, blitv]
+  must_not_match: [smoothie, tagliatell, losos, piletin, brancin, fortia, tortelin, tortellin, burek, pita, savijac, njoki, tjestenin, rezanc, krem\b, juha,
+                   pizza, lazanj, lasagn, sir\b, palacink, rolat]
+  unit: kg
+  attributes:
+    oblik:
+      smrznuti: '\bsmrz|\bledo|\bduboko'
+      baby: '\bbaby|\bmladi'
+  loose_produce: true
+
+persin:
+  name: peršin
+  synonyms: [peršin, persin]
+  must_match: [persin]
+  must_not_match: [sir\b, meki, hren, origano, zac\b, korijen, susen, zacin, list\b, kotanyi, safram, sjeme, maestro, ulje, maslac, krumpir]
+  unit: kom
+  loose_produce: true
+
+gljive:
+  name: gljive (šampinjoni)
+  synonyms: [gljive, šampinjoni, sampinjoni, bukovače, bukovace]
+  must_match: [sampinjon, gljiv, bukovac]
+  must_not_match: [ledo, mjesav, ragu, namaz, povrc, juha, umak, pizza, rizoto, krem\b, pasteta, ocijed, masa\b, mase\b, limenk, lim\b,
+                   staklo, konzerv, susen, tortelin, tortellin, burek, pita, salata, kocka, zacin]
+  unit: kg
+  attributes:
+    vrsta:
+      sampinjoni: '\bsampinjon'
+      bukovace: '\bbukovac'
+  loose_produce: true
+
+riza:
+  name: riža
+  synonyms: [riža, riza]
+  must_match: [riza\b, rize\b, rizi\b, riso\b, rice\b]
+  must_not_match: [plodovi, pah\b, rizolino, ling\b, rizling, vino, cokolad, cok\b, kreker, snack, mlijek, napitak, hipp, kasica, vafl, keks, pahuljic,
+                   puding, ocat, sake, chips, kolac, sushi set, mikado, pedigree, frutek, jela\b, povrce,
+                   piletin, kuhan, salata, napolitank, galet, tortil, brasno, ben\b]
+  unit: kg
+  attributes:
+    vrsta:
+      basmati: '\bbasmati'
+      jasmin: '\bjasmin'
+      arborio: '\barborio|\bcarnaroli|\brizot|\boriginario'
+      parboiled: '\bparboil'
+      integralna: '\bintegral|\bsmed|\bbrown'
+      dugo_zrno: 'dugo zrno|dugo zrna|\bdugozrn|long grain'
+      okrugla: '\bokrugl|kratko zrno|okruglo zrno'
+      sushi: '\bsushi'
+  loose_produce: false
+
+tjestenina:
+  name: tjestenina
+  synonyms: [tjestenina, pasta, špageti, spageti, penne, fusilli, makaroni]
+  must_match: [tjestenin, spaget, spaghett, penne, fusill, makaron, tagliatell, farfalle, rigatoni,
+               linguine, tortiglioni, puzic, svrdl, mascice, leptiric, pipe rigate, sedanini, tjest\b]
+  must_not_match: [juha, instant, bolognese, piletin, goved, kokosj, salata, umak, gotov, sira\b, punjen,
+                   tortelin, tortellin, ravioli, njoki, lazanj, lasagn, maggi, carbonara, pesto, mesn,
+                   sir\b, skus, tuna, povrce]
+  unit: kg
+  attributes:
+    oblik:
+      spageti: '\bspaget|\bspaghett'
+      penne: '\bpenne'
+      fusilli: '\bfusill|\bsvrdl'
+      makaroni: '\bmakaron'
+      tagliatelle: '\btagliatell|\brezanc'
+      farfalle: '\bfarfalle|\bleptir|\bmasnic'
+      puzici: '\bpuzic'
+    vrsta:
+      integralna: '\bintegral'
+      bez_glutena: 'bez glutena|gluten free'
+      s_jajima: 's jajima|\bjajim|\bjajc'
+  loose_produce: false
+
+kruh:
+  name: kruh
+  synonyms: [kruh]
+  must_match: [kruh\b, kruha\b]
+  must_not_match: [mrvic, prezl, noz\b, kutija, kosar, kalup, mjesavin, smjes, brasno, pekar\b, toster,
+                   tost\b, pudding, svjeze pecen, cips, dvopek, krutoni, pecivo]
+  unit: kg
+  attributes:
+    vrsta:
+      bijeli: '\bbijel'
+      polubijeli: '\bpolubijel'
+      crni: '\bcrn|\bintegral'
+      kukuruzni: '\bkukuruz'
+      razeni: '\braz'
+      mijesani: '\bmijesan'
+    oblik:
+      rezani: '\brezan|\bnarezan|\brez\.'
+  loose_produce: false
+
+griz:
+  name: griz
+  synonyms: [griz, pšenična krupica]
+  must_match: [griz\b, psenicna krupica]
+  must_not_match: [desert, belriso, knedl, kukuruz, kasica, mlijek, puding, napitak, hipp]
+  unit: kg
+  loose_produce: false
+
+palenta:
+  name: palenta (kukuruzna krupica)
+  synonyms: [palenta, pura, kukuruzna krupica, kukuruzni griz]
+  must_match: [palent, polent, kukuruzna krupica, kukuruzni griz, kuk krupica]
+  must_not_match: [chips, stapic]
+  unit: kg
+  loose_produce: false
+
+zobene_pahuljice:
+  name: zobene pahuljice
+  synonyms: [zobene pahuljice, zobene, zob]
+  must_match: [zobene pahuljice, zob pahuljice, pahuljice zobene, zobene\b, ovsene]
+  must_not_match: [cokolino, cokolad, keks, musli, mlijek, napitak, kasica, voce, vocn, banan, jabuk, med\b, kakao,
+                   bar\b, ploc]
+  unit: kg
+  attributes:
+    vrsta:
+      sitne: '\bsitn|\bfine|\binstant'
+      krupne: '\bkrupn'
+  loose_produce: false
+
+krusne_mrvice:
+  name: krušne mrvice
+  synonyms: [krušne mrvice, krusne mrvice, prezle, mrvice]
+  must_match: [krusne mrvice, mrvice krusne, mrvice\b, prezle, panko]
+  must_not_match: [dekor, saren, kakao, oetker, keks, cokolad]
+  unit: kg
+  loose_produce: false
+
+kvasac:
+  name: kvasac
+  synonyms: [kvasac, germa]
+  must_match: [kvasac, kvas\b]
+  must_not_match: [pivski tablet, tablet, kapsul]
+  unit: kg
+  attributes:
+    vrsta:
+      suhi: '\bsuh|\binstant|\binst\.'
+      svjezi: '\bsvjez|\bsvj\.'
+  loose_produce: false
+
+prasak_za_pecivo:
+  name: prašak za pecivo
+  synonyms: [prašak za pecivo, prasak za pecivo, praška za pecivo]
+  must_match: [prasak za pecivo, pr za pecivo, prasak pecivo, backpulver]
+  must_not_match: []
+  unit: kg
+  loose_produce: false
+
+vanilin_secer:
+  name: vanilin šećer
+  synonyms: [vanilin šećer, vanilin secer, vanilin]
+  must_match: [vanilin secer, vanilinski secer, secer vanilin, vanilin\b]
+  must_not_match: [keks, puding, sladoled, krema, napitak]
+  unit: kg
+  loose_produce: false
+
+kakao:
+  name: kakao (prah)
+  synonyms: [kakao, kakao prah]
+  must_match: [kakao\b]
+  must_not_match: [rolada, dekor, torta, vafel, napolit, mrvice, napitak, instant, mlijek, maslac, keks, cokolad, krem\b, namaz, puding, sladoled, kocke,
+                   kuglic, pahuljic, zitaric, kroasan, croissant, bombon, zrn, nesquik, benco, kras\b,
+                   nescafe, bar\b, ploc]
+  unit: kg
+  loose_produce: false
+
+cokolada_za_kuhanje:
+  name: čokolada za kuhanje
+  synonyms: [čokolada za kuhanje, cokolada za kuhanje, čokolada za kolače]
+  must_match: [cokolada za kuhanje, cokolada za kuh, cok za kuh, cokolada za kolace, cokolada za pecenje,
+               kuhinjska cokolada, za kuhanje cokolada]
+  must_not_match: []
+  unit: kg
+  loose_produce: false
+
+pileca_prsa:
+  name: pileća prsa / file
+  synonyms: [pileća prsa, pileca prsa, pileći file, pileci file, piletina file]
+  must_match: [pilec prsa, pileca prsa, pileci file, pilec file, prsa pilec, file pilec, pileci filet,
+               pil prsa, pil file]
+  must_not_match: [zabatak, dimcek, narezak, narzak, gavelino, odresc, kids, panir, pohan, dimljen, kuhan, narez, salam, pasteta, hrenov, kobas, sunka, grill sir,
+                   juha, nuggets, medaljon, odrez, cordon, stapic, macke, pse\b, felix, kebab, gyros,
+                   marinir, rolica, salata, sendvic, tortilj, wrap, mini\b, cca\b]
+  unit: kg
+  loose_produce: false
+
+piletina:
+  name: piletina (cijelo pile, batak, zabatak, krila)
+  synonyms: [piletina, pile, pileći batak, pileci batak, pileća krila, pileca krila, zabatak]
+  must_match: [pile\b, pilec batak, pileci batak, batak, zabatak, pilec krila, pileca krila, krilca,
+               pileca zadnja, pilece meso, pilec zadnj]
+  must_not_match: [whisk, maggi, zac\b, usitnjen, tina\b, bonas, mjes\b, hrana, panir, pohan, dimljen, pecen, narez, salam, pasteta, hrenov, kobas, juha, nuggets,
+                   medaljon, odrez, cordon, stapic, kebab, gyros, marinir, rolica, salata, sendvic, kotanyi,
+                   zacin, alu\b, grill zacin, gotov, umak, mini\b, prsa\b, file\b, filet\b, purec, puret,
+                   gusc, patk]
+  unit: kg
+  attributes:
+    dio:
+      cijelo: '\bpile\b(?!.*\b(batak|zabatak|krila|krilca|prsa))|\bcijelo|\bkalibro|\bgrill'
+      batak: '\bbatak'
+      zabatak: '\bzabatak'
+      krila: '\bkril'
+  loose_produce: false
+
+mljeveno_meso:
+  name: mljeveno meso
+  synonyms: [mljeveno meso, mljeveno, mljeveno mesano meso]
+  must_match: [mljeveno meso, meso mljeveno, mljeveno mijesano, mljeveno junece, mljeveno svinjsko,
+               mljeveno purece, mljeveno pilece, mljeveno telece, mljev meso]
+  must_not_match: [posipac, secer, papar, aluminij, veggie, polpete, cevap, pljeskav, burger]
+  unit: kg
+  attributes:
+    vrsta:
+      mijesano: '\bmijes|\bmjes'
+      junece: '\bjunec|\bjun\.|\bgoved'
+      svinjsko: '\bsvinj'
+      purece: '\bpurec'
+      pilece: '\bpilec'
+      telece: '\btelec'
+  loose_produce: false
+
+svinjetina:
+  name: svinjetina (svježe meso)
+  synonyms: [svinjetina, svinjsko meso, svinjski vrat, svinjski but, svinjska lopatica, svinjski kotlet]
+  must_match: [svinjetin, svinjski vrat, svinjski but, svinjska lopatic, svinjski kotlet, svinjsko meso,
+               svinjski file, svinjska rebra, svinjski karee, svinjski lungic, sv vrat, sv but, sv lopatic,
+               sv kotlet, sv karee]
+  must_not_match: [svinjetinom, dimljen, kuhan, narez, salam, pasteta, kobas, hrenov, sunka, pecen, pohan, panir, mast\b,
+                   cvarc, juha, gulas, gotov, konzerv, lim\b, mljev, kotanyi, zacin, cca\b]
+  unit: kg
+  attributes:
+    dio:
+      vrat: '\bvrat'
+      but: '\bbut\b'
+      lopatica: '\blopatic'
+      kotlet: '\bkotlet|\bkaree|\bkare\b'
+      rebra: '\brebr'
+      file: '\bfile|\blungic'
+  loose_produce: false
+
+junetina:
+  name: junetina / govedina (svježe meso)
+  synonyms: [junetina, govedina, juneće meso, junece meso, goveđe meso, govede meso, junetina za gulaš]
+  must_match: [junetin, govedin, junec but, junec vrat, junec lopatic, junec gulas, junec ramstek,
+               junec rebr, junec file, junec meso, goveda prsa, govede meso, junec\b]
+  must_not_match: [kroket, burek, mm\b, pekar, alu\b, artu, grasak, gastro, zelatin, posl\b, govedinom, simply, dimljen, kuhan, narez, salam, pasteta, kobas, hrenov, pecen, pohan, juha, gulas gotov,
+                   gotov, konzerv, lim\b, mljev, kocka, temeljac, kotanyi, zacin, burger, cevap, pljeskav,
+                   macke, pse\b, hrana, felix, whiskas, piletin, puretin, povrce, umak, jela\b, cca\b,
+                   pastet, carpaccio, prsut, mesnat]
+  unit: kg
+  attributes:
+    dio:
+      but: '\bbut\b'
+      vrat: '\bvrat'
+      lopatica: '\blopatic'
+      gulas: '\bgulas'
+      file: '\bfile|\bramstek|\bbiftek'
+      rebra: '\brebr|\bprsa'
+  loose_produce: false
+
+slanina:
+  name: slanina / panceta
+  synonyms: [slanina, panceta, špek, spek, bacon]
+  must_match: [slanin, pancet, spek\b, bacon]
+  must_not_match: [chips, cips, grah, kobas, pizza, kreker, umak, sir\b, krumpir, zacin, aroma, ulje]
+  unit: kg
+  attributes:
+    oblik:
+      narezana: '\bnarez|\brez\.|\brezan|\bslice'
+      kockice: '\bkock'
+  loose_produce: false
+
+sunka:
+  name: šunka (kuhana)
+  synonyms: [šunka, sunka, kuhana šunka, kuhana sunka]
+  must_match: [sunka\b, sunke\b, sunk\b]
+  must_not_match: [pizza, sendvic, tost, sir\b, pasteta, salata, burek, kroasan, croissant, tortelin,
+                   tortellin, palacink, cips, kreker, panini, rolica, krem\b, namaz, pita, omlet]
+  unit: kg
+  attributes:
+    vrsta:
+      kuhana: '\bkuhan|\bpraska|\bkuh\.'
+      pileca: '\bpilec'
+      pureca: '\bpurec'
+      delikates: '\bdelikates|\bdel\.'
+    oblik:
+      narezana: '\bnarez|\brez\.|\brezan'
+  loose_produce: false
+
+tuna:
+  name: tuna (konzerva)
+  synonyms: [tuna, tunjevina]
+  must_match: [tuna\b, tune\b, tunj]
+  must_not_match: [salata, grah, kukuruz, pasteta, namaz, sendvic, pizza, tjestenin, riza\b, macke, felix,
+                   whiskas, gourmet, pse\b, povrce, meksick, rio\b mare insalat, kus\b, krem\b, kus kus]
+  unit: kg
+  attributes:
+    oblik:
+      komadi: '\bkomad|\bkom\.'
+      file: '\bfile|\bfilet'
+      sjeckana: '\bsjeckan|\bmrvic'
+    preljev:
+      ulje: '\bulj|\bmaslinov|\bsuncokret'
+      vlastiti_sok: 'vlastit|\bsalamur|\bvoda|\bnatur'
+  loose_produce: false
+
+grah:
+  name: grah
+  synonyms: [grah, grah zrno, crveni grah, bijeli grah]
+  must_match: [grah\b, graha\b, grah zrn]
+  must_not_match: [kobasic, slanin, zapecen, hamburger, varivo, variva, juha, salata, tuna, sjeme, mahun,
+                   sarenac sjeme, carnex, gavrilovic, gotov, rebarc, kocka, posni grah sa, umak, chili,
+                   konzerv mesn, tortilj, burrito, mix\b, kukuruz]
+  unit: kg
+  attributes:
+    vrsta:
+      bijeli: '\bbijel'
+      crveni: '\bcrven|\bkidney'
+      sareni: '\bsaren|\btresnjev|\bpinto|\bborlott'
+      smedi: '\bsmed'
+      crni: '\bcrni'
+    oblik:
+      konzerva: '\blim\.|\blimenk|\bkonz|\bocijed|\bkuhan|\bmasa\b|\bstaklo|\btetra'
+  loose_produce: false
+
+leca:
+  name: leća
+  synonyms: [leća, leca, lece]
+  must_match: [leca\b, lece\b, leca zelena, leca crvena]
+  must_not_match: [visiomax, kontakt, dnevne, mjesecne, mjes\b, silik, hidr, otopin, cips, chips, snack,
+                   juha, salata, sir\b, kava\b, paprika]
+  unit: kg
+  attributes:
+    vrsta:
+      zelena: '\bzelen'
+      crvena: '\bcrven'
+      crna: '\bcrna|\bbeluga'
+      smeda: '\bsmed'
+    oblik:
+      konzerva: '\blim\.|\blimenk|\bkonz|\bocijed|\bkuhan'
+  loose_produce: false
+
+slanutak:
+  name: slanutak
+  synonyms: [slanutak, leblebija, cicer]
+  must_match: [slanut, leblebij, cicer]
+  must_not_match: [hummus, humus, namaz, brasno, chips, cips, snack, salata, krem\b, pasta, falafel]
+  unit: kg
+  attributes:
+    oblik:
+      konzerva: '\blim\.|\blimenk|\bkonz|\bocijed|\bkuhan|\bstaklo|\btetra'
+  loose_produce: false
+
+kukuruz:
+  name: kukuruz šećerac (konzerva)
+  synonyms: [kukuruz, kukuruz šećerac, kukuruz secerac]
+  must_match: [kukuruz secerac, kukuruz sladak, secerac, kukuruz\b, kukuruza\b]
+  must_not_match: [brasn, krupic, griz, palent, kruh, pahuljic, flips, kokice, chips, cips, snack, sjeme,
+                   ulje, skrob, salata, tuna, grah, mix\b, pecivo, tortilj, nachos, klip na zaru, kokic,
+                   kukuruzni, kukuruzno]
+  unit: kg
+  loose_produce: false
+
+grasak:
+  name: grašak
+  synonyms: [grašak, grasak]
+  must_match: [grasak, graska\b]
+  must_not_match: [mrkv, juha, rizi bizi, salata, sjeme, chips, cips, snack, wasabi, protein, mix\b,
+                   povrce, kukuruz]
+  unit: kg
+  attributes:
+    oblik:
+      smrznuti: '\bsmrz|\bledo|\bduboko'
+      konzerva: '\blim\.|\blimenk|\bkonz|\bocijed|\bstaklo'
+  loose_produce: false
+
+banana:
+  name: banana
+  synonyms: [banana, banane]
+  must_match: [banan]
+  must_not_match: [choco, krem\b, kruh, bruno, banani\b, ledolette, cips, chips, sok\b, jogurt, mlijek, kasica, frutek, napitak, smoothie, sladoled, kolac,
+                   keks, cokolad, susen, puding, voce mix, kremom, mix\b, nektar, zitaric, musli, bar\b,
+                   splitter, slatkis, bombon, gumen, aroma, jagod]
+  unit: kg
+  loose_produce: true
+
+jabuka:
+  name: jabuka
+  synonyms: [jabuka, jabuke]
+  must_match: [jabuk]
+  must_not_match: [ledolette, karamel, sok\b, nektar, ocat, kasica, frutek, cips, chips, susen, kolac, strudl, savijac, pita\b,
+                   pekmez, dzem, kompot, pire, jogurt, cimet, caj\b, sirup, napitak, cider, rakij, bar\b,
+                   aroma, gumen, mrkv, smoothie, keks, mix\b, limun, osvjez, sampon, gel\b, pice]
+  unit: kg
+  attributes:
+    vrsta:
+      zlatni_delicious: '\bzlatn|\bgolden|\bdelic'
+      idared: '\bidared'
+      granny_smith: '\bgranny'
+      crvena: '\bcrven|\bred\b|\bjonagold|\bgala\b|\bfuji'
+  loose_produce: true
+
+limun:
+  name: limun
+  synonyms: [limun, limuni]
+  must_match: [limun\b, limuna\b, limuni\b]
+  must_not_match: [cjedil, cevitana, ocjed, vitaminka, sok\b, aroma, sirup, napitak, caj\b, ledeni, voda\b, pivo, radler, keks, kolac, bombon,
+                   ocat, sol\b, papar, deterd, sredstvo, osvjez, gel\b, deo\b, sapun, kora\b, korica,
+                   trava, zacin, umak, okus, s limunom, cedevita, mineral, jogurt, pecivo, lim\b]
+  unit: kg
+  loose_produce: true
+
+naranca:
+  name: naranča
+  synonyms: [naranča, naranca, naranče]
+  must_match: [naranc]
+  must_not_match: [entelvit, cevitana, medenjac, gerber, narancast, batat, vitaminka, sok\b, nektar, aroma, sirup, napitak, caj\b, keks, kolac, bombon, cokolad, dzem, marmelad,
+                   okus, cedevita, gazir, fanta, osvjez, jogurt, kora\b, korica, mrkv, ananas, mix\b,
+                   pecivo, sampon, gel\b, voda\b]
+  unit: kg
+  loose_produce: true
+
+papar:
+  name: papar
+  synonyms: [papar, crni papar]
+  must_match: [papar\b]
+  must_not_match: [sol\b, mlinac set, set\b, kobas, salam, sir\b, umak, chips, cips, pastrm, odrez, file,
+                   zacin za, mix\b, kreker, slanina, pancet, steak]
+  unit: kg
+  attributes:
+    oblik:
+      mljeveni: '\bmljeven|\bmlj\.'
+      zrno: '\bzrn|\bcijeli'
+      mlinac: '\bmlinac|\bmlin\b'
+    vrsta:
+      crni: '\bcrn'
+      bijeli: '\bbijel'
+      sareni: '\bsaren|\bmix'
+  loose_produce: false
+
+mljevena_paprika:
+  name: mljevena paprika (začin)
+  synonyms: [mljevena paprika, slatka paprika, ljuta paprika, aleva paprika]
+  must_match: [paprika mljevena, mljevena paprika, paprika slatka mlj, paprika ljuta mlj, paprika mlj,
+               mlj paprika, aleva paprika, paprika slatka, paprika ljuta, slatka paprika, ljuta paprika]
+  must_not_match: [chips, cips, kobas, salam, sir\b, ajvar, krem\b, namaz, filet, punjen, pecen, babur,
+                   svjez, kom\b, rog\b, masline]
+  unit: kg
+  attributes:
+    vrsta:
+      slatka: '\bslatk'
+      ljuta: '\bljut'
+      dimljena: '\bdimljen'
+  loose_produce: false
+
+dodatak_jelima:
+  name: dodatak jelima (Vegeta i sl.)
+  synonyms: [vegeta, dodatak jelima, univerzalni dodatak jelima]
+  must_match: [vegeta\b, dodatak jelima, univerzalni dodatak, dodatak za jela]
+  must_not_match: [maestro, natur, twist, krumpir, chips, juha, umak, marinad, grill, rizoto, piletin,
+                   fix\b, kocka, temeljac, krem]
+  unit: kg
+  loose_produce: false
+
+ocat:
+  name: ocat (alkoholni/vinski)
+  synonyms: [ocat, alkoholni ocat, vinski ocat, kvasina]
+  must_match: [ocat\b, octa\b, kvasin]
+  must_not_match: [balzam, balsam, jabuc, jabuk, aceto balsam, krema, glazura, sredstvo, deterd, cist,
+                   kamenac, perilic, kapsul, tablet, sprej]
+  unit: l
+  attributes:
+    vrsta:
+      alkoholni: '\balkohol'
+      vinski: '\bvinsk'
+  loose_produce: false
+
+med:
+  name: med
+  synonyms: [med, pčelinji med, pcelinji med]
+  must_match: [med\b, meda\b]
+  must_not_match: [medvjed, medved, medeni, medenjak, medic, medi\b, medalj, medit, medium, medjed, medicin,
+                   kremom, keks, bombon, caj\b, rakij, liker, jogurt, mlijek, musli, pahuljic, zitaric,
+                   senf, umak, sampon, krema, gel\b, sapun, balzam, losion, slanina, sunka, oraha, orasi,
+                   cimet, pastil, sirup, pastile, lizalic, napitak, kolac, kroasan, zlatni med, bar\b]
+  unit: kg
+  attributes:
+    vrsta:
+      livadni: '\blivad|\bcvjet|\bcvijet'
+      bagremov: '\bbagrem'
+      kestenov: '\bkesten'
+      kaduljin: '\bkadulj'
+      lipov: '\blip'
+      sumski: '\bsum'
+  loose_produce: false
+
+kava:
+  name: kava
+  synonyms: [kava, mljevena kava, kava u zrnu]
+  must_match: [kava\b, kave\b, kafa\b, cafe\b, caffe\b, espresso\b]
+  must_not_match: [aparat, filter, mlinac, salic, salica, solja, solje, kapsul, jastucic, pad\b, pads\b,
+                   napitak, ledena, mlijek, vrhnje za kavu, sladoled, keks, bombon, cokolad, liker, toplo,
+                   krem\b, sapun, piling, gel\b, instant napitak, cappuccino, latte, mocha, caj\b, zamjen,
+                   cikorij, kavomat, za kavu, kava mix, 3in1, 2in1, 3 u 1, 2 u 1]
+  unit: kg
+  attributes:
+    oblik:
+      mljevena: '\bmljeven|\bmlj\.|\bmlj\b|\bground'
+      zrno: '\bzrn|\bbeans|\bin grani'
+      instant: '\binstant|\btopiv|\bnescafe'
+  loose_produce: false
+
+senf:
+  name: senf
+  synonyms: [senf, gorušica, gorusica]
+  must_match: [senf\b, gorusic, dijon]
+  must_not_match: [sjeme, umak za, marinad, chips, kreker]
+  unit: kg
+  loose_produce: false
+
+majoneza:
+  name: majoneza
+  synonyms: [majoneza, majonez]
+  must_match: [majonez]
+  must_not_match: [salata, luk\b, cesnjak, chilli, chili, tartar, umak, sendvic, tuna, kecap, ketchup]
+  unit: kg
+  loose_produce: false
+
+kecap:
+  name: kečap
+  synonyms: [kečap, kecap, ketchup]
+  must_match: [kecap, ketchup, kecup]
+  must_not_match: [chips, cips, flips, kreker, majonez, umak za]
+  unit: kg
+  attributes:
+    vrsta:
+      blagi: '\bblag|\bmild|\bslatk'
+      ljuti: '\bljut|\bhot\b|\bchili'
+  loose_produce: false
+
+voda:
+  name: voda (negazirana)
+  synonyms: [voda, negazirana voda, izvorska voda]
+  must_match: [voda\b, vode\b]
+  must_not_match: [mineral, gazir, okus, aroma, toaletn, micelar, kolonj, parfem, tonik, rashladn, destil,
+                   akumul, za pegl, ruzin, ruzina, termal, kokos, limun, jagod, mint, borovnic, breskv,
+                   osvjez, vitamin, sprej, cvjetn, cist, odmasc, posuda, boca za, filter, cedevita, sok\b,
+                   ledeni, caj\b, citrus, naranc, zero\b, plus\b, fit\b, sport]
+  unit: l
+  loose_produce: false

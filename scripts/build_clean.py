@@ -58,5 +58,7 @@ for row in stats["quality"]:
     chain, dq, *vals = row
     print(f"{chain:<20}{dq:<10}" + "".join(f"{'' if v is None else v:>7}" for v in vals))
 
-for t in ("stores", "products", "prices", "city_alias", "chains"):
+print("\n=== Osnovne namirnice (staples.yaml):", stats["staples"])
+
+for t in ("stores", "products", "prices", "city_alias", "chains", "product_staples", "product_attrs"):
     print(f"clean.{t}:", con.execute(f"SELECT count(*) FROM clean.{t}").fetchone()[0])

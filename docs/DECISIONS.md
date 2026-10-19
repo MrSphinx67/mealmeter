@@ -146,3 +146,40 @@ ali jasno ručni unos) i besmislene sidrene cijene: „ALU PILEĆA KRILCA 1kg KO
 omjera prema ostalim lancima je 1,05, a samo 1,9 % artikala odstupa više od 2× (Konzum 4,0 %,
 Studenac 11,7 %, Žabac 21,2 %). Sumnjiva su pomoćna polja i to što ne znamo gdje Lorenco prodaje.
 Ako se pokaže da je Lorenco stvarni nacionalni web-shop, ovu odluku vrijedi preispitati.
+
+### Dio A: rječnik osnovnih namirnica (`src/mealmeter/staples.yaml`)
+
+19. **72 namirnice** s poljima `name`, `synonyms`, `must_match`, `must_not_match`, `unit` (kg/l/kom),
+    `attributes` i `loose_produce`. Zajednička isključenja (hrana za ljubimce, kozmetika,
+    grickalice, dječja hrana, gotova jela) su u `_defaults` i vrijede za sve namirnice.
+    **Rječnik je prvi prijedlog i čeka ručni pregled** (`docs/staples_review.md`).
+20. **Kako je nastao prijedlog:** za svaku namirnicu izračunate su najčešće riječi koje se u
+    stvarnim nazivima pojavljuju uz nju (npr. uz „mlijek“: čokoladno, sojino, kakao, nivea, sapun…).
+    Iz njih su izvedeni `must_not_match` i atributi, a zatim dorađeni prema pregledu kandidata.
+    Nisam odlučivao koji su proizvodi „točni“: `scripts/staples_review.py` za svaku namirnicu ispisuje
+    top 20 kandidata i top 10 isključenih (s uzorkom koji ih je isključio).
+21. **Pravila podudaranja** računaju se pri buildu u `clean.product_staples` (proizvod ↔ namirnica,
+    `excluded`) i `clean.product_attrs` (proizvod, namirnica, atribut, vrijednost):
+    - `must_match` i `must_not_match` su RE2 uzorci na **početku riječi** u `name_norm` (prefiks je
+      dovoljan, `\b` za kraj riječi).
+    - Atributi su Python regexi na tekstu sa zadržanom interpunkcijom (`2,8%MM` → `2.8%mm`), jer u
+      `name_norm` „2,8 %“ i „2,8 l“ izgledaju isto. Zato „Mlijeko trajno 1,5 L“ nema atribut `mast`.
+    - Grupa (isti EAN) pripada namirnici ako barem jedan njezin naziv prolazi pravila, a nijedan ne
+      pogađa `must_not_match`.
+    - **`loose_produce`** (svježe voće i povrće) ima dodatno pravilo:
+      - riječ namirnice je prva ili druga riječ naziva,
+      - proizvod je bez globalnog EAN-a (vaga/PLU), bez gramature ili ≥ 500 g,
+      - i nije tekućina.
+
+      Bez toga „banana“ i „limun“ vraćaju uglavnom bombone, sokove i deterdžente s okusom.
+22. **`find_products(query=None, city=None, limit=10, ingredient=None, attributes=None)`**:
+    - `ingredient` je ključ ili sinonim namirnice, a `attributes` je npr. `{"tip": "glatko"}`.
+      Nepoznata namirnica ili atribut daju `ValueError` s popisom dostupnih vrijednosti.
+    - **Slobodan upit koji je točno sinonim namirnice** („mlijeko“, „Brašno“, „jaje“) automatski
+      koristi namirnicu, pa „mlijeko“ ne vraća čokoladno ni sojino mlijeko. „Čokoladno mlijeko“ nije
+      sinonim i ide kao slobodan upit.
+    - Uz `ingredient` slobodan upit dodatno sužava po nazivu („podravka“ + brašno).
+    - Cijena po jedinici bira se prvo u jedinici namirnice (mlijeko po l, jaja po kom).
+    - Rezultat nosi `ingredient` i `attributes` grupe (najčešća vrijednost među proizvodima grupe).
+    - Poredak za namirnicu: najprije grupe u kojima je riječ namirnice među prve tri riječi u
+      **većini** naziva grupe („KEKS NUTRI MRKVA“ ide iza „MRKVA 1kg“), zatim broj lanaca i trgovina.

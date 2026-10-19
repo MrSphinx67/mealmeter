@@ -7,6 +7,7 @@ from pathlib import Path
 
 import duckdb
 
+from mealmeter.staples import build_staples
 from mealmeter.normalize import (
     CITY_ALIASES,
     canonical_city,
@@ -196,6 +197,7 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
 
     stats = {}
     stats["quality"] = chain_quality_report(con)
+    stats["staples"] = build_staples(con)
     stats["dedup"] = con.execute("""
         SELECT r.chain, r.n_raw, coalesce(c.n_clean, 0) AS n_clean, r.n_zero_price
         FROM (SELECT chain, count(*) n_raw, count(*) FILTER (WHERE price_eff IS NULL) n_zero_price

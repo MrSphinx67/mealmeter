@@ -96,6 +96,7 @@ REAL_NAMES = [
     ("Dimljena svinjska rebra, cca. 700g", None),
     ("DEKA DJ. JEDNOBOJNA 110X140 CM WIM", None),
     ("LAGUNA MALVAZIJA 0,187 (20)", None),
+    ("JAJA 10/1 L TOM CRO", None),  # L je veličina jaja, a "10/1" broj komada
     # poznato ograničenje: jedinica zalijepljena za sljedeću riječ
     ("ULTRA PENNE RIG.500gPAGANI", None),
 ]

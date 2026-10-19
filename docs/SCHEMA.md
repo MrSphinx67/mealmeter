@@ -107,17 +107,28 @@ Kontrola gramature: naša cijena po kg/l (`high`) slaže se s lančevim `unit_pr
 kod Branke (7,5 %), Stanića (14,7 %) i Žabca (4,4 %) potvrđuju da je njihov `unit_price` zapravo
 cijena pakiranja. Metro (66 %) prodaje kutije porcija („20G PODRAVKA DŽEM“ za 15,81 €).
 
+**`clean.chains`** `(chain, n_stores, scope, data_quality)`: `data_quality` je `ok` ili `suspect`
+(Lorenco). Razlozi su u DECISIONS.md, a pokazatelje za sve lance ispisuje `build_clean.py`.
+
+**`clean.product_staples`** `(chain, product_id, staple, excluded)`: proizvodi čiji naziv pogađa
+`must_match` namirnice iz `staples.yaml`; `excluded = true` kad pogađa i `must_not_match`.
+
+**`clean.product_attrs`** `(chain, product_id, staple, attr, value)`: atributi iz naziva (npr.
+brasno/tip/glatko, mlijeko/mast/2.8), samo za neisključene proizvode.
+
 ## Funkcije pretrage (`src/mealmeter/search.py`)
 
-- `find_products(query, city=None, limit=10)`: grupe proizvoda (po EAN-u ili po lancu i nazivu) s
-  poljima `id, ean, name, brand, pack, n_chains, n_stores, chains, price_min/max,
-  price_per_unit_min/max, per_unit, unit_confidence, any_special, has_national, date, date_hr`
-  i `note` kad grupa uključuje nacionalnu cijenu.
+- `find_products(query=None, city=None, limit=10, ingredient=None, attributes=None)`: grupe proizvoda
+  (po EAN-u ili po lancu i nazivu) s poljima `id, ean, name, brand, pack, n_chains, n_stores, chains,
+  price_min/max, price_per_unit_min/max, per_unit, unit_confidence, pack_source, suspect_chains,
+  any_special, has_national, ingredient, date, date_hr`, uz `attributes` kad je zadana namirnica i
+  `note` kad grupa uključuje nacionalnu cijenu.
 - `get_prices(identifier, city=None, limit=50)`: identifier je EAN ili `lanac:product_id`. Po
   trgovini vraća `chain, store_id, address, city, scope, product_id, ean, name, price_eff,
   is_special, special_price, anchor_price, best_price_30, price_per_unit, per_unit,
-  unit_confidence, date, date_hr` i `note` za nacionalne cijene.
-- CLI: `uv run python -m mealmeter.cli find "brašno glatko" --city Osijek` i
+  unit_confidence, pack_source, data_quality, date, date_hr` i `note` za nacionalne cijene.
+- CLI: `uv run python -m mealmeter.cli find "brašno glatko" --city Osijek`,
+  `uv run python -m mealmeter.cli find --ingredient brasno --attr tip=glatko --city Osijek` i
   `uv run python -m mealmeter.cli prices 3850104223624 --city Osijek` (`--json` za strojni izlaz).
 
 ## Zaključci
