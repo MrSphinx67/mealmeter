@@ -10,11 +10,12 @@ import duckdb
 from mealmeter.staples import build_staples
 from mealmeter.normalize import (
     CITY_ALIASES,
+    analyze_pack,
     canonical_city,
     category_group,
+    is_clearance,
     norm_text,
     normalize_ean,
-    parse_pack,
     parse_pack_unit_field,
     unit_hint,
 )
@@ -118,23 +119,28 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
         q = "SELECT chain, product_id, barcode, name, unit, quantity, category FROM products"
         for chain, pid, barcode, name, unit, quantity, category in con.execute(q).fetchall():
             ean, valid, glob = normalize_ean(barcode)
-            pack, source = parse_pack(name), "name"
-            if pack is None and (pack := parse_pack_unit_field(unit)):
+            pack, drained, variable = analyze_pack(name)
+            source = "name"
+            # promjenjiva težina: nema pakiranja ni iz stupca unit (cijena je po kg od lanca)
+            if pack is None and not variable and (pack := parse_pack_unit_field(unit)):
                 source = "unit"
             amount, pack_unit = pack or (None, None)
             yield (chain, pid, ean, valid, glob, norm_text(name), amount, pack_unit,
-                   source if pack else None, unit_hint(unit, quantity), category_group(category))
+                   source if pack else None, unit_hint(unit, quantity), category_group(category),
+                   drained, variable, is_clearance(name))
 
     _temp_table(con, "product_derived", {
         "chain": "VARCHAR", "product_id": "VARCHAR", "ean_norm": "VARCHAR", "ean_valid": "BOOLEAN",
         "ean_global": "BOOLEAN", "name_norm": "VARCHAR", "pack_amount": "DOUBLE", "pack_unit": "VARCHAR",
         "pack_source": "VARCHAR", "unit_hint": "VARCHAR", "category_group": "VARCHAR",
+        "drained_amount": "DOUBLE", "variable_weight": "BOOLEAN", "clearance": "BOOLEAN",
     }, product_rows())
     con.execute("""
         CREATE OR REPLACE TABLE clean.products AS
         SELECT r.chain, r.product_id, r.barcode, d.ean_norm, d.ean_valid, d.ean_global,
                r.name, d.name_norm, r.brand, r.category, d.category_group, r.unit, r.quantity,
-               d.pack_amount, d.pack_unit, d.pack_source, d.unit_hint
+               d.pack_amount, d.pack_unit, d.pack_source, d.unit_hint,
+               d.drained_amount, d.variable_weight, d.clearance
         FROM products r JOIN product_derived d USING (chain, product_id)
     """)
 
@@ -144,10 +150,10 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
         UPDATE clean.products p SET pack_amount = e.amount, pack_unit = e.unit, pack_source = 'ean'
         FROM (
           SELECT ean_norm, any_value(pack_amount) AS amount, any_value(pack_unit) AS unit
-          FROM clean.products WHERE ean_global AND pack_unit IS NOT NULL
+          FROM clean.products WHERE ean_global AND pack_unit IS NOT NULL AND NOT variable_weight
           GROUP BY ean_norm HAVING count(DISTINCT (pack_amount, pack_unit)) = 1
         ) e
-        WHERE p.ean_norm = e.ean_norm AND p.ean_global AND p.pack_unit IS NULL
+        WHERE p.ean_norm = e.ean_norm AND p.ean_global AND p.pack_unit IS NULL AND NOT p.variable_weight
     """)
 
     # --- cijene ---
@@ -181,7 +187,9 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
                     ELSE CASE WHEN d.unit_price IS NOT NULL THEN p.unit_hint END END AS per_unit,
                -- low: jedinica (kg/l) mora biti poznata iz unit/quantity, inače nema cijene po jedinici
                CASE WHEN p.pack_unit IS NOT NULL THEN 'high'
-                    WHEN d.unit_price IS NOT NULL AND p.unit_hint IS NOT NULL THEN 'low' END AS unit_confidence
+                    WHEN d.unit_price IS NOT NULL AND p.unit_hint IS NOT NULL THEN 'low' END AS unit_confidence,
+               -- konzerve: cijena po kg ocijeđene mase, uz bruto price_per_unit
+               round(d.price_eff / nullif(p.drained_amount, 0) * 1000, 2)::DECIMAL(10,2) AS price_per_kg_drained
         FROM d JOIN clean.products p USING (chain, product_id)
     """)
 

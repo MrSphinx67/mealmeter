@@ -58,7 +58,23 @@ for row in stats["quality"]:
     chain, dq, *vals = row
     print(f"{chain:<20}{dq:<10}" + "".join(f"{'' if v is None else v:>7}" for v in vals))
 
-print("\n=== Osnovne namirnice (staples.yaml):", stats["staples"])
+st = dict(stats["staples"])
+suspects = st.pop("suspect_prices")
+print("\n=== Osnovne namirnice (staples.yaml):", st)
+print("\n=== Cijene izvan plausible_per_unit (price_suspect: izvan min/max i plan_basket)")
+print(f"{'namirnica':<18}{'odbačeno':>10}{'od':>10}{'%':>7}")
+for staple, n_bad, n_all in suspects:
+    print(f"{staple:<18}{n_bad:>10}{n_all:>10}{100 * n_bad / n_all:>7.1f}")
+print("\n=== Proizvodi izbačeni iz namirnica (drop_reason)")
+for reason, n in con.execute("""
+        SELECT split_part(drop_reason, ':', 1) || CASE WHEN drop_reason LIKE 'kategorija:%' THEN ':*' ELSE '' END,
+               count(*) FROM clean.product_staples WHERE drop_reason IS NOT NULL GROUP BY 1 ORDER BY 2 DESC""").fetchall():
+    print(f"  {reason:<16}{n:>8}")
+for col in ("clearance", "variable_weight"):
+    n = con.execute(f"SELECT count(*) FROM clean.products WHERE {col}").fetchone()[0]
+    print(f"  proizvoda s {col}: {n}")
+n = con.execute("SELECT count(*) FROM clean.products WHERE drained_amount IS NOT NULL").fetchone()[0]
+print(f"  proizvoda s ocijeđenom masom: {n}")
 
-for t in ("stores", "products", "prices", "city_alias", "chains", "product_staples", "product_attrs"):
+for t in ("stores", "products", "prices", "city_alias", "chains", "staple_rules", "product_staples", "product_attrs"):
     print(f"clean.{t}:", con.execute(f"SELECT count(*) FROM clean.{t}").fetchone()[0])

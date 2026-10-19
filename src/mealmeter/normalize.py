@@ -85,15 +85,37 @@ _PRE = r"(?<![\d=/])(?<!\d[.,])"
 _POST = r"(?![a-zčćšžđ])"
 
 _MULTI = re.compile(_PRE + r"(\d+)\s*[x×*]\s*" + _NUM + r"\s*" + _UNIT + r"\.?" + _POST, re.I)
-# obrnuti redoslijed: "30G*20", "0,5L x 6" (ali ne "50G X 10CM")
+# obrnuti redoslijed: "30G*20", "7GX5", "0,5L x 6" (ali ne "50G X 10CM")
 _MULTI_REV = re.compile(
     _PRE + _NUM + r"\s*" + _UNIT + r"\.?\s*[x×*]\s*(\d+)(?![\d.,])(?!\s*(?:cm|mm|m)\b)", re.I
 )
-_SLASH = re.compile(_PRE + _NUM + r"\s*" + _UNIT + r"\s*/\s*" + _NUM + r"\s*" + _UNIT + _POST, re.I)
-_DRAINED = re.compile(r"ocij[a-zčćšžđ]*\.?\s*(?:mas[a-zčćšžđ]*\.?)?\s*" + _NUM + r"\s*" + _UNIT + _POST, re.I)
-# "cca 700g" = artikl promjenjive težine koji se prodaje po kg; gramatura nije pakiranje
-_APPROX = re.compile(r"\bcca\b", re.I)
+# bruto/ocijeđeno: "3x80g/3x56g", "3x80/56 g", "2x80/2x52g", "3x70g/50g"
+_SLASH_MULTI = re.compile(
+    _PRE + r"(\d+)\s*[x×*]\s*" + _NUM + r"\s*" + _UNIT + r"?\s*/\s*(?:(\d+)\s*[x×*]\s*)?" + _NUM + r"\s*" + _UNIT + _POST,
+    re.I,
+)
+# bruto/ocijeđeno: "565g/340g", "185/140g", "115/81G"
+_SLASH = re.compile(_PRE + _NUM + r"\s*" + _UNIT + r"?\s*/\s*" + _NUM + r"\s*" + _UNIT + _POST, re.I)
+# ocijeđena / neto masa: "ocijeđ mase 130g", "OC. MASA 280 g", "OCJ. MASA 120g", "O.M. 350g",
+# "NETO OC.MASA 240 g", "(NETTOMASA 140G)", "(NETO 800G)", "OCIJEĐENA NASA 122 g"
+_DRAINED = re.compile(
+    r"(?:\bocij|\bocj|\boc\b|\bo\.\s*m\.|\bnett?o)[a-zčćšžđ]*\.?\s*(?:[mn]as[a-zčćšžđ]*\.?)?\s*-?\s*"
+    + _NUM + r"\s*" + _UNIT + _POST,
+    re.I,
+)
+# promjenjiva težina: "cca 700g", "CCA1-1,5KG", "1-1,5 kg" (cijena je po kg, gramatura nije pakiranje)
+_VARIABLE = re.compile(
+    r"\bcca(?=[\s\d.]|$)|(?<![\d.,])\d+(?:[.,]\d+)?\s*-\s*\d+(?:[.,]\d+)?\s*(?:kg|g)\b", re.I
+)
+# broj komada uz jednu gramaturu: "4+1 GRATIS", "5+1", "3/1" (ne "-25/1-", to je broj u kartonu), "6 PAK"
+_PROMO = re.compile(r"(?<![\d.,])(\d{1,2})\s*\+\s*(\d)(?!\d)")
+_COUNT = re.compile(r"(?<![\d\-])(?<!-\s)(\d{1,3})\s*/\s*1(?!\d)(?!\s*-)")
+_PAK = re.compile(r"(?<![\d.,])(\d{1,2})\s*-?\s*(?:pak|pack)\b", re.I)
+# zadnja opcija: "TUNA 2x80" bez jedinice (pretpostavljaju se grami)
+_MULTI_NOUNIT = re.compile(r"(?<![\d.,])([1-9]|1[0-2])\s*[x×*]\s*(\d{2,4})(?![\d.,])(?!\s*(?:cm|mm|m\b|x|[a-z]))", re.I)
 _SINGLE = re.compile(_PRE + _NUM + r"\s*" + _UNIT + r"\.?" + _POST, re.I)
+# gramatura do ove vrijednosti uz "4+1" / "3/1" / "6 PAK" je jedna vrećica, ako je i po komadu < 5 g
+_SACHET_MAX = 30
 
 
 def _num(s: str) -> float:
@@ -114,35 +136,98 @@ def _is_age(name: str, m: re.Match) -> bool:
     return before.endswith("+") or after.startswith("+")
 
 
-@lru_cache(maxsize=None)
-def parse_pack(name: str | None) -> tuple[float, str] | None:
-    """Gramatura iz naziva: (količina, 'g' | 'ml' | 'kom') ili None.
+def _blank(text: str, m: re.Match) -> str:
+    return text[: m.start()] + " " * (m.end() - m.start()) + text[m.end():]
 
-    Prioritet: višestruko pakiranje ("6x0,33 l", "30G*20") > ocijeđena masa ("185g ocijeđ.mase 130g",
-    "565g/340g": uzima se drugi broj) > masa/volumen > komadi. Oznake poput "5/1" ili "(10)"
-    se ne tumače. Nazivi s "cca" (promjenjiva težina, cijena po kg) vraćaju None.
+
+def _piece_count(text: str) -> int | None:
+    """Broj komada iz "4+1", "3/1" ili "6 PAK" (prvo što se nađe)."""
+    if m := _PROMO.search(text):
+        return int(m.group(1)) + int(m.group(2))
+    if (m := _COUNT.search(text)) and int(m.group(1)) > 1:
+        return int(m.group(1))
+    if (m := _PAK.search(text)) and int(m.group(1)) > 1:
+        return int(m.group(1))
+    return None
+
+
+@lru_cache(maxsize=None)
+def analyze_pack(name: str | None) -> tuple[tuple[float, str] | None, float | None, bool]:
+    """(bruto gramatura, ocijeđena masa, promjenjiva težina) iz naziva.
+
+    - Bruto: (količina, 'g' | 'ml' | 'kom') ili None. Prioritet: višestruko pakiranje
+      ("6x0,33 l", "30G*20", "7GX5") > bruto iz "bruto/ocijeđeno" > masa/volumen > komadi.
+      Jedna mala gramatura uz "4+1", "3/1" ili "6 PAK" množi se brojem komada ("7 g 4+1" -> 35 g),
+      osim ako je očito već ukupna ("35G 4+1", "5+1 48GR").
+    - Ocijeđena masa u g/ml ("185/140g" -> 140, "3x80/56 g" -> 168, "OC. MASA 280 g" -> 280).
+    - Promjenjiva težina ("cca", "1-1,5 kg"): bruto je None, cijena je po kg.
+    Oznake "-12/1-" (broj u kartonu) i "(10)" se ne tumače.
     """
-    if not name or _APPROX.search(name):
-        return None
-    if (m := _MULTI.search(name)) and int(m.group(1)) > 0 and _num(m.group(2)) > 0:
+    if not name:
+        return None, None, False
+    if _VARIABLE.search(name):
+        return None, None, True
+    text, gross, drained = name, None, None
+
+    if m := _SLASH_MULTI.search(text):
+        n, unit_b = int(m.group(1)), m.group(6)
+        a, unit = _to_base(m.group(2), m.group(3) or unit_b)
+        b, _ = _to_base(m.group(5), unit_b)
+        if n > 0 and 0 < b:
+            gross = (round(n * a, 3), unit)
+            drained = round((int(m.group(4)) if m.group(4) else (n if b < a else 1)) * b, 3)
+            text = _blank(text, m)
+    elif (m := _SLASH.search(text)) and (m.group(2) or _num(m.group(1)) >= 20):
+        a, unit = _to_base(m.group(1), m.group(2) or m.group(4))
+        b, unit_b = _to_base(m.group(3), m.group(4))
+        if unit == unit_b and 0 < b < a and _num(m.group(3)) >= 10:
+            gross, drained = (a, unit), b
+            text = _blank(text, m)
+    if drained is None and (m := _DRAINED.search(text)) and _num(m.group(1)) > 0:
+        drained = _to_base(m.group(1), m.group(2))[0]
+        text = _blank(text, m)
+    if gross:
+        return gross, drained, False
+
+    if (m := _MULTI.search(text)) and int(m.group(1)) > 0 and _num(m.group(2)) > 0:
         amount, unit = _to_base(m.group(2), m.group(3))
-        return round(int(m.group(1)) * amount, 3), unit
-    if (m := _MULTI_REV.search(name)) and int(m.group(3)) > 0 and _num(m.group(1)) > 0:
+        return (round(int(m.group(1)) * amount, 3), unit), drained, False
+    if (m := _MULTI_REV.search(text)) and int(m.group(3)) > 0 and _num(m.group(1)) > 0:
         amount, unit = _to_base(m.group(1), m.group(2))
-        return round(int(m.group(3)) * amount, 3), unit
-    if (m := _DRAINED.search(name)) and _num(m.group(1)) > 0:
-        return _to_base(m.group(1), m.group(2))
-    if m := _SLASH.search(name):
-        a1, u1 = _to_base(m.group(1), m.group(2))
-        a2, u2 = _to_base(m.group(3), m.group(4))
-        if u1 == u2 and a2 > 0:
-            return a2, u2
-    found = [_to_base(m.group(1), m.group(2)) for m in _SINGLE.finditer(name) if not _is_age(name, m)]
+        return (round(int(m.group(3)) * amount, 3), unit), drained, False
+
+    found = [_to_base(m.group(1), m.group(2)) for m in _SINGLE.finditer(text) if not _is_age(text, m)]
     found = [f for f in found if f[0] > 0]
-    for amount, unit in found:
-        if unit != "kom":
-            return amount, unit
-    return found[0] if found else None
+    pick = next((f for f in found if f[1] != "kom"), found[0] if found else None)
+    if pick:
+        amount, unit = pick
+        k = _piece_count(text) if unit != "kom" else None
+        if k and amount <= _SACHET_MAX and amount / k < 5:
+            amount = round(amount * k, 3)
+        return (amount, unit), drained, False
+    if m := _MULTI_NOUNIT.search(text):
+        return (float(int(m.group(1)) * int(m.group(2))), "g"), drained, False
+    return None, drained, False
+
+
+def parse_pack(name: str | None) -> tuple[float, str] | None:
+    """Bruto gramatura iz naziva: (količina, 'g' | 'ml' | 'kom') ili None (vidi analyze_pack)."""
+    return analyze_pack(name)[0]
+
+
+def parse_drained(name: str | None) -> float | None:
+    """Ocijeđena (neto) masa konzerve u g/ml ili None (vidi analyze_pack)."""
+    return analyze_pack(name)[1]
+
+
+def is_variable_weight(name: str | None) -> bool:
+    """Artikl promjenjive težine ("CCA 1 kg", "1-1,5KG"): cijena je po kg, gramatura nije pakiranje."""
+    return analyze_pack(name)[2]
+
+
+def is_clearance(name: str | None) -> bool:
+    """Rasprodaja / sniženje zbog roka ili kvalitete: "SNIŽENJE", "SNIŽENO", "SNIŽENI"."""
+    return bool(name) and bool(re.search(r"(^| )snizen", norm_text(name) or ""))
 
 
 def parse_pack_unit_field(unit: str | None) -> tuple[float, str] | None:

@@ -27,6 +27,28 @@ class Staple:
     unit: str
     attributes: dict[str, dict[str, str]] = field(default_factory=dict, hash=False, compare=False)
     loose_produce: bool = False
+    plausible_per_unit: tuple[float, float] | None = None
+    min_pack: float | None = None
+    max_pack: float | None = None
+    default_exclude_variants: tuple[tuple[str, str], ...] = ()
+    compare_by: str = "unit"
+    sachet_g: float | None = None
+    sachet_g_by: dict[str, dict[str, float]] = field(default_factory=dict, hash=False, compare=False)
+    pantry: bool = False
+
+    @property
+    def compare_unit(self) -> str:
+        """Jedinica u kojoj se uspoređuje cijena: kg/l/kom ili "vrecica" (compare_by: pack)."""
+        return "vrecica" if self.compare_by == "pack" else self.unit
+
+    def units_in_pack(self, pack_amount: float | None, pack_unit: str | None, attrs: dict[str, str]) -> float | None:
+        """Broj jedinica usporedbe u pakiranju kad to nije kg/l (npr. vrećica od 7 g)."""
+        if self.compare_by != "pack" or not pack_amount or pack_unit != "g":
+            return None
+        size = self.sachet_g
+        for attr, by_value in self.sachet_g_by.items():
+            size = by_value.get(attrs.get(attr), size)
+        return round(pack_amount / size, 3) if size else None
 
     @property
     def match_regex(self) -> str:
@@ -70,6 +92,8 @@ def load_staples(path: Path = STAPLES_PATH) -> dict[str, Staple]:
     default_not = [_fold(p) for p in defaults.get("must_not_match", [])]
     out = {}
     for key, d in raw.items():
+        if not re.fullmatch(r"[a-z_]+", key):
+            raise ValueError(f"{key}: ključ smije sadržavati samo mala slova i _")
         unit = d.get("unit")
         if unit not in UNITS:
             raise ValueError(f"{key}: unit mora biti jedan od {UNITS}, a ne {unit!r}")
@@ -90,7 +114,20 @@ def load_staples(path: Path = STAPLES_PATH) -> dict[str, Staple]:
             unit=unit,
             attributes=attrs,
             loose_produce=bool(d.get("loose_produce", False)),
+            plausible_per_unit=tuple(d["plausible_per_unit"]) if d.get("plausible_per_unit") else None,
+            min_pack=d.get("min_pack"),
+            max_pack=d.get("max_pack"),
+            default_exclude_variants=tuple(tuple(v.split("=", 1)) for v in d.get("default_exclude_variants", [])),
+            compare_by=d.get("compare_by", "unit"),
+            sachet_g=d.get("sachet_g"),
+            sachet_g_by=d.get("sachet_g_by") or {},
+            pantry=bool(d.get("pantry", False)),
         )
+        for attr, value in st.default_exclude_variants:
+            if value not in attrs.get(attr, {}):
+                raise ValueError(f"{key}: default_exclude_variants {attr}={value} nije definiran atribut")
+        if st.compare_by not in ("unit", "pack") or (st.compare_by == "pack" and not st.sachet_g):
+            raise ValueError(f"{key}: compare_by mora biti unit ili pack (uz sachet_g)")
         # Svi regexi se moraju dati kompilirati (Python re je nadskup RE2 za ove uzorke)
         re.compile(st.match_regex)
         if st.exclude_regex:
@@ -174,21 +211,52 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
             params,
         )
 
+    # pravila namirnica kao tablica (za SQL i pregled)
+    con.execute("""
+        CREATE OR REPLACE TABLE clean.staple_rules (
+          staple VARCHAR PRIMARY KEY, name VARCHAR, unit VARCHAR, compare_unit VARCHAR,
+          ppu_min DOUBLE, ppu_max DOUBLE, min_pack DOUBLE, max_pack DOUBLE,
+          pantry BOOLEAN, loose_produce BOOLEAN)
+    """)
+    con.executemany("INSERT INTO clean.staple_rules VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [
+        (st.key, st.name, st.unit, st.compare_unit,
+         *(st.plausible_per_unit or (None, None)), st.min_pack, st.max_pack, st.pantry, st.loose_produce)
+        for st in staples.values()
+    ])
+    # pakiranje izvan [min_pack, max_pack]: porcije i ugostiteljska pakiranja ispadaju iz namirnice
+    con.execute("""
+        UPDATE clean.product_staples ps SET drop_reason = 'pakiranje'
+        FROM clean.products p, clean.staple_rules r
+        WHERE p.chain = ps.chain AND p.product_id = ps.product_id AND r.staple = ps.staple
+          AND ps.drop_reason IS NULL AND NOT ps.excluded AND p.pack_amount IS NOT NULL
+          AND (p.pack_amount < r.min_pack OR p.pack_amount > r.max_pack)
+    """)
+
     rows = con.execute("""
-        SELECT s.chain, s.product_id, s.staple, p.name
+        SELECT s.chain, s.product_id, s.staple, p.name, p.pack_amount, p.pack_unit
         FROM clean.product_staples s JOIN clean.products p USING (chain, product_id)
         WHERE NOT s.excluded AND s.drop_reason IS NULL
     """).fetchall()
-
-    def attr_rows():
-        for chain, pid, key, name in rows:
-            for attr, value in extract_attributes(staples[key], name).items():
-                yield chain, pid, key, attr, value
+    attr_rows, unit_rows = [], []
+    for chain, pid, key, name, amount, pack_unit in rows:
+        attrs = extract_attributes(staples[key], name)
+        attr_rows += [(chain, pid, key, a, v) for a, v in attrs.items()]
+        if (n := staples[key].units_in_pack(amount, pack_unit, attrs)) is not None:
+            unit_rows.append((chain, pid, key, n))
 
     _temp_table(con, "attrs_tmp", {
         "chain": "VARCHAR", "product_id": "VARCHAR", "staple": "VARCHAR", "attr": "VARCHAR", "value": "VARCHAR",
-    }, attr_rows())
+    }, attr_rows)
     con.execute("CREATE OR REPLACE TABLE clean.product_attrs AS SELECT * FROM attrs_tmp")
+    # n_units: broj jedinica usporedbe u pakiranju kad to nije kg/l (vrećice; kasnije i jaja)
+    con.execute("ALTER TABLE clean.product_staples ADD COLUMN n_units DOUBLE")
+    _temp_table(con, "units_tmp", {
+        "chain": "VARCHAR", "product_id": "VARCHAR", "staple": "VARCHAR", "n_units": "DOUBLE",
+    }, unit_rows)
+    con.execute("""
+        UPDATE clean.product_staples ps SET n_units = u.n_units FROM units_tmp u
+        WHERE u.chain = ps.chain AND u.product_id = ps.product_id AND u.staple = ps.staple
+    """)
     return {
         "staples": len(staples),
         "matched": con.execute(
@@ -196,4 +264,18 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
         "excluded": con.execute("SELECT count(*) FROM clean.product_staples WHERE excluded").fetchone()[0],
         "dropped": con.execute("SELECT count(*) FROM clean.product_staples WHERE drop_reason IS NOT NULL").fetchone()[0],
         "attrs": con.execute("SELECT count(*) FROM clean.product_attrs").fetchone()[0],
+        "suspect_prices": staple_price_suspects(con),
     }
+
+
+def staple_price_suspects(con: duckdb.DuckDBPyConnection) -> list[tuple]:
+    """Po namirnici: broj cijena (trgovina x proizvod) izvan plausible_per_unit i ukupno usporedivih."""
+    return con.execute("""
+        SELECT ps.staple, count(*) FILTER (WHERE c.price_per_unit NOT BETWEEN r.ppu_min AND r.ppu_max) AS suspect,
+               count(*) AS total
+        FROM clean.product_staples ps
+        JOIN clean.staple_rules r USING (staple)
+        JOIN clean.prices c USING (chain, product_id)
+        WHERE NOT ps.excluded AND ps.drop_reason IS NULL AND r.ppu_min IS NOT NULL AND c.per_unit = r.unit
+        GROUP BY ps.staple ORDER BY ps.staple
+    """).fetchall()

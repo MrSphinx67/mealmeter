@@ -23,7 +23,8 @@ PICK = {
     ),
     "eurospin": (["310017", "310002"], ["900006101", "001761601"]),  # akcija s price > special, duplikati, 0.00
     "lidl": (["105", "192"], ["6907930", "6909648", "6904110"]),  # duplikati, gramatura u `unit`
-    "ntl": (["20654", "10102"], ["169600", "245063", "110379"]),  # PLU banana, Tabasco 11 znamenki
+    "ntl": (["20654", "10102"], ["169600", "245063", "110379",  # PLU banana, Tabasco 11 znamenki
+                                 ("001069", ["20654"])]),  # "BANANA SNIŽENJE" (rasprodaja)
     "spar": (["87089"], ["18058"]),  # adresa sa sufiksom "87089 Spar"
     "roto": (["D22"], ["04030203", "15598"]),  # cijena 0.00
     "dm": (["all"], ["1000105"]),  # nacionalna cijena

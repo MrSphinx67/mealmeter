@@ -68,6 +68,7 @@ def find_products(
     con: duckdb.DuckDBPyConnection | None = None,
     ingredient: str | None = None,
     attributes: dict[str, str] | None = None,
+    include_clearance: bool = False,
 ) -> list[dict]:
     """Pronađi proizvode po nazivu ili po osnovnoj namirnici (staples.yaml).
 
@@ -76,6 +77,10 @@ def find_products(
     - `ingredient` (kanonski ključ ili sinonim): pravila namirnice (must_match/must_not_match),
       cijena po jedinici u njezinoj jedinici (kg/l/kom), a `attributes` filtrira po atributima
       iz naziva, npr. {"tip": "glatko"}. Uz `ingredient` slobodan upit dodatno sužava po nazivu.
+      Za namirnicu se zadano izostavljaju: rasprodaja ("SNIŽENJE"; `include_clearance=True` ih
+      vraća), varijante iz default_exclude_variants (osim ako je atribut izričito zadan),
+      pakiranja izvan min_pack/max_pack, a cijene po jedinici izvan plausible_per_unit
+      (price_suspect) ne ulaze u raspon cijena.
 
     Grupira po EAN-u (samo globalni EAN-ovi), a inače po lancu i normaliziranom nazivu; grupa
     ulazi ako barem jedan njezin naziv odgovara (kod namirnice: i nijedan nije isključen).
@@ -127,6 +132,15 @@ def find_products(
                 WHERE pa.staple = ? AND pa.attr = ? AND pa.value = ?""")
             hit_params += [staple.key, attr, value]
     hit_sql = " INTERSECT ".join(f"({h})" for h in hit_parts)
+    if staple:
+        # zadano isključene varijante (bez glutena, integralno...) osim ako je atribut tražen
+        for attr, value in staple.default_exclude_variants:
+            if attr in (attributes or {}):
+                continue
+            hit_sql = f"""({hit_sql}) EXCEPT (
+                SELECT DISTINCT g.gkey FROM g JOIN clean.product_attrs pa USING (chain, product_id)
+                WHERE pa.staple = ? AND pa.attr = ? AND pa.value = ?)"""
+            hit_params += [staple.key, attr, value]
 
     # "pogodak" za izbor prikaznog naziva i relevantnost
     if staple:
@@ -157,7 +171,23 @@ def find_products(
     else:
         drop_sql, drop_params = "TRUE", []
 
-    best = "x.unit_confidence = pick.conf AND x.per_unit = pick.per_unit"
+    # cijena po jedinici: kg/l/kom iz clean.prices, ili po vrećici (compare_by: pack) iz n_units
+    if staple and staple.compare_by == "pack":
+        ppu_sql = "round(c.price_eff / nullif(psu.n_units, 0), 2)"
+        per_unit_sql = "CASE WHEN psu.n_units > 0 THEN 'vrecica' END"
+        conf_sql = "CASE WHEN psu.n_units > 0 THEN 'high' END"
+    else:
+        ppu_sql, per_unit_sql, conf_sql = "c.price_per_unit", "c.per_unit", "c.unit_confidence"
+    psu_join = (f"""LEFT JOIN clean.product_staples psu ON psu.chain = p.chain
+                   AND psu.product_id = p.product_id AND psu.staple = '{staple.key}'""" if staple else "")
+    if staple and staple.plausible_per_unit:
+        lo, hi = staple.plausible_per_unit
+        suspect_sql = f"coalesce({per_unit_sql} = '{staple.compare_unit}' AND NOT ({ppu_sql} BETWEEN {lo} AND {hi}), false)"
+    else:
+        suspect_sql = "false"
+    clearance_sql = "NOT p.clearance" if staple and not include_clearance else "TRUE"
+
+    best = "x.unit_confidence = pick.conf AND x.per_unit = pick.per_unit AND NOT x.price_suspect"
     sql = f"""
         WITH g AS (
           SELECT *, CASE WHEN ean_global THEN ean_norm ELSE chain || ':' || name_norm END AS gkey
@@ -169,14 +199,17 @@ def find_products(
                  p.pack_amount, p.pack_unit, p.pack_source, p.ean_norm, p.ean_global,
                  {name_hit_sql} AS name_hit,
                  {coverage_sql} AS coverage,
-                 c.store_id, c.price_eff, c.price_per_unit, c.per_unit,
-                 c.unit_confidence, c.is_special, c.date, s.scope, ch.data_quality
+                 c.store_id, c.price_eff, {ppu_sql} AS price_per_unit, {per_unit_sql} AS per_unit,
+                 {conf_sql} AS unit_confidence, {suspect_sql} AS price_suspect,
+                 c.price_per_kg_drained, p.variable_weight,
+                 c.is_special, c.date, s.scope, ch.data_quality
           FROM g p
           JOIN hit USING (gkey)
           JOIN clean.prices c USING (chain, product_id)
           JOIN clean.stores s USING (chain, store_id)
           JOIN clean.chains ch USING (chain)
-          WHERE {city_sql} AND {drop_sql}
+          {psu_join}
+          WHERE {city_sql} AND {drop_sql} AND {clearance_sql}
         ),
         -- relevantnost grupe po različitim proizvodima (ne po broju trgovina)
         cov AS (
@@ -188,7 +221,7 @@ def find_products(
         pick AS (
           SELECT gkey, unit_confidence AS conf, per_unit FROM (
             SELECT gkey, unit_confidence, per_unit, count(*) AS n FROM x
-            WHERE unit_confidence IS NOT NULL GROUP BY ALL
+            WHERE unit_confidence IS NOT NULL AND NOT price_suspect GROUP BY ALL
           )
           QUALIFY row_number() OVER (
             PARTITION BY gkey
@@ -217,6 +250,10 @@ def find_products(
           CASE WHEN pick.conf = 'low' THEN 'unit_price'
                ELSE mode(x.pack_source) FILTER (WHERE {best}) END AS pack_source,
           string_agg(DISTINCT x.chain, ', ' ORDER BY x.chain) FILTER (WHERE x.data_quality = 'suspect') AS suspect_chains,
+          count(*) FILTER (WHERE x.price_suspect) AS n_price_suspect,
+          min(x.price_per_kg_drained) AS price_per_kg_drained_min,
+          max(x.price_per_kg_drained) AS price_per_kg_drained_max,
+          bool_or(x.variable_weight) AS any_variable_weight,
           bool_or(x.is_special) AS any_special,
           bool_or(x.scope = 'national') AS has_national,
           max(x.date) AS date,
@@ -229,7 +266,7 @@ def find_products(
     """
     params = (
         hit_params + name_hit_params + coverage_params + city_params + drop_params
-        + [staple.unit if staple else None, tokens[0] if tokens else "", limit]
+        + [staple.compare_unit if staple else None, tokens[0] if tokens else "", limit]
     )
     cur = con.execute(sql, params)
     cols = [d[0] for d in cur.description]
@@ -244,6 +281,9 @@ def find_products(
         if row["has_national"]:
             row["note"] = NATIONAL_NOTE
         row["ingredient"] = staple.key if staple else None
+        if staple:
+            row["compare_by"] = staple.compare_by
+            row["pantry"] = staple.pantry
         out.append(_with_date(row))
     if staple and out:
         _attach_attributes(con, staple.key, out)
@@ -298,7 +338,7 @@ def get_prices(
                c.price_per_unit, c.per_unit, c.unit_confidence,
                CASE WHEN c.unit_confidence = 'low' THEN 'unit_price'
                     WHEN c.unit_confidence = 'high' THEN p.pack_source END AS pack_source,
-               ch.data_quality, c.date
+               ch.data_quality, c.price_per_kg_drained, p.drained_amount, p.variable_weight, p.clearance, c.date
         FROM clean.products p
         JOIN clean.prices c USING (chain, product_id)
         JOIN clean.stores s USING (chain, store_id)

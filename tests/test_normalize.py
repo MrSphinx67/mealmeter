@@ -76,12 +76,12 @@ REAL_NAMES = [
     ("KAŠICA HIPP OBROK PURETINA+1g 220g", (220, "g")),
     ("babylove EKO vafli 1G+ borov. 30 g", (30, "g")),
     ("BRAŠNO KARLA GLATKO T-550 1kg+DIGO KVASAC U LIMENCI", (1000, "g")),
-    # neto / ocijeđena masa
-    ("GRAH ŠARENI 400g/240g O.M. CANNELLINI", (240, "g")),
-    ("KOMPOT BRESKVA FRUTTAMO 820g/470g", (470, "g")),
-    ("KRASTAVCI 6-9 cm 1580g ZORELA ocijeđene mase 820g", (820, "g")),
-    ("TUNA KOMADI GIANA 185g BILJNO ULJE - ocijeđ mase 130g", (130, "g")),
-    ("SALATA ČETIRI GRAHA 425g GIANA - ocijeđ mase240g", (240, "g")),
+    # bruto uz ocijeđenu masu (ocijeđena se vraća zasebno, vidi test_parse_drained)
+    ("GRAH ŠARENI 400g/240g O.M. CANNELLINI", (400, "g")),
+    ("KOMPOT BRESKVA FRUTTAMO 820g/470g", (820, "g")),
+    ("KRASTAVCI 6-9 cm 1580g ZORELA ocijeđene mase 820g", (1580, "g")),
+    ("TUNA KOMADI GIANA 185g BILJNO ULJE - ocijeđ mase 130g", (185, "g")),
+    ("SALATA ČETIRI GRAHA 425g GIANA - ocijeđ mase240g", (425, "g")),
     # komadi
     ("ULOŠCI HIGIJENSKI NORMAL PLUS DUO 20 kom ALWAYS", (20, "kom")),
     ("Zubobran inter.čet. perf.smile 1 kom.", (1, "kom")),

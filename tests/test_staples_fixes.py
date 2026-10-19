@@ -131,3 +131,146 @@ def test_point2_exclusions(key, name):
 ])
 def test_point2_keeps_real_products(key, name):
     assert name_match(S[key], name) == "match"
+
+
+# --- 3. sustavna pravila ------------------------------------------------------
+
+from dataclasses import replace  # noqa: E402
+
+import duckdb  # noqa: E402
+
+from mealmeter import search  # noqa: E402
+from mealmeter.build import build_clean, load_raw  # noqa: E402
+from mealmeter.normalize import analyze_pack, is_clearance  # noqa: E402
+
+# (naziv, bruto (količina, jedinica) ili None, ocijeđena masa ili None) — stvarni nazivi
+MULTIPACK = [
+    # tuna
+    ("CALVO TUNA U MASLINOVOM ULJU 3X65g", (195, "g"), None),
+    ("EVA TUNA KOM.BILJ 4*80 GR", (320, "g"), None),
+    ("EVA TUNA KOMADI B.U. 4 x 80 g 3+1 GRATIS", (320, "g"), None),
+    ("KFJ TUNA 2x80 g", (160, "g"), None),
+    ("EVA TUNA FILETI U ULJU RIBA 115/81G, (30) (PAL144)", (115, "g"), 81),
+    ("KLC.Tuna u extr.djev.maslin.ulju185/140g", (185, "g"), 140),
+    ("KLC.Tuna u suncokretovom ulju 3x80/56 g", (240, "g"), 168),
+    ("KLC.File tune u suncokr.ulju 3x80g/3x56g", (240, "g"), 168),
+    ("KLC.File tune u masl.ulju 3x70g/50g", (210, "g"), 150),
+    ("Kaiser Franz J.tuna u ulju 2x80/2x52g", (160, "g"), 104),
+    ("TUNA KOMADI NATURALE RIO MARE 160 g (OCIJEĐENA MASA 122 g) ORBICO", (160, "g"), 122),
+    ("TUNA ŽUTOPERAJNA ODREZ. U SUNC. ULJU 170g (OCJ. MASA 120g)GIANA", (170, "g"), 120),
+    # kvasac
+    ("7GX5 DR.OETKER KVASAC(4+1)", (35, "g"), None),
+    ("DI-GO INST. SUHI PEKARSKI KVASAC 7 g 4+1 GRAT (10)", (35, "g"), None),
+    ("DOLCELA INSTANT SUHI KVASAC 7 g 4+1 GRATIS, PODRAVKA", (35, "g"), None),
+    ("INSTANT SUHI KVASAC 35G 4+1GRATIS", (35, "g"), None),  # 35 g je već ukupno
+    ("DI-GO KVASAC 5X7G PODRAVKA", (35, "g"), None),
+    ("KVASAC DI-GO -10/1 35G 5*7G SUHI -10/1-", (35, "g"), None),  # -10/1- je karton
+    ("2X25G DUOS SVJEŽI PEK KVASAC", (50, "g"), None),
+    ("KVASAC 4+1", None, None),
+    # vanilin šećer
+    ("DOLCELA VANILIN ŠEĆER 8 g 5+1 GRATIS PODRAVKA (44)", (48, "g"), None),
+    ("DOLCELA VANILIN ŠEĆER 8 g 6 PAK PODRAVKA (16)", (48, "g"), None),
+    ("DR.OETKER VANILIN ŠEĆER 5+1 48GR", (48, "g"), None),
+    ("8GX10 DR.OETK.VANILIN ŠEĆ. 8+2", (80, "g"), None),
+    ("VANILIN ŠEĆER BOUR. DOLCELA 10 g 3/1", (30, "g"), None),
+    ("ULTRA VANILIN ŠEĆER 5/1 50G (45)", (50, "g"), None),
+    ("KOTANYI 20G BOURBON VANILIN ŠEĆER -25/1-", (20, "g"), None),
+    # prašak za pecivo
+    ("PRAŠAK ZA PECIVO 12 g 5+1 GRATIS PODRAVKA", (72, "g"), None),
+    ("PRAŠAK ZA PECIVO 12 G 6PAK DOLCELA", (72, "g"), None),
+    ("DOLCELA PRAŠAK ZA PECIVO 12 g 10 pak (48) PODRAVKA", (120, "g"), None),
+    ("PRASAK ZA PECIVO 96 G 6+2 GRATIS", (96, "g"), None),
+    ("PRAŠAK ZA PECIVO (5 x 12g) 60g FINETA", (60, "g"), None),
+    ("PRAŠAK ZA PECIVO 10*12 g DOLCE", (120, "g"), None),
+    # konzerve
+    ("KUKURUZ ŠEĆERAC 340 g PODRAVKA (10) OC. MASA 280 g", (340, "g"), 280),
+    ("N-KUKURUZ ŠEĆERAC 170G (NETTOMASA 140G)BONDUELLE-12/1 0504", (170, "g"), 140),
+    ("GRAH SMEĐI 800g LIM.PODRAVKA-ocijeđene mase 460g", (800, "g"), 460),
+    ("KRASTAVCI MARINO O.M.350g", None, 350),
+]
+
+
+@pytest.mark.parametrize("name,gross,drained", MULTIPACK)
+def test_multipack_and_drained(name, gross, drained):
+    got_gross, got_drained, variable = analyze_pack(name)
+    assert not variable
+    assert got_gross == (None if gross is None else (pytest.approx(gross[0]), gross[1]))
+    assert got_drained == (None if drained is None else pytest.approx(drained))
+
+
+def test_enough_multipack_examples():
+    sachet = [n for n, *_ in MULTIPACK if any(w in n.upper() for w in ("TUN", "KVAS", "VANILIN", "PRAŠAK", "PRASAK"))]
+    assert len(sachet) >= 20
+
+
+@pytest.mark.parametrize("name", [
+    "CCA1-1,5KG PILE GRILL SMRZ",
+    "CCA1,6KG CEKIN HRVATSKO PILE",
+    "Dimljena svinjska rebra, cca. 700g",
+    "SIR TILZIT CCA 4,5 KG VALIO EESTI AS",
+    "PILE GRILL 1-1,5 KG",
+])
+def test_variable_weight(name):
+    assert analyze_pack(name) == (None, None, True)
+
+
+@pytest.mark.parametrize("name,expected", [
+    ("BANANA SNIŽENJE", True), ("KUPUS CRVENI SNIŽENJE", True), ("PAPRIKA PARADAJZERICA SNIŽENJE", True),
+    ("TIKVICA SNIŽENO", True), ("KIVI SNIŽENI", True), ("MRKVA ŽUTA SNIŽENA", True), ("BANANA", False),
+])
+def test_clearance(name, expected):
+    assert is_clearance(name) is expected
+
+
+@pytest.mark.parametrize("key,amount,attrs,expected", [
+    ("kvasac", 35, {}, 5), ("kvasac", 7, {"vrsta": "suhi"}, 1), ("kvasac", 42, {"vrsta": "svjezi"}, 1),
+    ("vanilin_secer", 48, {}, 6), ("prasak_za_pecivo", 1000, {}, pytest.approx(83.333, rel=1e-3)),
+    ("brasno", 1000, {}, None),
+])
+def test_sachet_units(key, amount, attrs, expected):
+    assert S[key].units_in_pack(amount, "g", attrs) == expected
+
+
+def test_new_staple_fields():
+    assert S["mlijeko"].plausible_per_unit == (0.5, 4)
+    assert S["maslac"].plausible_per_unit == (6, 40) and S["maslinovo_ulje"].plausible_per_unit == (4, 60)
+    assert S["kvasac"].compare_unit == "vrecica" and S["brasno"].compare_unit == "kg"
+    assert all(S[k].pantry for k in ("papar", "sol", "mljevena_paprika", "ocat", "dodatak_jelima"))
+    assert ("laktoza", "bez") in S["mlijeko"].default_exclude_variants
+    assert ("tip", "integralno") in S["brasno"].default_exclude_variants
+
+
+def test_clearance_excluded_by_default(con):
+    ids = {r["id"] for r in search.find_products(ingredient="banana", con=con)}
+    assert "ntl:001069" not in ids
+    with_clearance = {r["id"] for r in search.find_products(ingredient="banana", con=con, include_clearance=True)}
+    assert "ntl:001069" in with_clearance
+
+
+def test_plausible_range_marks_suspect(con, monkeypatch):
+    narrow = replace(S["brasno"], plausible_per_unit=(0.4, 0.7))
+    monkeypatch.setattr(search, "resolve_ingredient", lambda _: narrow)
+    res = search.find_products(ingredient="brasno", con=con)
+    assert any(r["n_price_suspect"] > 0 for r in res)
+    assert all(r["price_per_unit_max"] is None or r["price_per_unit_max"] <= 0.7 for r in res)
+
+
+def test_default_exclude_variants(con, monkeypatch):
+    hide_ostro = replace(S["brasno"], default_exclude_variants=(("tip", "ostro"),))
+    monkeypatch.setattr(search, "resolve_ingredient", lambda _: hide_ostro)
+    assert "3850104223631" not in {r["id"] for r in search.find_products(ingredient="brasno", con=con)}
+    asked = search.find_products(ingredient="brasno", attributes={"tip": "ostro"}, con=con)
+    assert [r["id"] for r in asked] == ["3850104223631"]
+
+
+def test_pack_range_drops_products(tmp_path, monkeypatch):
+    from mealmeter import staples as staples_mod
+    from tests.conftest import FIXTURE
+    big_only = dict(S, brasno=replace(S["brasno"], min_pack=2000))
+    monkeypatch.setattr(staples_mod, "load_staples", lambda *a, **k: big_only)
+    c = duckdb.connect(str(tmp_path / "t.duckdb"))
+    load_raw(c, FIXTURE, "2026-10-19")
+    build_clean(c)
+    rows = c.execute("""SELECT p.pack_amount, ps.drop_reason FROM clean.product_staples ps
+                        JOIN clean.products p USING (chain, product_id) WHERE ps.staple = 'brasno'""").fetchall()
+    assert rows and all((r[1] == "pakiranje") == (r[0] < 2000) for r in rows if r[0])
