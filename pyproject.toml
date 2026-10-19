@@ -1,0 +1,18 @@
+[project]
+name = "mealmeter"
+version = "0.1.0"
+description = "Free open-source MCP connector that finds grocery prices in Croatian stores for a dish or ingredients and a city."
+authors = [
+    { name = "MrSphinx67", email = "282975938+MrSphinx67@users.noreply.github.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "duckdb>=1.5.6",
+]
+
+[project.scripts]
+mealmeter = "mealmeter:main"
+
+[build-system]
+requires = ["uv_build>=0.13.1,<0.14.0"]
+build-backend = "uv_build"
