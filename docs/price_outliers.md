@@ -19,7 +19,7 @@ rječnika (→ `must_not_match`) ili krivo pročitana gramatura.
 | grasak | auto | 0,93–14,92 /kg | 87 | 15879 | 0.5 |
 | griz | auto | 0,80–12,72 /kg | 76 | 3295 | 2.3 |
 | jabuka | auto | 0,42–6,76 /kg | 40 | 20475 | 0.2 |
-| jaja | manual | 0,10–1,50 /kom | 316 | 15633 | 2.0 |
+| jaja | manual | 0,10–1,50 /kom | 316 | 15530 | 2.0 |
 | jogurt | auto | 0,86–13,72 /kg | 192 | 59574 | 0.3 |
 | junetina | auto | 3,37–53,96 /kg | 13 | 8225 | 0.2 |
 | kakao | auto | 2,94–47,08 /kg | 362 | 22777 | 1.6 |
@@ -76,7 +76,7 @@ rječnika (→ `must_not_match`) ili krivo pročitana gramatura.
 | tjestenina | auto | 0,94–15,12 /kg | 1889 | 118896 | 1.6 |
 | tuna | auto | 5,20–83,12 /kg | 225 | 47378 | 0.5 |
 | tvrdi_sir | auto | 3,65–58,40 /kg | 487 | 72309 | 0.7 |
-| ulje | manual | 1,00–12,00 /l | 586 | 13898 | 4.2 |
+| ulje | manual | 1,00–12,00 /l | 586 | 13818 | 4.2 |
 | vanilin_secer | auto | 0,04–0,72 /vrecica | 333 | 9674 | 3.4 |
 | vrhnje_za_kuhanje | auto | 1,65–26,32 /l | 0 | 7578 | 0.0 |
 | zelena_salata | auto | 0,83–13,28 /kg | 0 | 830 | 0.0 |
@@ -99,8 +99,8 @@ rječnika (→ `must_not_match`) ili krivo pročitana gramatura.
 | KVASAC SVJEŽI 500g FERMIPAN DUOS | 22 | 1 | 0,08 | 0,08–0,08 | 500 g |
 | KVASAC 500G,KVASAC | 12 | 3 | 0,08 | 0,01–0,10 | 500 g |
 | 42G DI-GO DOMAĆI SVJ. KVAS. | 7 | 1 | 19,50 | 19,50–19,50 | 42 g |
-| 42G DI-GO DOMAĆI SVJ. KVAS. | 7 | 1 | 24,49 | 24,49–24,49 | 42 g |
 | 7GX5 DR.OETKER KVASAC(4+1) | 7 | 1 | 4,84 | 4,84–4,84 | 35 g |
+| 42G DI-GO DOMAĆI SVJ. KVAS. | 7 | 1 | 24,49 | 24,49–24,49 | 42 g |
 
 ## luk (crveni/žuti) (`luk`): 5.6 % odbačeno, granice 0,31–5,00 €/kg
 
@@ -120,24 +120,24 @@ rječnika (→ `must_not_match`) ili krivo pročitana gramatura.
 | LUK 1550 g SREDNJI CITRES | 3 | 1 | 6,32 | 6,19–6,32 | 1550 g |
 | LUK MLADI SNIŽENJE | 2 | 1 | 5,70 | 5,61–5,78 | – |
 | MLADI LUK | 2 | 1 | 5,39 | 5,39–5,39 | – |
-| LUK CHARLOTTE 500G | 1 | 1 | 5,98 | 5,98–5,98 | 500 g |
+| LUK MLADI AGROVIR | 1 | 1 | 5,25 | 5,25–5,25 | – |
 
 ## sol (`sol`): 5.1 % odbačeno, granice 0,20–8,00 €/kg
 
 | naziv | odbačenih cijena | lanaca | €/jed (medijan) | raspon | pakiranje |
 |---|---|---|---|---|---|
 | HIMALAJSKA SOL 390 G CAPE HERB SPICE | 150 | 1 | 15,36 | 11,51–16,38 | 390 g |
-| SOL HIMALAJ.SITNA ŠAFRAM 250 g | 134 | 6 | 11,16 | 9,00–11,96 | 250 g |
+| SOL HIMALAJSKA SITNA 250g ŠAFRAM | 134 | 6 | 11,16 | 9,00–11,96 | 250 g |
 | Himalajska kamena sol | 116 | 1 | 9,50 | 9,50–9,50 | 420 g |
-| SOL 500 G MORSKA GRUBA KRISTALICNA SOLANA NIN | 110 | 2 | 8,58 | 8,14–9,10 | 500 g |
+| GRUBA KRISTAL.MORSKA SOL-TULJAK 500 | 110 | 2 | 8,58 | 8,14–9,10 | 500 g |
 | SOL SA SMANJ UDJEL NATRIJA 250g | 105 | 1 | 9,96 | 9,96–10,60 | 250 g |
-| SOL M.SIT.PR.500 G TULJAK SOLANA NIN | 80 | 2 | 8,18 | 8,14–8,70 | 500 g |
+| SITNA MORSKA SOL-TULJAK 500g BIO | 80 | 2 | 8,18 | 8,14–8,70 | 500 g |
 | SOL GRUBO MLJEVENA 300 G STAKLO SOLANA NIN | 21 | 1 | 17,70 | 17,70–18,57 | 300 g |
-| 500G MALDON M.SOL KRIST.DIMLJ. | 7 | 1 | 49,98 | 49,98–49,98 | 500 g |
-| 250G SOL. NIN BIO CVIJET SOLI | 7 | 1 | 490,00 | 490,00–490,00 | 250 g |
-| 250G SOL. NIN BIO CVIJET SOLI | 7 | 1 | 49,00 | 49,00–49,00 | 250 g |
-| 1KG SOL.PAG MORSKA SITNA VREĆ | 7 | 1 | 9,00 | 9,00–9,00 | 1000 g |
-| 570G MALDON MORSKA SOL KRIST. | 7 | 1 | 30,68 | 30,68–30,68 | 570 g |
-| 500G SOL. NIN BIO CVIJET SOLI | 7 | 1 | 32,26 | 32,26–32,26 | 500 g |
 | 1KG SOL.NIN SITNA KUH.SOL VR | 7 | 1 | 8,88 | 8,88–8,88 | 1000 g |
+| 500G SOL. NIN BIO CVIJET SOLI | 7 | 1 | 32,26 | 32,26–32,26 | 500 g |
 | 1KG SOL.PAG MORSKA KRUPNA VREĆ | 7 | 1 | 9,30 | 9,30–9,30 | 1000 g |
+| 1KG SOL.PAG MORSKA SITNA VREĆ | 7 | 1 | 9,00 | 9,00–9,00 | 1000 g |
+| 250G SOL. NIN BIO CVIJET SOLI | 7 | 1 | 490,00 | 490,00–490,00 | 250 g |
+| 570G MALDON MORSKA SOL KRIST. | 7 | 1 | 30,68 | 30,68–30,68 | 570 g |
+| 250G SOL. NIN BIO CVIJET SOLI | 7 | 1 | 49,00 | 49,00–49,00 | 250 g |
+| 500G MALDON M.SOL KRIST.DIMLJ. | 7 | 1 | 49,98 | 49,98–49,98 | 500 g |

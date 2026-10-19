@@ -53,6 +53,7 @@ class Staple:
     piece_g: float | None = None
     # oblik namirnice preko drugih namirnica: {"konzerva": "rajcica_konzerva", ...}
     form_staples: dict[str, str] = field(default_factory=dict, hash=False, compare=False)
+    ambiguous_form: bool = False
 
     @property
     def require_regex(self) -> str | None:
@@ -173,7 +174,10 @@ def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> d
             inferred_attributes=inferred,
             piece_g=d.get("piece_g"),
             form_staples=d.get("form_staples") or {},
+            ambiguous_form=bool(d.get("ambiguous_form", False)),
         )
+        if st.ambiguous_form and "oblik" not in attrs:
+            raise ValueError(f"{key}: ambiguous_form traži atribut oblik")
         for a, v in st.default_attributes.items():
             if v not in attrs.get(a, {}):
                 raise ValueError(f"{key}: default_attributes {a}={v} nije definiran atribut")
@@ -196,6 +200,10 @@ def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> d
             for rx in values.values():
                 re.compile(rx)
         out[key] = st
+    for st in out.values():
+        for form, key in st.form_staples.items():
+            if key not in out:
+                raise ValueError(f"{st.key}: form_staples {form} -> {key} ne postoji")
     return out
 
 

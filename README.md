@@ -12,6 +12,7 @@ uv run python scripts/load.py data/raw/extracted 2026-10-19 data/mealmeter.duckd
 uv run python scripts/build_clean.py
 uv run python -m mealmeter.cli find "brašno glatko" --city Osijek
 uv run python -m mealmeter.cli prices 3850104223624 --city Osijek
+uv run python -m mealmeter.cli basket data/recipes/test_palacinke.json --city Osijek
 uv run pytest
 ```
 

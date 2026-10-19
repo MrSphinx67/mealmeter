@@ -3,6 +3,7 @@
     python -m mealmeter.cli find "brašno glatko" --city Osijek
     python -m mealmeter.cli find --ingredient brasno --attr tip=glatko --city Osijek
     python -m mealmeter.cli prices 3850104223624 --city Osijek
+    python -m mealmeter.cli basket data/recipes/test_palacinke.json --city Osijek
 """
 
 import argparse
@@ -108,6 +109,57 @@ def cmd_prices(args) -> None:
         print(f"\n* {search.NATIONAL_NOTE}")
 
 
+def cmd_basket(args) -> None:
+    from mealmeter.basket import plan_basket
+
+    recipe = json.loads(open(args.recipe, encoding="utf-8").read())
+    ingredients = recipe["ingredients"] if isinstance(recipe, dict) else recipe
+    res = plan_basket(ingredients, args.city)
+    if args.json:
+        print(json.dumps(res, ensure_ascii=False, indent=2, default=str))
+        return
+    title = recipe.get("name", args.recipe) if isinstance(recipe, dict) else args.recipe
+    print(f"{title}  ·  {res['city']}" + (f"  ·  cijene na dan {res['date_hr']}" if res.get("date_hr") else ""))
+    for w in res["warnings"]:
+        print(f"  ! {w}")
+    for u in res["unmatched"]:
+        print(f"  ✗ {u['name']}: {u['reason']}")
+    best = res["best_store"]
+    if not best:
+        print("\nNema trgovine s ovim sastojcima.")
+        return
+    print(f"\nNajbolja trgovina: {best['chain']}, {best['address'] or '(sve poslovnice)'}, {best['city'] or ''}"
+          f"  ·  {best['n_matched']}/{best['n_ingredients']} sastojaka  ·  ukupno {_fmt_money(best['total'])} €")
+    if best["missing"]:
+        print(f"  nedostaje: {', '.join(best['missing'])}")
+    rows = [
+        [
+            it["ingredient"],
+            it["name"][:42],
+            f"{it['n_packs']} x {_fmt_money(it['price_eff'])}" if it["n_packs"] else "na vagu",
+            _fmt_money(it["cost_pack"]),
+            _fmt_money(it["cost_used"]) + (" *" if it["pantry"] else ""),
+            f"{it['unit_confidence']}/{it['pack_source']}",
+            ", ".join(search_flag(f) for f in it["flags"]),
+        ]
+        for it in best["items"]
+    ]
+    print()
+    print(_table(rows, ["sastojak", "proizvod", "pakiranja", "cijena €", "utrošeno €", "pouzdanost", "napomena"]))
+    print("  * pantry (začini i sl.): u ukupno ulazi samo utrošeni dio")
+    print()
+    rows = [[s["chain"], (s["address"] or "(sve poslovnice)")[:34], f"{s['n_matched']}/{s['n_ingredients']}",
+             _fmt_money(s["total"]), s["scope"] + (" (suspect)" if s["data_quality"] == "suspect" else "")]
+            for s in res["stores"][: args.top]]
+    print(_table(rows, ["lanac", "adresa", "sastojaka", "ukupno €", "scope"]))
+
+
+def search_flag(flag: str) -> str:
+    from mealmeter.basket import FLAG_TEXT
+
+    return FLAG_TEXT.get(flag, flag)
+
+
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(prog="mealmeter", description="Pretraga cijena u hrvatskim trgovinama")
     sub = ap.add_subparsers(required=True)
@@ -127,6 +179,13 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--limit", type=int, default=50)
     p.add_argument("--json", action="store_true")
     p.set_defaults(func=cmd_prices)
+
+    b = sub.add_parser("basket", help="cijena recepta po trgovini (recept.json)")
+    b.add_argument("recipe", help='JSON: {"name": ..., "ingredients": [{"name", "amount", "unit", "form"?}]}')
+    b.add_argument("--city", required=True)
+    b.add_argument("--top", type=int, default=8, help="koliko trgovina ispisati")
+    b.add_argument("--json", action="store_true")
+    b.set_defaults(func=cmd_basket)
 
     args = ap.parse_args(argv)
     args.func(args)

@@ -1,0 +1,12 @@
+{
+  "name": "Palačinke (4 osobe)",
+  "ingredients": [
+    {"name": "brašno glatko", "amount": 250, "unit": "g"},
+    {"name": "mlijeko", "amount": 0.5, "unit": "l"},
+    {"name": "jaja", "amount": 3, "unit": "kom"},
+    {"name": "šećer", "amount": 1, "unit": "žlica"},
+    {"name": "sol", "amount": 1, "unit": "prstohvat"},
+    {"name": "ulje", "amount": 30, "unit": "ml"},
+    {"name": "vanilin šećer", "amount": 1, "unit": "vrećica"}
+  ]
+}

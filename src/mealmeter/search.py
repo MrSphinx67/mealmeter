@@ -9,7 +9,7 @@ import duckdb
 
 from mealmeter.build import NATIONAL_NOTE
 from mealmeter.normalize import canonical_city, date_hr, norm_text, normalize_ean
-from mealmeter.staples import STAPLE_PPU_SQL, resolve_ingredient
+from mealmeter.staples import STAPLE_PPU_SQL, load_staples, resolve_ingredient
 
 DEFAULT_DB = Path(os.environ.get("MEALMETER_DB", Path(__file__).resolve().parents[2] / "data" / "mealmeter.duckdb"))
 
@@ -362,9 +362,20 @@ def _attach_attributes(con: duckdb.DuckDBPyConnection, staple, rows: list[dict])
 def get_prices(
     identifier: str, city: str | None = None, limit: int = 50, con: duckdb.DuckDBPyConnection | None = None
 ) -> list[dict]:
-    """Cijene po trgovini za EAN ili za `lanac:product_id`, od najjeftinije."""
+    """Cijene po trgovini za EAN, `lanac:product_id` ili id klase (npr. "jaja:m"), od najjeftinije."""
     ident = identifier.strip()
-    if ":" in ident:
+    staples = load_staples()
+    prefix = ident.split(":", 1)[0].strip()
+    if ":" in ident and prefix in staples and staples[prefix].group_by:
+        # id klase iz find_products (npr. "jaja:m"): svi proizvodi namirnice s tom vrijednošću atributa
+        st, value = staples[prefix], ident.split(":", 1)[1].strip()
+        if value not in st.attributes[st.group_by]:
+            raise ValueError(f"'{identifier}': nepoznata klasa; moguće: {', '.join(st.attributes[st.group_by])}")
+        prod_sql = """EXISTS (SELECT 1 FROM clean.product_attrs pa JOIN clean.product_staples ps USING (chain, product_id, staple)
+                              WHERE pa.chain = p.chain AND pa.product_id = p.product_id AND pa.staple = ?
+                                AND pa.attr = ? AND pa.value = ? AND NOT ps.excluded AND ps.drop_reason IS NULL)"""
+        prod_params = [st.key, st.group_by, value]
+    elif ":" in ident:
         chain, pid = ident.split(":", 1)
         prod_sql, prod_params = "p.chain = ? AND p.product_id = ?", [chain.strip(), pid.strip()]
     else:

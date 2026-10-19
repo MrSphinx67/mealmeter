@@ -1,0 +1,14 @@
+{
+  "name": "Grah varivo (6 osoba)",
+  "ingredients": [
+    {"name": "grah", "amount": 500, "unit": "g"},
+    {"name": "luk", "amount": 2, "unit": "kom"},
+    {"name": "češnjak", "amount": 3, "unit": "režanj"},
+    {"name": "mrkva", "amount": 200, "unit": "g"},
+    {"name": "slanina", "amount": 150, "unit": "g"},
+    {"name": "koncentrat rajčice", "amount": 2, "unit": "žlica"},
+    {"name": "mljevena paprika", "amount": 1, "unit": "žličica"},
+    {"name": "papar", "amount": 1, "unit": "prstohvat"},
+    {"name": "lovorov list", "amount": 2, "unit": "kom"}
+  ]
+}

@@ -143,7 +143,10 @@ ili `default`.
   trgovini vraća `chain, store_id, address, city, scope, product_id, ean, name, price_eff,
   is_special, special_price, anchor_price, best_price_30, price_per_unit, per_unit,
   unit_confidence, pack_source, data_quality, date, date_hr` i `note` za nacionalne cijene.
+- `plan_basket(ingredients, city, mode="single_store")` (`src/mealmeter/basket.py`): cijena recepta
+  po trgovini, najbolja trgovina, nepovezani sastojci i pretpostavke (vidi DECISIONS.md, točka 37).
 - CLI: `uv run python -m mealmeter.cli find "brašno glatko" --city Osijek`,
+  `uv run python -m mealmeter.cli basket data/recipes/test_grah.json --city Osijek`,
   `uv run python -m mealmeter.cli find --ingredient brasno --attr tip=glatko --city Osijek` i
   `uv run python -m mealmeter.cli prices 3850104223624 --city Osijek` (`--json` za strojni izlaz).
 

@@ -306,3 +306,47 @@ Ako se pokaže da je Lorenco stvarni nacionalni web-shop, ovu odluku vrijedi pre
 36. **Neprehrambeni proizvodi.** Uz kategorije, `_defaults` dobiva uzorke za proizvode pronađene
     među kandidatima lanaca bez kategorije: sjeme, igračke, stolica „jaje“, vrtni luk, motorno ulje
     (Valvoline, 10W), citronela, folija za jaja.
+
+## Korak 2B, Dio B: plan_basket (2026-10-20)
+
+37. **`plan_basket(ingredients, city, mode="single_store")`** (`src/mealmeter/basket.py`).
+    - Sastojak je `{name, amount, unit, form?, attributes?}`.
+    - **Naziv** se razrješava kao točan sinonim namirnice, ili sinonim + vrijednosti atributa
+      („glatko brašno“ → brasno, tip=glatko). Sinonim koji je i vrijednost atributa postavlja taj
+      atribut („špageti“ → tjestenina, oblik=spageti).
+    - Nepoznata namirnica, jedinica ili atribut ide u `unmatched` s razlogom.
+    - **Jedinice:** g, dag, kg, ml, cl, dl, l, kom (komad, režanj/češanj, glavica) i vrećica.
+      Žlica (15), žličica (5) i prstohvat (0,5) pretvaraju se uz gustoću 1 i upozorenje. Komad se
+      pretvara u grame preko `piece_g` (luk 150 g, češanj 5 g, jaje 60 g…). g↔ml uz upozorenje.
+    - **Dvosmislen oblik** (`ambiguous_form`: grah, leća, slanutak, grašak, kukuruz, gljive;
+      `form_staples`: rajčica → svježa/konzerva/pasirana/koncentrat). Bez `form` bira se oblik
+      najjeftiniji za traženu količinu u gradu i vraća upozorenje s `assumed_form` i cijenama ostalih
+      oblika. **Prinos se ne uzima u obzir** (suhi grah naraste otprilike 2,5x). Proizvodi s
+      `oblik=nepoznato` ne ulaze kad je oblik zadan ili pretpostavljen.
+    - **Odabir u trgovini** (`choose_product`):
+      1. Kandidati bez zastavica (rasprodaja, `price_suspect`, `pack_confidence=low`, lanac
+         `suspect`); samo ako takvih nema, uzimaju se označeni (`fallback=true`, `flags`).
+      2. Najmanje pakiranje koje pokriva količinu; uz jednaku veličinu najjeftinije.
+      3. Inače najjeftinije po jedinici, u potrebnom broju pakiranja.
+      - Konzerve koriste `drained_amount`, a vrećice i jaja `n_units`.
+      - **Kupnja na vagu** (cijena po kg bez pakiranja) dopuštena je samo za `loose_produce` i robu
+        promjenjive težine, jer bi inače npr. „Šećer kristal 25/1 kg“ bez gramature izgledao kao
+        0,01 € za žlicu.
+    - **Iznosi:** `cost_pack` (cijela pakiranja) i `cost_used` (razmjerno). U `total` ulazi
+      `cost_pack`, a za `pantry` namirnice `cost_used` (`counted`).
+    - **Trgovine:** grad preko aliasa + `scope=national`. Nepoznat grad vraća `city_suggestions`
+      (difflib nad nazivima gradova) i nijednu trgovinu.
+    - **Poredak trgovina:** broj povezanih sastojaka, lanac nije `suspect`, broj označenih stavki,
+      ukupno. `best_store` je prva trgovina koja nije `suspect` (Lorenco), osim ako drugih nema;
+      tada ide upozorenje.
+    - Izlaz: `ingredients` (s pretpostavkama), `unmatched`, `stores` (stavke, `total`,
+      `n_matched`, `missing`, `unit_confidence`, `date`, `date_hr`), `best_store` i `warnings`.
+    - Podržan je samo `mode="single_store"`.
+38. **`get_prices` prima id klase** („jaja:m“) za namirnice s `group_by`.
+39. **Isključenja otkrivena kroz košaricu** (Plodine nemaju kategorija): „DEKORACIJA ZA JAJA“ i
+    „BOCA ZA ULJE“ idu u `_defaults`.
+    - Šećer u prahu i u kockama, te sol sa smanjenim natrijem, zadano su isključene varijante
+      (**moja odluka**: za generički „šećer“ i „sol“ to nije očekivani proizvod).
+    - Rinfuza (RFS/RFZ) kod mahunarki znači suho na vagu, a ne svježe.
+40. **Recepti** su u `data/recipes/test_*.json` (palačinke, grah, bolonjez), u gitu kroz iznimku u
+    `.gitignore`. CLI: `python -m mealmeter.cli basket data/recipes/test_grah.json --city Osijek`.

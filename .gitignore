@@ -1,4 +1,5 @@
-data/
+data/*
+!data/recipes/
 *.duckdb
 *.duckdb.wal
 .env

@@ -29,6 +29,10 @@
 #                   dobiva pretpostavljenu masu, uz unit_confidence=low i pack_source=assumed
 #   inferred_attributes  atribut zaključen iz naziva linije (LAGANO JUTRO -> laktoza=bez), u izlazu
 #                   označen kao "inferred"
+#   piece_g         masa jednog komada u g, za recepte u komadima ("2 luka"; češnjak: jedan češanj)
+#   ambiguous_form  oblik (atribut oblik: konzerva/suho/smrznuto/svjeze) bitno mijenja proizvod; košarica
+#                   bez zadanog oblika bira najjeftiniji i upozorava
+#   form_staples    oblik namirnice je druga namirnica (rajčica: svjeze/konzerva/pasirana/koncentrat)
 #   loose_produce   svježe voće/povrće. Dodatno pravilo: riječ namirnice je prva ili druga riječ
 #                   naziva, a proizvod je bez globalnog EAN-a (vaga/PLU), bez gramature ili >= 500 g,
 #                   i nije tekućina (inače "banana" pogađa bombone i sokove s okusom banane)
@@ -104,6 +108,9 @@ _defaults:
     - citronel
     - valvoline
     - 10w
+    - dekorac
+    - boca za
+    - renga
     - klice\b
     - umj\b
     # dječja hrana
@@ -152,7 +159,7 @@ secer:
                    napitak, keks, bombon, vata, sirup, sok\b, cola, pepsi, cokolad, kukuruz, bonduelle,
                    cimet, rum\b, limun, aroma]
   unit: kg
-  default_exclude_variants: [vrsta=smedi]
+  default_exclude_variants: [vrsta=smedi, vrsta=u_prahu, vrsta=kocke]
   max_pack: 5000
   min_pack: 250
   plausible_per_unit: [0.6, 8]
@@ -172,13 +179,14 @@ sol:
                    elephant, flat\b, chilli, chili, papar, set\b, mlinac, posuda, bocic, doza, finish,
                    somat, perilic, ocat, ulje, kupanje, naocal, suncan, med\b, soljenk]
   unit: kg
+  default_exclude_variants: [vrsta=himalajska, vrsta=smanjeni_natrij]
   pantry: true
-  default_exclude_variants: [vrsta=himalajska]
   max_pack: 5000
   min_pack: 250
   plausible_per_unit: [0.2, 8]
   attributes:
     vrsta:
+      smanjeni_natrij: 'manje natrija|smanj\w*\.? udjel\w* natrij|\bnatrij|\bkalij'
       morska: '\bmorsk'
       himalajska: '\bhimalaj'
       kamena: '\bkamen'
@@ -427,6 +435,7 @@ jaja:
                    fidelin, fuz, surl, keks, misura, polje\b, klara\b, bez\b, od svj, liker, puding,
                    krem\b, sendvic, salata, pasteta, namaz, jaja s\b, sa jajima, s jajima]
   unit: kom
+  piece_g: 60
   plausible_per_unit: [0.1, 1.5]
   max_pack: 30
   min_pack: 4
@@ -457,6 +466,7 @@ luk:
                    krem\b, namaz, svinjsk, poriluk, vlasac, kapulic, srdel, sardin, baguett, stapic,
                    naljev, octu, ocat, kis\b, kisel, srebrn, srebni, marinir, pohan, kolut, fileti]
   unit: kg
+  piece_g: 150
   default_exclude_variants: [vrsta=mladi, vrsta=ljutika]
   packaged: {pattern: rukavac, default_g: 500}
   attributes:
@@ -475,6 +485,7 @@ cesnjak:
   must_not_match: [tabasco, prelje, granul, umak, zacin, vegeta, presa, rolls, pasta, posipac, sampon, derma, mlinac, sir\b,
                    bruschett, crispy, masline, kruh, papar, prahu, ulje, tost, maslac, namaz, chips]
   unit: kg
+  piece_g: 5
   loose_produce: true
 
 krumpir:
@@ -487,6 +498,7 @@ krumpir:
                    salata, burek, twist, frites, pommes, zacin, aviko, pecivo, medaljon, stapic, panir,
                    gulas, restan, pomfrit, chips, juha, smrz, tijest, rosti]
   unit: kg
+  piece_g: 200
   attributes:
     namjena:
       kuhanje: 'za kuhanje|\bkuhanj'
@@ -508,6 +520,8 @@ rajcica:
                    bosiljk, polpa, masline, mesne, pasta, ketchup, kecap, pizza, sir\b, chips, grah,
                    punjen, brik, salsa, pesto, povrcem, ulju]
   unit: kg
+  form_staples: {svjeze: rajcica, konzerva: rajcica_konzerva, pasirana: pasirana_rajcica, koncentrat: koncentrat_rajcice}
+  piece_g: 120
   attributes:
     vrsta:
       cherry: '\bcherry|\bcheri|\bkoktel|\bmini'
@@ -560,6 +574,7 @@ mrkva:
   must_not_match: [kitekat, keks, pasteta, hr\b, mac\b, tamnj, sun\b, grasak, sok\b, jajima, naranca, jabuka, piletin, hrana, toco, tjestenin, rezanc, nektar,
                    limun, pekmez, sjeme, govedin, kocka, pice, juha, salata, mix\b, smrz, ledo, ribana]
   unit: kg
+  piece_g: 100
   loose_produce: true
 
 paprika:
@@ -572,6 +587,7 @@ paprika:
                    delko, kotanyi, safram, vegeta, maestro, zvijezda, zorela, fant, kisel, lim\b,
                    staklo, juha, krem\b, pomfrit]
   unit: kg
+  piece_g: 150
   attributes:
     boja:
       crvena: '\bcrven'
@@ -591,6 +607,7 @@ krastavac:
                    staklo, pasterizir, sok\b, sjeme, namaz, lim\b, limun, kornison, salata, sendvic, toco,
                    doora, vitaminka, zorela, podravka, zvijezda, giana, natureta, campo]
   unit: kg
+  piece_g: 300
   loose_produce: true
 
 tikvica:
@@ -600,6 +617,7 @@ tikvica:
   must_not_match: [strukl, mjesavin, sjeme, ledo, rizoto, cvijet, bulgur, piletin, kozic, pasta, namaz, krema,
                    hummus, kvinoj, ukrasn, noz\b, donut, pecen, porcij]
   unit: kg
+  piece_g: 250
   loose_produce: true
 
 kupus:
@@ -609,6 +627,7 @@ kupus:
   must_not_match: [posud, kisel, kis\b, salata, sarmu, sjeme, pritiskiv, rezac, noz\b, dinstan, julienne, sal\b,
                    rez\b, rezani, ribani, mix\b, povrce, vac\b, vak\b]
   unit: kg
+  piece_g: 1500
   attributes:
     vrsta:
       crveni: '\bcrven'
@@ -638,6 +657,7 @@ zelena_salata:
   must_not_match: [sjeme, sjem\b, edt, homme, after, case\b, casa\b, sa sirom, s sirom, tuna, piletin,
                    mix\b, krumpir, grah, kupus, umak, prelje, dresing, sendvic, tjestenin]
   unit: kg
+  piece_g: 400
   attributes:
     vrsta:
       iceberg: '\biceberg|\bledenk'
@@ -711,6 +731,7 @@ gljive:
   must_not_match: [ledo, mjesav, ragu, namaz, povrc, juha, umak, pizza, rizoto, krem\b, pasteta, ocijed, masa\b, mase\b, limenk, lim\b,
                    staklo, konzerv, susen, tortelin, tortellin, burek, pita, salata, kocka, zacin]
   unit: kg
+  ambiguous_form: true
   attributes:
     oblik:
       konzerva: '\blim\.|\blimenk|\blim\b|\bkonz|\bocij|\bocj|\boc\.|\bo\.m\.|\bstaklo|\bstaklenk|\btetra|\bkuhan|\bvakum|\bvak\b|netto|neto|\d+\s*(?:g|gr)\.?\s*/\s*\d+'
@@ -1049,6 +1070,7 @@ grah:
                    sarenac sjeme, carnex, gavrilovic, gotov, rebarc, kocka, posni grah sa, umak, chili,
                    konzerv mesn, tortilj, burrito, mix\b, kukuruz]
   unit: kg
+  ambiguous_form: true
   max_pack: 5000
   min_pack: 150
   attributes:
@@ -1061,8 +1083,8 @@ grah:
     oblik:
       konzerva: '\blim\.|\blimenk|\blim\b|\bkonz|\bocij|\bocj|\boc\.|\bo\.m\.|\bstaklo|\bstaklenk|\btetra|\bkuhan|\bvakum|\bvak\b|netto|neto|\d+\s*(?:g|gr)\.?\s*/\s*\d+'
       smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen'
-      svjeze: '\bsvjez|\bsvj\.|\brfz\b|\brfs\b'
-      suho: '\bsuh|\brinfuz|\bvrecic|\bpvc\b'
+      svjeze: '\bsvjez|\bsvj\.'
+      suho: '\bsuh|\brinfuz|\brfs\b|\brfz\b|\bvrecic|\bpvc\b'  # rinfuza mahunarki = suho na vagu
       _default: nepoznato
   loose_produce: false
 
@@ -1073,6 +1095,7 @@ leca:
   must_not_match: [visiomax, kontakt, dnevne, mjesecne, mjes\b, silik, hidr, otopin, cips, chips, snack,
                    juha, salata, sir\b, kava\b, paprika]
   unit: kg
+  ambiguous_form: true
   max_pack: 5000
   min_pack: 150
   attributes:
@@ -1084,8 +1107,8 @@ leca:
     oblik:
       konzerva: '\blim\.|\blimenk|\blim\b|\bkonz|\bocij|\bocj|\boc\.|\bo\.m\.|\bstaklo|\bstaklenk|\btetra|\bkuhan|\bvakum|\bvak\b|netto|neto|\d+\s*(?:g|gr)\.?\s*/\s*\d+'
       smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen'
-      svjeze: '\bsvjez|\bsvj\.|\brfz\b|\brfs\b'
-      suho: '\bsuh|\brinfuz|\bvrecic|\bpvc\b'
+      svjeze: '\bsvjez|\bsvj\.'
+      suho: '\bsuh|\brinfuz|\brfs\b|\brfz\b|\bvrecic|\bpvc\b'  # rinfuza mahunarki = suho na vagu
       _default: nepoznato
   loose_produce: false
 
@@ -1095,14 +1118,15 @@ slanutak:
   must_match: [slanut, leblebij, cicer]
   must_not_match: [hummus, humus, namaz, brasno, chips, cips, snack, salata, krem\b, pasta, falafel]
   unit: kg
+  ambiguous_form: true
   max_pack: 5000
   min_pack: 150
   attributes:
     oblik:
       konzerva: '\blim\.|\blimenk|\blim\b|\bkonz|\bocij|\bocj|\boc\.|\bo\.m\.|\bstaklo|\bstaklenk|\btetra|\bkuhan|\bvakum|\bvak\b|netto|neto|\d+\s*(?:g|gr)\.?\s*/\s*\d+'
       smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen'
-      svjeze: '\bsvjez|\bsvj\.|\brfz\b|\brfs\b'
-      suho: '\bsuh|\brinfuz|\bvrecic|\bpvc\b'
+      svjeze: '\bsvjez|\bsvj\.'
+      suho: '\bsuh|\brinfuz|\brfs\b|\brfz\b|\bvrecic|\bpvc\b'  # rinfuza mahunarki = suho na vagu
       _default: nepoznato
   loose_produce: false
 
@@ -1114,14 +1138,15 @@ kukuruz:
                    pahuljic, flips, kokice, chips, cips, sjeme, ulje, skrob, salata, tuna, grah, mix\b,
                    pecivo, tortilj, nachos, klip na zaru, kukuruzni, kukuruzno]
   unit: kg
+  ambiguous_form: true
   max_pack: 5000
   min_pack: 150
   attributes:
     oblik:
       konzerva: '\blim\.|\blimenk|\blim\b|\bkonz|\bocij|\bocj|\boc\.|\bo\.m\.|\bstaklo|\bstaklenk|\btetra|\bkuhan|\bvakum|\bvak\b|netto|neto|\d+\s*(?:g|gr)\.?\s*/\s*\d+'
       smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen'
-      svjeze: '\bsvjez|\bsvj\.|\brfz\b|\brfs\b'
-      suho: '\bsuh|\brinfuz|\bvrecic|\bpvc\b'
+      svjeze: '\bsvjez|\bsvj\.'
+      suho: '\bsuh|\brinfuz|\brfs\b|\brfz\b|\bvrecic|\bpvc\b'  # rinfuza mahunarki = suho na vagu
       _default: nepoznato
   loose_produce: false
 
@@ -1132,14 +1157,15 @@ grasak:
   must_not_match: [mrkv, juha, rizi bizi, salata, sjeme, chips, cips, snack, wasabi, protein, mix\b,
                    povrce, kukuruz]
   unit: kg
+  ambiguous_form: true
   max_pack: 5000
   min_pack: 150
   attributes:
     oblik:
       konzerva: '\blim\.|\blimenk|\blim\b|\bkonz|\bocij|\bocj|\boc\.|\bo\.m\.|\bstaklo|\bstaklenk|\btetra|\bkuhan|\bvakum|\bvak\b|netto|neto|\d+\s*(?:g|gr)\.?\s*/\s*\d+'
       smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen'
-      svjeze: '\bsvjez|\bsvj\.|\brfz\b|\brfs\b'
-      suho: '\bsuh|\brinfuz|\bvrecic|\bpvc\b'
+      svjeze: '\bsvjez|\bsvj\.'
+      suho: '\bsuh|\brinfuz|\brfs\b|\brfz\b|\bvrecic|\bpvc\b'  # rinfuza mahunarki = suho na vagu
       _default: nepoznato
   loose_produce: false
 
@@ -1153,6 +1179,7 @@ banana:
                    kremom, mix\b, nektar, zitaric, musli, bar\b, splitter, slatkis, bombon, gumen,
                    aroma, jagod]
   unit: kg
+  piece_g: 150
   loose_produce: true
 
 jabuka:
@@ -1165,6 +1192,7 @@ jabuka:
                    cider, rakij, bar\b, aroma, gumen, mrkv, smoothie, keks, mix\b, limun, osvjez,
                    sampon, gel\b, pice]
   unit: kg
+  piece_g: 180
   attributes:
     vrsta:
       zlatni_delicious: '\bzlatn|\bgolden|\bdelic'
@@ -1183,6 +1211,7 @@ limun:
                    gel\b, deo\b, sapun, kora\b, korica, trava, zacin, umak, okus, s limunom, cedevita,
                    mineral, jogurt, pecivo, lim\b]
   unit: kg
+  piece_g: 120
   loose_produce: true
 
 naranca:
@@ -1194,6 +1223,7 @@ naranca:
                    caj\b, keks, kolac, bombon, cokolad, dzem, marmelad, okus, cedevita, gazir, fanta,
                    osvjez, jogurt, kora\b, korica, mrkv, ananas, mix\b, pecivo, sampon, gel\b, voda\b]
   unit: kg
+  piece_g: 200
   loose_produce: true
 
 papar:

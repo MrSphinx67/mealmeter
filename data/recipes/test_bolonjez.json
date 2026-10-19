@@ -1,0 +1,13 @@
+{
+  "name": "Špageti bolonjez (4 osobe)",
+  "ingredients": [
+    {"name": "špageti", "amount": 400, "unit": "g"},
+    {"name": "mljeveno meso", "amount": 500, "unit": "g"},
+    {"name": "rajčica", "amount": 700, "unit": "g", "form": "pasirana"},
+    {"name": "luk", "amount": 1, "unit": "kom"},
+    {"name": "maslinovo ulje", "amount": 3, "unit": "žlica"},
+    {"name": "parmezan", "amount": 50, "unit": "g"},
+    {"name": "sol", "amount": 1, "unit": "žličica"},
+    {"name": "bosiljak", "amount": 1, "unit": "vezica"}
+  ]
+}
