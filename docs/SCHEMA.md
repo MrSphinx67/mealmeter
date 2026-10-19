@@ -87,7 +87,12 @@ vrijednost se uspješno parsirala.
 | ean_global | valjan i nije kod ograničene upotrebe (vaga/in-store: 7.189 nije globalno); grupira se samo po njima. 219.343 različitih globalnih EAN-ova |
 | name_norm | naziv: mala slova, bez dijakritika, `đ`/`dj` → `d`, interpunkcija → razmak |
 | pack_amount, pack_unit | gramatura: količina u `g`, `ml` ili `kom` |
-| pack_source | `name` (301.306), `unit` (Lidl, 6.142), `ean` (naslijeđeno od istog EAN-a, 19.656), NULL (150.422; uglavnom neprehrambeno i roba na vagu) |
+| pack_amount, pack_unit | **bruto** gramatura (od Koraka 2A2; ocijeđena masa je zasebno) |
+| pack_source | `name`, `unit` (Lidl), `ean` (naslijeđeno od istog EAN-a), NULL (uglavnom neprehrambeno i roba na vagu) |
+| drained_amount | ocijeđena masa konzerve u g („OC. MASA 280 g“, „185/140g“) |
+| variable_weight | „CCA“ ili raspon težine („1-1,5KG“): nema pakiranja, cijena po kg je od lanca |
+| clearance | naziv sadrži „SNIŽEN…“ (rasprodaja) |
+| category_group | normalizirana kategorija lanca (hrana, pice, kozmetika, higijena, kucanstvo, djeca, sunce, igracke, ljubimci, ostalo) |
 | unit_hint | `kg`/`l`: na što se (vjerojatno) odnosi lančev `unit_price` (iz `quantity`/`unit`) |
 
 **`clean.prices`** (16.401.076 redaka; iz 17.316.247 uklonjeno 907.165 duplikata i 8.006 redaka bez cijene)
@@ -101,6 +106,7 @@ vrijednost se uspješno parsirala.
 | is_special | `special_price IS NOT NULL` |
 | price_per_unit, per_unit | cijena po `kg` / `l` / `kom` |
 | unit_confidence | `high` (iz gramature), `low` (iz lančevog `unit_price`), NULL. Ukupno 73,1 % high, 3,0 % low, 23,9 % bez cijene po jedinici |
+| price_per_kg_drained | cijena po kg ocijeđene mase (konzerve) |
 
 Kontrola gramature: naša cijena po kg/l (`high`) slaže se s lančevim `unit_price` (unutar 5 %) u
 84–97 % slučajeva kod većine lanaca (Konzum 95,8 %, Tommy 96,6 %, Lidl 92,2 %). Niske vrijednosti
@@ -110,8 +116,14 @@ cijena pakiranja. Metro (66 %) prodaje kutije porcija („20G PODRAVKA DŽEM“ 
 **`clean.chains`** `(chain, n_stores, scope, data_quality)`: `data_quality` je `ok` ili `suspect`
 (Lorenco). Razlozi su u DECISIONS.md, a pokazatelje za sve lance ispisuje `build_clean.py`.
 
-**`clean.product_staples`** `(chain, product_id, staple, excluded)`: proizvodi čiji naziv pogađa
-`must_match` namirnice iz `staples.yaml`; `excluded = true` kad pogađa i `must_not_match`.
+**`clean.staple_rules`** `(staple, name, unit, compare_by, compare_unit, ppu_min, ppu_max, min_pack,
+max_pack, pantry, loose_produce)`: pravila aktivnih namirnica iz `staples.yaml`.
+
+**`clean.product_staples`** `(chain, product_id, staple, excluded, drop_reason, n_units)`: proizvodi čiji
+naziv pogađa `must_match` (i `require_any`) namirnice.
+- `excluded = true` kad pogađa i `must_not_match`; tada cijela grupa ispada.
+- `drop_reason` (`kategorija:*`, `pakiranje`) izbacuje samo taj proizvod.
+- `n_units` je broj vrećica ili komada kad je `compare_by` pack ili count.
 
 **`clean.product_attrs`** `(chain, product_id, staple, attr, value)`: atributi iz naziva (npr.
 brasno/tip/glatko, mlijeko/mast/2.8), samo za neisključene proizvode.

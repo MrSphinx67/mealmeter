@@ -183,3 +183,76 @@ Ako se pokaže da je Lorenco stvarni nacionalni web-shop, ovu odluku vrijedi pre
     - Rezultat nosi `ingredient` i `attributes` grupe (najčešća vrijednost među proizvodima grupe).
     - Poredak za namirnicu: najprije grupe u kojima je riječ namirnice među prve tri riječi u
       **većini** naziva grupe („KEKS NUTRI MRKVA“ ide iza „MRKVA 1kg“), zatim broj lanaca i trgovina.
+
+## Korak 2A2: ispravci rječnika nakon ručnog pregleda (2026-10-20)
+
+23. **Pogrešna isključenja uklonjena.**
+    - `pse\b` → `za pse`: „BRAŠ.PŠE.“ je pšenično brašno, a ne hrana za pse.
+    - Uklonjeni su i `kutija`, `kolac`, `gala`, `jela`, `ben`, `kras`, `natur`, `list`, `korijen` i `ribani`.
+    - Novi atributi: peršin `dio=list|korijen`, tvrdi sir `oblik=ribani`.
+    - **Luk „rukavac“ je običan svježi luk u mrežici od 4 komada** („LUK CRVENI RUKAVAC 4/1“). Isključenje
+      `rukavac` je zato pogrešno, ali je ostavljeno dok vlasnik ne odluči.
+24. **Neprehrambene kategorije.** `category_group` normalizira 1.357 kategorija lanaca u hrana, pice,
+    kozmetika, higijena, kucanstvo, djeca, sunce, igracke, ljubimci i ostalo (97 tis. proizvoda nema
+    kategoriju).
+    - Kozmetika, higijena, kućanstvo, djeca, sunce, igračke i ljubimci nikad se ne vežu za namirnicu.
+      Ljubimci nisu bili na popisu, ali su očito neprehrambeni.
+    - Takav proizvod se **samo izbacuje iz grupe** (`drop_reason`) i ne ruši cijelu EAN grupu.
+    - Dodani su `must_not_match` uzorci po namirnici iz pregleda, s dvije napomene:
+      - **ulje: umjesto `sun` dodani su `sun\b` i `suncan`**, jer bi prefiks `sun` isključio suncokretovo ulje.
+      - **`kos` isključuje i „ULJE KOŠTICA GROŽĐA“**, koje je jestivo.
+25. **Sustavna pravila** (polja u `staples.yaml`, tablica `clean.staple_rules`):
+    - `plausible_per_unit`: vrijednosti vlasnika za mlijeko, brašno, šećer, sol, ulje, maslinovo ulje
+      i maslac; za jaja **prijedlog** 0,1–1,5 €/kom. Cijena izvan raspona je `price_suspect`: ne ulazi
+      u raspon `price_per_unit_min/max` (ni u plan_basket), a broj takvih cijena vraća se kao
+      `n_price_suspect`. Build ispisuje broj odbačenih po namirnici.
+    - `clearance`: naziv sadrži „SNIŽEN…“ (SNIŽENJE/SNIŽENO/SNIŽENI/SNIŽENA). Takvi proizvodi se ne
+      prikazuju u zadanom izboru, a `include_clearance=True` ih vraća.
+    - `default_exclude_variants`:
+      - brašno: integralno i bez glutena (novi atribut `gluten`)
+      - tjestenina: integralna i bez glutena
+      - mlijeko i jogurt: bez laktoze
+      - sol: himalajska
+      - šećer: smeđi
+      - riža: integralna
+
+      **„kokos“ nema atribut**, jer je kokosovo brašno, mlijeko i šećer već isključen kroz `must_not_match`.
+    - `min_pack`/`max_pack`: **vrijednosti su moj prijedlog za pregled** (npr. brašno 500–5000 g,
+      maslac 100–1000 g, mlijeko 500–2000 ml). Pakiranje izvan raspona dobiva `drop_reason='pakiranje'`.
+    - **Promjenjiva težina** („CCA“, „1-1,5KG“): nema pakiranja ni iz stupca `unit` ni preko EAN-a, pa je
+      `unit_confidence='low'` (cijena po kg od lanca).
+    - **Konzerve:** `parse_pack` sada vraća **bruto**, a `parse_drained` ocijeđenu masu. To mijenja
+      ponašanje iz Koraka 1, gdje je „565g/340g“ davalo 340. `clean.prices.price_per_kg_drained` se
+      vraća uz bruto `price_per_unit`.
+    - **Višestruka pakiranja:** „3*80G“, „7GX5“, „4+1 GRATIS“, „3/1“, „6 PAK“, a „2x80“ bez jedinice
+      tumači se kao grami. Mala gramatura (≤ 30 g, i po komadu < 5 g) uz broj komada se množi
+      („7 g 4+1“ = 35 g); veća se uzima kao ukupna („35G 4+1“, „5+1 48GR“). „-25/1-“ je broj u kartonu
+      i ne tumači se.
+    - **Vrećice:** `compare_by: pack` (kvasac 7 g, svježi 42 g; vanilin šećer 8 g; prašak za pecivo
+      12 g), pa je cijena po vrećici (`per_unit='vrecica'`).
+    - `pantry`: papar, sol, mljevena paprika, ocat i dodatak jelima. Polje se vraća u izlazu, a koristit
+      će ga plan_basket (cost_used).
+26. **Atributi.**
+    - Riža ima točno 8 vrsta; originario nije arborio, a „oro“ nije parboiled.
+    - Mlijeko dobiva `mast=0` za „0%“. **„LAGANO JUTRO“ je Dukatova linija bez laktoze**: od 72 takva
+      naziva 5 izričito kaže „BEZ LAKTOZE“, a nijedan suprotno. Uzorak `laktoza=bez` zato uključuje
+      „lagano jutro“. Ranije se oznaka dobivala samo preko EAN grupe, pa je bila nedosljedna.
+    - **Jaja:** broj komada iz „10/1“ i „10 KOM“ (`compare_by: count`, cijena po jajetu). Grupiraju
+      se po klasi („jaja:m“, `group_by: velicina`), a ne po EAN-u. „S“ je i prijedlog, pa se veličina
+      S prepoznaje samo uz razred/vel./kl. ili u zagradi.
+    - Krumpir dobiva `namjena=kuhanje|pecenje|salata`.
+    - `find_products` vraća `attribute_sources`: za svaki atribut naziv proizvoda iz kojeg je izvučen.
+27. **Sadržaj.**
+    - Voda, kruh i kava su `disabled` (u YAML-u, ali se ne grade i ne mogu se tražiti).
+    - Nova namirnica `rajcica_konzerva` (pelati, polpa, sjeckana); polpa je izašla iz pasirane rajčice.
+    - Grah, leća, slanutak, grašak, kukuruz i gljive dobivaju `oblik=konzerva|suho|smrznuto|svjeze`.
+      Zadana vrijednost ako ništa ne pogodi (`attributes._default`): mahunarke suho, kukuruz konzerva,
+      gljive svježe, grašak bez zadane vrijednosti.
+    - Junetina i svinjetina traže dio mesa (`require_any`). Prefiks `junec` sada hvata
+      „JUNEĆI BUT/VRAT/FILEKI“, pa je junetina narasla s 74 na 288 grupa.
+    - Mljeveno meso: zadani filtar `vrsta=mijesano` (`default_attributes`), a naziv bez vrste računa
+      se kao miješano.
+    - **Zelena salata = glavice.** U podacima postoje: iceberg/ledenka (oko 30 proizvoda u 20 lanaca),
+      puterica (31), kristalka i lollo. „Ledena“ i „glavatica“ se ne pojavljuju. Rukola, matovilac,
+      radič i endivija su nove zasebne namirnice.
+    - `loose_produce` odbija staklenke („6-9 cm“, ocij/ocj, kis).
