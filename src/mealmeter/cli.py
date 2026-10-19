@@ -21,6 +21,13 @@ def _fmt_range(lo, hi) -> str:
     return _fmt_money(lo) if lo == hi else f"{_fmt_money(lo)}–{_fmt_money(hi)}"
 
 
+def _fmt_conf(r: dict) -> str:
+    """unit_confidence/pack_source, npr. "high/name", "low/unit_price" ili "-"."""
+    if not r.get("unit_confidence"):
+        return "-"
+    return f"{r['unit_confidence']}/{r['pack_source']}"
+
+
 def _table(rows: list[list[str]], headers: list[str]) -> str:
     widths = [max(len(str(x)) for x in col) for col in zip(headers, *rows)]
     line = lambda r: "  ".join(str(x).ljust(w) for x, w in zip(r, widths))  # noqa: E731
@@ -45,15 +52,15 @@ def cmd_find(args) -> None:
             r["pack"] or "",
             _fmt_range(r["price_min"], r["price_max"]),
             _fmt_range(r["price_per_unit_min"], r["price_per_unit_max"])
-            + (f" /{r['per_unit']}" if r["per_unit"] else "")
-            + (" (low)" if r["unit_confidence"] == "low" else ""),
+            + (f" /{r['per_unit']}" if r["per_unit"] else ""),
+            _fmt_conf(r),
             f"{r['n_chains']}{'*' if r.get('note') else ''}",
             r["n_stores"],
         ]
         for r in res
     ]
     print(f"Cijene na dan {res[0]['date_hr']}\n")
-    print(_table(rows, ["id", "naziv", "marka", "pakiranje", "cijena €", "€ po jedinici", "lanaca", "trgovina"]))
+    print(_table(rows, ["id", "naziv", "marka", "pakiranje", "cijena €", "€ po jedinici", "pouzdanost", "lanaca", "trgovina"]))
     if any(r.get("note") for r in res):
         print(f"\n* uključuje nacionalnu cijenu. {search.NATIONAL_NOTE}")
 
@@ -76,13 +83,14 @@ def cmd_prices(args) -> None:
             r["city"] or "",
             _fmt_money(r["price_eff"]) + (" AKCIJA" if r["is_special"] else ""),
             (_fmt_money(r["price_per_unit"]) + f" /{r['per_unit']}") if r["per_unit"] else "-",
-            r["scope"] + ("*" if r.get("note") else ""),
+            _fmt_conf(r),
+            r["scope"] + ("*" if r.get("note") else "") + (" (suspect)" if r["data_quality"] == "suspect" else ""),
             r["date_hr"],
         ]
         for r in res
     ]
     print(f"{res[0]['name']}  [{args.identifier}]\n")
-    print(_table(rows, ["lanac", "adresa", "grad", "cijena €", "po jedinici", "scope", "datum"]))
+    print(_table(rows, ["lanac", "adresa", "grad", "cijena €", "po jedinici", "pouzdanost", "scope", "datum"]))
     if any(r.get("note") for r in res):
         print(f"\n* {search.NATIONAL_NOTE}")
 

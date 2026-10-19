@@ -25,6 +25,10 @@ CITY_FIXES = {
     ("kaufland", "6630"): "Krk",  # Ulica Stjepana Radića 31B Krk
 }
 
+# Lanci čiji podaci nisu pouzdani: ostaju u bazi, ali se ne koriste za preporuke (plan_basket).
+# Razlozi se računaju pri svakom buildu (chain_quality_report) i zapisuju u clean.chains.
+SUSPECT_CHAINS = {"lorenco"}
+
 NATIONAL_NOTE = "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu."
 
 
@@ -179,7 +183,19 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
         FROM d JOIN clean.products p USING (chain, product_id)
     """)
 
+    # --- lanci ---
+    con.execute("CREATE OR REPLACE TEMP TABLE suspect (chain VARCHAR)")
+    con.executemany("INSERT INTO suspect VALUES (?)", [(c,) for c in sorted(SUSPECT_CHAINS)])
+    con.execute("""
+        CREATE OR REPLACE TABLE clean.chains AS
+        SELECT s.chain, count(*) AS n_stores,
+               CASE WHEN bool_and(s.scope = 'national') THEN 'national' ELSE 'local' END AS scope,
+               CASE WHEN s.chain IN (SELECT chain FROM suspect) THEN 'suspect' ELSE 'ok' END AS data_quality
+        FROM clean.stores s GROUP BY s.chain
+    """)
+
     stats = {}
+    stats["quality"] = chain_quality_report(con)
     stats["dedup"] = con.execute("""
         SELECT r.chain, r.n_raw, coalesce(c.n_clean, 0) AS n_clean, r.n_zero_price
         FROM (SELECT chain, count(*) n_raw, count(*) FILTER (WHERE price_eff IS NULL) n_zero_price
@@ -204,3 +220,44 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
         FROM clean.prices GROUP BY chain ORDER BY chain
     """).fetchall()
     return stats
+
+
+def chain_quality_report(con: duckdb.DuckDBPyConnection) -> list[tuple]:
+    """Pokazatelji kvalitete po lancu (za obrazloženje data_quality).
+
+    Stupci: chain, data_quality, % unit_price prazno/0, % cijena > 3x ili < 1/3 sidrene,
+    % bez kategorije, % bez marke, % neprepoznatih jedinica, medijan omjera cijene prema
+    ostalim lancima za isti EAN, % artikala s odstupanjem > 2x.
+    """
+    return con.execute("""
+        WITH e AS (
+          SELECT p.ean_norm, c.chain, median(c.price_eff) AS pe
+          FROM clean.prices c JOIN clean.products p USING (chain, product_id)
+          WHERE p.ean_global GROUP BY ALL
+        ),
+        r AS (
+          SELECT a.chain, a.pe / median(b.pe) AS ratio
+          FROM e a JOIN e b ON a.ean_norm = b.ean_norm AND a.chain <> b.chain
+          GROUP BY a.chain, a.ean_norm, a.pe
+        ),
+        rr AS (SELECT chain, median(ratio) AS med_ratio, avg((ratio > 2 OR ratio < 0.5)::INT) AS off2 FROM r GROUP BY chain),
+        pr AS (
+          SELECT chain,
+                 avg((unit_price IS NULL)::INT) AS up_missing,
+                 avg(coalesce(price_eff > 3 * anchor_price OR price_eff < anchor_price / 3, false)::INT) AS anchor_off
+          FROM clean.prices GROUP BY chain
+        ),
+        pd AS (
+          SELECT chain, avg((category IS NULL)::INT) AS no_cat, avg((brand IS NULL)::INT) AS no_brand,
+                 avg((NOT regexp_full_match(lower(coalesce(unit, '')),
+                     'kg|g|l|ml|kom|komad|ko|ea|pak|set|m|kilogram|litra|lt|pz|kpl|par|kut|kar|kmd|gr')
+                     AND NOT regexp_matches(coalesce(unit, ''), '[0-9]'))::INT) AS bad_unit
+          FROM clean.products GROUP BY chain
+        )
+        SELECT ch.chain, ch.data_quality,
+               round(100 * pr.up_missing, 1), round(100 * pr.anchor_off, 1),
+               round(100 * pd.no_cat, 1), round(100 * pd.no_brand, 1), round(100 * pd.bad_unit, 1),
+               round(rr.med_ratio, 2), round(100 * rr.off2, 1)
+        FROM clean.chains ch JOIN pr USING (chain) JOIN pd USING (chain) LEFT JOIN rr USING (chain)
+        ORDER BY ch.data_quality DESC, ch.chain
+    """).fetchall()

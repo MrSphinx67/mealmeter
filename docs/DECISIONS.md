@@ -108,3 +108,41 @@ svakom pokretanju):
 15. **Python UDF-ovi u DuckDB-u traže numpy**, pa se izvedeni stupci (EAN, gramatura,
     `name_norm`, gradovi) računaju u Pythonu i učitavaju preko privremenog CSV-a. Tako izbjegavamo
     ovisnost o numpyju.
+
+## Korak 2 (2026-10-19)
+
+### Odluke vlasnika projekta
+
+16. **Odstupanja iz Koraka 1 su prihvaćena**: `pack_source` `unit`/`ean` računa se kao `high`, uz
+    `ean_global`, EAN-13 kanonizaciju, pretragu po EAN grupi, „Sesvete“ = Zagreb i `date_hr` s
+    vodećom nulom.
+17. **Izlaz uvijek nosi `unit_confidence` i `pack_source`**, i u `find_products` i u `get_prices`
+    (CLI ih prikazuje u stupcu „pouzdanost“, npr. `high/name`).
+    - `pack_source` ∈ {`name`, `unit`, `ean`} kad je `unit_confidence = 'high'`.
+    - `pack_source = 'unit_price'` kad je `unit_confidence = 'low'` (cijena po jedinici je od lanca).
+    - Oba su NULL kad cijena po jedinici nije poznata.
+18. **Lorenco ima `data_quality = 'suspect'`** (`clean.chains`, izvor je `SUSPECT_CHAINS` u
+    `build.py`). Ostaje u bazi i u pretrazi (`find_products` vraća `suspect_chains`, `get_prices`
+    vraća `data_quality`), ali se **isključuje iz preporuka `plan_basket`**.
+
+### Po čemu su Lorenco podaci sumnjivi
+
+`scripts/build_clean.py` pri svakom buildu ispisuje tablicu kvalitete za sve lance. Za Lorenco
+(arhiva 2026-10-19, u zagradi je najgori među ostalim lancima):
+
+| pokazatelj | Lorenco | ostali lanci |
+|---|---|---|
+| `unit_price` prazan ili 0 | 42,8 % | ≤ 6,5 % (KTC) |
+| `price_eff` > 3× ili < ⅓ sidrene cijene | 19,9 % | ≤ 8,7 % (dm), većina < 1 % |
+| bez kategorije | 100 % | 100 % samo Plodine |
+| bez marke | 100 % | 100 % i Branka, Bure, djelo_vodice, Jadranka, Žabac |
+| trgovina | jedna `all`, bez adrese i grada | dm isto (nacionalni web-shop) |
+
+Uz to, Lorenco ima neispravne jedinice (`055`, `056`, `K0M`, `KO6`, `kođ`, `hks`, `50`; malo redaka,
+ali jasno ručni unos) i besmislene sidrene cijene: „ALU PILEĆA KRILCA 1kg KOTANYI“ 17,11 € uz sidrenu
+0,59 €, „TAYLORS FINE TAWNY 0,75L“ 15,40 € uz sidrenu 0,36 €.
+
+**Napomena:** same cijene (`price_eff`) Lorenca **nisu** sumnjive. Za isti globalni EAN medijan
+omjera prema ostalim lancima je 1,05, a samo 1,9 % artikala odstupa više od 2× (Konzum 4,0 %,
+Studenac 11,7 %, Žabac 21,2 %). Sumnjiva su pomoćna polja i to što ne znamo gdje Lorenco prodaje.
+Ako se pokaže da je Lorenco stvarni nacionalni web-shop, ovu odluku vrijedi preispitati.

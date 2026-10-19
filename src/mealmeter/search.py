@@ -94,11 +94,12 @@ def find_products(
                  CASE WHEN ({name_sql}) THEN {n_tok} / greatest({n_tok}, len(
                    [w FOR w IN string_split(p.name_norm, ' ') IF length(w) > 2 AND NOT regexp_matches(w, '^[0-9]')]
                  )) ELSE 0 END AS coverage, c.store_id, c.price_eff, c.price_per_unit, c.per_unit,
-                 c.unit_confidence, c.is_special, c.date, s.scope
+                 c.unit_confidence, c.is_special, c.date, s.scope, ch.data_quality
           FROM g p
           JOIN hit USING (gkey)
           JOIN clean.prices c USING (chain, product_id)
           JOIN clean.stores s USING (chain, store_id)
+          JOIN clean.chains ch USING (chain)
           WHERE {city_sql}
         ),
         conf AS (
@@ -128,6 +129,10 @@ def find_products(
           max(x.price_per_unit) FILTER (WHERE {best}) AS price_per_unit_max,
           unit.per_unit,
           conf.conf AS unit_confidence,
+          -- izvor gramature za odabrani raspon: name / unit / ean, ili unit_price kad je confidence low
+          CASE WHEN conf.conf = 'low' THEN 'unit_price'
+               ELSE mode(x.pack_source) FILTER (WHERE {best}) END AS pack_source,
+          string_agg(DISTINCT x.chain, ', ' ORDER BY x.chain) FILTER (WHERE x.data_quality = 'suspect') AS suspect_chains,
           bool_or(x.is_special) AS any_special,
           bool_or(x.scope = 'national') AS has_national,
           max(x.date) AS date,
@@ -177,10 +182,14 @@ def get_prices(
         f"""
         SELECT p.chain, s.store_id, s.address, s.city, s.scope, p.product_id, p.ean_norm AS ean, p.name,
                c.price_eff, c.is_special, c.special_price, c.anchor_price, c.best_price_30,
-               c.price_per_unit, c.per_unit, c.unit_confidence, c.date
+               c.price_per_unit, c.per_unit, c.unit_confidence,
+               CASE WHEN c.unit_confidence = 'low' THEN 'unit_price'
+                    WHEN c.unit_confidence = 'high' THEN p.pack_source END AS pack_source,
+               ch.data_quality, c.date
         FROM clean.products p
         JOIN clean.prices c USING (chain, product_id)
         JOIN clean.stores s USING (chain, store_id)
+        JOIN clean.chains ch USING (chain)
         WHERE {prod_sql} AND {city_sql}
         ORDER BY c.price_eff, p.chain, s.city, s.address
         LIMIT ?

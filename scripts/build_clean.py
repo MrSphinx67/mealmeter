@@ -51,5 +51,12 @@ print("\n=== Kontrola: naša cijena/kg (iz naziva) vs. unit_price lanca, % unuta
 for chain, n, pct in stats["unit_agreement"]:
     print(f"{chain:<20}{n:>10}{pct:>8}")
 
-for t in ("stores", "products", "prices", "city_alias"):
+print("\n=== Kvaliteta podataka po lancu (%: unit_price prazan, cijena >3x/<1/3 sidrene, bez kategorije,")
+print("    bez marke, neprepoznata jedinica; omjer cijene prema ostalim lancima za isti EAN i % odstupanja >2x)")
+print(f"{'lanac':<20}{'kvaliteta':<10}{'up_0':>7}{'sidro':>7}{'kat':>7}{'marka':>7}{'jed':>7}{'omjer':>7}{'>2x':>7}")
+for row in stats["quality"]:
+    chain, dq, *vals = row
+    print(f"{chain:<20}{dq:<10}" + "".join(f"{'' if v is None else v:>7}" for v in vals))
+
+for t in ("stores", "products", "prices", "city_alias", "chains"):
     print(f"clean.{t}:", con.execute(f"SELECT count(*) FROM clean.{t}").fetchone()[0])

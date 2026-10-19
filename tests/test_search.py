@@ -101,6 +101,20 @@ def test_find_groups_by_ean(con):
     assert top["date"] == "2026-10-19" and top["date_hr"] == "19.10.2026."
 
 
+def test_output_has_confidence_and_source(con):
+    top = next(r for r in find_products("brasno glatko", con=con) if r["id"] == PODRAVKA_1KG)
+    assert (top["unit_confidence"], top["pack_source"]) == ("high", "name")
+    banana = find_products("banana", con=con)[0]
+    assert (banana["unit_confidence"], banana["pack_source"]) == ("low", "unit_price")
+    rows = get_prices("lidl:6907930", con=con)
+    assert {(r["unit_confidence"], r["pack_source"]) for r in rows} == {("high", "unit")}
+
+
+def test_chain_quality(con):
+    assert q(con, "SELECT chain, data_quality FROM clean.chains WHERE data_quality <> 'ok'") == []  # fixture nema Lorenca
+    assert all(r["data_quality"] == "ok" for r in get_prices(PODRAVKA_1KG, con=con))
+
+
 def test_find_ignores_diacritics_and_case(con):
     a = find_products("BRASNO glatko", con=con)
     b = find_products("brašno GLATKO", con=con)
