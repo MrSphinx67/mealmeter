@@ -9,7 +9,7 @@ import duckdb
 
 from mealmeter.build import NATIONAL_NOTE
 from mealmeter.normalize import canonical_city, date_hr, norm_text, normalize_ean
-from mealmeter.staples import resolve_ingredient
+from mealmeter.staples import STAPLE_PPU_SQL, resolve_ingredient
 
 DEFAULT_DB = Path(os.environ.get("MEALMETER_DB", Path(__file__).resolve().parents[2] / "data" / "mealmeter.duckdb"))
 
@@ -59,6 +59,116 @@ def _with_date(row: dict) -> dict:
         row["date"] = d.isoformat()
         row["date_hr"] = date_hr(d)
     return row
+
+
+def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | None,
+                include_clearance: bool) -> tuple[str, list, str]:
+    """SQL (CTE-ovi g, hit, x) za kandidate: jedan redak po (trgovina, proizvod).
+
+    x sadrži sve proizvode iz grupa koje odgovaraju upitu/namirnici, s cijenom po jedinici u
+    jedinici usporedbe namirnice (STAPLE_PPU_SQL), pouzdanošću, izvorom gramature i zastavicama
+    (price_suspect, clearance, pack_confidence, data_quality). Koriste ga find_products i plan_basket.
+    Vraća (sql, parametri, stupac relevantnosti za razinu grupe).
+    """
+    city_sql, city_params = _city_filter(city)
+    name_sql = " AND ".join("p.name_norm LIKE ?" for _ in tokens) or "TRUE"
+    likes = [f"%{t}%" for t in tokens]
+
+    # --- koje grupe ulaze u rezultat ---
+    hit_parts, hit_params = [], []
+    if tokens:
+        hit_parts.append(f"SELECT DISTINCT gkey FROM g p WHERE {name_sql}")
+        hit_params += likes
+    if staple:
+        hit_parts.append("""
+            SELECT g.gkey FROM g JOIN clean.product_staples ps USING (chain, product_id)
+            WHERE ps.staple = ? AND ps.drop_reason IS NULL
+            GROUP BY g.gkey HAVING bool_or(NOT ps.excluded) AND NOT bool_or(ps.excluded)""")
+        hit_params.append(staple.key)
+        for attr, value in (attributes or {}).items():
+            hit_parts.append("""
+                SELECT DISTINCT g.gkey FROM g JOIN clean.product_attrs pa USING (chain, product_id)
+                WHERE pa.staple = ? AND pa.attr = ? AND pa.value = ?""")
+            hit_params += [staple.key, attr, value]
+    hit_sql = " INTERSECT ".join(f"({h})" for h in hit_parts)
+    if staple:
+        # zadano isključene varijante (bez glutena, integralno...) osim ako je atribut tražen
+        for attr, value in staple.default_exclude_variants:
+            if attr in (attributes or {}):
+                continue
+            hit_sql = f"""({hit_sql}) EXCEPT (
+                SELECT DISTINCT g.gkey FROM g JOIN clean.product_attrs pa USING (chain, product_id)
+                WHERE pa.staple = ? AND pa.attr = ? AND pa.value = ?)"""
+            hit_params += [staple.key, attr, value]
+
+    if staple:
+        # "pogodak" za izbor prikaznog naziva; razina 0 ako je riječ namirnice među prve tri riječi
+        # u većini naziva grupe (prosjek: "CEDEVITA KIDS BANANA" ne čini Cedevitu bananom)
+        name_hit_sql = f"""EXISTS (SELECT 1 FROM clean.product_staples ps WHERE ps.chain = p.chain
+                              AND ps.product_id = p.product_id AND ps.staple = '{staple.key}'
+                              AND NOT ps.excluded AND ps.drop_reason IS NULL)"""
+        name_hit_params = []
+        coverage_sql = f"CASE WHEN {name_hit_sql} AND regexp_matches(p.name_norm, ?) THEN 1.0 ELSE 0.0 END"
+        coverage_params = [staple.early_regex]
+        cov_col = "cov.cov_avg"
+        # članovi grupe koje namirnica odbacuje (neprehrambena kategorija, pakiranje) ne ulaze u cijene
+        drop_sql = f"""NOT EXISTS (SELECT 1 FROM clean.product_staples d WHERE d.chain = p.chain
+                      AND d.product_id = p.product_id AND d.staple = '{staple.key}' AND d.drop_reason IS NOT NULL)"""
+        rules_join = f"""LEFT JOIN clean.product_staples psu ON psu.chain = p.chain
+                           AND psu.product_id = p.product_id AND psu.staple = '{staple.key}'
+                         CROSS JOIN (SELECT * FROM clean.staple_rules WHERE staple = '{staple.key}') r"""
+        ppu_sql = STAPLE_PPU_SQL.replace("ps.", "psu.")
+        per_unit_sql = """CASE WHEN r.compare_by IN ('pack', 'count') THEN CASE WHEN psu.n_units > 0 THEN r.compare_unit END
+                               WHEN psu.assumed_g > 0 THEN r.unit ELSE c.per_unit END"""
+        conf_sql = """CASE WHEN r.compare_by IN ('pack', 'count') THEN CASE WHEN psu.n_units > 0 THEN 'high' END
+                           WHEN psu.assumed_g > 0 THEN 'low' ELSE c.unit_confidence END"""
+        source_sql = """CASE WHEN r.compare_by = 'count' AND psu.n_units > 0 THEN 'name'
+                             WHEN r.compare_by = 'pack' AND psu.n_units > 0 THEN p.pack_source
+                             WHEN psu.assumed_g > 0 THEN 'assumed'
+                             WHEN c.unit_confidence = 'low' THEN 'unit_price' ELSE p.pack_source END"""
+        suspect_sql = f"""coalesce(({per_unit_sql}) = r.compare_unit
+                                   AND NOT (({ppu_sql}) BETWEEN r.ppu_min AND r.ppu_max), false)"""
+        n_units_sql, assumed_sql = "psu.n_units", "psu.assumed_g"
+        clearance_sql = "TRUE" if include_clearance else "NOT p.clearance"
+    else:
+        name_hit_sql, name_hit_params = f"({name_sql})", likes
+        n_tok = float(len(tokens))
+        # udio "pravih" riječi naziva (bez brojeva i kratica do 2 slova) koje pokriva upit
+        coverage_sql = f"""CASE WHEN ({name_sql}) THEN {n_tok} / greatest({n_tok}, len(
+                   [w FOR w IN string_split(p.name_norm, ' ') IF length(w) > 2 AND NOT regexp_matches(w, '^[0-9]')]
+                 )) ELSE 0 END"""
+        coverage_params = likes
+        cov_col = "cov.cov_max"
+        drop_sql, rules_join = "TRUE", ""
+        ppu_sql, per_unit_sql, conf_sql = "c.price_per_unit", "c.per_unit", "c.unit_confidence"
+        source_sql = "CASE WHEN c.unit_confidence = 'low' THEN 'unit_price' ELSE p.pack_source END"
+        suspect_sql, n_units_sql, assumed_sql, clearance_sql = "false", "NULL::DOUBLE", "NULL::DOUBLE", "TRUE"
+
+    gkey_expr, gkey_join = _gkey_sql(staple)
+    sql = f"""
+        WITH g AS (
+          SELECT p.*, {gkey_expr} AS gkey FROM clean.products p {gkey_join}
+        ),
+        hit AS ({hit_sql}),
+        x AS (
+          SELECT p.gkey, p.chain, p.product_id, p.name, p.name_norm, p.brand,
+                 p.pack_amount, p.pack_unit, p.pack_confidence, p.drained_amount, p.ean_norm, p.ean_global,
+                 {name_hit_sql} AS name_hit,
+                 {coverage_sql} AS coverage,
+                 c.store_id, c.price_eff, ({ppu_sql}) AS price_per_unit, ({per_unit_sql}) AS per_unit,
+                 ({conf_sql}) AS unit_confidence, ({source_sql}) AS pack_source, ({suspect_sql}) AS price_suspect,
+                 {n_units_sql} AS n_units, {assumed_sql} AS assumed_g,
+                 c.price_per_kg_drained, p.variable_weight, p.clearance,
+                 c.is_special, c.date, s.scope, s.address, s.city, ch.data_quality
+          FROM g p
+          JOIN hit USING (gkey)
+          JOIN clean.prices c USING (chain, product_id)
+          JOIN clean.stores s USING (chain, store_id)
+          JOIN clean.chains ch USING (chain)
+          {rules_join}
+          WHERE {city_sql} AND {drop_sql} AND {clearance_sql}
+        )"""
+    return sql, hit_params + name_hit_params + coverage_params + city_params, cov_col
 
 
 def find_products(
@@ -114,106 +224,10 @@ def find_products(
     if not tokens and staple is None:
         return []
     con = con or connect()
-    city_sql, city_params = _city_filter(city)
-    name_sql = " AND ".join("p.name_norm LIKE ?" for _ in tokens) or "TRUE"
-    likes = [f"%{t}%" for t in tokens]
-
-    # --- koje grupe ulaze u rezultat ---
-    hit_parts, hit_params = [], []
-    if tokens:
-        hit_parts.append(f"SELECT DISTINCT gkey FROM g p WHERE {name_sql}")
-        hit_params += likes
-    if staple:
-        hit_parts.append("""
-            SELECT g.gkey FROM g JOIN clean.product_staples ps USING (chain, product_id)
-            WHERE ps.staple = ? AND ps.drop_reason IS NULL
-            GROUP BY g.gkey HAVING bool_or(NOT ps.excluded) AND NOT bool_or(ps.excluded)""")
-        hit_params.append(staple.key)
-        for attr, value in (attributes or {}).items():
-            hit_parts.append("""
-                SELECT DISTINCT g.gkey FROM g JOIN clean.product_attrs pa USING (chain, product_id)
-                WHERE pa.staple = ? AND pa.attr = ? AND pa.value = ?""")
-            hit_params += [staple.key, attr, value]
-    hit_sql = " INTERSECT ".join(f"({h})" for h in hit_parts)
-    if staple:
-        # zadano isključene varijante (bez glutena, integralno...) osim ako je atribut tražen
-        for attr, value in staple.default_exclude_variants:
-            if attr in (attributes or {}):
-                continue
-            hit_sql = f"""({hit_sql}) EXCEPT (
-                SELECT DISTINCT g.gkey FROM g JOIN clean.product_attrs pa USING (chain, product_id)
-                WHERE pa.staple = ? AND pa.attr = ? AND pa.value = ?)"""
-            hit_params += [staple.key, attr, value]
-
-    # "pogodak" za izbor prikaznog naziva i relevantnost
-    if staple:
-        name_hit_sql = """EXISTS (SELECT 1 FROM clean.product_staples ps WHERE ps.chain = p.chain
-                              AND ps.product_id = p.product_id AND ps.staple = ? AND NOT ps.excluded
-                              AND ps.drop_reason IS NULL)"""
-        name_hit_params = [staple.key]
-        # razina 0 ako je riječ namirnice među prve tri riječi u većini naziva grupe, inače 1
-        # (prosjek: jedan lanac s nazivom "CEDEVITA KIDS BANANA" ne čini Cedevitu bananom)
-        coverage_sql = f"CASE WHEN {name_hit_sql} AND regexp_matches(p.name_norm, ?) THEN 1.0 ELSE 0.0 END"
-        coverage_params = [staple.key, staple.early_regex]
-        cov_col = "cov.cov_avg"
-    else:
-        name_hit_sql, name_hit_params = f"({name_sql})", likes
-        n_tok = float(len(tokens))
-        # udio "pravih" riječi naziva (bez brojeva i kratica do 2 slova) koje pokriva upit
-        coverage_sql = f"""CASE WHEN ({name_sql}) THEN {n_tok} / greatest({n_tok}, len(
-                   [w FOR w IN string_split(p.name_norm, ' ') IF length(w) > 2 AND NOT regexp_matches(w, '^[0-9]')]
-                 )) ELSE 0 END"""
-        coverage_params = likes
-        cov_col = "cov.cov_max"
-
-    # članovi grupe koje namirnica odbacuje (npr. neprehrambena kategorija lanca) ne ulaze u cijene
-    if staple:
-        drop_sql = """NOT EXISTS (SELECT 1 FROM clean.product_staples d WHERE d.chain = p.chain
-                      AND d.product_id = p.product_id AND d.staple = ? AND d.drop_reason IS NOT NULL)"""
-        drop_params = [staple.key]
-    else:
-        drop_sql, drop_params = "TRUE", []
-
-    # cijena po jedinici: kg/l/kom iz clean.prices, ili po vrećici (compare_by: pack) iz n_units
-    if staple and staple.compare_by in ("pack", "count"):
-        ppu_sql = "round(c.price_eff / nullif(psu.n_units, 0), 2)"
-        per_unit_sql = f"CASE WHEN psu.n_units > 0 THEN '{staple.compare_unit}' END"
-        conf_sql = "CASE WHEN psu.n_units > 0 THEN 'high' END"
-    else:
-        ppu_sql, per_unit_sql, conf_sql = "c.price_per_unit", "c.per_unit", "c.unit_confidence"
-    psu_join = (f"""LEFT JOIN clean.product_staples psu ON psu.chain = p.chain
-                   AND psu.product_id = p.product_id AND psu.staple = '{staple.key}'""" if staple else "")
-    if staple and staple.plausible_per_unit:
-        lo, hi = staple.plausible_per_unit
-        suspect_sql = f"coalesce({per_unit_sql} = '{staple.compare_unit}' AND NOT ({ppu_sql} BETWEEN {lo} AND {hi}), false)"
-    else:
-        suspect_sql = "false"
-    clearance_sql = "NOT p.clearance" if staple and not include_clearance else "TRUE"
-
-    gkey_expr, gkey_join = _gkey_sql(staple)
+    cand_sql, cand_params, cov_col = _candidates(staple, tokens, attributes, city, include_clearance)
     best = "x.unit_confidence = pick.conf AND x.per_unit = pick.per_unit AND NOT x.price_suspect"
     sql = f"""
-        WITH g AS (
-          SELECT p.*, {gkey_expr} AS gkey FROM clean.products p {gkey_join}
-        ),
-        hit AS ({hit_sql}),
-        x AS (
-          SELECT p.gkey, p.chain, p.product_id, p.name, p.name_norm, p.brand,
-                 p.pack_amount, p.pack_unit, p.pack_source, p.ean_norm, p.ean_global,
-                 {name_hit_sql} AS name_hit,
-                 {coverage_sql} AS coverage,
-                 c.store_id, c.price_eff, {ppu_sql} AS price_per_unit, {per_unit_sql} AS per_unit,
-                 {conf_sql} AS unit_confidence, {suspect_sql} AS price_suspect,
-                 c.price_per_kg_drained, p.variable_weight,
-                 c.is_special, c.date, s.scope, ch.data_quality
-          FROM g p
-          JOIN hit USING (gkey)
-          JOIN clean.prices c USING (chain, product_id)
-          JOIN clean.stores s USING (chain, store_id)
-          JOIN clean.chains ch USING (chain)
-          {psu_join}
-          WHERE {city_sql} AND {drop_sql} AND {clearance_sql}
-        ),
+        {cand_sql},
         -- relevantnost grupe po različitim proizvodima (ne po broju trgovina)
         cov AS (
           SELECT gkey, max(coverage) AS cov_max, avg(coverage) AS cov_avg
@@ -251,9 +265,7 @@ def find_products(
           pick.per_unit,
           pick.conf AS unit_confidence,
           -- izvor gramature za odabrani raspon: name / unit / ean, ili unit_price kad je confidence low
-          CASE WHEN pick.conf = 'low' THEN 'unit_price'
-               WHEN pick.conf = 'high' AND '{staple.compare_by if staple else "unit"}' = 'count' THEN 'name'
-               ELSE mode(x.pack_source) FILTER (WHERE {best}) END AS pack_source,
+          mode(x.pack_source) FILTER (WHERE {best}) AS pack_source,
           string_agg(DISTINCT x.chain, ', ' ORDER BY x.chain) FILTER (WHERE x.data_quality = 'suspect') AS suspect_chains,
           count(*) FILTER (WHERE x.price_suspect) AS n_price_suspect,
           min(x.price_per_kg_drained) AS price_per_kg_drained_min,
@@ -269,10 +281,7 @@ def find_products(
         ORDER BY _tier, _starts DESC, n_chains DESC, n_stores DESC, price_per_unit_min NULLS LAST, name
         LIMIT ?
     """
-    params = (
-        hit_params + name_hit_params + coverage_params + city_params + drop_params
-        + [staple.compare_unit if staple else None, tokens[0] if tokens else "", limit]
-    )
+    params = cand_params + [staple.compare_unit if staple else None, tokens[0] if tokens else "", limit]
     cur = con.execute(sql, params)
     cols = [d[0] for d in cur.description]
     out = []
@@ -314,15 +323,17 @@ def _gkey_sql(staple) -> tuple[str, str]:
 def _attach_attributes(con: duckdb.DuckDBPyConnection, staple, rows: list[dict]) -> None:
     """Atributi grupe = najčešća vrijednost svakog atributa među proizvodima u grupi.
 
-    attribute_sources daje za svaki atribut jedan naziv proizvoda iz kojeg je vrijednost izvučena.
+    attribute_sources daje za svaki atribut {"name": naziv proizvoda, "how": "name" | "inferred" |
+    "default"}: "name" ako barem jedan proizvod u grupi vrijednost izričito ima u nazivu, inače
+    "inferred" (zaključeno, npr. LAGANO JUTRO -> bez laktoze) ili "default" (npr. oblik=nepoznato).
     """
     keys = [r["_gkey"] for r in rows]
     placeholders = ", ".join("?" for _ in keys)
     gkey_expr, gkey_join = _gkey_sql(staple)
     found = con.execute(
         f"""
-        SELECT gkey, attr, value, name FROM (
-          SELECT {gkey_expr} AS gkey, pa.attr, pa.value, p.name
+        SELECT gkey, attr, value, name, how FROM (
+          SELECT {gkey_expr} AS gkey, pa.attr, pa.value, p.name, pa.how
           FROM clean.products p {gkey_join}
           JOIN clean.product_attrs pa ON pa.chain = p.chain AND pa.product_id = p.product_id
           WHERE pa.staple = ?
@@ -331,11 +342,14 @@ def _attach_attributes(con: duckdb.DuckDBPyConnection, staple, rows: list[dict])
         [staple.key, *keys],
     ).fetchall()
     counts: dict[tuple, dict[str, int]] = {}
-    sources: dict[tuple, str] = {}
-    for gkey, attr, value, name in found:
+    sources: dict[tuple, dict] = {}
+    rank = {"name": 0, "inferred": 1, "default": 2}
+    for gkey, attr, value, name, how in found:
         counts.setdefault((gkey, attr), {}).setdefault(value, 0)
         counts[(gkey, attr)][value] += 1
-        sources.setdefault((gkey, attr, value), name)
+        cur = sources.get((gkey, attr, value))
+        if cur is None or rank[how] < rank[cur["how"]]:
+            sources[(gkey, attr, value)] = {"name": name, "how": how}
     for r in rows:
         r["attributes"], r["attribute_sources"] = {}, {}
         for (gkey, attr), by_value in counts.items():

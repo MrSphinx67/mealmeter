@@ -25,6 +25,10 @@
 #   default_attributes  zadani filtar ako atribut nije zadan (mljeveno meso: vrsta=mijesano)
 #   disabled        namirnica postoji, ali nije u v1 (ne gradi se i ne može se tražiti)
 #   attributes._default  vrijednost atributa kad nijedan uzorak ne pogodi
+#   packaged        {pattern, default_g}: pakirana roba na vagu bez gramature u nazivu (luk RUKAVAC 4/1)
+#                   dobiva pretpostavljenu masu, uz unit_confidence=low i pack_source=assumed
+#   inferred_attributes  atribut zaključen iz naziva linije (LAGANO JUTRO -> laktoza=bez), u izlazu
+#                   označen kao "inferred"
 #   loose_produce   svježe voće/povrće. Dodatno pravilo: riječ namirnice je prva ili druga riječ
 #                   naziva, a proizvod je bez globalnog EAN-a (vaga/PLU), bez gramature ili >= 500 g,
 #                   i nije tekućina (inače "banana" pogađa bombone i sokove s okusom banane)
@@ -88,8 +92,18 @@ _defaults:
     - buddy
     - poesie
     - mousse
-    # vrt, dekoracije
+    # vrt, dekoracije, igračke, namještaj, auto (iz pregleda kandidata lanaca bez kategorije)
     - sjemensk
+    - sjeme\b
+    - igr\b
+    - glazben
+    - stolica
+    - vrtni
+    - obuci
+    - termoskup
+    - citronel
+    - valvoline
+    - 10w
     - klice\b
     - umj\b
     # dječja hrana
@@ -154,9 +168,9 @@ sol:
   name: sol
   synonyms: [sol, kuhinjska sol]
   must_match: [sol\b]
-  must_not_match: [pivo, alc, nitrit, ambre, sprej, spf, sun\b, mlijeko, elephant, flat\b, chilli,
-                   chili, papar, set\b, mlinac, posuda, bocic, doza, finish, somat, perilic, ocat,
-                   ulje, kupanje, naocal, suncan, med\b, soljenk]
+  must_not_match: [junec, telec, but\b, odresc, pivo, alc, nitrit, ambre, sprej, spf, sun\b, mlijeko,
+                   elephant, flat\b, chilli, chili, papar, set\b, mlinac, posuda, bocic, doza, finish,
+                   somat, perilic, ocat, ulje, kupanje, naocal, suncan, med\b, soljenk]
   unit: kg
   pantry: true
   default_exclude_variants: [vrsta=himalajska]
@@ -178,15 +192,23 @@ ulje:
   name: ulje (suncokretovo/biljno)
   synonyms: [ulje, suncokretovo ulje, biljno ulje, jestivo ulje]
   must_match: [ulje\b]
-  must_not_match: [djec, tijelo, kos, sun\b, suncan, spf, namjest, ciscen, incun, filet, maslin,
-                   masl\b, mas\b, tuna, sardin, fileti, skus, usne, kosu, baby, argan, etericn, spreju,
-                   bucin, kokos, palmin, sezam, lanen, ocat, set\b, kozm, motor, lampe, masaz]
+  must_not_match: [edm, masli, djev, devic, za kos, kosu\b, kose\b, djec, tijelo, sun\b, suncan, spf,
+                   namjest, ciscen, incun, filet, maslin, masl\b, mas\b, tuna, sardin, fileti, skus,
+                   usne, baby, argan, etericn, spreju, bucin, palmin, lanen, ocat, set\b, kozm, motor,
+                   lampe, masaz]
   unit: l
+  default_exclude_variants: [vrsta=avokado, vrsta=sezam, vrsta=kokos, vrsta=grozde, vrsta=specijalno]
   max_pack: 5000
   min_pack: 500
   plausible_per_unit: [1, 12]
   attributes:
     vrsta:
+      # specijalna ulja: postoje, ali nisu zadani izbor (default_exclude_variants)
+      avokado: '\bavokad|\bavocad'
+      sezam: '\bsezam|\bsesam'
+      kokos: '\bkokos|\bcoco'
+      grozde: '\bgrozd|\bkostic\w* grozd|\bgrape'
+      specijalno: '\bpistacij|\bkonoplj|\borah|\bkikiriki|\bbadem|\bljesnjak|\bcrni kim|\bchia|\bmakov'
       suncokretovo: '\bsuncokret|\bsunc\b'
       repicino: '\brepic|\buljane repice'
       biljno: '\bbiljn|\bbilj\b'
@@ -212,9 +234,10 @@ maslac:
   name: maslac
   synonyms: [maslac, puter, butter]
   must_match: [maslac, puter\b, butter\b, markenbutter]
-  must_not_match: [bombon, candie, zacinsk, bilj, peanut, snickers, kikiriki, kokic, keks, croissant,
-                   kroasan, shea, kakao, namaz, mikrovaln, smokic, caj\b, pop\b, crunchy, bobi,
-                   buttons, slani stapic, biskvit, popcorn, tijest]
+  must_not_match: [povrc, mjesavin, focacc, pistacij, toast, tikva, salata, tost, bombon, candie,
+                   zacinsk, bilj, peanut, snickers, kikiriki, kokic, keks, croissant, kroasan, shea,
+                   kakao, namaz, mikrovaln, smokic, caj\b, pop\b, crunchy, bobi, buttons, slani stapic,
+                   biskvit, popcorn, tijest]
   unit: kg
   max_pack: 1000
   min_pack: 100
@@ -239,11 +262,12 @@ mlijeko:
   name: mlijeko
   synonyms: [mlijeko, kravlje mlijeko]
   must_match: [mlijek]
-  must_not_match: [cokolad, cok\b, kakao, sojin, soja, zob, rizin, riza\b, bademov, badem, kokos, kozje,
-                   vanilij, jagod, banan, kava\b, kave\b, napitak, napolitank, keks, kras\b, bijela cokolada,
-                   prahu, zamjen, zamj\b, nan\b, junior, kiselo, jogurt, sir\b, sladoled, puding, kroasan,
-                   croissant, bombon, cokoladic, med\b, sun\b, suncanje, disney, dorina, ciste, cisti,
-                   pjena za, ukrasn, proteinsk, kefir, kondenz, lgg\b, aktiv]
+  must_not_match: [loncic, cokolad, cok\b, kakao, sojin, soja, zob, rizin, riza\b, bademov, badem,
+                   kokos, kozje, vanilij, jagod, banan, kava\b, kave\b, napitak, napolitank, keks,
+                   kras\b, bijela cokolada, prahu, zamjen, zamj\b, nan\b, junior, kiselo, jogurt,
+                   sir\b, sladoled, puding, kroasan, croissant, bombon, cokoladic, med\b, sun\b,
+                   suncanje, disney, dorina, ciste, cisti, pjena za, ukrasn, proteinsk, kefir, kondenz,
+                   lgg\b, aktiv]
   unit: l
   default_exclude_variants: [laktoza=bez]
   max_pack: 2000
@@ -263,7 +287,11 @@ mlijeko:
       trajno: '\btrajn|\buht\b'
       svjeze: '\bsvjez|\bsvj\.'
     laktoza:
-      bez: 'bez laktoze|\blf\b|laktoze free|lagano jutro'
+      bez: 'bez laktoze|\blf\b|laktoze free'
+  # Dukatova linija LAGANO JUTRO je mlijeko bez laktoze; naziv to rijetko izričito kaže
+  inferred_attributes:
+    laktoza:
+      bez: 'lagano jutro'
   loose_produce: false
 
 jogurt:
@@ -423,14 +451,18 @@ luk:
   name: luk (crveni/žuti)
   synonyms: [luk, crveni luk, žuti luk, zuti luk, kapula]
   must_match: [luk\b, kapula]
-  must_not_match: [presa, gnjecil, dinst, termick, smrz, ledo\b, kock, rezani, cesnjak, vrhnje, sir\b, med\b, senf, kikiriki, przeni, granul, pasta, pecivo, bruschett,
-                   karameliz, majonez, rings, zacin, tuba, umak, salat, prsten, masline, sendvic, krem\b,
-                   namaz, svinjsk, rukavac, poriluk, vlasac, kapulic, srdel, sardin, baguett, stapic, naljev,
-                   octu, ocat, kis\b, kisel, srebrn, srebni, marinir, pohan, kolut, fileti]
+  must_not_match: [zapecen, presa, gnjecil, dinst, termick, smrz, ledo\b, kock, rezani, cesnjak,
+                   vrhnje, sir\b, med\b, senf, kikiriki, przeni, granul, pasta, pecivo, bruschett,
+                   karameliz, majonez, rings, zacin, tuba, umak, salat, prsten, masline, sendvic,
+                   krem\b, namaz, svinjsk, poriluk, vlasac, kapulic, srdel, sardin, baguett, stapic,
+                   naljev, octu, ocat, kis\b, kisel, srebrn, srebni, marinir, pohan, kolut, fileti]
   unit: kg
+  default_exclude_variants: [vrsta=mladi, vrsta=ljutika]
+  packaged: {pattern: rukavac, default_g: 500}
   attributes:
     vrsta:
       mladi: '\bmlad'
+      ljutika: '\bchalot|\bechalion|\bljutik|\bborettan|\bguarnicion|\bshallot'
       crveni: '\bcrven|\bljubicast'
       zuti: '\bzut|\bsrebren'
       bijeli: '\bbijel'
@@ -449,9 +481,11 @@ krumpir:
   name: krumpir
   synonyms: [krumpir, krompir, kumpir]
   must_match: [krumpir]
-  must_not_match: [bombon, haribo, umak, valjusc, krumpiric, sweet, pire, ledo, porcij, njoki, pita, vegeta, kriske, kroket, kruh, ploske, gnjecil, wedges,
-                   batat, slatki, peceni, salata, burek, twist, frites, pommes, zacin, aviko, pecivo,
-                   medaljon, stapic, panir, gulas, restan, pomfrit, chips, juha, smrz, tijest, rosti]
+  must_not_match: [pekarsk, curly, resetkast, krumpirus, tjestenin, gratin, stangic, srca, fries,
+                   povrc, bombon, haribo, umak, valjusc, krumpiric, sweet, pire, ledo, porcij, njoki,
+                   pita, vegeta, kriske, kroket, kruh, ploske, gnjecil, wedges, batat, slatki, peceni,
+                   salata, burek, twist, frites, pommes, zacin, aviko, pecivo, medaljon, stapic, panir,
+                   gulas, restan, pomfrit, chips, juha, smrz, tijest, rosti]
   unit: kg
   attributes:
     namjena:
@@ -506,6 +540,7 @@ rajcica_konzerva:
       pelati: '\bpelat|\bcijel|\boljust'
       polpa: '\bpolpa'
       sjeckana: '\bsjec|\bkomad|\bkock'
+      _default: nepoznato
   loose_produce: false
 
 koncentrat_rajcice:
@@ -596,7 +631,7 @@ kiseli_kupus:
 
 zelena_salata:
   name: zelena salata (glavice)
-  synonyms: [zelena salata, salata, iceberg, ledenka, kristalka, puterica]
+  synonyms: [lollo, zelena salata, salata, iceberg, ledenka, kristalka, puterica]
   must_match: [salata iceberg, iceberg salata, salata ledenk, ledenk, salata kristalk, kristalka salata,
                salata puteric, puterica, salata zelena puteric, lollo, zelena salata, salata zelena,
                salata glav]
@@ -681,8 +716,8 @@ gljive:
       konzerva: '\blim\.|\blimenk|\blim\b|\bkonz|\bocij|\bocj|\boc\.|\bo\.m\.|\bstaklo|\bstaklenk|\btetra|\bkuhan|\bvakum|\bvak\b|netto|neto|\d+\s*(?:g|gr)\.?\s*/\s*\d+'
       smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen'
       suho: '\bsuh|\brinfuz|\bvrecic|\bpvc\b'
-      svjeze: '\bsvjez|\bsvj\.|\brfz\b|\brfs\b'
-      _default: svjeze
+      svjeze: '\bsvjez|\bsvj\.|\brfz\b|\brfs\b|\bpodloz|bez korijena'
+      _default: nepoznato
     vrsta:
       sampinjoni: '\bsampinjon'
       bukovace: '\bbukovac'
@@ -798,7 +833,7 @@ krusne_mrvice:
   name: krušne mrvice
   synonyms: [krušne mrvice, krusne mrvice, prezle, mrvice]
   must_match: [krusne mrvice, mrvice krusne, mrvice\b, prezle, panko]
-  must_not_match: [dekor, saren, kakao, oetker, keks, cokolad]
+  must_not_match: [nugget, kozic, coko, kukuruz, dekor, saren, kakao, oetker, keks, cokolad]
   unit: kg
   max_pack: 2000
   min_pack: 200
@@ -1028,7 +1063,7 @@ grah:
       smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen'
       svjeze: '\bsvjez|\bsvj\.|\brfz\b|\brfs\b'
       suho: '\bsuh|\brinfuz|\bvrecic|\bpvc\b'
-      _default: suho
+      _default: nepoznato
   loose_produce: false
 
 leca:
@@ -1051,7 +1086,7 @@ leca:
       smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen'
       svjeze: '\bsvjez|\bsvj\.|\brfz\b|\brfs\b'
       suho: '\bsuh|\brinfuz|\bvrecic|\bpvc\b'
-      _default: suho
+      _default: nepoznato
   loose_produce: false
 
 slanutak:
@@ -1068,7 +1103,7 @@ slanutak:
       smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen'
       svjeze: '\bsvjez|\bsvj\.|\brfz\b|\brfs\b'
       suho: '\bsuh|\brinfuz|\bvrecic|\bpvc\b'
-      _default: suho
+      _default: nepoznato
   loose_produce: false
 
 kukuruz:
@@ -1087,7 +1122,7 @@ kukuruz:
       smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen'
       svjeze: '\bsvjez|\bsvj\.|\brfz\b|\brfs\b'
       suho: '\bsuh|\brinfuz|\bvrecic|\bpvc\b'
-      _default: konzerva
+      _default: nepoznato
   loose_produce: false
 
 grasak:
@@ -1105,6 +1140,7 @@ grasak:
       smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen'
       svjeze: '\bsvjez|\bsvj\.|\brfz\b|\brfs\b'
       suho: '\bsuh|\brinfuz|\bvrecic|\bpvc\b'
+      _default: nepoznato
   loose_produce: false
 
 banana:
@@ -1215,8 +1251,9 @@ ocat:
   name: ocat (alkoholni/vinski)
   synonyms: [ocat, alkoholni ocat, vinski ocat, kvasina]
   must_match: [ocat\b, octa\b, kvasin]
-  must_not_match: [balzam, balsam, jabuc, jabuk, aceto balsam, krema, glazura, sredstvo, deterd, cist,
-                   kamenac, perilic, kapsul, tablet, sprej]
+  must_not_match: [bals, aceto, zacinsk, limun, nara\b, doza, set\b, balzam, balsam, jabuc, jabuk,
+                   aceto balsam, krema, glazura, sredstvo, deterd, cist, kamenac, perilic, kapsul,
+                   tablet, sprej]
   unit: l
   pantry: true
   max_pack: 3000
@@ -1283,7 +1320,8 @@ kecap:
   name: kečap
   synonyms: [kečap, kecap, ketchup]
   must_match: [kecap, ketchup, kecup]
-  must_not_match: [chips, cips, flips, kreker, majonez, umak za]
+  must_not_match: [chio, pring, clipsy, bobi, kubet, pom bar, kroki, stix, cubics, chips, cips, flips,
+                   kreker, majonez, umak za]
   unit: kg
   attributes:
     vrsta:

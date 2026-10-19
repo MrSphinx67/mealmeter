@@ -256,3 +256,53 @@ Ako se pokaže da je Lorenco stvarni nacionalni web-shop, ovu odluku vrijedi pre
       puterica (31), kristalka i lollo. „Ledena“ i „glavatica“ se ne pojavljuju. Rukola, matovilac,
       radič i endivija su nove zasebne namirnice.
     - `loose_produce` odbija staklenke („6-9 cm“, ocij/ocj, kis).
+
+## Korak 2B, ispravci rječnika (2026-10-20)
+
+28. **Luk „rukavac“ je uključen.** Polje `packaged: {pattern: rukavac, default_g: 500}`: pakirani
+    luk bez gramature u nazivu dobiva pretpostavljenih 500 g (`product_staples.assumed_g`), uz
+    `unit_confidence='low'` i `pack_source='assumed'`. Kad je gramatura u nazivu, koristi se ona.
+29. **Ulje.** `kos` je zamijenjen s `za kos|kosu\b|kose\b`, pa je ulje od koštica grožđa dopušteno.
+    - Atribut `vrsta`: suncokretovo, repičino, biljno, te specijalna avokado, sezam, kokos, grožđe i
+      specijalno (pistacija, konoplja, orah, kikiriki, badem…). Specijalna su u
+      `default_exclude_variants`, pa zadani izbor sadrži samo uobičajena jestiva ulja.
+    - Ulja bez prepoznate vrste („ZVIJEZDA OMEGOL“) ostaju u zadanom izboru.
+    - **Sukob u zahtjevu:** točka 5 traži `avokad` u `must_not_match`, a točka 2 avokado kao
+      specijalnu varijantu. Provedena je točka 2, jer bi `must_not_match` ulje avokada učinio
+      nedohvatljivim. Iz zadanog izbora ispada svejedno.
+    - „ULJE EDM“ (ekstra djevičansko maslinovo) isključeno je iz ulja kroz `edm|masli|djev|devic`.
+30. **Porijeklo atributa.** `product_attrs.how` i `attribute_sources[atribut].how`:
+    - `name`: vrijednost izričito piše u nazivu
+    - `inferred`: zaključena (`inferred_attributes`, npr. LAGANO JUTRO → laktoza=bez)
+    - `default`: nijedan uzorak nije pogodio (`attributes._default`)
+
+    U pregledu su označene kao „(zaključeno)“ i „(zadano)“.
+31. **Odbačene cijene i automatske granice.** Namirnice bez ručnog `plausible_per_unit` dobivaju
+    granice 0,25x–4x medijana cijene po jedinici namirnice (`clean.staple_rules.range_source='auto'`,
+    65 namirnica). Pretraga i košarica čitaju granice iz `clean.staple_rules`.
+    - `docs/price_outliers.md` pokazuje odbačene grupe za namirnice s > 5 % odbačenih cijena.
+    - Na temelju izvještaja dodani su krivi pogoci:
+      - maslac: tikva, salata, tost/toast, povrće, focaccia
+      - mlijeko: lončić
+      - sol: šol (komad govedine)
+      - ocat: balsamico i začinski
+      - krumpir: pekarski, curly fries, krumpiruša
+      - kečap: grickalice
+      - krušne mrvice: nuggetsi
+    - Luk: mladi luk i ljutika su zadano isključene varijante.
+    - Iznad 5 % ostaju kvasac (18 %; rinfuza od 100–500 g je stvarno jeftinija po vrećici, pa ju
+      automatska granica penalizira), luk (5,6 %; ljutika i borettane su skupi, ali su zadano
+      isključeni) i sol (5,1 %; himalajska i cvijet soli).
+32. **`docs/ranges.md`** sadrži sve `min_pack`/`max_pack` i granice cijena.
+33. **Konzerve.** `pack_amount` je neto masa **s tekućinom** (bruto sadržaj), a `drained_amount`
+    ocijeđena masa. Vidi SCHEMA.md.
+34. **`pack_confidence`** (`clean.products`) je `low` kad gramatura ovisi o heuristici višestrukog
+    pakiranja: „4+1“, „3/1“ i „PAK“ uz jednu gramaturu, „2x80“ bez jedinice, ili višestruko
+    pakiranje uz „gratis“. U košarici takvi proizvodi nisu zadani izbor. „4+1 GR.“ više se ne čita
+    kao grami.
+35. **Oblik bez oznake je `nepoznato`** (`attributes._default`) za grah, leću, slanutak, grašak,
+    kukuruz, gljive i rajčicu u konzervi. Ništa se ne pogađa, pa ni suho. „Podložak“ i „bez korijena“
+    kod gljiva znače svježe.
+36. **Neprehrambeni proizvodi.** Uz kategorije, `_defaults` dobiva uzorke za proizvode pronađene
+    među kandidatima lanaca bez kategorije: sjeme, igračke, stolica „jaje“, vrtni luk, motorno ulje
+    (Valvoline, 10W), citronela, folija za jaja.

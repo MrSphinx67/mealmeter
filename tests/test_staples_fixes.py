@@ -193,7 +193,7 @@ MULTIPACK = [
 
 @pytest.mark.parametrize("name,gross,drained", MULTIPACK)
 def test_multipack_and_drained(name, gross, drained):
-    got_gross, got_drained, variable = analyze_pack(name)
+    got_gross, got_drained, variable, _ = analyze_pack(name)
     assert not variable
     assert got_gross == (None if gross is None else (pytest.approx(gross[0]), gross[1]))
     assert got_drained == (None if drained is None else pytest.approx(drained))
@@ -212,7 +212,7 @@ def test_enough_multipack_examples():
     "PILE GRILL 1-1,5 KG",
 ])
 def test_variable_weight(name):
-    assert analyze_pack(name) == (None, None, True)
+    assert analyze_pack(name) == (None, None, True, None)
 
 
 @pytest.mark.parametrize("name,expected", [
@@ -248,12 +248,24 @@ def test_clearance_excluded_by_default(con):
     assert "ntl:001069" in with_clearance
 
 
-def test_plausible_range_marks_suspect(con, monkeypatch):
-    narrow = replace(S["brasno"], plausible_per_unit=(0.4, 0.7))
-    monkeypatch.setattr(search, "resolve_ingredient", lambda _: narrow)
-    res = search.find_products(ingredient="brasno", con=con)
-    assert any(r["n_price_suspect"] > 0 for r in res)
-    assert all(r["price_per_unit_max"] is None or r["price_per_unit_max"] <= 0.7 for r in res)
+def test_plausible_range_marks_suspect(con):
+    # pretraga čita granice iz clean.staple_rules (ručne ili automatske)
+    old = con.execute("SELECT ppu_min, ppu_max FROM clean.staple_rules WHERE staple = 'brasno'").fetchone()
+    con.execute("UPDATE clean.staple_rules SET ppu_min = 0.4, ppu_max = 0.7 WHERE staple = 'brasno'")
+    try:
+        res = search.find_products(ingredient="brasno", con=con)
+        assert any(r["n_price_suspect"] > 0 for r in res)
+        assert all(r["price_per_unit_max"] is None or r["price_per_unit_max"] <= 0.7 for r in res)
+    finally:
+        con.execute("UPDATE clean.staple_rules SET ppu_min = ?, ppu_max = ? WHERE staple = 'brasno'", old)
+
+
+def test_manual_and_auto_ranges(con):
+    rules = dict(con.execute("SELECT staple, range_source FROM clean.staple_rules").fetchall())
+    assert rules["brasno"] == "manual" and rules["mlijeko"] == "manual"
+    # fixture: med i banana nemaju ručne granice -> 0.25x-4x medijana
+    lo, hi, src = con.execute("SELECT ppu_min, ppu_max, range_source FROM clean.staple_rules WHERE staple = 'banana'").fetchone()
+    assert src == "auto" and hi == pytest.approx(16 * lo)
 
 
 def test_default_exclude_variants(con, monkeypatch):
@@ -371,10 +383,10 @@ def test_canned_tomato(name, oblik):
 
 @pytest.mark.parametrize("key,name,oblik", [
     ("grah", "GRAH SMEĐI 800g LIM.PODRAVKA-ocijeđene mase 460g", "konzerva"),
-    ("grah", "GRAH ŠARENI NATURA 500 g", "suho"),
-    ("grah", "GRAH 1 kg ZLATNO ZRNO", "suho"),
+    ("grah", "GRAH ŠARENI NATURA 500 g", "nepoznato"),  # bez oznake se ne pogađa
+    ("grah", "GRAH 1 kg ZLATNO ZRNO", "nepoznato"),
     ("leca", "LEĆA LIM 400 g NETO OC.MASA 240 g (12) PODRAVKA", "konzerva"),
-    ("leca", "LEĆA ZELENA 500G NATURA MARJAN VOĆE", "suho"),
+    ("leca", "LEĆA ZELENA 500G NATURA MARJAN VOĆE", "nepoznato"),
     ("slanutak", "SLANUTAK 800 g LIMENKA ( OCJ. MASA 480 g) PODRA", "konzerva"),
     ("slanutak", "SLANUTAK 500 G MARJAN VOCE PVC", "suho"),
     ("grasak", "N-LEDO GRAŠAK 400G -18/1- 065672", "smrznuto"),
@@ -455,3 +467,106 @@ def test_leafy_split(key, name, expected):
 def test_loose_produce_rejects_jars(name, rejected):
     import re
     assert bool(re.search(LOOSE_REJECT_REGEX, norm_text(name))) is rejected
+
+
+# --- 2B ispravci ----------------------------------------------------------------
+
+from mealmeter.staples import extract_attributes_detail  # noqa: E402
+
+
+@pytest.mark.parametrize("name,expected", [
+    ("MLIJEKO LAGANO JUTRO 1,5% 1L DUKAT", ("bez", "inferred")),
+    ("MLIJEKO TRAJNO LAGANO JUTRO 1,5% BEZ LAKTOZE 0,5L DUKAT BOCA", ("bez", "name")),
+    ("MLIJEKO BEZ LAKTOZE 1,5% 1L LAGANO JUTRO", ("bez", "name")),
+])
+def test_lactose_inferred(name, expected):
+    assert extract_attributes_detail(S["mlijeko"], name)["laktoza"] == expected
+
+
+def test_milk_attribute_sources_have_origin(con):
+    r = search.find_products(ingredient="mlijeko", attributes={"mast": "2.8"}, con=con)[0]
+    assert r["attribute_sources"]["mast"] == {"name": "MLIJEKO TRAJNO 2.8% 1L BOCA DUKAT", "how": "name"}
+
+
+@pytest.mark.parametrize("name,expected", [
+    ("LUK CRVENI RUKAVAC 4/1", "match"),
+    ("LUK RUKAVAC LJUBIČASTI 4 KOM", "match"),
+    ("LUK ŽUTI RUKAVAC VH 4/1", "match"),
+])
+def test_onion_net_included(name, expected):
+    assert name_match(S["luk"], name) == expected
+    assert S["luk"].assumed_pack_g == 500
+
+
+@pytest.mark.parametrize("name,match,vrsta", [
+    ("ULJE SUNCOKRET PVC 1L (15) (PAL 675), ZVIJEZDA", "match", "suncokretovo"),
+    ("ULJE KOŠTICA GROŽĐA 1 L FARCHI", "match", "grozde"),  # dopušteno, ali ne zadano
+    ("ULJE AVOKADA 500 ML PIETRO CORICCELI", "match", "avokado"),
+    ("ULJE PISTACIJE 500 ML BASSO", "match", "specijalno"),
+    ("SUN CARE MARM.SOHO ULJE SP.150ML", None, None),  # sun\b (kozmetiku inače izbacuje kategorija)
+])
+def test_oil_kinds(name, match, vrsta):
+    st = S["ulje"]
+    assert (name_match(st, name) == "match") == (match == "match")
+    if vrsta:
+        assert extract_attributes(st, name)["vrsta"] == vrsta
+
+
+def test_oil_default_selection():
+    excluded = {v for a, v in S["ulje"].default_exclude_variants if a == "vrsta"}
+    assert excluded == {"avokado", "sezam", "kokos", "grozde", "specijalno"}
+    assert name_match(S["ulje"], "ULJE ZA KOSU ARGAN 100ML") == "excluded"
+
+
+@pytest.mark.parametrize("key,name", [
+    ("maslac", "TIKVA PUTER"), ("maslac", "SALATA PUTER KOMAD"), ("maslac", "TOAST S MASLACEM 500 G MULINI"),
+    ("mlijeko", "LONCIC ZA MLIJEKO 800 ML COLOR"),
+])
+def test_obvious_wrong_hits_excluded(key, name):
+    assert name_match(S[key], name) == "excluded"
+
+
+def test_lettuce_synonyms():
+    assert {"iceberg", "ledenka", "kristalka", "lollo", "puterica"} <= set(S["zelena_salata"].synonyms)
+    assert resolve_ingredient("Lollo").key == "zelena_salata"
+
+
+@pytest.mark.parametrize("name,conf", [
+    ("DOLCELA INSTANT SUHI KVASAC 7 g 4+1 GRATIS, PODRAVKA", "low"),
+    ("Di-go Kvasac suhi instant 5x35 g 1gratis", "low"),
+    ("KFJ TUNA 2x80 g", "high"),
+    ("BRAŠNO GLATKO T-550 1kg PODRAVKA", "high"),
+    ("VANILIN ŠEĆER BOUR. DOLCELA 10 g 3/1", "low"),
+    ("BANANA", None),
+])
+def test_pack_confidence(name, conf):
+    assert analyze_pack(name)[3] == conf
+
+
+@pytest.mark.parametrize("key,name", [
+    # neprehrambeni kandidati pronađeni u lancima bez kategorije (Plodine, Lorenco, Stridon) i NTL-u
+    ("ulje", "VALVOLINE ULJE ALL CLIM.EXTRA 10W40 4 L"),
+    ("jaja", "JAJE STOLICA RATAN CRNA 120X96X70"),
+    ("jaja", "GLAZBENO JAJE SA SLATKISIMA 150 G WINDEL"),
+    ("jaja", "OBUCI JAJE TERMOSKUPLJAJUĆA FOLIJA 12/1"),
+    ("jaja", "IGR.DINOSAUR JAJE 12/1 74571"),
+    ("luk", "VRTNI LUK HY16-01 140X240 CM"),
+    ("spinat", "SJEME BLITVA SREBRNOLISNA"),
+    ("spinat", "SJEME SPINAT MATADOR"),
+    ("griz", "DR.IGR DINO GRIZ"),
+    ("limun", "CITRONELA LIMUN I MELISA"),
+    ("sol", "NATUR PUR JUNEĆI ODRESCI (ŠOL)"),
+    ("ulje", "ULJE EDM 0,5 l ZVIJEZDA"),  # EDM = ekstra djevičansko maslinovo
+    ("ocat", "OCAT ACETO BALS.0,5L ZVIJEZDA"),
+    ("krumpir", "PEKARSKI KRUMPIR 680 G EASY CHEF"),
+    ("kecap", "CHIO TIP TOP CUBICS KETCHUP INTERSNACK 50 g (30)"),
+    ("krusne_mrvice", "GASTRO NUGGETSI PILEĆI U PANKO PANADI"),
+])
+def test_remaining_wrong_hits_excluded(key, name):
+    assert name_match(S[key], name) == "excluded"
+
+
+@pytest.mark.parametrize("name,vrsta", [("LUK MLADI - VEZICA", "mladi"), ("500G LUK ECHALION", "ljutika")])
+def test_onion_variants_not_default(name, vrsta):
+    assert extract_attributes(S["luk"], name)["vrsta"] == vrsta
+    assert ("vrsta", vrsta) in S["luk"].default_exclude_variants

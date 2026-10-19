@@ -100,7 +100,9 @@ def section(st, top: int, n_excl: int, results: list[dict]) -> list[str]:
     for i, r in enumerate(results[:top], 1):
         unit = f" /{r['per_unit']}" if r["per_unit"] else ""
         conf = f"{r['unit_confidence']}/{r['pack_source']}" if r["unit_confidence"] else "–"
-        attrs = ", ".join(f"{k}={v}" for k, v in r["attributes"].items())
+        attrs = ", ".join(
+            f"{k}={v}" + {"inferred": " (zaključeno)", "default": " (zadano)"}.get(r["attribute_sources"][k]["how"], "")
+            for k, v in r["attributes"].items())
         flags = " ⚠" + str(r["n_price_suspect"]) if r.get("n_price_suspect") else ""
         out.append(
             f"| {i} | {cell(r['id'])} | {cell(r['name'])} | {cell(r['pack'])} | {r['n_chains']} | {r['n_stores']} "

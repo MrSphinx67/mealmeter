@@ -87,9 +87,10 @@ vrijednost se uspješno parsirala.
 | ean_global | valjan i nije kod ograničene upotrebe (vaga/in-store: 7.189 nije globalno); grupira se samo po njima. 219.343 različitih globalnih EAN-ova |
 | name_norm | naziv: mala slova, bez dijakritika, `đ`/`dj` → `d`, interpunkcija → razmak |
 | pack_amount, pack_unit | gramatura: količina u `g`, `ml` ili `kom` |
-| pack_amount, pack_unit | **bruto** gramatura (od Koraka 2A2; ocijeđena masa je zasebno) |
+| pack_amount, pack_unit | gramatura pakiranja; kod konzervi **neto masa s tekućinom** (sadržaj limenke, npr. 400 g u „GRAH 400g/240g“) |
+| pack_confidence | `high`, ili `low` kad gramatura ovisi o heuristici višestrukog pakiranja („7 g 4+1“, „10 g 3/1“, „2x80“, „5x35 g 1gratis“); NULL bez gramature |
 | pack_source | `name`, `unit` (Lidl), `ean` (naslijeđeno od istog EAN-a), NULL (uglavnom neprehrambeno i roba na vagu) |
-| drained_amount | ocijeđena masa konzerve u g („OC. MASA 280 g“, „185/140g“) |
+| drained_amount | **ocijeđena masa** konzerve u g, bez tekućine („OC. MASA 280 g“, „185/140g“, „NETO 800G“); košarica je koristi za konzerve |
 | variable_weight | „CCA“ ili raspon težine („1-1,5KG“): nema pakiranja, cijena po kg je od lanca |
 | clearance | naziv sadrži „SNIŽEN…“ (rasprodaja) |
 | category_group | normalizirana kategorija lanca (hrana, pice, kozmetika, higijena, kucanstvo, djeca, sunce, igracke, ljubimci, ostalo) |
@@ -116,17 +117,20 @@ cijena pakiranja. Metro (66 %) prodaje kutije porcija („20G PODRAVKA DŽEM“ 
 **`clean.chains`** `(chain, n_stores, scope, data_quality)`: `data_quality` je `ok` ili `suspect`
 (Lorenco). Razlozi su u DECISIONS.md, a pokazatelje za sve lance ispisuje `build_clean.py`.
 
-**`clean.staple_rules`** `(staple, name, unit, compare_by, compare_unit, ppu_min, ppu_max, min_pack,
-max_pack, pantry, loose_produce)`: pravila aktivnih namirnica iz `staples.yaml`.
+**`clean.staple_rules`** `(staple, name, unit, compare_by, compare_unit, ppu_min, ppu_max, range_source,
+min_pack, max_pack, pantry, loose_produce)`: pravila aktivnih namirnica iz `staples.yaml`;
+`range_source` je `manual` (`plausible_per_unit`) ili `auto` (0,25x–4x medijana). Vidi docs/ranges.md.
 
 **`clean.product_staples`** `(chain, product_id, staple, excluded, drop_reason, n_units)`: proizvodi čiji
 naziv pogađa `must_match` (i `require_any`) namirnice.
 - `excluded = true` kad pogađa i `must_not_match`; tada cijela grupa ispada.
 - `drop_reason` (`kategorija:*`, `pakiranje`) izbacuje samo taj proizvod.
 - `n_units` je broj vrećica ili komada kad je `compare_by` pack ili count.
+- `assumed_g` je pretpostavljena masa pakiranja bez gramature (`packaged`, luk rukavac 500 g).
 
-**`clean.product_attrs`** `(chain, product_id, staple, attr, value)`: atributi iz naziva (npr.
-brasno/tip/glatko, mlijeko/mast/2.8), samo za neisključene proizvode.
+**`clean.product_attrs`** `(chain, product_id, staple, attr, value, how)`: atributi iz naziva (npr.
+brasno/tip/glatko, mlijeko/mast/2.8), samo za neisključene proizvode. `how` je `name`, `inferred`
+ili `default`.
 
 ## Funkcije pretrage (`src/mealmeter/search.py`)
 

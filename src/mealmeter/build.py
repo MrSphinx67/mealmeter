@@ -119,37 +119,40 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
         q = "SELECT chain, product_id, barcode, name, unit, quantity, category FROM products"
         for chain, pid, barcode, name, unit, quantity, category in con.execute(q).fetchall():
             ean, valid, glob = normalize_ean(barcode)
-            pack, drained, variable = analyze_pack(name)
+            pack, drained, variable, confidence = analyze_pack(name)
             source = "name"
             # promjenjiva težina: nema pakiranja ni iz stupca unit (cijena je po kg od lanca)
             if pack is None and not variable and (pack := parse_pack_unit_field(unit)):
-                source = "unit"
+                source, confidence = "unit", "high"
             amount, pack_unit = pack or (None, None)
             yield (chain, pid, ean, valid, glob, norm_text(name), amount, pack_unit,
                    source if pack else None, unit_hint(unit, quantity), category_group(category),
-                   drained, variable, is_clearance(name))
+                   drained, variable, is_clearance(name), confidence)
 
     _temp_table(con, "product_derived", {
         "chain": "VARCHAR", "product_id": "VARCHAR", "ean_norm": "VARCHAR", "ean_valid": "BOOLEAN",
         "ean_global": "BOOLEAN", "name_norm": "VARCHAR", "pack_amount": "DOUBLE", "pack_unit": "VARCHAR",
         "pack_source": "VARCHAR", "unit_hint": "VARCHAR", "category_group": "VARCHAR",
         "drained_amount": "DOUBLE", "variable_weight": "BOOLEAN", "clearance": "BOOLEAN",
+        "pack_confidence": "VARCHAR",
     }, product_rows())
     con.execute("""
         CREATE OR REPLACE TABLE clean.products AS
         SELECT r.chain, r.product_id, r.barcode, d.ean_norm, d.ean_valid, d.ean_global,
                r.name, d.name_norm, r.brand, r.category, d.category_group, r.unit, r.quantity,
                d.pack_amount, d.pack_unit, d.pack_source, d.unit_hint,
-               d.drained_amount, d.variable_weight, d.clearance
+               d.drained_amount, d.variable_weight, d.clearance, d.pack_confidence
         FROM products r JOIN product_derived d USING (chain, product_id)
     """)
 
     # Isti globalni EAN = isti proizvod: gramaturu bez naziva ("BRAŠNO GLATKO 1/1") naslijedi od
     # drugih lanaca, ali samo ako se svi parsirani nazivi za taj EAN slažu.
     con.execute("""
-        UPDATE clean.products p SET pack_amount = e.amount, pack_unit = e.unit, pack_source = 'ean'
+        UPDATE clean.products p SET pack_amount = e.amount, pack_unit = e.unit, pack_source = 'ean',
+                                    pack_confidence = e.conf
         FROM (
-          SELECT ean_norm, any_value(pack_amount) AS amount, any_value(pack_unit) AS unit
+          SELECT ean_norm, any_value(pack_amount) AS amount, any_value(pack_unit) AS unit,
+                 CASE WHEN bool_or(pack_confidence = 'low') THEN 'low' ELSE 'high' END AS conf
           FROM clean.products WHERE ean_global AND pack_unit IS NOT NULL AND NOT variable_weight
           GROUP BY ean_norm HAVING count(DISTINCT (pack_amount, pack_unit)) = 1
         ) e

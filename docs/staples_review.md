@@ -105,20 +105,20 @@ atributi: tip = glatko, ostro, polubijelo, integralno; vrsta = psenicno, pirovo,
 | 2 | 3850104052552 | BRAŠNO KUKURUZNO 1KG (10) (PAL 60), PODRAVKA | 1 kg | 19 | 674 | 1,21–1,89 /kg | high/name | vrsta=kukuruzno |
 | 3 | 3850104223624 | BRAŠNO GLATKO T-550 1KG (10) (PAL 60) PODRAVKA | 1 kg | 18 | 1167 | 0,62–0,83 /kg | high/name | oznaka=t550, tip=glatko, vrsta=psenicno |
 | 4 | 3850104223631 | BRAŠNO PŠEN. T-400 OŠTRO 1 KG (10) (PAL60) PODRAVKA | 1 kg | 17 | 926 | 0,69–0,83 /kg | high/name | oznaka=t400, tip=ostro, vrsta=psenicno |
-| 5 | 3858884172637 | BRASNO T-400 1 KG CAKOVECKI MLINOVI - OSTRO ZA KOLACE | 1 kg | 16 | 953 | 0,82–0,83 /kg ⚠9 | high/name | tip=ostro, oznaka=t400, vrsta=psenicno |
+| 5 | 3858884172637 | BRASNO T-400 1 KG CAKOVECKI MLINOVI - OSTRO ZA KOLACE | 1 kg | 16 | 953 | 0,82–0,83 /kg ⚠9 | high/name | oznaka=t400, tip=ostro, vrsta=psenicno |
 | 6 | 3858884172583 | BRAŠNO PŠENIČNO T-400 ZA DIZANA TIJESTA 1KG ČAKOVEČKI MLINOV | 1 kg | 16 | 895 | 1,09–1,92 /kg | high/name | oznaka=t400, vrsta=psenicno |
 | 7 | 3858884172521 | BRAŠNO PŠENIČNO GLATKO T-550, 5KG ČAKOVEČKI MLINOVI(PAL200) | 5 kg | 16 | 703 | 0,71–0,80 /kg ⚠4 | high/name | oznaka=t550, tip=glatko, vrsta=psenicno |
 | 8 | 3850104223617 | PŠEN.BRAŠNO T 550 GLATKO 2 KG PODRAVKA(6) (PAL 48) | 2 kg | 15 | 823 | 0,56–0,82 /kg | high/name | oznaka=t550, tip=glatko, vrsta=psenicno |
-| 9 | 3850104063084 | BRAŠNO PODR 1KG POLUBIJELO T-850 -10/1- | 1 kg | 15 | 468 | 1,07–1,72 /kg | high/name | oznaka=t850, tip=polubijelo, vrsta=psenicno |
+| 9 | 3850104063084 | BRAŠNO PODR 1KG POLUBIJELO T-850 -10/1- | 1 kg | 15 | 468 | 1,07–1,72 /kg | high/name | oznaka=t850, vrsta=psenicno, tip=polubijelo |
 | 10 | 3850104223648 | PŠEN.BRAŠNO T -400 OŠTRO 2 KG, PODRAVKA(6) (PAL 48) | 2 kg | 14 | 694 | 0,45–0,85 /kg | high/name | oznaka=t400, tip=ostro, vrsta=psenicno |
 | 11 | 3858884172576 | BRAŠNO ZA TANKA TIJESTA 1 kg T- 700 ČAKOVEČKI MLI | 1 kg | 12 | 643 | 1,09–1,69 /kg | high/name |  |
-| 12 | 3850104423659 | BRAŠNO GL.T-550 5 kg PŠ.BIJELO PODRAVKA | 5 kg | 11 | 286 | 0,54–1,03 /kg | high/name | oznaka=t550, vrsta=psenicno, tip=glatko |
+| 12 | 3850104423659 | BRAŠNO GL.T-550 5 kg PŠ.BIJELO PODRAVKA | 5 kg | 11 | 286 | 0,54–1,03 /kg | high/name | oznaka=t550, tip=glatko, vrsta=psenicno |
 | 13 | 3858884172538 | BRAŠNO OŠTRO ZA KOLAČE T-400 5KG,ČAKOVEČKI MLINOVI | 5 kg | 10 | 381 | 0,75–0,84 /kg | high/name | oznaka=t400, tip=ostro |
 | 14 | 3858884170169 | BRAŠNO KUKURUZNO 1KG ČAKOVEČKI MLIN (10) | 1 kg | 9 | 420 | 1,31–1,79 /kg | high/name | vrsta=kukuruzno |
 | 15 | 3858884175751 | BRAŠNO PŠENIČNO T-550 ZA PIZZU 1KG ČAKOVEČKI MLINOVI | 1 kg | 9 | 405 | 1,39–1,95 /kg | high/name | oznaka=t550, vrsta=psenicno |
 | 16 | 3859891753246 | N-BRAŠNO ULTRA 1KG GLATKO T-550 -10/1- | 1 kg | 8 | 161 | 0,68–0,80 /kg | high/ean | oznaka=t550, tip=glatko, vrsta=psenicno |
-| 17 | 3850104065019 | BRAŠNO RAŽENO 900G T-1250 PODRAVKA | 900 g | 8 | 36 | 1,31–2,54 /kg | high/name | vrsta=razeno |
-| 18 | 3850104423604 | PŠEN.BRAŠNO T -400 OŠTRO 5 KG, PODRAVKA | 5 kg | 7 | 190 | 0,62–0,83 /kg | high/name | oznaka=t400, vrsta=psenicno, tip=ostro |
+| 17 | 3850104065019 | BRAŠNO RAŽENO T-1250 900G PODRAVKA | 900 g | 8 | 36 | 1,31–2,54 /kg | high/name | vrsta=razeno |
+| 18 | 3850104423604 | PŠEN.BRAŠNO T -400 OŠTRO 5 KG, PODRAVKA | 5 kg | 7 | 190 | 0,62–0,83 /kg | high/name | oznaka=t400, tip=ostro, vrsta=psenicno |
 | 19 | 3858887101009 | BRAŠNO FARINA SPECIALE PŠENIČNO TIP 00 1kg (10) | 1 kg | 6 | 443 | 0,99–1,65 /kg | high/name | oznaka=00, vrsta=psenicno |
 | 20 | 3858884175768 | BRAŠNO ZA BUREK POLUBIJ. T-700 1 kg | 1 kg | 6 | 180 | 1,43–1,79 /kg | high/name | vrsta=psenicno |
 
@@ -127,7 +127,7 @@ atributi: tip = glatko, ostro, polubijelo, integralno; vrsta = psenicno, pirovo,
 | naziv | lanaca | isključio |
 |---|---|---|
 | SMJESA ZA KRUH (BEZGLUTENSKO BRAŠNO) DR.SCHÄR MIX B 1KG (10) | 15 | `mix\b` |
-| KOKOS BRAŠNO 200G (10), ŠAFRAM | 14 | `kokos` |
+| KOKOS BRAŠNO 200 g ŠAFRAM (10) | 14 | `kokos` |
 | HELJDINO BRAŠNO 1 kg PODRAVKA (10) | 13 | `heljd` |
 | SUPERFOODS eko kokosovo brašno 250g | 10 | `kokos` |
 | KOKOS BRAŠNO 200G(20) NATURA, MARJAN VOĆE | 8 | `kokos` |
@@ -135,7 +135,7 @@ atributi: tip = glatko, ostro, polubijelo, integralno; vrsta = psenicno, pirovo,
 | BRAŠNO MIX IT 500G BEZ GLUTENA -10/1 DR.SCHAR | 7 | `mix\b` |
 | N-TOAST KLARA ZP 500G S INTEG. BRAŠNOM -8/1- | 7 | `toast` |
 | ULTRA KOKOS BRAŠNO 200G, ŠAFRAM (10) | 7 | `kokos` |
-| BIO BRAŠNO ZOBENO 250 g ENCIAN | 6 | `zob` |
+| BRAŠNO ZOBENO BIO ENCIAN 250 g | 6 | `zob` |
 
 </details>
 
@@ -153,12 +153,12 @@ atributi: vrsta = u_prahu, smedi, kocke, bijeli
 |---|---|---|---|---|---|---|---|---|
 | 1 | 3858881087460 | ŠEĆER U PRAHU 250 g FRANCK VREĆ. (10) | 250 g | 16 | 1058 | 3,76–5,16 /kg | high/name | vrsta=u_prahu |
 | 2 | 3858881087477 | ŠEĆER U PRAHU 500 g FRANCK VREĆ. (10) | 500 g | 15 | 754 | 3,18–4,98 /kg | high/name | vrsta=u_prahu |
-| 3 | 3859888279476 | ŠEĆER KOCKA BIJELI RIO-PAK 500 g | 500 g | 11 | 733 | 2,66–5,50 /kg | high/name | vrsta=kocke |
+| 3 | 3859888279476 | SECER KOCKA BIJELA 500 G RIO PAK | 500 g | 11 | 733 | 2,66–5,50 /kg | high/name | vrsta=kocke |
 | 4 | 9007829025017 | Agragold Šećer kristal 1kg_OC | 1 kg | 11 | 392 | 0,65–1,33 /kg | high/name | vrsta=bijeli |
 | 5 | 3859893641008 | Viro Šećer bijeli kristal 1 kg_OC | 1 kg | 10 | 759 | 0,75–0,99 /kg | high/name | vrsta=bijeli |
 | 6 | 3830049080018 | ŠEĆER BIJELI KRISTAL 1KG DIAMANT | 1 kg | 10 | 334 | 0,79–1,33 /kg | high/name | vrsta=bijeli |
 | 7 | 3859892259518 | ŠEĆER BIJELI U KOCKI 500G LARA -7/1- | 500 g | 10 | 91 | 4,30–6,18 /kg | high/name | vrsta=kocke |
-| 8 | 3859888163218 | ŠEĆER U PRAHU 500G (10), ŠAFRAM | 500 g | 9 | 144 | 2,66–4,38 /kg ⚠4 | high/name | vrsta=u_prahu |
+| 8 | 3859888163218 | ŠEĆER U PRAHU ŠAFRAM 500G-10/1- | 500 g | 9 | 144 | 2,66–4,38 /kg ⚠4 | high/name | vrsta=u_prahu |
 | 9 | 3859890236696 | ŠEĆER BIJELI U KOCKI 500 g LARA VM2 | 500 g | 8 | 78 | 4,98–7,36 /kg | high/name | vrsta=kocke |
 | 10 | 8436560216964 | SECER BIJELI 1 KG JUST SUGAR | 1 kg | 7 | 229 | 0,89–1,33 /kg | high/name | vrsta=bijeli |
 | 11 | 4000521730000 | ŽELIRNI ŠEĆER EXTRA 500G 2:1, DR.OETKER | 500 g | 7 | 151 | 6,46–7,98 /kg ⚠7 | high/name |  |
@@ -192,7 +192,7 @@ atributi: vrsta = u_prahu, smedi, kocke, bijeli
 <a id="sol"></a>
 ## sol (`sol`)
 
-jedinica: **kg** · loose_produce: **false** · grupa: **175** · isključenih grupa: **245** · plausible: **0.2–8 €/kg** · pakiranje: **250–5000** · zadano bez: **vrsta=himalajska** · **pantry**
+jedinica: **kg** · loose_produce: **false** · grupa: **162** · isključenih grupa: **258** · plausible: **0.2–8 €/kg** · pakiranje: **250–5000** · zadano bez: **vrsta=himalajska** · **pantry**
 
 sinonimi: sol, kuhinjska sol  
 must_match: `sol\b`
@@ -212,13 +212,13 @@ atributi: vrsta = morska, himalajska, kamena, jodirana; zrno = sitna, krupna
 | 9 | 3859888817036 | Pag 91 kuhinj. morska sol krupna 1kg PVC | 1 kg | 8 | 494 | 0,49–0,99 /kg | high/name | zrno=krupna, vrsta=morska |
 | 10 | 3859888595118 | SOL MORSKA SITNA PVC 1kg SOLANA NIN | 1 kg | 8 | 446 | 0,79–1,19 /kg | high/name | zrno=sitna, vrsta=morska |
 | 11 | 3859888817012 | Pag 91 kuhins. morska sol krupna 1 kg kk | 1 kg | 8 | 440 | 0,74–1,15 /kg | high/name | zrno=krupna, vrsta=morska |
-| 12 | 3859888155077 | SOL KUHINJSKA MORSKA PVC 1KG, SOLANA PAG (10)(PAL800) | 1 kg | 8 | 365 | 0,62–0,99 /kg | high/name | zrno=sitna, vrsta=morska |
+| 12 | 3859888155077 | SOL KUHINJSKA MORSKA PVC 1KG, SOLANA PAG (10)(PAL800) | 1 kg | 8 | 365 | 0,62–0,99 /kg | high/name | vrsta=morska, zrno=sitna |
 | 13 | 3859888817029 | Pag 91 kuh. morska sol sitna 1kg pvc | 1 kg | 7 | 581 | 0,49–1,09 /kg | high/name | zrno=sitna, vrsta=morska |
 | 14 | 3859892380533 | KUHINJSKA SOL 1KG (20) ULTRA (740PAL) | 1 kg | 7 | 76 | 0,51–0,74 /kg | high/name | zrno=sitna |
 | 15 | 3859888817135 | Pag 91 kuh.morska sol sitna 5 kg, pvc | 5 kg | 6 | 380 | 0,31–0,60 /kg | high/name | zrno=sitna, vrsta=morska |
 | 16 | 3859888595989 | SOL SITNA MORSKA BIO 600 G SOLANA NIN | 600 g | 6 | 238 | 0,83–4,48 /kg | high/name | zrno=sitna, vrsta=morska |
 | 17 | 3858881730014 | SOL KUHINJSKA JODIRANA KAMENA 1KG (20), DERMA | 1 kg | 6 | 128 | 0,99–1,89 /kg | high/ean | vrsta=kamena |
-| 18 | 3859888817159 | SOL MORSKA 5 kg KRUPNA PAG 91( 1/1 ) | 5 kg | 5 | 351 | 0,34–0,60 /kg | high/name | vrsta=morska, zrno=krupna |
+| 18 | 3859888817159 | SOL MORSKA 5 kg KRUPNA PAG 91( 1/1 ) | 5 kg | 5 | 351 | 0,34–0,60 /kg | high/name | zrno=krupna, vrsta=morska |
 | 19 | 3859888155589 | SOL MORSKA SITNA CA/MG 1kg SOL PAG | 1 kg | 4 | 290 | 1,05–2,09 /kg | high/name | zrno=sitna, vrsta=morska |
 | 20 | 3870009000427 | SOL KAMENA JODIRANA SA MANJE NATRIJA 250 G TULJAK TUZLA | 250 g | 4 | 270 | 6,76–7,56 /kg | high/name | vrsta=kamena |
 
@@ -242,12 +242,12 @@ atributi: vrsta = morska, himalajska, kamena, jodirana; zrno = sitna, krupna
 <a id="ulje"></a>
 ## ulje (suncokretovo/biljno) (`ulje`)
 
-jedinica: **l** · loose_produce: **false** · grupa: **168** · isključenih grupa: **803** · plausible: **1–12 €/l** · pakiranje: **500–5000**
+jedinica: **l** · loose_produce: **false** · grupa: **176** · isključenih grupa: **777** · plausible: **1–12 €/l** · pakiranje: **500–5000** · zadano bez: **vrsta=avokado, vrsta=sezam, vrsta=kokos, vrsta=grozde, vrsta=specijalno**
 
 sinonimi: ulje, suncokretovo ulje, biljno ulje, jestivo ulje  
 must_match: `ulje\b`
   
-atributi: vrsta = suncokretovo, repicino, biljno
+atributi: vrsta = avokado, sezam, kokos, grozde, specijalno, suncokretovo, repicino, biljno
 
 | # | id | naziv | pakiranje | lanaca | trgovina | €/jed | pouzdanost | atributi |
 |---|---|---|---|---|---|---|---|---|
@@ -257,7 +257,7 @@ atributi: vrsta = suncokretovo, repicino, biljno
 | 4 | 3858882210065 | ULJE BILJNO PVC 1L (15), ZVIJEZDA | 1 l | 18 | 739 | 1,69–2,49 /l | high/name | vrsta=biljno |
 | 5 | 3856015313249 | ULJE SUNCOKRET 1,2L (12) (PAL 540) ZVIJEZDA | 1,2 l | 17 | 776 | 1,37–1,72 /l | high/name | vrsta=suncokretovo |
 | 6 | 3858882211345 | N-ULJE ZVIJEZDA 3L SUNCOKRET- 4/1- PET | 3 l | 14 | 379 | 1,60–2,41 /l | high/name | vrsta=suncokretovo |
-| 7 | 3856015309273 | ULJE MEDITERAN 1L ZVIJEZDA (15) | 1 l | 13 | 596 | 2,75–4,09 /l | high/name |  |
+| 7 | 3856015309273 | ULJE ZVIJEZDA 1L MEDITERAN-15/1 | 1 l | 13 | 596 | 2,75–4,09 /l | high/name |  |
 | 8 | 3857500104311 | ULJE SUNCOKRETOVO HLADNO PREŠANO 1 L SUNCE VINKOVACA | 1 l | 12 | 800 | 1,53–4,09 /l | high/name | vrsta=suncokretovo |
 | 9 | 3856015312044 | Zvijezda Ulje suncokretovo XXL 4x1 L | 4 l | 8 | 457 | 1,25–1,67 /l | high/name | vrsta=suncokretovo |
 | 10 | 8600498170029 | ULJE SUNCOKRET 1L DIJAMANT (15) | 1 l | 4 | 114 | 1,49–1,72 /l | high/name | vrsta=suncokretovo |
@@ -270,22 +270,22 @@ atributi: vrsta = suncokretovo, repicino, biljno
 | 17 | 3858894591787 | ULTRA SUNCOKRETOVO ULJE 1L(15) PAL 765 | 1 l | 3 | 6 | 1,59–1,69 /l | high/name | vrsta=suncokretovo |
 | 18 | 3856015326652 | ULJE SUNCOKRET 1 L + 200 mL gratis ZVIJEZDA (12) | 1,2 l | 2 | 134 | 1,54–3,45 /l | high/unit | vrsta=suncokretovo |
 | 19 | 3856003944523 | ULJE SUNCOKRET 1L ZORELA | 1 l | 2 | 133 | 1,59–1,69 /l | high/name | vrsta=suncokretovo |
-| 20 | 3858890139556 | ULJE KONOPLJE 500 ML EKOZONA | 500 ml | 2 | 100 | – ⚠100 | – |  |
+| 20 | 8007153008374 | ULJE MIX SJEMEN. 1 l FIOR DI VITA FARCH | 1 l | 2 | 46 | 2,89–6,25 /l | high/name |  |
 
 <details><summary>Najčešće isključeni (top 10)</summary>
 
 | naziv | lanaca | isključio |
 |---|---|---|
-| ULJE MASLINOVO EXTRA DJEVICANSKO 1 L ZVIJEZDA STAKLO | 22 | `maslin` |
-| ULJE MASLINOVO EXTRA DJEVICANSKO 0.5 L ZVIJEZDA STAKLO | 19 | `maslin` |
-| N-ULJE MASL. 1L ORGULA TRADICIJA EXTRA DJEVIČANSKO -6/1- EKO | 16 | `masl\b` |
+| ULJE MASLINOVO EXTRA DJEVICANSKO 1 L ZVIJEZDA STAKLO | 22 | `masli` |
+| ULJE MASLINOVO EXTRA DJEVICANSKO 0.5 L ZVIJEZDA STAKLO | 19 | `masli` |
+| N-ULJE MASL. 1L ORGULA TRADICIJA EXTRA DJEVIČANSKO -6/1- EKO | 16 | `dev` |
 | ULJE BUCINO 500 ML ZVIJEZDA STAKLO | 16 | `bucin` |
 | RIO MARE TUNA MAS.ULJE 2x80 g OC.MASA 104 g (48) | 12 | `mas\b` |
 | RIO MARE TUNA MASL.ULJE 3X80G OC.MASA 156G (32) | 12 | `masl\b` |
-| ULJE MASLINOVO 1 L BLAGO TRENTON UG. | 10 | `maslin` |
-| N-ULJE MASL. 0.75L ORGULA TRADICIJA EXTRA DJEVIČANSKO -6/1- EKO | 9 | `masl\b` |
-| N-ULJE MASL. 1L ORGULA HARMONIJA EXTRA DJEVIČANSKO -6/1 EKO | 9 | `masl\b` |
-| N-ULJE MASL. 750ML ORGULA ZLATNO EXTRA DJEVIČANSKO -6/1- EKO | 9 | `masl\b` |
+| ULJE MASLINOVO 1 L BLAGO TRENTON UG. | 10 | `masli` |
+| ULJE MASLINOVO S OKUSOM CRNOG TARTUFA 100 ML ZIGANTE | 10 | `masli` |
+| N-ULJE MASL. 0.25L ORGULA TRADICIJA EXTRA DJEVIČANSKO -12/1- EKO | 9 | `dev` |
+| N-ULJE MASL. 0.75L ORGULA TRADICIJA EXTRA DJEVIČANSKO -6/1- EKO | 9 | `dev` |
 
 </details>
 
@@ -342,7 +342,7 @@ atributi: kvaliteta = ekstra_djevicansko, djevicansko
 <a id="maslac"></a>
 ## maslac (`maslac`)
 
-jedinica: **kg** · loose_produce: **false** · grupa: **222** · isključenih grupa: **241** · plausible: **6–40 €/kg** · pakiranje: **100–1000**
+jedinica: **kg** · loose_produce: **false** · grupa: **198** · isključenih grupa: **265** · plausible: **6–40 €/kg** · pakiranje: **100–1000**
 
 sinonimi: maslac, puter, butter  
 must_match: `maslac | puter\b | butter\b | markenbutter`
@@ -406,13 +406,13 @@ must_match: `margarin | margo\b | rama\b`
 | 5 | 3858882211611 | N-MARGARIN ZVIJEZDA 250G ZA KREME AROMA SLATKOG VRHNJA -24/1- | 250 g | 18 | 842 | 3,56–6,36 /kg | high/name |  |
 | 6 | 3858882210553 | MARGARIN STOLNI SPECIJAL 500G ZVIJEZDA | 500 g | 17 | 677 | 2,66–5,16 /kg | high/name |  |
 | 7 | 3856015325358 | MARGARIN MARGO S JOGURTOM 225g ZVIJEZDA | 225 g | 16 | 576 | 4,00–7,96 /kg | high/name |  |
-| 8 | 3856015305534 | N-MARGARIN ZVIJEZDA STOLNI 250G S AROMOM VANILIJE -24/1- | 250 g | 16 | 496 | 1,16–6,36 /kg | high/name |  |
+| 8 | 3856015305534 | N-MARGARIN ZVIJEZDA STOLNI 250G S AROMOM VANILIJE -24/1- | 250 g | 16 | 496 | 3,12–6,36 /kg ⚠2 | high/name |  |
 | 9 | 3858883227406 | MARGARINSKI NAMAZ MARGARITA 500 G BAKINA KUHINJA STANIC | 500 g | 15 | 850 | 1,98–6,58 /kg | high/name |  |
 | 10 | 3856015332974 | MARGARIN MARGO BUTTERY 400G ZVIJEZDA | 400 g | 14 | 606 | 3,73–7,48 /kg | high/name |  |
 | 11 | 3856015325419 | MARGARIN MARGO S MASLACEM 225G ZVIJEZDA | 225 g | 14 | 602 | 6,18–12,40 /kg | high/name |  |
 | 12 | 3858883228885 | MARGARIN ZA KOLAČE I KUHANJE 250 g BAKINA KUHINJ | 250 g | 13 | 738 | 2,76–6,56 /kg | high/name |  |
 | 13 | 8585037200491 | MARGARIN ZA JELO I KUHANJE 250g FC | 250 g | 12 | 612 | 2,36–4,08 /kg | high/name |  |
-| 14 | 8719200264915 | MARGARIN RAMA CLASSIC 225g | 225 g | 12 | 523 | 3,96–9,33 /kg | high/name |  |
+| 14 | 8719200264915 | MARGARIN RAMA CLASS. 225 g | 225 g | 12 | 523 | 3,96–9,33 /kg | high/name |  |
 | 15 | 8719200198869 | MARGARIN RAMA ZA KOLAČE 250 g STANI | 250 g | 10 | 549 | 2,36–7,96 /kg | high/name |  |
 | 16 | 8719200265097 | MARGARIN RAMA CLASSIC 400 g STANI | 400 g | 10 | 410 | 4,22–8,73 /kg | high/name |  |
 | 17 | 3856015323989 | STOLNI MARGARIN 4x250 g SUPER PONUDA ZVIJEZDA (8) | 1 kg | 10 | 367 | 2,99–4,49 /kg | high/name |  |
@@ -423,7 +423,7 @@ must_match: `margarin | margo\b | rama\b`
 <a id="mlijeko"></a>
 ## mlijeko (`mlijeko`)
 
-jedinica: **l** · loose_produce: **false** · grupa: **264** · isključenih grupa: **395** · plausible: **0.5–4 €/l** · pakiranje: **500–2000** · zadano bez: **laktoza=bez**
+jedinica: **l** · loose_produce: **false** · grupa: **258** · isključenih grupa: **401** · plausible: **0.5–4 €/l** · pakiranje: **500–2000** · zadano bez: **laktoza=bez**
 
 sinonimi: mlijeko, kravlje mlijeko  
 must_match: `mlijek`
@@ -436,11 +436,11 @@ atributi: mast = 0, 0.5, 0.9, 1.5, 2.8, 3.2, 3.5, 3.8; vrsta = trajno, svjeze; l
 | 2 | 3850354016830 | N-MLIJEKO DUKAT 1.00L 2.8%MM EDGE -12/1- 11214 | 1 l | 23 | 1320 | 0,78–1,03 /l | high/name | mast=2.8, vrsta=trajno |
 | 3 | 3850108020656 | N-MLIJEKO Z BREGOV 2.00L 2.80%MM -6/1- ČEP VINDIJA 2065 | 2 l | 23 | 1298 | 0,81–1,22 /l | high/name | mast=2.8, vrsta=trajno |
 | 4 | 3850108020908 | MLIJEKO ZBREGOV 2.8% MM SA ČEPOM 1L (12), VINDIJA | 1 l | 23 | 1290 | 0,85–1,03 /l | high/name | mast=2.8, vrsta=trajno |
-| 5 | 3838800040578 | MLIJEKO ALPSKO 3,5% 1 L LJUBLJANSKE MLEKARNE(780/PAL) | 1 l | 22 | 918 | 1,39–2,16 /l | high/name | vrsta=trajno, mast=3.5 |
-| 6 | 3850354006053 | MLIJEKO TRAJNO 2.8% MM 1 L DUKAT BOCA ( 6 ) | 1 l | 21 | 1375 | 0,85–1,19 /l | high/name | mast=2.8, vrsta=trajno |
+| 5 | 3838800040578 | MLIJEKO ALPSKO 3,5% 1 L LJUBLJANSKE MLEKARNE(780/PAL) | 1 l | 22 | 918 | 1,39–2,16 /l | high/name | mast=3.5, vrsta=trajno |
+| 6 | 3850354006053 | N-MLIJEKO DUKAT 1.00L 2.8%MMTRAJNO BOCA-6/1 | 1 l | 21 | 1375 | 0,85–1,19 /l | high/name | mast=2.8, vrsta=trajno |
 | 7 | 3850108011760 | N-*MLIJEKO Z BREGOV SVJEŽE 3.2%MM 1.75L 1176 -6/1-PET | 1,75 l | 21 | 1232 | 1,14–1,77 /l ⚠5 | high/name | vrsta=svjeze, mast=3.2 |
 | 8 | 3850354000501 | N-MLIJEKO DUKAT 1.00L 3.2%MM SVJEŽE -12/1- 120 | 1 l | 21 | 1022 | 0,89–1,69 /l | high/name | vrsta=svjeze, mast=3.2 |
-| 9 | 3850108020557 | MLIJEKO Z BREGOV 2,8% MM 500 ml SLIM TRAJNO VI | 500 ml | 21 | 956 | 1,70–2,78 /l | high/name | mast=2.8, vrsta=trajno |
+| 9 | 3850108020557 | MLIJEKO Z BREGOV 2,8% MM 500 ml SLIM TRAJNO VI | 500 ml | 21 | 956 | 1,70–2,78 /l | high/name | vrsta=trajno, mast=2.8 |
 | 10 | 3850354006091 | MLIJEKO TRAJNO 3,8%MM 1L HDPE BOCA LACTALIS DUKAT | 1 l | 21 | 890 | 1,31–2,30 /l | high/name | mast=3.8, vrsta=trajno |
 | 11 | 3850108011814 | N-*MLIJEKO Z BREGOV SVJEŽE 3.2%MM 1L 1181 -6/1-PET | 1 l | 20 | 1133 | 1,29–2,02 /l | high/name | vrsta=svjeze, mast=3.2 |
 | 12 | 3850354016878 | Dukat trajno mlijeko 2,8% 0,5 l EDGE | 500 ml | 20 | 1047 | 1,36–3,04 /l | high/name | mast=2.8, vrsta=trajno |
@@ -458,8 +458,8 @@ atributi: mast = 0, 0.5, 0.9, 1.5, 2.8, 3.2, 3.5, 3.8; vrsta = trajno, svjeze; l
 | naziv | lanaca | isključio |
 |---|---|---|
 | DUKAT ČOKOLADNO MLIJEKO 0.5 L EDGE (12) | 22 | `cokolad` |
+| MLIJEKO ČOKOLADNO 0,5L BOCA DUKAT (6) | 20 | `cokolad` |
 | MLIJEKO ČOKOLADNO ZBREGOV 2%MM 0.5L SLIM (16), VINDIJA | 20 | `cokolad` |
-| ČOKOLADNO MLIJEKO BOCA 0,5L (6) DUKAT | 20 | `cokolad` |
 | N-MLIJEKO Z BREGOV 1.00L KOZJE 2.8%MM S ČEPOM UHT -12/1- | 19 | `kozje` |
 | MLIJEKO ČOKOLADNO KOKOS 500 ml DUKAT | 18 | `cokolad` |
 | N-MLIJEKO DUKAT 1.00L ČOK. -6/1- BOCA | 18 | `cok\b` |
@@ -483,10 +483,10 @@ atributi: vrsta = grcki, tekuci, cvrsti; laktoza = bez; mast = 0.1, 0.9, 1.5, 2.
 | # | id | naziv | pakiranje | lanaca | trgovina | €/jed | pouzdanost | atributi |
 |---|---|---|---|---|---|---|---|---|
 | 1 | 3850354016021 | N-*DUKAT JOGURT 1000G TEKUĆI-6/1- 2.8%MM 32363 | 1 kg | 24 | 1293 | 1,35–3,19 /kg | high/name | mast=2.8, vrsta=tekuci |
-| 2 | 3850354010784 | DUKATOS JOGURT NATUR 450 g KANTICA DUKAT | 450 g | 24 | 1047 | 4,33–7,76 /kg | high/name | vrsta=grcki |
+| 2 | 3850354010784 | Dukatos grčki tip jogurta 9,7% 450g kant | 450 g | 24 | 1047 | 4,33–7,76 /kg | high/name | vrsta=grcki |
 | 3 | 3850108037388 | N-*JOGURT VINDIJA 1000G 2.8%MM 3738 PET -6/1- | 1 kg | 23 | 1286 | 1,75–3,09 /kg | high/name | mast=2.8, vrsta=tekuci |
 | 4 | 3850108030174 | N-JOGURT VINDIJA 900G 3.2%MM ČVRSTI KANTICA -6/1-3017 | 900 g | 22 | 1073 | 2,28–3,43 /kg | high/name | mast=3.2, vrsta=cvrsti |
-| 5 | 3850108037289 | N-JOGURT VINDIJA180G 3.2MM ČVRSTI PET 3728 -20/1- | 180 g | 21 | 1204 | 2,44–3,67 /kg | high/name | mast=3.2, vrsta=cvrsti |
+| 5 | 3850108037289 | N-JOGURT VINDIJA180G 3.2MM ČVRSTI PET 3728 -20/1- | 180 g | 21 | 1204 | 2,44–3,67 /kg | high/name | vrsta=cvrsti, mast=3.2 |
 | 6 | 3850354016007 | N-*DUKAT JOGURT 330G TEKUĆI2.8% MM -8/1- 13356/13714 -12/1- | 330 g | 21 | 660 | 3,00–5,30 /kg | high/name | mast=2.8, vrsta=tekuci |
 | 7 | 3850354001133 | JOGURT ČVRSTI 180G 3,2%MM (20) DUKAT | 180 g | 20 | 1188 | 2,44–2,72 /kg | high/name | mast=3.2, vrsta=cvrsti |
 | 8 | 3850108030242 | N-JOGURT VILIKIS 150G NATUR3024 GRČKI TIP JOGURTA -12/1 | 150 g | 20 | 1167 | 5,67–9,00 /kg | high/name | vrsta=grcki |
@@ -499,7 +499,7 @@ atributi: vrsta = grcki, tekuci, cvrsti; laktoza = bez; mast = 0.1, 0.9, 1.5, 2.
 | 15 | 3850354009924 | N-DUKAT JOGURT ČVRSTI 3,2%MM800G MAXI PAKIRANJE KANTICA | 800 g | 18 | 803 | 1,49–3,36 /kg | high/name | mast=3.2, vrsta=cvrsti |
 | 16 | 3850354016014 | N-*DUKAT JOGURT 500G TEKUĆI 2.8%MM -8/1- 32362 BOCA | 500 g | 18 | 666 | 2,38–3,98 /kg | high/name | mast=2.8, vrsta=tekuci |
 | 17 | 3850108037395 | JOGURT TEKUĆI LIGHT 0,9% mm 1000 g PET VINDIJA | 1 kg | 17 | 886 | 1,99–3,09 /kg | high/name | mast=0.9, vrsta=tekuci |
-| 18 | 3850354009177 | Dukat tekući jogurt MAXI 2,8% mm 230 g | 230 g | 17 | 822 | 2,57–5,17 /kg | high/name | vrsta=tekuci, mast=2.8 |
+| 18 | 3850354009177 | Dukat tekući jogurt MAXI 2,8% mm 230 g | 230 g | 17 | 822 | 2,57–5,17 /kg | high/name | mast=2.8, vrsta=tekuci |
 | 19 | 3850108030303 | JOGURT TEKUĆI 0.9%MM LIGHT 200g Z'BREGOV VINDIJA | 200 g | 16 | 641 | 2,25–3,20 /kg | high/name | mast=0.9, vrsta=tekuci |
 | 20 | 3856015325358 | MARGARIN MARGO S JOGURTOM 225g ZVIJEZDA | 225 g | 16 | 576 | 4,00–7,96 /kg | high/name |  |
 
@@ -510,12 +510,12 @@ atributi: vrsta = grcki, tekuci, cvrsti; laktoza = bez; mast = 0.1, 0.9, 1.5, 2.
 | Dukatos Voćni jogurt SK2 | 21 | `vocn` |
 | JOGURT JOGO JAGODA 1KG PET DUKAT (6)* | 19 | `jagod` |
 | JOGURT VOĆNI JOGO JAGODA, BRES.Š.V.150 g DUKAT | 18 | `vocn` |
-| JOGURT JAGODA DUKATOS 150 g DUKAT | 17 | `jagod` |
+| JOGURT DUKATOS JAGODA 150 g DUKAT | 17 | `jagod` |
 | VOCNI JOGURT MARELICA/JAGODA 150 G DUKAT | 17 | `vocn` |
 | JOGURT VOĆNI ŠUMSKO VOĆE 1 kg PET DUKAT | 16 | `vocn` |
 | N-DUKAT JOGURT DUKATOS 150GBADEM-PISTACIJA GRČKI TIP 13261 | 16 | `pistacij` |
 | B.aktiv LGG jogurt acai š.voće 330 g PET | 14 | `voce` |
-| SLADOLED KORNET KING JOGURT-ŠUM.VOĆE 167ml LEDO | 14 | `voce` |
+| LEDO KING KORNET 111G ŠUMSKO VOĆE JOGURT -24/1- | 14 | `voce` |
 | DUKATINO VOĆNI JOGURT MIX 125G,(20) DUKAT | 13 | `vocn` |
 
 </details>
@@ -533,7 +533,7 @@ atributi: mast = 12, 20
 | # | id | naziv | pakiranje | lanaca | trgovina | €/jed | pouzdanost | atributi |
 |---|---|---|---|---|---|---|---|---|
 | 1 | 3850354009863 | Dukat kiselo vrhnje 12% mm 900 g kantica | 900 g | 23 | 684 | 3,28–5,43 /kg | high/name | mast=12 |
-| 2 | 3850354009887 | BRZO&FINO KISELO VRHNJE 20%MM 900G,DUKAT | 900 g | 22 | 1009 | 3,54–6,10 /kg | high/name | mast=20 |
+| 2 | 3850354009887 | Dukat kiselo vrhnje 20% mm 900 g kantica | 900 g | 22 | 1009 | 3,54–6,10 /kg | high/name | mast=20 |
 | 3 | 3850108033106 | N-VRHNJE KISELO VINDIJA 200G20%MM -20/1- 3310 | 200 g | 21 | 1001 | 3,30–9,45 /kg | high/name | mast=20 |
 | 4 | 3850354002024 | KISELO VRHNJE 12%MM 200G (20) DUKAT | 200 g | 20 | 1228 | 3,45–5,55 /kg | high/name | mast=12 |
 | 5 | 3850108036480 | DOMAĆE KISELO VRHNJE ZA SVJEŽI SIR 25%MM 300G, VINDIJA | 300 g | 20 | 1187 | 3,93–8,17 /kg | high/name |  |
@@ -583,23 +583,23 @@ must_match: `vrhnje za kuhanje | vrhnje za kuh | vrh za kuh | kuhinjsko vrhnje |
 | 1 | 3850354017158 | VRHNJE ZA KUHANJE BRZO & FINO 500 g EDGE DUKAT | 500 g | 23 | 1244 | 5,58 /l | high/name |  |
 | 2 | 3850354008606 | VRHNJE ZA KUHANJE 20%MM 500G BOCA BRZO&FINO DUKAT | 500 g | 20 | 1075 | 7,58–8,18 /l | high/name |  |
 | 3 | 3850108033571 | N-VRHNJE ZA KUH VINDIJA 500ML 20% mm-12/1- | 500 ml | 20 | 1052 | 5,30–8,58 /l | high/name |  |
-| 4 | 3850354001232 | VRHNJE ZA KUHANJE 20% 200G DUKAT (24) | 200 g | 19 | 1197 | 4,45–9,25 /kg | high/name |  |
+| 4 | 3850354001232 | VRHNJE ZA KUHANJE 20% 200G DUKAT (24) | 200 g | 19 | 1197 | – /kg | high/name |  |
 | 5 | 3850108033892 | VRHNJE ZA KUHANJE UHT 0,2L Z'BREGOV VINDIJA | 200 ml | 17 | 1206 | 4,95–8,95 /l | high/name |  |
 | 6 | 3850108033472 | VRHNJE ZA KUHANJE BEZ LAKTOZE OSMIJEH 200 ML Z'BREGOV | 200 ml | 16 | 427 | 4,95–9,75 /l | high/name |  |
 | 7 | 3850354017257 | BRZO&FINO VRHNJE ZA KUHANJE 1 kg DUKAT (12) 11449 | 1 kg | 15 | 307 | 3,79–6,99 /l | high/name |  |
-| 8 | 3850354007975 | VRHNJE ZA KUH 20% BRZO&FINO 3X200G (7) | 600 g | 13 | 648 | 4,32–7,75 /kg | high/name |  |
-| 9 | 3850354017172 | BRZO&FINO VRHNJE ZA KUHANJE LAGANO 500G (12) | 500 g | 13 | 632 | 5,28–7,98 /kg | high/name |  |
+| 8 | 3850354007975 | VRHNJE ZA KUH 20% BRZO&FINO 3X200G (7) | 600 g | 13 | 648 | – /kg | high/name |  |
+| 9 | 3850354017172 | BRZO&FINO VRHNJE ZA KUHANJE LAGANO 500G (12) | 500 g | 13 | 632 | – /kg | high/name |  |
 | 10 | 3850354017295 | VRHNJE ZA KUHANJE LAGANO (bez laktoze) B&F 500g DUKAT | 500 g | 13 | 394 | 8,34 /l | high/name |  |
 | 11 | 3850108033588 | VRHNJE ZA KUHANJE 20% MM 200 ml SLIM VINDIJA | 200 ml | 12 | 342 | 4,95–10,45 /l | high/name |  |
 | 12 | 3870085021835 | VRHNJE ZA KUHANJE 20 % 0,5L MEGGLE (12) | 500 ml | 9 | 599 | 5,56–7,38 /l | high/name |  |
 | 13 | 3850108033489 | Z bregov Vrhnje za kuhanje bez laktoze 20% m.m. 0,2 l | 200 ml | 9 | 204 | 3,45–10,60 /l | high/name |  |
-| 14 | 5411188120988 | Alpro rižino vrhnje za kuhanje 250 ml | 250 ml | 8 | 415 | 6,84–11,96 /l | high/name |  |
-| 15 | 3850354012641 | VRHNJE ZA KUHANJE B&F LAGANI 10% 200 g DUKA | 200 g | 8 | 243 | 5,95–8,75 /kg | high/name |  |
+| 14 | 5411188120988 | RIZINO VRHNJE ZA KUHANJE 250 ML ALPRO | 250 ml | 8 | 415 | 6,84–11,96 /l | high/name |  |
+| 15 | 3850354012641 | VRHNJE ZA KUHANJE B&F LAGANI 10% 200 g DUKA | 200 g | 8 | 243 | – /kg | high/name |  |
 | 16 | 3850108033526 | Z`bregov Vrhnje za kuhanje 20% 1L UHT | 1 l | 8 | 175 | 3,98–7,59 /l | high/name |  |
 | 17 | 3870085021811 | VRHNJE ZA KUH. 20%mmMEGGLE 200 ml | 200 ml | 6 | 384 | 6,45–9,45 /l | high/name |  |
 | 18 | 3850257061203 | VRHNJE ZA KUHANJE 20% 0,5 L KRAVICA KRALJICA | 500 ml | 5 | 246 | 5,58–7,98 /l | high/name |  |
 | 19 | 3856003914106 | VRHNJE ZA KUHANJE 10% MM 200 ml NTL DUKA | 200 g | 4 | 408 | 5,25–6,05 /l | high/name |  |
-| 20 | 3858883523188 | VRHNJE ZA KUH.200 g DUKAT LOT:02012027 | 200 g | 4 | 75 | 4,90–7,95 /kg | high/name |  |
+| 20 | 3858883523188 | VRHNJE ZA KUH.200 g DUKAT LOT:02012027 | 200 g | 4 | 75 | – /kg | high/name |  |
 
 <a id="slatko_vrhnje"></a>
 ## slatko vrhnje (`slatko_vrhnje`)
@@ -611,23 +611,23 @@ must_match: `slatko vrhnje | vrhnje slatko | vrhnje za slag | slag vrhnje | vrhn
 
 | # | id | naziv | pakiranje | lanaca | trgovina | €/jed | pouzdanost | atributi |
 |---|---|---|---|---|---|---|---|---|
-| 1 | 3850354001348 | VRHNJE ZA ŠLAG 33%MM 500G BRZO&FINO DUKAT | 500 g | 20 | 839 | 4,80–10,50 /kg | high/name |  |
+| 1 | 3850354001348 | VRHNJE ZA ŠLAG 33%MM 500G BRZO&FINO DUKAT | 500 g | 20 | 839 | – /kg | high/name |  |
 | 2 | 3850108033663 | N-VRHNJE ZA ŠLAG VINDIJA 3366 500ML 36%MM UHT SLIM -16/1 -12/1- | 500 ml | 17 | 803 | 6,38–11,70 /l | high/name |  |
 | 3 | 3850108033694 | N-VRHNJE ZA ŠLAG VINDIJA 200ML UHT -21/1- | 200 ml | 14 | 700 | 10,95–14,45 /l | high/name |  |
-| 4 | 3850354001317 | VRHNJE ZA ŠLAG 33%MM 200g BRZO&FINO DUKAT | 200 g | 13 | 533 | 7,15–15,45 /kg | high/name |  |
+| 4 | 3850354001317 | VRHNJE ZA ŠLAG 33%MM 200g BRZO&FINO DUKAT | 200 g | 13 | 533 | – /kg | high/name |  |
 | 5 | 3850108033816 | Z bregov vrhnje za šlag 36%mm 0,2L | 200 ml | 8 | 229 | 7,30–17,95 /l | high/name |  |
 | 6 | 3850354003236 | VRHNJE ZA ŠLAG NA BILJNOJ BAZI 1L DECORO DUKAT | 1 l | 7 | 33 | 2,52–5,09 /l | high/name |  |
 | 7 | 4014500033921 | SLATKO VRHNJE 200 ML ZOTT STANIC | 200 ml | 3 | 182 | 6,65–12,65 /l | high/name |  |
 | 8 | 3850108033649 | Vindija Vrhnje za šlag 36% 1 L | 1 l | 3 | 88 | 6,92–8,49 /l | high/name |  |
-| 9 | 3858883523171 | VRHNJE ZA ŠLAG 500 g33%MM LOT:16102026 | 500 g | 3 | 68 | 6,70–9,38 /kg | high/name |  |
+| 9 | 3858883523171 | VRHNJE ZA ŠLAG 500 g33%MM LOT:16102026 | 500 g | 3 | 68 | – /kg | high/name |  |
 | 10 | 3838800050270 | MU ALP.VRHNJE ZA ŠLAG 1L | 1 l | 3 | 9 | 6,49 /l | high/name |  |
-| 11 | 4036500001212 | VRHNJE SLATKO 30% 200 g OMIRA | 200 g | 2 | 49 | 8,45–10,25 /kg | high/name |  |
+| 11 | 4036500001212 | VRHNJE SLATKO 30% 200 g OMIRA | 200 g | 2 | 49 | – /kg | high/name |  |
 | 12 | 8003180908311 | ZAMJENA ZA VRHNJE ZA ŠLAG 500mL | 500 ml | 2 | 36 | 3,80–3,98 /l | high/name |  |
-| 13 | 3850354017233 | VRHNJE ZA ŠLAG VANILIJA 500g DUKAT | 500 g | 2 | 3 | 7,56–7,96 /kg | high/ean |  |
-| 14 | 4056489317999 | Vrhnje za šlag | 1 kg | 1 | 116 | 4,59 /kg | high/unit |  |
-| 15 | lidl:0026724 | Trajno vrhnje za šlag s 30% m.m. | 200 g | 1 | 116 | 5,25–6,75 /kg | high/unit |  |
-| 16 | 40894355 | Vrhnje za šlag 36% | 500 g | 1 | 116 | 6,78 /kg | high/unit |  |
-| 17 | lidl:0052366 | Vrhnje za šlag bez laktoze | 200 g | 1 | 116 | 7,45 /kg | high/unit |  |
+| 13 | 3850354017233 | VRHNJE ZA ŠLAG VANILIJA 500g DUKAT | 500 g | 2 | 3 | – /kg | high/ean |  |
+| 14 | lidl:0026724 | Trajno vrhnje za šlag s 30% m.m. | 200 g | 1 | 116 | – /kg | high/unit |  |
+| 15 | 4056489317999 | Vrhnje za šlag | 1 kg | 1 | 116 | – /kg | high/unit |  |
+| 16 | 40894355 | Vrhnje za šlag 36% | 500 g | 1 | 116 | – /kg | high/unit |  |
+| 17 | lidl:0052366 | Vrhnje za šlag bez laktoze | 200 g | 1 | 116 | – /kg | high/unit |  |
 | 18 | 9100000091952 | SLATKO VRHNJE S-BUDGET 0,5 L | 500 ml | 1 | 67 | 6,78 /l | high/name |  |
 | 19 | 8017596123169 | VRHNJE ZA ŠLAG 200ml | 200 ml | 1 | 43 | 6,75 /l | high/name |  |
 | 20 | 9006207003241 | SVJEŽE VRHNJE ZA ŠLAG 36% m.m.250ml | 250 ml | 1 | 43 | 6,76 /l | high/name |  |
@@ -658,12 +658,12 @@ atributi: mast = posni, masni
 | 12 | 8585002519511 | Meggle Sir svježi zrnati Prot.20%m.m380g | 380 g | 6 | 591 | 6,03–10,24 /kg | high/name |  |
 | 13 | 3850108058345 | SIR SVJEŽI POLUMASNI 250 g Z BREGOV VINDIJA | 250 g | 6 | 167 | 2,12–7,80 /kg | high/name |  |
 | 14 | 5900531001512 | SIR SVJEŽI ZRNATI 20 % mm 200 g DAIRLY | 200 g | 5 | 585 | 4,95–8,25 /kg | high/name |  |
-| 15 | 3858888598679 | SIR SVJEŽI SPORT ZDENKA 500 g | 500 g | 5 | 341 | 3,98–6,58 /kg | high/name |  |
+| 15 | 3858888598679 | SVJEZI SIR SPORT 500 G ZDENKA | 500 g | 5 | 341 | 3,98–6,58 /kg | high/name |  |
 | 16 | 3858888590222 | Zdenka svježi sir 500gr. Masni pl-posuda | 500 g | 5 | 265 | 3,98–5,30 /kg | high/name | mast=masni |
 | 17 | 3858883522129 | PRESIDENT SVJEŽI SIR POSNI LIGHT 500 g DUKAT | 500 g | 5 | 78 | 4,98–6,38 /kg | high/name | mast=posni |
 | 18 | 3859892380090 | N-SIR SVJEŽI POLUMASNI 25%MM500G - 5868 6/1 DOM.KRAV. | 500 g | 5 | 73 | 3,98–4,98 /kg | high/name |  |
 | 19 | 3856003930021 | SIR SVJEŽI POLUMASNI 500g 15% MM TO JE TO VINDIJA | 500 g | 4 | 486 | 3,58–4,98 /kg | high/name |  |
-| 20 | 3870085020227 | SVJEZI SIR POSNI 450 G MEGGLE | 450 g | 4 | 302 | 5,44–6,20 /kg | high/name | mast=posni |
+| 20 | 3870085020227 | SIR SVJEŽI MEGGLE 7% MM 450 g | 450 g | 4 | 302 | 5,44–6,20 /kg | high/name | mast=posni |
 
 <details><summary>Najčešće isključeni (top 10)</summary>
 
@@ -675,8 +675,8 @@ atributi: mast = posni, masni
 | SIR SVJEZI ZRNATI VLASAC 200 G PRESIDENT DUKAT | 11 | `vlasac` |
 | PRESIDENT KREM SVJEŽI SIR 500 gr DUKAT | 10 | `krem\b` |
 | PRESIDENT SVJEŽI SIR I VRHNJE 450 g DUKAT | 10 | `vrhnje` |
+| Meggle svježi sir s vrhnjem 450 g | 6 | `vrhnje` |
 | SIR SVJEŽI KREM VIVIS 200 g VINDIJA | 6 | `krem\b` |
-| SVJEZI SIR S VRHNJEM 450 G MEGGLE | 6 | `vrhnje` |
 | DOMAĆE KISELO VRHNJE ZA SVJEŽI SIR 25%MM 300G, VINDIJA | 5 | `vrhnje` |
 | N-ŠTRUKLI SA SVJ.SIR. SLATKI VINDIJA 600G -12/1- SMRZNUTO | 5 | `strukli` |
 
@@ -700,10 +700,10 @@ atributi: vrsta = gauda, trapist, edamac, tilzit; oblik = ribani, narezani
 | 4 | 3850355007301 | SIR PRESIDENT GOUDA 250G -12/1 15021/15041 | 250 g | 19 | 833 | 11,16–18,36 /kg | high/name | vrsta=gauda |
 | 5 | 3850108058215 | Vindija Gouda sir rezani 45% mm 150 g | 150 g | 17 | 965 | 16,60–24,60 /kg | high/name | vrsta=gauda, oblik=narezani |
 | 6 | 3850108057997 | Vindija Sir Tilzit polutvrdi45%mm 200g | 200 g | 17 | 614 | 14,95–22,50 /kg | high/name | vrsta=tilzit |
-| 7 | 3850355007141 | PRESIDENT TILZIT SLICE 150 g (10) DUKAT | 150 g | 17 | 608 | 17,27–26,80 /kg | high/name | vrsta=tilzit, oblik=narezani |
+| 7 | 3850355007141 | PRESIDENT TILZIT SLICE 150 g (10) DUKAT | 150 g | 17 | 608 | 17,27–26,80 /kg | high/name | oblik=narezani, vrsta=tilzit |
 | 8 | 3850108057980 | Vindija Sir Gauda polutvrdi45%mm200g | 200 g | 16 | 555 | 14,95–22,50 /kg | high/name | vrsta=gauda |
 | 9 | 3850355007103 | SIR SIRELA PRESIDENT SANDWICH GOUDA 120 g DUKA | 120 g | 16 | 542 | 18,25–29,08 /kg | high/name | vrsta=gauda, oblik=narezani |
-| 10 | 3850108055696 | N-SIR VINDIJA GOUDA RIBANI 200G -10/1- | 200 g | 15 | 546 | 14,95–26,25 /kg | high/name | vrsta=gauda, oblik=ribani |
+| 10 | 3850108055696 | N-SIR VINDIJA GOUDA RIBANI 200G -10/1- | 200 g | 15 | 546 | 14,95–26,25 /kg | high/name | oblik=ribani, vrsta=gauda |
 | 11 | 3850355007387 | SIR TILZIT 400 G PRESIDENT DUKAT | 400 g | 13 | 539 | 9,73–16,88 /kg | high/name | vrsta=tilzit |
 | 12 | 3858888597955 | SIR SPORT TRAPIST 45%MM 400 g 1/5 KOLUTA EGALIZIRANI ZDENKA | 400 g | 13 | 469 | 12,38–25,98 /kg | high/name | vrsta=trapist |
 | 13 | 3858888590475 | SIR EDAMAC 400g ZDENKA EGALIZIRANO | 400 g | 12 | 502 | 12,48–17,73 /kg | high/name | vrsta=edamac |
@@ -771,7 +771,7 @@ atributi: oblik = ribana, kuglica
 |---|---|---|
 | N-LEDO PIZZA MOZZARELLA 325G -5/1- | 14 | `pizza` |
 | N-VIN.PANIRANA MOZZARELLA 500G SMRZ. -6/1- | 14 | `panir` |
-| JUHA KREM RAJČICA/MOZZARELLA 23G FINI MINI PODRAVKA | 9 | `krem\b` |
+| FINI MINI JUHA OD RAJČICE I MOZZARELLE 23g 18/1 (1) | 9 | `juha` |
 | Salata svježa sa mozzarella sirom 170g | 7 | `salata` |
 | N-PIZZA RISTORANTE MOZZARELLA 355G -7/1- DR.OETKER | 5 | `pizza` |
 | JUHA PODR 80G KREM OD RAJČICE S MOZZARELLOM -16/1- | 4 | `krem\b` |
@@ -835,7 +835,7 @@ atributi: oblik = ribani
 <a id="jaja"></a>
 ## jaja (`jaja`)
 
-jedinica: **kom** · loose_produce: **false** · grupa: **367** · isključenih grupa: **866** · plausible: **0.1–1.5 €/kom** · pakiranje: **4–30** · grupira po: **velicina**
+jedinica: **kom** · loose_produce: **false** · grupa: **353** · isključenih grupa: **880** · plausible: **0.1–1.5 €/kom** · pakiranje: **4–30** · grupira po: **velicina**
 
 sinonimi: jaja, jaje, kokosja jaja  
 must_match: `jaja\b | jaje\b`
@@ -847,29 +847,29 @@ atributi: velicina = xl, l, m, s; uzgoj = slobodni, podni, bio
 | 1 | jaja:m | N-JAJA LUKAČ A KLASA 10KOM RAZRED M KAVEZNI UZGOJ -18/1 | 10 kom | 24 | 1335 | 0,14–1,30 /kom ⚠27 | high/name | velicina=m, uzgoj=podni |
 | 2 | jaja:l | N-JAJA NUJIĆ A KLASA 10KOM RAZRED L -36/1 SLOBODNI UZGOJ | 10 kom | 21 | 1171 | 0,10–0,47 /kom ⚠27 | high/name | velicina=l, uzgoj=podni |
 | 3 | jaja:xl | JAJA XL RAZRED 10/1 PODNI UZGOJ VRANA |  | 6 | 207 | 0,30–0,51 /kom | high/name | velicina=xl, uzgoj=podni |
-| 4 | 3858894520787 | OBUCI JAJE TERMOSKUPLJAJUĆA FOLIJA 12/1 | 12 kom | 3 | 251 | 0,23–0,32 /kom | high/name |  |
-| 5 | 3858895340025 | Gala Jaja svj.Aklas.Mraz.podni uzgoj10/1 | 10 kom | 3 | 177 | 0,19–0,30 /kom | high/name | uzgoj=podni |
-| 6 | jaja:s | Žito Jaja iz podnog uzgoja razred S | 10 kom | 3 | 128 | 0,11–0,26 /kom | high/name | velicina=s, uzgoj=podni |
-| 7 | 8714786243552 | LICEN.JAJE MIX 10 g AJAX DISTRIBUCIJA | 10 g | 3 | 88 | – | – |  |
-| 8 | 0704715531629 | IGR. JAJE LITTLE HORSE PONY 9cm LAPIS |  | 2 | 123 | – | – |  |
-| 9 | 3850374082921 | IGR.DINOSAUR JAJE 12/1 74571 |  | 2 | 118 | 0,21–0,25 /kom | high/name |  |
-| 10 | 3850374082938 | DINOSAUR JAJE 12KOM/DISPLEJ | 12 kom | 2 | 116 | 0,23–0,25 /kom | high/name |  |
-| 11 | 3857500131508 | SVJEŽA JAJA RAZL. VEL. BIO 6/1 |  | 2 | 110 | 0,47–0,53 /kom | high/name | uzgoj=bio |
-| 12 | 3858894520121 | KOŠARICA PLETENA - JAJA U BOJI |  | 2 | 88 | – | – |  |
-| 13 | 3858894522439 | JAJA U TUBI - CRNA I ZLATNA 6KOM | 6 kom | 2 | 85 | – ⚠85 | – |  |
-| 14 | 3858895340018 | JAJA SVJEŽA A KL.RAZ.L MP PODNI UZGOJ 10/1 |  | 2 | 67 | 0,30–0,33 /kom | high/name | uzgoj=podni |
-| 15 | 5200701008243 | JAJE FUNKY PAW PATROL LIZALICA 10G -12/1- | 10 g | 2 | 29 | – | – |  |
-| 16 | 8697422659873 | JAJE JR.EGG + BOMBONI 10g | 10 g | 2 | 10 | – | – |  |
-| 17 | 3858894522422 | JAJA U TUBI LJUBIČASTA- 6 KOM | 6 kom | 2 | 7 | – ⚠7 | – |  |
-| 18 | 8681812047364 | JAJE SURPRISE EGG 4g LAIRMAK | 4 g | 2 | 5 | – | – |  |
-| 19 | 8697422654533 | JAJE PUPPY+ BOMBON 10g | 10 g | 2 | 4 | – | – |  |
-| 20 | 5907707051661 | DEKOR BOJE ZA JAJA DR.OETKER |  | 2 | 3 | 0,28 /kom | high/name |  |
+| 4 | 3858895340025 | Gala Jaja svj.Aklas.Mraz.podni uzgoj10/1 | 10 kom | 3 | 177 | 0,19–0,30 /kom | high/name | uzgoj=podni |
+| 5 | jaja:s | Žito Jaja iz podnog uzgoja razred S | 10 kom | 3 | 128 | 0,11–0,26 /kom | high/name | velicina=s, uzgoj=podni |
+| 6 | 8714786243552 | LICEN.JAJE MIX 10 g AJAX DISTRIBUCIJA | 10 g | 3 | 88 | – | – |  |
+| 7 | 3857500131508 | SVJEŽA JAJA RAZL. VEL. BIO 6/1 |  | 2 | 110 | 0,47–0,53 /kom | high/name | uzgoj=bio |
+| 8 | 3858894520121 | KOŠARICA PLETENA - JAJA U BOJI |  | 2 | 88 | – | – |  |
+| 9 | 3858894522439 | JAJA U TUBI - CRNA I ZLATNA 6KOM | 6 kom | 2 | 85 | – ⚠85 | – |  |
+| 10 | 3858895340018 | JAJA SVJEŽA A KL.RAZ.L MP PODNI UZGOJ 10/1 |  | 2 | 67 | 0,30–0,33 /kom | high/name | uzgoj=podni |
+| 11 | 5200701008243 | JAJE FUNKY PAW PATROL LIZALICA 10G -12/1- | 10 g | 2 | 29 | – | – |  |
+| 12 | 8697422659873 | JAJE JR.EGG + BOMBONI 10g | 10 g | 2 | 10 | – | – |  |
+| 13 | 3858894522422 | JAJA U TUBI LJUBIČASTA- 6 KOM | 6 kom | 2 | 7 | – ⚠7 | – |  |
+| 14 | 8681812047364 | JAJE SURPRISE EGG 4g LAIRMAK | 4 g | 2 | 5 | – | – |  |
+| 15 | 8697422654533 | JAJE PUPPY+ BOMBON 10g | 10 g | 2 | 4 | – | – |  |
+| 16 | 5907707051661 | BOJE ZA JAJA 5/1 |  | 2 | 3 | 0,28 /kom | high/name |  |
+| 17 | 8699462605148 | JAJE PRINCESS SUPRISE 15g | 15 g | 2 | 3 | – | – |  |
+| 18 | 8697422658043 | JAJE TOY JOY + BOMBON 10g | 10 g | 2 | 3 | – | – |  |
+| 19 | 8695504151109 | CHOCO JAJE TOTO 20g | 20 g | 2 | 2 | – | – |  |
+| 20 | 3859892521035 | Jaja iz kaveznog uzgoja, razred "S" | 10 kom | 1 | 116 | 0,10 /kom | high/name |  |
 
 <details><summary>Najčešće isključeni (top 10)</summary>
 
 | naziv | lanaca | isključio |
 |---|---|---|
-| JAJE ČOKOLADNO KINDER SURPRISE 20G T1x192 | 15 | `coko` |
+| N-FERRERO KINDER JAJE SURPRISE 20G -72/1- | 15 | `ferrero` |
 | N-ČOK.JAJE MICKEY MOUSE 20GRATTOUILLE -48/1- | 14 | `cok\b` |
 | ČOKOLADNO JAJE HOT WHEELS 20g ZAINI | 12 | `coko` |
 | N-ČOK.JAJE PRINCES -SHIMMERiSHINE20G -48/1- | 11 | `cok\b` |
@@ -885,57 +885,57 @@ atributi: velicina = xl, l, m, s; uzgoj = slobodni, podni, bio
 <a id="luk"></a>
 ## luk (crveni/žuti) (`luk`)
 
-jedinica: **kg** · loose_produce: **true** · grupa: **194** · isključenih grupa: **49**
+jedinica: **kg** · loose_produce: **true** · grupa: **207** · isključenih grupa: **36** · zadano bez: **vrsta=mladi, vrsta=ljutika**
 
 sinonimi: luk, crveni luk, zuti luk, kapula  
 must_match: `luk\b | kapula`
   
-atributi: vrsta = mladi, crveni, zuti, bijeli
+atributi: vrsta = mladi, ljutika, crveni, zuti, bijeli
 
 | # | id | naziv | pakiranje | lanaca | trgovina | €/jed | pouzdanost | atributi |
 |---|---|---|---|---|---|---|---|---|
-| 1 | 3859891348275 | LUK CRVENI PAK. 1 kg | 1 kg | 2 | 463 | 0,99–1,45 /kg | high/name | vrsta=crveni |
-| 2 | 3858890133004 | LUK CRVENI 1KG EKOZONA | 1 kg | 2 | 206 | 1,49–2,19 /kg | high/name | vrsta=crveni |
-| 3 | 3858893252184 | LUK MLADI - VEZICA |  | 2 | 197 | – | – | vrsta=mladi |
-| 4 | 3850334173034 | LUK LJUBIČASTI (10) |  | 2 | 192 | 1,01–1,29 /kg | low/unit_price | vrsta=crveni |
-| 5 | 3850334386205 | LUK SREBRENAC (10) |  | 2 | 118 | 1,83–1,99 /kg | low/unit_price | vrsta=zuti |
-| 6 | 3859891254354 | Luk crveni 2kg | 2 kg | 2 | 82 | 0,80–1,00 /kg | high/name | vrsta=crveni |
-| 7 | 3859889644051 | LUK CRVENI PAK 1 kg | 1 kg | 2 | 58 | 0,89–0,99 /kg | high/name | vrsta=crveni |
-| 8 | 8000523000909 | LUK BORETTANSKI U ACETU 540G CITRES | 540 g | 2 | 5 | 9,24–10,74 /kg | high/name |  |
-| 9 | 3857500102126 | LUK ŽUTI PAKIRANI 1KG | 1 kg | 2 | 4 | 1,25–1,29 /kg | high/name | vrsta=zuti |
-| 10 | 3859894214188 | *LUK SREBRENAC 4/1 |  | 2 | 4 | – | – | vrsta=zuti |
-| 11 | 3859894214133 | LUK CHARLOTTE 500G | 500 g | 2 | 2 | 4,98–5,98 /kg | high/name |  |
-| 12 | ntl:248675 | LUK CRVENI |  | 1 | 343 | 0,49–0,59 /kg | low/unit_price | vrsta=crveni |
-| 13 | ntl:248676 | LUK LJUBIČASTI |  | 1 | 343 | 1,09–1,19 /kg | low/unit_price | vrsta=crveni |
-| 14 | ntl:246142 | LUK SREBRENAC |  | 1 | 343 | 2,49 /kg | low/unit_price | vrsta=zuti |
-| 15 | ntl:248677 | LUK MLADI |  | 1 | 343 | 4,99 /kg | low/unit_price | vrsta=mladi |
-| 16 | 3850334386182 | LUK CRVENI |  | 1 | 188 | 0,79 /kg | low/unit_price | vrsta=crveni |
-| 17 | 3850334049667 | LUK ŽUTI 1 kg | 1 kg | 1 | 181 | 1,09–1,29 /kg | high/name | vrsta=zuti |
-| 18 | 3850334092236 | LUK MLADI VEZICA KOM |  | 1 | 167 | 7,42 /kg | low/unit_price | vrsta=mladi |
-| 19 | 3856003916407 | LUK CRVENI 2,5 kg | 2,5 kg | 1 | 162 | 1,08 /kg | high/name | vrsta=crveni |
-| 20 | 3857500111555 | LUK ZUTI 1 KG | 1 kg | 1 | 155 | 0,89–0,99 /kg | high/name | vrsta=zuti |
+| 1 | 3859889644716 | LUK LJUBIČASTI RUKAVAC 4/1 |  | 4 | 519 | 2,58–3,78 /kg | low/assumed | vrsta=crveni |
+| 2 | 3859889644709 | LUK CRVENI RUKAVAC 4/1 |  | 4 | 339 | 1,98–2,90 /kg | low/assumed | vrsta=crveni |
+| 3 | 3859891348275 | LUK CRVENI PAK. 1 kg | 1 kg | 2 | 463 | 0,99–1,45 /kg | high/name | vrsta=crveni |
+| 4 | 3858890133004 | LUK CRVENI 1KG EKOZONA | 1 kg | 2 | 206 | 1,49–2,19 /kg | high/name | vrsta=crveni |
+| 5 | 3850334173034 | LUK LJUBIČASTI (10) |  | 2 | 192 | 1,01–1,29 /kg | low/unit_price | vrsta=crveni |
+| 6 | 3850334386205 | LUK SREBRENAC (10) |  | 2 | 118 | 1,83–1,99 /kg | low/unit_price | vrsta=zuti |
+| 7 | 3859891254354 | Luk crveni 2kg | 2 kg | 2 | 82 | 0,80–1,00 /kg | high/name | vrsta=crveni |
+| 8 | 3859889644051 | LUK CRVENI PAK 1 kg | 1 kg | 2 | 58 | 0,89–0,99 /kg | high/name | vrsta=crveni |
+| 9 | 3859891815135 | LUK LJUBIČASTI RUKAVAC 4/1 |  | 2 | 58 | 1,98 /kg | low/assumed | vrsta=crveni |
+| 10 | 3856017200318 | LUK ŽUTI RUKAVAC 4/1 |  | 2 | 45 | 1,98 /kg | low/assumed | vrsta=zuti |
+| 11 | 3857500102126 | LUK ŽUTI PAKIRANI 1KG | 1 kg | 2 | 4 | 1,25–1,29 /kg | high/name | vrsta=zuti |
+| 12 | 3859894214188 | *LUK SREBRENAC 4/1 |  | 2 | 4 | – | – | vrsta=zuti |
+| 13 | 3859894214232 | LUK RUKAVAC MIX 5/1 |  | 2 | 3 | 3,38 /kg | low/assumed |  |
+| 14 | 3859894214133 | LUK CHARLOTTE 500G | 500 g | 2 | 2 | 4,98 /kg ⚠1 | high/name |  |
+| 15 | ntl:248675 | LUK CRVENI |  | 1 | 343 | 0,49–0,59 /kg | low/unit_price | vrsta=crveni |
+| 16 | ntl:248676 | LUK LJUBIČASTI |  | 1 | 343 | 1,09–1,19 /kg | low/unit_price | vrsta=crveni |
+| 17 | ntl:246142 | LUK SREBRENAC |  | 1 | 343 | 2,49 /kg | low/unit_price | vrsta=zuti |
+| 18 | ntl:022066 | LUK LJUBIČASTI RUKAVAC 4/1SNIŽENJE |  | 1 | 258 | 1,40 /kg | low/assumed | vrsta=crveni |
+| 19 | 3850334386182 | LUK CRVENI |  | 1 | 188 | 0,79 /kg | low/unit_price | vrsta=crveni |
+| 20 | 3850334049667 | LUK ŽUTI 1 kg | 1 kg | 1 | 181 | 1,09–1,29 /kg | high/name | vrsta=zuti |
 
 <details><summary>Najčešće isključeni (top 10)</summary>
 
 | naziv | lanaca | isključio |
 |---|---|---|
 | LUK REZANI 3000G TERMIČKI OBRAĐEN -5/1- VREĆA | 6 | `termick` |
-| LUK CRVENI RUKAVAC 4/1 | 4 | `rukavac` |
 | LUK KOCKICE SMRZNUTI 2,5KG LEDO | 4 | `smrz` |
-| LUK LJUBIČASTI RUKAVAC 4/1 | 4 | `rukavac` |
 | ZAČIN LUK PRŽENI 1000 g KOTANY | 4 | `przeni` |
 | IGRAČKA LUK I STRIJELA AY32-1A NIRD | 3 | `igrack` |
 | LUK DINSTANI 3 kg C.A.K. | 3 | `dinst` |
 | CITRES LUK SREDNJI U OCTU 1550 g | 2 | `octu` |
 | LUK DINSTANI 2,6KG PODRAVKA | 2 | `dinst` |
 | LUK KOCKICE 2.5KG LEDO | 2 | `ledo\b` |
+| LUK U GRANULAMA ST. | 2 | `granul` |
+| SREBNI LUK U NALJEVU 560g | 2 | `naljev` |
 
 </details>
 
 <a id="cesnjak"></a>
 ## češnjak (`cesnjak`)
 
-jedinica: **kg** · loose_produce: **true** · grupa: **59** · isključenih grupa: **18**
+jedinica: **kg** · loose_produce: **true** · grupa: **57** · isključenih grupa: **20**
 
 sinonimi: cesnjak, bijeli luk  
 must_match: `cesnjak | cesnjaka`
@@ -944,24 +944,24 @@ must_match: `cesnjak | cesnjaka`
 |---|---|---|---|---|---|---|---|---|
 | 1 | 3830054730205 | ČEŠNJAK SJECKANI U ULJU 1KG MODIMA | 1 kg | 3 | 38 | 5,18–6,69 /kg | high/name |  |
 | 2 | 3850334173287 | ČEŠNJAK RFZ (10) |  | 2 | 148 | 3,99–4,34 /kg | low/unit_price |  |
-| 3 | 3858891960487 | LUČICA ČEŠNJAK CRVENI 500 g | 500 g | 2 | 80 | 9,98–11,18 /kg | high/name |  |
-| 4 | 3858891960470 | LUČICA ČEŠNJAK BIJELI 500 g | 500 g | 2 | 79 | 9,98–11,18 /kg | high/name |  |
-| 5 | 5411361032336 | ČEŠNJAK DS 1kg ARDO | 1 kg | 2 | 3 | 5,49–6,29 /kg | high/ean |  |
-| 6 | ntl:024796 | ČEŠNJAK RFS |  | 1 | 342 | 4,99 /kg | low/unit_price |  |
-| 7 | plodine:110801 | CESNJAK RINFUZO |  | 1 | 149 | 3,49 /kg | low/unit_price |  |
-| 8 | 3858893252634 | Češnjak VH rfs |  | 1 | 144 | 5,49 /kg | low/unit_price |  |
-| 9 | gavranovic:071145 | ČEŠNJAK |  | 1 | 124 | 4,59–6,29 /kg | low/unit_price |  |
-| 10 | gavranovic:089992 | ČEŠNJAK 250g | 250 g | 1 | 124 | 6,20–7,56 /kg | high/name |  |
-| 11 | lidl:0082712 | Češnjak | 250 g | 1 | 116 | 5,56 /kg | high/unit |  |
-| 12 | lidl:0084614 | Bio češnjak 150g | 150 g | 1 | 116 | 9,93 /kg | high/name |  |
-| 13 | lidl:0082711 | Češnjak domaći 200g | 200 g | 1 | 116 | 9,95 /kg | high/name |  |
-| 14 | 3858890139280 | BIO CESNJAK EKOZONA |  | 1 | 116 | – | – |  |
-| 15 | 6917986800682 | CESNJAK 500 G | 500 g | 1 | 106 | 4,68–5,30 /kg | high/name |  |
-| 16 | tommy:10030072 | ČEŠNJAK MLADI |  | 1 | 73 | 5,49–5,99 /kg | low/unit_price |  |
-| 17 | ribola:0112349 | ČEŠNJAK |  | 1 | 61 | 3,99–6,05 /kg | low/unit_price |  |
-| 18 | 3859889884129 | Češnjak mrežica 500g | 500 g | 1 | 53 | 7,98 /kg | high/name |  |
-| 19 | eurospin:080159501 | ČEŠNJAK RFZ |  | 1 | 43 | 4,49 /kg | low/unit_price |  |
-| 20 | ktc:00117 | ČEŠNJAK |  | 1 | 30 | 4,29 /kg | low/unit_price |  |
+| 3 | 5411361032336 | ČEŠNJAK DS 1kg ARDO | 1 kg | 2 | 3 | 5,49–6,29 /kg | high/ean |  |
+| 4 | ntl:024796 | ČEŠNJAK RFS |  | 1 | 342 | 4,99 /kg | low/unit_price |  |
+| 5 | plodine:110801 | CESNJAK RINFUZO |  | 1 | 149 | 3,49 /kg | low/unit_price |  |
+| 6 | 3858893252634 | Češnjak VH rfs |  | 1 | 144 | 5,49 /kg | low/unit_price |  |
+| 7 | gavranovic:071145 | ČEŠNJAK |  | 1 | 124 | 4,59–6,29 /kg | low/unit_price |  |
+| 8 | gavranovic:089992 | ČEŠNJAK 250g | 250 g | 1 | 124 | 6,20–7,56 /kg | high/name |  |
+| 9 | lidl:0082712 | Češnjak | 250 g | 1 | 116 | 5,56 /kg | high/unit |  |
+| 10 | lidl:0084614 | Bio češnjak 150g | 150 g | 1 | 116 | 9,93 /kg | high/name |  |
+| 11 | lidl:0082711 | Češnjak domaći 200g | 200 g | 1 | 116 | 9,95 /kg | high/name |  |
+| 12 | 3858890139280 | BIO CESNJAK EKOZONA |  | 1 | 116 | – | – |  |
+| 13 | 6917986800682 | CESNJAK 500 G | 500 g | 1 | 106 | 4,68–5,30 /kg | high/name |  |
+| 14 | tommy:10030072 | ČEŠNJAK MLADI |  | 1 | 73 | 5,49–5,99 /kg | low/unit_price |  |
+| 15 | ribola:0112349 | ČEŠNJAK |  | 1 | 61 | 3,99–6,05 /kg | low/unit_price |  |
+| 16 | 3859889884129 | Češnjak mrežica 500g | 500 g | 1 | 53 | 7,98 /kg | high/name |  |
+| 17 | eurospin:080159501 | ČEŠNJAK RFZ |  | 1 | 43 | 4,49 /kg | low/unit_price |  |
+| 18 | ktc:00117 | ČEŠNJAK |  | 1 | 30 | 4,29 /kg | low/unit_price |  |
+| 19 | studenac:082830 | ČEŠNJAK kg |  | 1 | 20 | 3,69–4,06 /kg | low/unit_price |  |
+| 20 | stridon:106166 | ČEŠNJAK AGROVIR |  | 1 | 14 | 3,65–5,59 /kg | low/unit_price |  |
 
 <details><summary>Najčešće isključeni (top 10)</summary>
 
@@ -973,17 +973,17 @@ must_match: `cesnjak | cesnjaka`
 | ZAČIN ČEŠNJAK GRAN.1 kg NADAL | 3 | `zacin` |
 | ČEŠNJAK GRANULE 830G NADALINA (10) | 3 | `granul` |
 | MIRODIJE ČEŠNJAK U GRANULAMA 750G PODRAVKA | 2 | `granul` |
+| SJEME CESNJAK BIJELI 500G | 2 | `sjeme\b` |
+| SJEME CESNJAK CRVENI 500G | 2 | `sjeme\b` |
 | ČEŠNJAK U GRANULAMA 1000 g HOD | 2 | `granul` |
 | PASTA ČEŠNJAK 680g STAKLO | 1 | `pasta` |
-| POMMES ČEŠNJAK I ZAČINSKO BILJE 2500g AVIKO ( ZAPRIMATI NA KG )GASTRO | 1 | `zacin` |
-| POMMES ČEŠNJAK I ZAČINSKO BILJE 2500g GASTRO PČ | 1 | `zacin` |
 
 </details>
 
 <a id="krumpir"></a>
 ## krumpir (`krumpir`)
 
-jedinica: **kg** · loose_produce: **true** · grupa: **258** · isključenih grupa: **178**
+jedinica: **kg** · loose_produce: **true** · grupa: **238** · isključenih grupa: **198**
 
 sinonimi: krumpir, krompir, kumpir  
 must_match: `krumpir`
@@ -1000,40 +1000,40 @@ atributi: namjena = kuhanje, pecenje, salata; vrsta = mladi, crveni, zuti, bijel
 | 6 | 8028772002000 | KRUMPIR 2 KG GIRO OPRANI | 2 kg | 2 | 211 | 1,35–1,80 /kg | high/name |  |
 | 7 | 3858890133011 | BIO KRUMPIR 1 KG EKOZONA | 1 kg | 2 | 169 | 1,39–2,19 /kg | high/name |  |
 | 8 | 3859892278021 | KRUMPIR BIJELI 5 kg NTL | 5 kg | 2 | 130 | 0,62–0,80 /kg | high/ean | vrsta=bijeli |
-| 9 | 3871832023782 | KRUMPIRUŠA JAMI 10x90 g | 900 g | 2 | 126 | 4,43 /kg | high/name |  |
-| 10 | 3859891254200 | Krumpir za pečenje 3kg | 3 kg | 2 | 82 | 0,59–1,00 /kg | high/name | namjena=pecenje |
-| 11 | 3859891254194 | Krumpir za kuhanje 3kg | 3 kg | 2 | 73 | 0,90–1,00 /kg | high/name | namjena=kuhanje |
-| 12 | 3859891254422 | Krumpir oprani - vrećica 5 kg | 5 kg | 2 | 69 | 0,80–0,90 /kg | high/name |  |
-| 13 | 5412873163136 | PEKARSKI KRUMPIR S KOŽOM GIDRAN 2,5kg (4) | 2,5 kg | 2 | 11 | 1,70–1,96 /kg | high/name |  |
-| 14 | 3858885876053 | KRUMPIR MLADI RFZ |  | 2 | 10 | 0,72–3,45 /kg | low/unit_price | vrsta=mladi |
-| 15 | 3859893072031 | LIČKI KRUMPIR 5/1 | 10 kg | 2 | 7 | 0,48–0,99 /kg | high/name |  |
-| 16 | ntl:248145 | KRUMPIR |  | 1 | 343 | 0,59–0,89 /kg | low/unit_price |  |
-| 17 | ntl:020788 | KRUMPIR CRVENI |  | 1 | 343 | 0,59–0,89 /kg | low/unit_price | vrsta=crveni |
-| 18 | 3859891568161 | KRUMPIR 2,5 kg ZORELA | 2,5 kg | 1 | 343 | 0,76–1,08 /kg | high/name |  |
-| 19 | 3850334386120 | KRUMPIR 5 kg | 5 kg | 1 | 188 | 0,70 /kg | high/name |  |
-| 20 | 3856017203005 | KRUMPIR KLIPER 1.5 kg | 1,5 kg | 1 | 188 | 0,99–1,19 /kg | high/name |  |
+| 9 | 3859891254200 | Krumpir za pečenje 3kg | 3 kg | 2 | 82 | 0,59–1,00 /kg | high/name | namjena=pecenje |
+| 10 | 3859891254194 | Krumpir za kuhanje 3kg | 3 kg | 2 | 73 | 0,90–1,00 /kg | high/name | namjena=kuhanje |
+| 11 | 3859891254422 | Krumpir oprani - vrećica 5 kg | 5 kg | 2 | 69 | 0,80–0,90 /kg | high/name |  |
+| 12 | 3858885876053 | KRUMPIR MLADI RFZ |  | 2 | 10 | 0,72–3,45 /kg | low/unit_price | vrsta=mladi |
+| 13 | 3859893072031 | LIČKI KRUMPIR 5/1 | 10 kg | 2 | 7 | 0,48–0,99 /kg | high/name |  |
+| 14 | ntl:248145 | KRUMPIR |  | 1 | 343 | 0,59–0,89 /kg | low/unit_price |  |
+| 15 | ntl:020788 | KRUMPIR CRVENI |  | 1 | 343 | 0,59–0,89 /kg | low/unit_price | vrsta=crveni |
+| 16 | 3859891568161 | KRUMPIR 2,5 kg ZORELA | 2,5 kg | 1 | 343 | 0,76–1,08 /kg | high/name |  |
+| 17 | 3850334386120 | KRUMPIR 5 kg | 5 kg | 1 | 188 | 0,70 /kg | high/name |  |
+| 18 | 3856017203005 | KRUMPIR KLIPER 1.5 kg | 1,5 kg | 1 | 188 | 0,99–1,19 /kg | high/name |  |
+| 19 | 3850334449702 | KRUMPIR ZA PEČENJE I PRŽENJE 2.5 kg | 2,5 kg | 1 | 188 | 1,08–1,28 /kg | high/name | namjena=pecenje |
+| 20 | 3850334151476 | KRUMPIR ZA KUHANJE 2.5 kg | 2,5 kg | 1 | 180 | 1,08–1,28 /kg | high/name | namjena=kuhanje |
 
 <details><summary>Najčešće isključeni (top 10)</summary>
 
 | naziv | lanaca | isključio |
 |---|---|---|
-| PEKARSKI KRUMPIR, KRIŠKE S KOROM 2,5 KG LEDO | 9 | `ledo` |
-| KRUMPIR PEKARSKI ZAČINJENI 750g LEDO | 8 | `ledo` |
-| KROKETI KRUMPIROVI 2,5kg LEDO | 4 | `ledo` |
+| PEKARSKI KRUMPIR, KRIŠKE S KOROM 2,5 KG LEDO | 9 | `pekarsk` |
+| KRUMPIR PEKARSKI ZAČINJENI 750g LEDO | 8 | `pekarsk` |
 | KRUMPIR KRIŠKE JACKET WEDGES 2500 g ( ZAPRIMATI NA KG ) | 4 | `kriske` |
 | KRUMPIR PIRE 3KG VR PODRAVKA (1) | 4 | `pire` |
+| KRUMPIROVI KROKETI 2.5KG LEDO | 4 | `ledo` |
 | KRUMPIR BATAT 1000 g | 3 | `batat` |
 | KRUMPIR PLOŠKE WEDGES 2,5 kg MCCAIN | 3 | `ploske` |
 | LEDO KRUMPIR POMMES FRITES 1KG (10) | 3 | `ledo` |
 | PIRE KRUMPIR GRANULE 4x1 kg PODRAVKA | 3 | `pire` |
-| KROKETI KRUMPIR 1 KG LEDO | 2 | `ledo` |
+| KRUMPIR BATAT (7) | 2 | `batat` |
 
 </details>
 
 <a id="rajcica"></a>
 ## rajčica (svježa) (`rajcica`)
 
-jedinica: **kg** · loose_produce: **true** · grupa: **203** · isključenih grupa: **199**
+jedinica: **kg** · loose_produce: **true** · grupa: **201** · isključenih grupa: **201**
 
 sinonimi: rajcica, paradajz, pomidor  
 must_match: `rajcic | paradajz | pomidor`
@@ -1101,11 +1101,11 @@ must_match: `pasirana rajcica | rajcica pasirana | pasir rajcica | rajcica pasir
 | 9 | 3838945029155 | PASIRANA RAJCICA 500 ML FRUCTAL | 500 ml | 10 | 382 | 1,98–2,18 /kg | high/name |  |
 | 10 | 3856020239695 | RAJCICA PASIRIRANA 690 G BIO PODRAVKA | 690 g | 10 | 307 | 3,07–4,86 /kg | high/name |  |
 | 11 | 3856020280321 | PASIRANA RAJČICA STAKLO 400g PODRAVKA | 400 g | 8 | 625 | 4,72–5,88 /kg | high/name |  |
-| 12 | 8005110004766 | PASIRANA RAJČICA MUTTI TETR 500G | 500 g | 7 | 71 | 2,10–2,90 /kg | high/name |  |
+| 12 | 8005110004766 | RAJČICA PASIRANA ČEP 500 g MUTTI | 500 g | 7 | 71 | 2,10–2,90 /kg | high/name |  |
 | 13 | 3858894142132 | RAJČICA PASIRANA 500 g E BUONO | 500 g | 6 | 501 | 0,98–2,18 /kg | high/name |  |
-| 14 | 8033837720720 | RAJČICA PASIRANA 690ml ROSSOGARGANO | 690 g | 6 | 469 | 2,52–4,19 /kg | high/name |  |
-| 15 | 3838945042505 | PASIRANA RAJCICA CLASSIC 750 ML FRUCTAL | 750 ml | 6 | 292 | 1,59–3,05 /l | high/name |  |
-| 16 | 3838945042512 | PASIRANA RAJCICA PIZZA 750 ML FRUCTAL | 750 ml | 6 | 285 | 1,59–3,05 /l | high/name |  |
+| 14 | 8033837720720 | PASIRANA RAJČICA 690g ROSSO GARGANO | 690 g | 6 | 469 | 2,52–4,19 /kg | high/name |  |
+| 15 | 3838945042505 | PASIRANA RAJCICA CLASSIC 750 ML FRUCTAL | 750 ml | 6 | 292 | – /l | high/name |  |
+| 16 | 3838945042512 | PASIRANA RAJČICA PIZZA 750 ml FRUCTAL | 750 ml | 6 | 285 | – /l | high/name |  |
 | 17 | 8005110860508 | PASIRANA RAJČICA MUTTI 500G TETRAPACK | 500 ml | 6 | 241 | 2,18–3,98 /kg | high/name |  |
 | 18 | 8000320990113 | RAJČICA PASIRANA CLIMATE 500G CIRIO BRIK | 500 ml | 6 | 221 | 1,66–2,18 /kg | high/name |  |
 | 19 | 8001440002199 | RAJČICA PASIRA.500 ml BRIK VALFRUTTA | 500 ml | 6 | 215 | 2,18 /kg | high/name |  |
@@ -1115,7 +1115,7 @@ must_match: `pasirana rajcica | rajcica pasirana | pasir rajcica | rajcica pasir
 
 | naziv | lanaca | isključio |
 |---|---|---|
-| RAJČICA PASIRANA S BOSILJKOM 400G MUTTI BOCA | 5 | `bosiljk` |
+| PASIRANA RAJČICA S BOSILJKOM BOCA 400G MUTTI | 5 | `bosiljk` |
 | MUTTI PASIRANA RAJČICA S BOSILJKOM | 2 | `bosiljk` |
 | KLC.Rajčica pasir.Rustica s bosiljk 690g | 1 | `bosiljk` |
 | RAJČICA PASIR. S BOSILJKOM PETTI 500 ml BOCA PROFUMATO | 1 | `bosiljk` |
@@ -1130,7 +1130,7 @@ jedinica: **kg** · loose_produce: **false** · grupa: **191** · isključenih g
 sinonimi: rajcica konzerva, sjeckana rajcica, pelati, polpa, rajcica u konzervi  
 must_match: `pelat | polpa | sjeckana rajcic | rajcica sjeckan | sjeck rajcic | rajcica sjeck | sjec rajcic | rajcica sjec | rajcica u komad | rajcica komadi | cijela rajcica | rajcica cijela | rajcica oljust | oljustena rajcic`
   
-atributi: oblik = pelati, polpa, sjeckana
+atributi: oblik = pelati, polpa, sjeckana, nepoznato
 
 | # | id | naziv | pakiranje | lanaca | trgovina | €/jed | pouzdanost | atributi |
 |---|---|---|---|---|---|---|---|---|
@@ -1151,7 +1151,7 @@ atributi: oblik = pelati, polpa, sjeckana
 | 15 | 8001440110351 | RAJČICA VALFRUTTA 400G PELATI | 400 g | 5 | 129 | 2,97–5,63 /kg | high/name | oblik=pelati |
 | 16 | 8000320010033 | RAJČICA CIRIO PELATI CIJELI800G -12/1 | 800 g | 5 | 67 | 2,61–4,74 /kg | high/name | oblik=pelati |
 | 17 | 3856003902103 | RAJČICA PELATI 400g ZORELA-OCIJEĐENA MASA 240g | 240 g | 4 | 449 | 2,13–4,96 /kg | high/name | oblik=pelati |
-| 18 | 8001440118401 | RAJCICA SJECKANA 2X330 ML VALFRUTTA | 660 ml | 4 | 138 | 3,32–5,29 /l | high/name | oblik=sjeckana |
+| 18 | 8001440118401 | RAJCICA SJECKANA 2X330 ML VALFRUTTA | 660 ml | 4 | 138 | – /l | high/name | oblik=sjeckana |
 | 19 | 8001440111143 | RAJČICA SJECKANA CUBETTI 400g VALFRUTTA | 400 g | 4 | 108 | 2,97–4,98 /kg | high/name | oblik=sjeckana |
 | 20 | 8005110043109 | RAJČICA PELAT 2,5kg MUTTI (6) | 2,5 kg | 4 | 39 | 3,18–3,60 /kg | high/name | oblik=pelati |
 
@@ -1177,9 +1177,9 @@ must_match: `koncentrat rajcic | rajcica koncentrat | konc rajcic | rajcica konc
 | 2 | 3850104053214 | RAJČICA KONCENTRAT TUBA 120G (24), PODRAVKA | 120 g | 20 | 748 | 9,67–19,08 /kg | high/name |  |
 | 3 | 3850104268533 | RAJČICA KONCENTRAT 300G, PODRAVKA (12) (PAL 48) | 300 g | 18 | 626 | 7,50–13,30 /kg | high/name |  |
 | 4 | 3856020269166 | KONCENTRAT RAJCICA 370G STAKLENKA PODRAVKA | 370 g | 18 | 459 | 6,73–10,24 /kg | high/name |  |
-| 5 | 3856020269197 | KONCENTRAT RAJČICE ST. PODRAVKA 720 g (12) | 720 g | 18 | 236 | 5,13–130,21 /kg | high/name |  |
+| 5 | 3856020269197 | KONCENTRAT RAJČICE ST. PODRAVKA 720 g (12) | 720 g | 18 | 236 | 5,13–8,32 /kg ⚠4 | high/name |  |
 | 6 | 3856020269135 | KONCENTRAT RAJČICE STAKLO 210G (12) PODRAVKA | 210 g | 11 | 259 | 8,14–13,38 /kg | high/name |  |
-| 7 | 8001440127007 | VALFRUTTA DVOSTRUK.KONC.RAJČICE TUBA 130G (24) | 130 g | 10 | 95 | 2,23–10,15 /kg | high/name |  |
+| 7 | 8001440127007 | VALFRUTTA DVOSTRUK.KONC.RAJČICE TUBA 130G (24) | 130 g | 10 | 95 | 6,38–10,15 /kg ⚠1 | high/name |  |
 | 8 | 3850104053153 | KONC. RAJČICE 460 g LIM. PODRAVKA (12) | 460 g | 9 | 193 | 3,67–8,85 /kg | high/name |  |
 | 9 | 8005110120015 | DVOSTRUKI KONCENTRAT RAJČICE 200 g MUTTI | 200 g | 8 | 215 | 8,95–13,95 /kg | high/name |  |
 | 10 | 3850104053177 | KONCENTRAT RAJČICE LIM. 850 g PODRAVKA | 850 g | 8 | 34 | 3,73–7,09 /kg | high/name |  |
@@ -1189,7 +1189,7 @@ must_match: `koncentrat rajcic | rajcica koncentrat | konc rajcic | rajcica konc
 | 14 | 3850104053146 | KONCENTRAT RAJCICA 260 G LIMENKA PODRAVKA | 260 g | 4 | 98 | 6,31–9,00 /kg | high/name |  |
 | 15 | 3856003945896 | RAJČICA KONCENTRAT 200 g ZORELA | 200 g | 3 | 455 | 6,95–7,95 /kg | high/name |  |
 | 16 | 3859890236924 | RAJČICA KONCE. 200 g VM2 | 200 g | 2 | 41 | 6,60–7,95 /kg | high/name |  |
-| 17 | 4007415006098 | KONC.RAJČICA 850 ml MIKADO | 850 ml | 2 | 11 | 3,35–3,40 /l | high/ean |  |
+| 17 | 4007415006098 | KONC.RAJČICA 850 ml MIKADO | 850 ml | 2 | 11 | – /l | high/ean |  |
 | 18 | 3831029509062 | RAJČICA KONCETRAT NATURETA 180 g TUBA ORBI | 180 g | 2 | 2 | 11,00–11,44 /kg | high/name |  |
 | 19 | 3838900843208 | RAJČICA KONCE TUBA GARDEN GOOD 200 g | 200 g | 1 | 184 | 6,95–7,40 /kg | high/name |  |
 | 20 | 3856025853049 | RAJCICA KONCENTRAT 200 G TUBA CAMPO | 200 g | 1 | 154 | 6,45 /kg | high/name |  |
@@ -1208,7 +1208,7 @@ must_match: `mrkv`
 | 2 | 3859889644105 | MRKVA PAKIRANA 1 kg | 1 kg | 2 | 351 | 1,39–1,49 /kg | high/name |  |
 | 3 | 3859889644099 | MRKVA 500 g | 500 g | 2 | 351 | 2,38–2,90 /kg | high/name |  |
 | 4 | 3850334173126 | MRKVA (5) |  | 2 | 196 | 0,55–0,85 /kg | low/unit_price |  |
-| 5 | 3858885876923 | Mrkva rfs | 5 kg | 2 | 151 | 0,10–1,04 /kg | high/ean |  |
+| 5 | 3858885876923 | Mrkva rfs | 5 kg | 2 | 151 | 1,04 /kg ⚠144 | high/name |  |
 | 6 | 3856028689522 | MRKVA ŽUTA 500 g | 500 g | 2 | 133 | 2,18 /kg | high/name |  |
 | 7 | 3859891082063 | MRKVA PAKIRANA 1 kg | 1 kg | 2 | 62 | 1,29–1,61 /kg | high/name |  |
 | 8 | 3858885875162 | Mrkva košarica 1kg | 1 kg | 2 | 55 | 1,29–1,79 /kg | high/name |  |
@@ -1216,7 +1216,7 @@ must_match: `mrkv`
 | 10 | 3870547029782 | MRKVA NANTES STANDARD |  | 2 | 12 | – | – |  |
 | 11 | 3859894093066 | MRKVA 2kg ZEMLJA PORIJEKLA HRVATSKA | 2 kg | 2 | 8 | 1,00–1,15 /kg | high/name |  |
 | 12 | 3850104282676 | MRKVA KOCKE LIM. 4.1kg PODRAVKA | 4,1 kg | 2 | 3 | 2,27–2,43 /kg | high/name |  |
-| 13 | 5411361008409 | MRKVA 2,5 kg BABY ARDO UG. | 2,5 kg | 2 | 2 | 1,80–2,00 /kg | high/ean |  |
+| 13 | 5411361008409 | MRKVA 2,5 kg BABY ARDO UG. | 2,5 kg | 2 | 2 | 1,80–2,00 /kg | high/name |  |
 | 14 | 3859891246755 | MRKVA 500 g | 500 g | 2 | 2 | 1,96–1,98 /kg | high/name |  |
 | 15 | ntl:248678 | MRKVA |  | 1 | 343 | 0,89 /kg | low/unit_price |  |
 | 16 | 3859891082858 | MRKVA PAKIRANA 1 KG | 1 kg | 1 | 155 | 1,29 /kg | high/name |  |
@@ -1231,7 +1231,7 @@ must_match: `mrkv`
 |---|---|---|
 | SMRZ. MRKVA KOCKA 2,5kg LEDO | 7 | `kocka` |
 | GRAŠAK MRKVA KOCKE ZMH HORVAT (2,5kg) | 4 | `grasak` |
-| GRAŠAK-MRKVA 2,5KG LEDO | 4 | `grasak` |
+| GRAŠAK-MRKVA 2.5kg LEDO | 4 | `grasak` |
 | MRKVA BABY UG 2.5 kg 9000199 LEDO | 3 | `ledo` |
 | GRAŠAK-MRKVA MIKS SMRZ. 2.5 kg | 2 | `grasak` |
 | MRKVA KOCKA 2,5 kg | 2 | `kocka` |
@@ -1245,7 +1245,7 @@ must_match: `mrkv`
 <a id="paprika"></a>
 ## paprika (svježa) (`paprika`)
 
-jedinica: **kg** · loose_produce: **true** · grupa: **242** · isključenih grupa: **151**
+jedinica: **kg** · loose_produce: **true** · grupa: **240** · isključenih grupa: **153**
 
 sinonimi: paprika, babura, svjeza paprika  
 must_match: `paprik | babur`
@@ -1308,7 +1308,7 @@ must_match: `krastav`
 | 4 | 3858885876077 | KRASTAVAC RFZ (10) |  | 2 | 153 | 1,69–1,89 /kg | low/unit_price |  |
 | 5 | 8595241528878 | KRASTAVCI 6-9cm 670g/360g | 670 g | 2 | 6 | 1,93–2,97 /kg | high/name |  |
 | 6 | 3858886520320 | KRASTAVCI 4 kg MARI UG. | 4 kg | 2 | 4 | 1,61–1,66 /kg | high/name |  |
-| 7 | 5319990747365 | KRASTAVCI 4,1kg BONVITA VM2 | 4,1 kg | 2 | 2 | 1,55–2,02 /kg | high/name |  |
+| 7 | 5319990747365 | KRASTAVCI 4,1kg BONVITA VM2 | 4,2 kg | 2 | 2 | 1,55–2,02 /kg | high/name |  |
 | 8 | ntl:248144 | KRASTAVAC |  | 1 | 343 | 1,79–1,89 /kg | low/unit_price |  |
 | 9 | 3850334173409 | KRASTAVAC |  | 1 | 184 | 1,89–2,25 /kg | low/unit_price |  |
 | 10 | 3850334072078 | KRASTAVAC K PLUS REZANI 670G/360g | 670 g | 1 | 162 | 2,97–3,21 /kg | high/name |  |
@@ -1318,9 +1318,9 @@ must_match: `krastav`
 | 14 | 3830070890273 | BIO KRASTAVAC 500G | 500 g | 1 | 139 | 2,98–5,18 /kg | high/name |  |
 | 15 | plodine:113101 | KRASTAVAC |  | 1 | 134 | 1,69 /kg | low/unit_price |  |
 | 16 | gavranovic:071176 | KRASTAVAC |  | 1 | 122 | 2,49–2,59 /kg | low/unit_price |  |
-| 17 | lidl:0084535 | Bio krastavac | 1 kom | 1 | 116 | 1,29 /kom | high/unit |  |
-| 18 | lidl:0082225 | Krastavac | 1 kg | 1 | 116 | 1,79 /kg | high/unit |  |
-| 19 | 4056489008644 | Krastavac 750g | 750 g | 1 | 116 | 2,39–2,92 /kg | high/name |  |
+| 17 | lidl:0082225 | Krastavac | 1 kg | 1 | 116 | 1,79 /kg | high/unit |  |
+| 18 | 4056489008644 | Krastavac 750g | 750 g | 1 | 116 | 2,39–2,92 /kg | high/name |  |
+| 19 | lidl:0084535 | Bio krastavac | 1 kom | 1 | 116 | – /kom | high/unit |  |
 | 20 | 3858889116759 | KRASTAVCI S-BUDGET 6-9 2350 g | 2,35 kg | 1 | 99 | 2,46 /kg | high/name |  |
 
 <details><summary>Najčešće isključeni (top 10)</summary>
@@ -1361,15 +1361,15 @@ must_match: `tikvic`
 | 9 | lidl:0082345 | Tikvica | 1 kg | 1 | 116 | 1,19–1,69 /kg | high/unit |  |
 | 10 | lidl:0084545 | Bio tikvica 500g | 500 g | 1 | 116 | 3,78 /kg | high/name |  |
 | 11 | tommy:10000094 | TIKVICE |  | 1 | 87 | 1,69–1,89 /kg | low/unit_price |  |
-| 12 | 8009735185039 | BIO TIKVICE PAKIRANE 500 g | 500 g | 1 | 72 | 5,78–6,78 /kg | high/name |  |
-| 13 | 3858890133028 | TIKVICA 500G EKOZONA | 500 g | 1 | 72 | 5,78–6,78 /kg | high/name |  |
+| 12 | 8009735185039 | BIO TIKVICE PAKIRANE 500 g | 500 g | 1 | 72 | 5,78 /kg ⚠7 | high/name |  |
+| 13 | 3858890133028 | TIKVICA 500G EKOZONA | 500 g | 1 | 72 | 5,78 /kg ⚠7 | high/name |  |
 | 14 | plodine:111827 | BIO TIKVICA 500G | 500 g | 1 | 69 | 3,44–3,98 /kg | high/name |  |
 | 15 | ribola:0109321 | TIKVICA |  | 1 | 61 | 1,69–2,50 /kg | low/unit_price |  |
 | 16 | kaufland:09700763 | Tikvica |  | 1 | 53 | 1,69 /kg | low/unit_price |  |
 | 17 | 8024581000398 | KBio.Tikvica 500g | 500 g | 1 | 53 | 4,58 /kg | high/name |  |
 | 18 | 3856028689386 | TIKVICA 500 g BIO ZONE | 500 g | 1 | 48 | 4,58 /kg | high/name |  |
 | 19 | eurospin:080062402 | TIKVICE rfz |  | 1 | 43 | 1,49 /kg | low/unit_price |  |
-| 20 | 8001553828617 | TIKVICA |  | 1 | 43 | – | – |  |
+| 20 | 8001553828624 | TIKVICA |  | 1 | 43 | – | – |  |
 
 <details><summary>Najčešće isključeni (top 10)</summary>
 
@@ -1399,11 +1399,11 @@ atributi: vrsta = crveni, bijeli, kineski, mladi
 
 | # | id | naziv | pakiranje | lanaca | trgovina | €/jed | pouzdanost | atributi |
 |---|---|---|---|---|---|---|---|---|
-| 1 | 3858885876169 | KUPUS BIJELI - KG |  | 4 | 221 | 0,68–0,79 /kg | low/unit_price | vrsta=bijeli |
+| 1 | 3858885876169 | KUPUS SVJEŽI (25) |  | 4 | 221 | 0,68–0,79 /kg | low/unit_price | vrsta=bijeli |
 | 2 | 3850334173348 | KUPUS CRVENI (25) |  | 2 | 179 | 0,89–1,16 /kg | low/unit_price | vrsta=crveni |
 | 3 | 3858885876718 | KUPUS CRVENI - KG |  | 2 | 151 | 0,80–0,99 /kg | low/unit_price | vrsta=crveni |
 | 4 | 3850334386168 | KUPUS KINESKI KOM (25) |  | 2 | 110 | 1,69 /kg | low/unit_price | vrsta=kineski |
-| 5 | 3858885876152 | KUPUS MLADI SVJEŽI (9) |  | 2 | 16 | 0,49–3,20 /kg | low/unit_price | vrsta=mladi |
+| 5 | 3858885876152 | KUPUS MLADI SVJEŽI (9) |  | 2 | 16 | 0,49–0,67 /kg ⚠4 | low/unit_price | vrsta=mladi |
 | 6 | ntl:248543 | KUPUS |  | 1 | 343 | 0,59–0,79 /kg | low/unit_price |  |
 | 7 | ntl:248673 | KUPUS CRVENI |  | 1 | 343 | 0,99 /kg | low/unit_price | vrsta=crveni |
 | 8 | 3850334173119 | KUPUS SVJEŽI |  | 1 | 188 | 0,79 /kg | low/unit_price |  |
@@ -1415,7 +1415,7 @@ atributi: vrsta = crveni, bijeli, kineski, mladi
 | 14 | 53112132 | KUPUS CRVENI |  | 1 | 122 | 0,79 /kg | low/unit_price | vrsta=crveni |
 | 15 | gavranovic:071184 | KUPUS MLADI |  | 1 | 122 | 0,89–1,35 /kg | low/unit_price | vrsta=mladi |
 | 16 | gavranovic:071182 | KUPUS CRVENI |  | 1 | 122 | 1,29–1,89 /kg | low/unit_price | vrsta=crveni |
-| 17 | gavranovic:162556 | KUPUS KINESKI |  | 1 | 122 | 3,59–5,29 /kg | low/unit_price | vrsta=kineski |
+| 17 | gavranovic:162556 | KUPUS KINESKI |  | 1 | 122 | – ⚠122 | – | vrsta=kineski |
 | 18 | plodine:958005 | KUPUS SA KOBASICAMA PORCIJA GASTRO |  | 1 | 121 | – | – |  |
 | 19 | lidl:0082955 | Kupus bijeli | 1 kg | 1 | 116 | 0,79 /kg | high/unit | vrsta=bijeli |
 | 20 | lidl:0082945 | Kupus crveni | 1 kg | 1 | 116 | 0,79 /kg | high/unit | vrsta=crveni |
@@ -1492,7 +1492,7 @@ atributi: oblik = glavice, rezani
 
 jedinica: **kg** · loose_produce: **true** · grupa: **73** · isključenih grupa: **2**
 
-sinonimi: zelena salata, salata, iceberg, ledenka, kristalka, puterica  
+sinonimi: zelena salata, lollo, salata, iceberg, ledenka, kristalka, puterica  
 must_match: `salata iceberg | iceberg salata | salata ledenk | ledenk | salata kristalk | kristalka salata | salata puteric | puterica | salata zelena puteric | lollo | zelena salata | salata zelena | salata glav`
   
 atributi: vrsta = iceberg, kristalka, puterica, lollo
@@ -1505,10 +1505,10 @@ atributi: vrsta = iceberg, kristalka, puterica, lollo
 | 4 | 8058056198877 | SALATA ICEBERG KOM |  | 1 | 155 | – | – | vrsta=iceberg |
 | 5 | plodine:111305 | SALATA KRISTALKA -KOMAD |  | 1 | 155 | – | – | vrsta=kristalka |
 | 6 | spar:178388 | SALATA ICEBERG kom |  | 1 | 144 | – | – | vrsta=iceberg |
-| 7 | gavranovic:158919 | SALATA PUTERICA 1KOM | 1 kom | 1 | 119 | 1,99 /kom | high/name | vrsta=puterica |
-| 8 | gavranovic:141336 | SALATA ICEBERG KOM |  | 1 | 119 | – | – | vrsta=iceberg |
-| 9 | lidl:0082071 | Salata puterica | 1 kom | 1 | 116 | 0,99 /kom | high/unit | vrsta=puterica |
-| 10 | lidl:0082031 | Salata Iceberg | 1 kom | 1 | 116 | 1,49 /kom | high/unit | vrsta=iceberg |
+| 7 | gavranovic:141336 | SALATA ICEBERG KOM |  | 1 | 119 | – | – | vrsta=iceberg |
+| 8 | gavranovic:158919 | SALATA PUTERICA 1KOM | 1 kom | 1 | 119 | – /kom | high/name | vrsta=puterica |
+| 9 | lidl:0082031 | Salata Iceberg | 1 kom | 1 | 116 | – /kom | high/unit | vrsta=iceberg |
+| 10 | lidl:0082071 | Salata puterica | 1 kom | 1 | 116 | – /kom | high/unit | vrsta=puterica |
 | 11 | tommy:10000062 | SALATA KRISTALKA SVJ. KOM |  | 1 | 87 | – | – | vrsta=kristalka |
 | 12 | tommy:10000653 | SALATA ICEBERG SVJ. KOM |  | 1 | 86 | – | – | vrsta=iceberg |
 | 13 | tommy:10510656 | SALATA PUTERICA S KORIJENOM |  | 1 | 72 | – | – | vrsta=puterica |
@@ -1518,7 +1518,7 @@ atributi: vrsta = iceberg, kristalka, puterica, lollo
 | 17 | 3858893252450 | Salata zelena kristal kom |  | 1 | 53 | – | – | vrsta=kristalka |
 | 18 | 3859891811168 | Salata zelena puterica kom |  | 1 | 53 | – | – | vrsta=puterica |
 | 19 | kaufland:09701482 | Salata zelena endivija kom |  | 1 | 52 | – | – |  |
-| 20 | 8001553801382 | SALATA PUTERICA |  | 1 | 43 | – | – | vrsta=puterica |
+| 20 | 8001553801375 | SALATA PUTERICA |  | 1 | 43 | – | – | vrsta=puterica |
 
 <details><summary>Najčešće isključeni (top 10)</summary>
 
@@ -1593,8 +1593,8 @@ must_match: `matovil | motovil`
 | 15 | branka:3306/5871 | MATOVILAC 125g | 125 g | 1 | 1 | 14,32 /kg | high/name |  |
 | 16 | lorenco:505 | MATOVILAC 100g | 100 g | 1 | 1 | 16,80 /kg | high/name |  |
 | 17 | trgocentar:4833350 | MATOVILAC 100G (PT) | 100 g | 1 | 1 | 16,90 /kg | high/name |  |
-| 18 | trgocentar:0079545 | MATOVILAC |  | 1 | 1 | 81,52 /kg | low/unit_price |  |
-| 19 | lorenco:412 | MATOVILAC |  | 1 | 1 | – | – |  |
+| 18 | lorenco:412 | MATOVILAC |  | 1 | 1 | – | – |  |
+| 19 | trgocentar:0079545 | MATOVILAC |  | 1 | 1 | – ⚠1 | – |  |
 | 20 | lorenco:2000582 | RIKOLA,MATOVILAC |  | 1 | 1 | – | – |  |
 
 <details><summary>Najčešće isključeni (top 10)</summary>
@@ -1624,13 +1624,13 @@ must_match: `radic\b | radica\b | cikorij`
 | 5 | lidl:0082120 | Radić | 1 kg | 1 | 116 | 3,99 /kg | high/unit |  |
 | 6 | 8057960790313 | RADIC CRVENI |  | 1 | 99 | 2,79 /kg | low/unit_price |  |
 | 7 | kaufland:09700774 | Radič crveni |  | 1 | 52 | 3,99 /kg | low/unit_price |  |
-| 8 | 8001553818328 | RADIČ |  | 1 | 43 | – | – |  |
-| 9 | 8001553801818 | RADIČ |  | 1 | 43 | – | – |  |
+| 8 | 8001553818014 | RADIČ |  | 1 | 43 | – | – |  |
+| 9 | 8001553818373 | RADIČ |  | 1 | 43 | – | – |  |
 | 10 | 8001553818427 | RADIČ |  | 1 | 43 | – | – |  |
-| 11 | 8001553818373 | RADIČ |  | 1 | 43 | – | – |  |
-| 12 | 8001553818342 | RADIČ |  | 1 | 43 | – | – |  |
-| 13 | 8001553818014 | RADIČ |  | 1 | 43 | – | – |  |
-| 14 | 8001553818397 | RADIČ |  | 1 | 43 | – | – |  |
+| 11 | 8001553818342 | RADIČ |  | 1 | 43 | – | – |  |
+| 12 | 8001553818397 | RADIČ |  | 1 | 43 | – | – |  |
+| 13 | 8001553801818 | RADIČ |  | 1 | 43 | – | – |  |
+| 14 | 8001553818328 | RADIČ |  | 1 | 43 | – | – |  |
 | 15 | tommy:10009221 | RADIČ |  | 1 | 39 | 3,89–4,39 /kg | low/unit_price |  |
 | 16 | ktc:00152 | RADIČ |  | 1 | 25 | 2,29–5,99 /kg | low/unit_price |  |
 | 17 | studenac:146811 | RADIČ kg |  | 1 | 19 | 1,99–2,19 /kg | low/unit_price |  |
@@ -1662,9 +1662,9 @@ must_match: `endivij | frisee | frize\b`
 | # | id | naziv | pakiranje | lanaca | trgovina | €/jed | pouzdanost | atributi |
 |---|---|---|---|---|---|---|---|---|
 | 1 | plodine:111323 | SALATA ENDIVIJA KOMAD |  | 1 | 155 | – | – |  |
-| 2 | gavranovic:158278 | SALATA ENDIVIJA 1KOM | 1 kom | 1 | 119 | 2,05–3,49 /kom | high/name |  |
+| 2 | gavranovic:158278 | SALATA ENDIVIJA 1KOM | 1 kom | 1 | 119 | – /kom | high/name |  |
 | 3 | spar:184145 | SALATA ENDIVIJA kom |  | 1 | 119 | – | – |  |
-| 4 | lidl:0082041 | Salata endivija | 1 kom | 1 | 116 | 0,99 /kom | high/unit |  |
+| 4 | lidl:0082041 | Salata endivija | 1 kom | 1 | 116 | – /kom | high/unit |  |
 | 5 | 3850334181978 | SALATA ENDIVIJA KOMAD |  | 1 | 112 | 4,45 /kg | low/unit_price |  |
 | 6 | ntl:067427 | SALATA ENDIVIJA KOM |  | 1 | 82 | 2,98–3,23 /kg | low/unit_price |  |
 | 7 | 8001553801702 | SALATA ENDIVIJA SCAROLA |  | 1 | 43 | – | – |  |
@@ -1696,7 +1696,7 @@ must_match: `endivij | frisee | frize\b`
 <a id="spinat"></a>
 ## špinat (`spinat`)
 
-jedinica: **kg** · loose_produce: **true** · grupa: **117** · isključenih grupa: **8**
+jedinica: **kg** · loose_produce: **true** · grupa: **112** · isključenih grupa: **13**
 
 sinonimi: spinat, blitva  
 must_match: `spinat | blitv`
@@ -1707,18 +1707,18 @@ atributi: oblik = smrznuti, baby
 |---|---|---|---|---|---|---|---|---|
 | 1 | 3850116053288 | ŠPINAT BRIKET DS 650G LEDO | 650 g | 18 | 692 | 3,43–7,37 /kg | high/name | oblik=smrznuti |
 | 2 | 3850116053042 | BLITVA BRIKET 650 g (10) LEDO | 650 g | 18 | 636 | 4,49–7,37 /kg | high/name | oblik=smrznuti |
-| 3 | 3850116804590 | BLITVA LIST BRIKET 2.5 kg UGOSTITELJSKI LEDO | 10 kg | 8 | 141 | 0,40–3,42 /kg | high/name | oblik=smrznuti |
-| 4 | 5412532129053 | BLITVA LIST 4*2,5 kg FLANDERS BEST ZMH HORVAT | 2,5 kg | 6 | 26 | 0,44–2,76 /kg | high/name | oblik=smrznuti |
+| 3 | 3850116804590 | BLITVA LIST BRIKET 2.5 kg UGOSTITELJSKI LEDO | 10 kg | 8 | 141 | 2,08–3,42 /kg ⚠122 | high/name | oblik=smrznuti |
+| 4 | 5412532129053 | BLITVA LIST 4*2,5 kg FLANDERS BEST ZMH HORVAT | 2,5 kg | 6 | 26 | 1,66–2,76 /kg ⚠6 | high/name | oblik=smrznuti |
 | 5 | 3850116850702 | ŠPINAT BRIKET FINO SJECKANI 2.5 KG LEDO | 2,5 kg | 5 | 153 | 1,60–3,49 /kg | high/ean | oblik=smrznuti |
 | 6 | 3850116818726 | ŠPINAT LIST BRIKET 2,5 kg LEDO | 2,5 kg | 4 | 35 | 2,28–3,72 /kg | high/name | oblik=smrznuti |
 | 7 | 5411361199701 | BLITVA PORCIJE 2,5kg ARDO CAK | 2,5 kg | 3 | 91 | 1,56–2,60 /kg | high/name |  |
 | 8 | 3850116880549 | BLITVA BRIKETI 750 g LEDO | 750 g | 3 | 8 | 3,56–4,07 /kg | high/name | oblik=smrznuti |
 | 9 | 5411683230441 | ŠPINAT LIST SMRZ. 2,5 kg DELTA | 2,5 kg | 2 | 36 | 1,56–2,00 /kg | high/name | oblik=smrznuti |
-| 10 | 3850116037523 | ŠPINAT FINO SJEC.BRIKET 2,5 kg | 2,5 kg | 2 | 21 | 0,74–2,12 /kg | high/name | oblik=smrznuti |
+| 10 | 3850116037523 | ŠPINAT FINO SJEC.BRIKET 2,5 kg | 2,5 kg | 2 | 21 | 1,94–2,12 /kg ⚠1 | high/name | oblik=smrznuti |
 | 11 | 3850116814773 | ŠPINAT BRIKETI 750 g LEDO | 750 g | 2 | 11 | 2,83–3,63 /kg | high/name | oblik=smrznuti |
 | 12 | 5412532870054 | ŠPINAT SJECKANI SMRZ 2,5KG (4) | 2,5 kg | 2 | 10 | 1,65–1,96 /kg | high/name | oblik=smrznuti |
 | 13 | 3858891042480 | ŠPINAT SJEĆENI 2,5KG FROZY | 2,5 kg | 2 | 3 | 2,30–2,50 /kg | high/name |  |
-| 14 | 5412532900058 | ŠPINAT BRIKET 2,5kg | 2,5 kg | 2 | 2 | 1,30–2,12 /kg | high/name |  |
+| 14 | 5412532900058 | ŠPINAT 2,5KG MLJEV. | 2,5 kg | 2 | 2 | 1,30–2,12 /kg | high/name |  |
 | 15 | 3858887470228 | BLITVA PORCIJE 2,5KG FLANDERS BEST | 2,5 kg | 2 | 2 | 2,00–2,12 /kg | high/name |  |
 | 16 | 3850334385925 | BLITVA VEZANA KOM |  | 1 | 187 | 2,58–4,78 /kg | low/unit_price |  |
 | 17 | 8015021000108 | SPINAT 500 G | 500 g | 1 | 155 | 3,98 /kg | high/name |  |
@@ -1736,8 +1736,10 @@ atributi: oblik = smrznuti, baby
 | ROLICA ŠPINAT RICOTTA I FETA SIR 100g | 1 | `sir\b` |
 | SAVIJAČA ŠPINAT 600 g MINUTE | 1 | `savijac` |
 | SAVIJAČA-ŠPINAT/FETA SIR 125g WOLF | 1 | `savijac` |
-| TAGLIATELLE ŠPINAT KM 500G | 1 | `tagliatell` |
-| ŠPINAT KREM SPAR 600 g | 1 | `krem\b` |
+| SJEME BLITVA SREB. 25g SJEMENARNA | 1 | `sjeme\b` |
+| SJEME BLITVA SREBRNOLISNA | 1 | `sjeme\b` |
+| SJEME BLITVA TAMNOZELENA | 1 | `sjeme\b` |
+| SJEME SPINAT MATADOR | 1 | `sjeme\b` |
 
 </details>
 
@@ -1756,23 +1758,23 @@ atributi: dio = korijen, list
 | 1 | 3870547029850 | PERŠIN BERLINSKI POLUDUGI STANDARD |  | 2 | 10 | – | – | dio=korijen |
 | 2 | 3870547029867 | PERŠIN LISNATI - DOMAĆI LIŠČAR - STANDARD vrećica |  | 2 | 7 | – | – | dio=list |
 | 3 | 3859891136254 | PERSIN KORJEN LIST KOM CCA. 250 G |  | 1 | 155 | – | – | dio=list |
-| 4 | gavranovic:072047 | PERŠIN LIST |  | 1 | 118 | 4,99–7,09 /kg | low/unit_price | dio=list |
-| 5 | lidl:0082766 | Peršin korijen list 250g | 250 g | 1 | 116 | 6,36 /kg | high/name | dio=korijen |
-| 6 | lidl:0083435 | Peršin list 50g | 50 g | 1 | 116 | 17,80 /kg | high/name | dio=list |
-| 7 | 8058056197740 | PERSIN LIST 500G. | 500 g | 1 | 94 | 3,20–4,68 /kg | high/name | dio=list |
+| 4 | gavranovic:072047 | PERŠIN LIST |  | 1 | 118 | – /kg | low/unit_price | dio=list |
+| 5 | lidl:0082766 | Peršin korijen list 250g | 250 g | 1 | 116 | – /kg | high/name | dio=korijen |
+| 6 | lidl:0083435 | Peršin list 50g | 50 g | 1 | 116 | – /kg | high/name | dio=list |
+| 7 | 8058056197740 | PERSIN LIST 500G. | 500 g | 1 | 94 | – /kg | high/name | dio=list |
 | 8 | 3856028690184 | PERŠIN SVJEŽI ZB BIO ZONE |  | 1 | 60 | – | – |  |
-| 9 | ribola:0112331 | PERŠIN LIST PAK100 g | 100 g | 1 | 59 | 12,90–15,50 /kg | high/name | dio=list |
-| 10 | 3859891689187 | Peršin korijen 500g | 500 g | 1 | 52 | 4,98 /kg | high/name | dio=korijen |
-| 11 | 3859891904297 | Peršin list rfs |  | 1 | 48 | 5,99 /kg | low/unit_price | dio=list |
+| 9 | ribola:0112331 | PERŠIN LIST PAK100 g | 100 g | 1 | 59 | – /kg | high/name | dio=list |
+| 10 | 3859891689187 | Peršin korijen 500g | 500 g | 1 | 52 | – /kg | high/name | dio=korijen |
+| 11 | 3859891904297 | Peršin list rfs |  | 1 | 48 | – /kg | low/unit_price | dio=list |
 | 12 | 3859892705282 | BIO PERŠIN FRANCUSKI U TEGLAMA |  | 1 | 43 | – | – |  |
 | 13 | 8001553803041 | PERŠIN |  | 1 | 43 | – | – |  |
-| 14 | 8057960790252 | PERSIN LIST |  | 1 | 37 | 4,99 /kg | low/unit_price | dio=list |
-| 15 | ktc:166138 | PERŠIN LIST PAK.50g | 50 g | 1 | 25 | 11,80 /kg | high/name | dio=list |
-| 16 | ktc:614345 | PERŠIN KORIJEN 300g | 300 g | 1 | 22 | 3,30 /kg | high/name | dio=korijen |
-| 17 | ktc:00149 | PERŠIN KORJEN+LIST |  | 1 | 20 | 4,29 /kg | low/unit_price | dio=list |
-| 18 | 3857500129833 | PERŠIN KOR LIS 250 gVOĆARNA STUDENAC |  | 1 | 20 | – | – |  |
-| 19 | tommy:10007271 | PERŠIN LIST |  | 1 | 13 | 3,99 /kg | low/unit_price | dio=list |
-| 20 | ktc:614367 | PERŠIN KORIJEN LIST 300g | 300 g | 1 | 11 | 5,30 /kg | high/name | dio=korijen |
+| 14 | 8057960790252 | PERSIN LIST |  | 1 | 37 | – /kg | low/unit_price | dio=list |
+| 15 | ktc:166138 | PERŠIN LIST PAK.50g | 50 g | 1 | 25 | – /kg | high/name | dio=list |
+| 16 | ktc:614345 | PERŠIN KORIJEN 300g | 300 g | 1 | 22 | – /kg | high/name | dio=korijen |
+| 17 | 3857500129833 | PERŠIN KOR LIS 250 gVOĆARNA STUDENAC |  | 1 | 20 | – | – |  |
+| 18 | ktc:00149 | PERŠIN KORJEN+LIST |  | 1 | 20 | – /kg | low/unit_price | dio=list |
+| 19 | tommy:10007271 | PERŠIN LIST |  | 1 | 13 | – /kg | low/unit_price | dio=list |
+| 20 | ktc:614367 | PERŠIN KORIJEN LIST 300g | 300 g | 1 | 11 | – /kg | high/name | dio=korijen |
 
 <details><summary>Najčešće isključeni (top 10)</summary>
 
@@ -1792,30 +1794,30 @@ jedinica: **kg** · loose_produce: **true** · grupa: **113** · isključenih gr
 sinonimi: gljive, sampinjoni, bukovace  
 must_match: `sampinjon | gljiv | bukovac`
   
-atributi: oblik = konzerva, smrznuto, suho, svjeze; vrsta = sampinjoni, bukovace
+atributi: oblik = konzerva, smrznuto, suho, svjeze, nepoznato; vrsta = sampinjoni, bukovace
 
 | # | id | naziv | pakiranje | lanaca | trgovina | €/jed | pouzdanost | atributi |
 |---|---|---|---|---|---|---|---|---|
-| 1 | 3859889614115 | ŠAMPINJONI 500G BEZ KORIJENA(PODLOŽAK) 1150 | 500 g | 7 | 115 | 3,98–6,58 /kg | high/name | vrsta=sampinjoni, oblik=svjeze |
-| 2 | 3859889614108 | ŠAMPINJONI SVJ.1000 g FRIDRIH | 1 kg | 4 | 169 | 3,32–4,09 /kg | high/name | vrsta=sampinjoni, oblik=svjeze |
-| 3 | 3850334013576 | GLJIVA ŠAMPINJON 500 grama (8) | 500 g | 3 | 198 | 2,82–4,98 /kg | high/name | vrsta=sampinjoni, oblik=svjeze |
-| 4 | 3858891564739 | ŠAMPINJONI REZANI 800G ULTRA | 800 g | 3 | 52 | 2,86–3,98 /kg | high/name | vrsta=sampinjoni, oblik=svjeze |
-| 5 | 8594012792326 | ŠAMPINJONI GIANA REZANI 800 g | 800 g | 3 | 26 | 3,24–5,24 /kg | high/name | vrsta=sampinjoni, oblik=svjeze |
-| 6 | 4007415005688 | ŠAMPINJONI REZANI U SL.OTOP.800 g AIPK | 800 g | 3 | 12 | 1,16–3,74 /kg | high/name | vrsta=sampinjoni, oblik=svjeze |
+| 1 | 3859889614115 | ŠAMPINJONI 500G BEZ KORIJENA(PODLOŽAK) 1150 | 500 g | 7 | 115 | 3,98–6,58 /kg | high/name | vrsta=sampinjoni, oblik=nepoznato (zadano) |
+| 2 | 3859889614108 | ŠAMPINJONI SVJ.1000 g FRIDRIH | 1 kg | 4 | 169 | 3,32–4,09 /kg | high/name | vrsta=sampinjoni, oblik=nepoznato (zadano) |
+| 3 | 3850334013576 | GLJIVA ŠAMPINJON 500 grama (8) | 500 g | 3 | 198 | 2,82–4,98 /kg | high/name | vrsta=sampinjoni, oblik=nepoznato (zadano) |
+| 4 | 3858891564739 | ŠAMPINJONI REZANI 800G ULTRA | 800 g | 3 | 52 | 2,86–3,98 /kg | high/name | vrsta=sampinjoni, oblik=nepoznato (zadano) |
+| 5 | 8594012792326 | ŠAMPINJONI GIANA REZANI 800 g | 800 g | 3 | 26 | 3,24–5,24 /kg | high/name | vrsta=sampinjoni, oblik=nepoznato (zadano) |
+| 6 | 4007415005688 | ŠAMPINJONI REZANI U SL.OTOP.800 g AIPK | 800 g | 3 | 12 | 1,16–3,74 /kg | high/name | vrsta=sampinjoni, oblik=nepoznato (zadano) |
 | 7 | 3859889614252 | ŠAMPINJONI RFS FRIDRIH |  | 2 | 149 | 2,99–3,95 /kg | low/unit_price | vrsta=sampinjoni, oblik=svjeze |
-| 8 | 3859889267007 | ŠAMPINJONI VH 500 g | 500 g | 2 | 145 | 3,78–4,48 /kg | high/name | vrsta=sampinjoni, oblik=svjeze |
-| 9 | 3859892060176 | ŠAMPINJONI MIX 500G GEA | 500 g | 2 | 145 | 4,58–4,98 /kg | high/name | vrsta=sampinjoni, oblik=svjeze |
+| 8 | 3859889267007 | ŠAMPINJONI VH 500 g | 500 g | 2 | 145 | 3,78–4,48 /kg | high/name | vrsta=sampinjoni, oblik=nepoznato (zadano) |
+| 9 | 3859892060176 | ŠAMPINJONI MIX 500G GEA | 500 g | 2 | 145 | 4,58–4,98 /kg | high/name | vrsta=sampinjoni, oblik=nepoznato (zadano) |
 | 10 | 8710609361427 | ŠAMPINJONI REZ. 2,55 kg LIMBUR | 2,55 kg | 2 | 48 | 2,69–3,25 /kg | high/name | vrsta=sampinjoni, oblik=konzerva |
-| 11 | 3859889614719 | BUKOVAČE PAK.500g FRIDRIH | 500 g | 2 | 16 | 4,98–5,90 /kg | high/name | vrsta=bukovace, oblik=svjeze |
-| 12 | 3859891246014 | GLJIVE SVJ.500 g ZKM | 500 g | 2 | 3 | 4,80–5,28 /kg | high/name | vrsta=sampinjoni, oblik=svjeze |
-| 13 | 8032484130135 | ŠAMPINJONI PAKIRANI.500g | 500 g | 2 | 2 | 3,68–4,78 /kg | high/name | vrsta=sampinjoni, oblik=svjeze |
-| 14 | 3859891581016 | ŠAMPINJONI 500 g | 500 g | 1 | 343 | 4,18–4,38 /kg | high/name | vrsta=sampinjoni, oblik=svjeze |
-| 15 | 5907700040082 | SAMPINJONI 500 G BIJELI | 500 g | 1 | 155 | 3,78 /kg | high/name | vrsta=sampinjoni, oblik=svjeze |
-| 16 | 3858893060048 | SAMPINJONI SMEDJI 500 G | 500 g | 1 | 144 | 4,38–4,78 /kg | high/name | vrsta=sampinjoni, oblik=svjeze |
-| 17 | 3856021233296 | BUKOVAČA VH 500 g. | 500 g | 1 | 144 | 4,98 /kg | high/name | vrsta=bukovace, oblik=svjeze |
-| 18 | 3859890284239 | ŠAMPINJONI 1 kg | 1 kg | 1 | 142 | 3,49 /kg | high/name | vrsta=sampinjoni, oblik=svjeze |
-| 19 | 3859892060053 | BUKOVACE 500 G | 500 g | 1 | 125 | 4,58–5,38 /kg | high/name | vrsta=bukovace, oblik=svjeze |
-| 20 | gavranovic:072057 | ŠAMPINJONI |  | 1 | 119 | 4,49–5,49 /kg | low/unit_price | vrsta=sampinjoni, oblik=svjeze |
+| 11 | 3859889614719 | BUKOVAČE PAK.500g FRIDRIH | 500 g | 2 | 16 | 4,98–5,90 /kg | high/name | vrsta=bukovace, oblik=nepoznato (zadano) |
+| 12 | 3859891246014 | GLJIVE SVJ.500 g ZKM | 500 g | 2 | 3 | 4,80–5,28 /kg | high/name | vrsta=sampinjoni, oblik=nepoznato (zadano) |
+| 13 | 8032484130135 | ŠAMPINJONI PAKIRANI.500g | 500 g | 2 | 2 | 3,68–4,78 /kg | high/name | vrsta=sampinjoni, oblik=nepoznato (zadano) |
+| 14 | 3859891581016 | ŠAMPINJONI 500 g | 500 g | 1 | 343 | 4,18–4,38 /kg | high/name | vrsta=sampinjoni, oblik=nepoznato (zadano) |
+| 15 | 5907700040082 | SAMPINJONI 500 G BIJELI | 500 g | 1 | 155 | 3,78 /kg | high/name | vrsta=sampinjoni, oblik=nepoznato (zadano) |
+| 16 | 3858893060048 | SAMPINJONI SMEDJI 500 G | 500 g | 1 | 144 | 4,38–4,78 /kg | high/name | vrsta=sampinjoni, oblik=nepoznato (zadano) |
+| 17 | 3856021233296 | BUKOVAČA VH 500 g. | 500 g | 1 | 144 | 4,98 /kg | high/name | vrsta=bukovace, oblik=nepoznato (zadano) |
+| 18 | 3859890284239 | ŠAMPINJONI 1 kg | 1 kg | 1 | 142 | 3,49 /kg | high/name | vrsta=sampinjoni, oblik=nepoznato (zadano) |
+| 19 | 3859892060053 | BUKOVACE 500 G | 500 g | 1 | 125 | 4,58–5,38 /kg | high/name | vrsta=bukovace, oblik=nepoznato (zadano) |
+| 20 | gavranovic:072057 | ŠAMPINJONI |  | 1 | 119 | 4,49–5,49 /kg | low/unit_price | vrsta=sampinjoni, oblik=nepoznato (zadano) |
 
 <details><summary>Najčešće isključeni (top 10)</summary>
 
@@ -1846,7 +1848,7 @@ atributi: vrsta = basmati, jasmin, arborio, carnaroli, originario, parboiled, in
 
 | # | id | naziv | pakiranje | lanaca | trgovina | €/jed | pouzdanost | atributi |
 |---|---|---|---|---|---|---|---|---|
-| 1 | 8001860100017 | Riso Scotti riža originario okr.zrno 1kg | 1 kg | 21 | 1152 | 2,25–5,40 /kg | high/name | vrsta=originario |
+| 1 | 8001860100017 | RIŽA SCOTTI 1KG ORIGINARIO U-1054 -10/1- | 1 kg | 21 | 1152 | 2,25–5,40 /kg | high/name | vrsta=originario |
 | 2 | 3838700540291 | RIŽA ZA DOMAĆA JELA ZLATO POLJE PODRAVKA 1 kg (12) | 1 kg | 19 | 919 | 2,07–4,39 /kg | high/name | vrsta=originario |
 | 3 | 3838700540369 | RIŽA ZLATO POLJE BLAZINICA PODRAVKA 800 g (9) | 800 g | 17 | 547 | 1,25–4,00 /kg | high/name |  |
 | 4 | 8001860201011 | Riso Scotti riža arborio dugo zrno 1kg | 1 kg | 16 | 961 | 2,95–5,99 /kg | high/name | vrsta=arborio |
@@ -1854,17 +1856,17 @@ atributi: vrsta = basmati, jasmin, arborio, carnaroli, originario, parboiled, in
 | 6 | 3838700540314 | RIŽA BIJELA 800 g VREĆICA ZLATO POLJE | 800 g | 16 | 747 | 1,94–4,19 /kg | high/name | vrsta=dugo_zrno |
 | 7 | 3838700540482 | RIŽA ZL POLJE ST ANDREA 500G KUT (18) | 500 g | 15 | 545 | 3,90–6,78 /kg | high/name |  |
 | 8 | 5410673007490 | RIZA PARABOILED DUGO ZRNO VRECICA 500 G BENS ORIGINAL | 500 g | 13 | 658 | 6,70–8,98 /kg | high/name | vrsta=dugo_zrno |
-| 9 | 3838700540406 | RIŽA ZL POLJE ST ANDREA 1KG KUT VAK (12) | 1 kg | 13 | 576 | 2,36–5,55 /kg | high/name |  |
+| 9 | 3838700540406 | RIŽA ZLATNO POLJE SANT ANDREA VAKUUM 1KG | 1 kg | 13 | 576 | 2,36–5,55 /kg | high/name |  |
 | 10 | 3838700540604 | RIŽA ARBORIO VAKUMIRANA 1000 g PODRA | 1 kg | 13 | 489 | 2,36–6,99 /kg | high/name | vrsta=arborio |
 | 11 | 3838700540413 | RIŽA ZL POLJE ZA DOM JELA 1KG KUT VAK (12) | 1 kg | 12 | 514 | 2,39–4,49 /kg | high/name |  |
 | 12 | 5410673007476 | RIZA DUGO ZRNO PARBOILED 500 G BENS ORIGINAL | 500 g | 12 | 464 | 5,52–9,18 /kg | high/name | vrsta=parboiled |
 | 13 | 3858889360954 | RIŽA NATUREL 1kg KUTIJA za domaća jela | 1 kg | 12 | 410 | 2,39–5,76 /kg | high/name |  |
 | 14 | 8001420001594 | RIŽA GALLO ORIGINARIO 1KG -12/1- 1151 | 1 kg | 11 | 611 | 3,19–5,29 /kg | high/name | vrsta=originario |
 | 15 | 3838700540383 | RIŽA PARBOILED DZ ZLATO POLJE 800G (12) | 800 g | 11 | 579 | 2,61–4,90 /kg | high/name | vrsta=parboiled |
-| 16 | 3859888279445 | RIZA RIO PAK DUGO ZRNO 1 KG PVC | 1 kg | 11 | 463 | 1,19–33,75 /kg | high/name | vrsta=dugo_zrno |
+| 16 | 3859888279445 | RIZA RIO PAK DUGO ZRNO 1 KG PVC | 1 kg | 11 | 463 | 1,19–2,29 /kg ⚠4 | high/name | vrsta=dugo_zrno |
 | 17 | 3858889360978 | RIŽA NATUREL ZA DOM. JELA 1 kg SAM. VREĆICA AWT | 1 kg | 11 | 412 | 1,85–4,51 /kg | high/name |  |
 | 18 | 5010338303273 | JAP SUSHI RIŽA 500G BLUE -10/1- DRAGON | 500 g | 11 | 262 | 3,00–10,90 /kg | high/name |  |
-| 19 | 8001860010019 | RIŽA SCOTTI 1 kg CARNAROLI NKAS | 1 kg | 11 | 229 | 4,99–119,75 /kg | high/name | vrsta=carnaroli |
+| 19 | 8001860010019 | RIŽA SCOTTI 1 kg CARNAROLI NKAS | 1 kg | 11 | 229 | 4,99–7,59 /kg ⚠4 | high/name | vrsta=carnaroli |
 | 20 | 3859888163676 | RIŽA I KLASA 950 g ŠAFRAM (24) | 950 g | 11 | 121 | 2,09–3,15 /kg | high/name | vrsta=dugo_zrno |
 
 <details><summary>Najčešće isključeni (top 10)</summary>
@@ -1898,7 +1900,7 @@ atributi: oblik = spageti, penne, fusilli, makaroni, tagliatelle, farfalle, puzi
 |---|---|---|---|---|---|---|---|---|
 | 1 | 8076802085738 | BARILLA PENNE RIGATE 73 (MAKARON) TJESTENINA 500G (30) | 500 g | 23 | 1384 | 2,38–4,78 /kg | high/name | oblik=penne |
 | 2 | 8076802085981 | BARILLA FUSSILI 98 (VIJAK) TJESTENINA 500G (30) | 500 g | 22 | 1398 | 1,90–5,02 /kg | high/name | oblik=fusilli |
-| 3 | 8076800195057 | N-TJEST BARILLA 5 500G SPAGHETU-1326 -24/1- | 500 g | 21 | 1398 | 2,12–4,12 /kg | high/name | oblik=spageti |
+| 3 | 8076800195057 | TJESTENINA SPAGHETTI 5 500 G BARILLA KUTIJA | 500 g | 21 | 1398 | 2,12–4,12 /kg | high/name | oblik=spageti |
 | 4 | 3859888666399 | TJEST MARODI SPAGHETTI n.5 400G -24/1- | 400 g | 21 | 759 | 2,47–5,63 /kg | high/name | oblik=spageti |
 | 5 | 3859888666061 | TJEST MARODI CHIFFERI RIGATI / PUŽIĆI SREDNJI 400G-12/1 | 400 g | 21 | 727 | 2,47–5,98 /kg | high/name | oblik=puzici |
 | 6 | 3859888666382 | MARODI PENNE RIGATE 400G,(12) (PAL 56) | 400 g | 21 | 609 | 2,47–5,63 /kg | high/name | oblik=penne |
@@ -1921,7 +1923,7 @@ atributi: oblik = spageti, penne, fusilli, makaroni, tagliatelle, farfalle, puzi
 
 | naziv | lanaca | isključio |
 |---|---|---|
-| BISTRA JUHA S TJEST.45G (16) (PAL 145) PODRAVKA | 18 | `juha` |
+| JUHA BISTRA S TJESTENINOM 45 G VRECICA PODRAVKA | 18 | `juha` |
 | TALIANETTA MAKARONI BOLOGNESE VR.160G (12) PODRAVKA | 18 | `tal?ianetta` |
 | ARGETA SALATA PILETINA TJESTENINA 160 G ATLANTIC | 16 | `piletin` |
 | TALIANETTA TJESTENINA SA 4 SIRA VR.145G (12) PODRAVKA | 15 | `tal?ianetta` |
@@ -1937,7 +1939,7 @@ atributi: oblik = spageti, penne, fusilli, makaroni, tagliatelle, farfalle, puzi
 <a id="griz"></a>
 ## griz (`griz`)
 
-jedinica: **kg** · loose_produce: **false** · grupa: **40** · isključenih grupa: **30** · pakiranje: **200–2000**
+jedinica: **kg** · loose_produce: **false** · grupa: **39** · isključenih grupa: **31** · pakiranje: **200–2000**
 
 sinonimi: griz, psenicna krupica  
 must_match: `griz\b | psenicna krupica`
@@ -1976,7 +1978,7 @@ must_match: `griz\b | psenicna krupica`
 | PUDING GRIZ HIGH PROTEIN 65 G DR.OETKER | 5 | `puding` |
 | Hipp bio kašica laku noć ban. griz 190g | 4 | `kasica` |
 | Maggi Juha s mini griz okruglicama 34 g | 4 | `juha` |
-| Maggi juha s griz okruglicama 47 g | 3 | `juha` |
+| JUHA S GRIZ OKRUGLICAMA 47 G MAGGI | 3 | `juha` |
 | HIPP BIO MK JABUKA/KRUŠ/GRIZ 190g | 2 | `hipp` |
 | JUHA KNEDLICE 52 g MESNE/GRIZ PODRAVKA | 2 | `knedl` |
 
@@ -1999,7 +2001,7 @@ must_match: `palent | polent | kukuruzna krupica | kukuruzni griz | kuk krupica`
 | 5 | 3838700540147 | PALENTA 450 g ZLATO POLJE PODRAVKA | 450 g | 14 | 640 | 1,89–4,11 /kg | high/name |  |
 | 6 | 3859890104001 | PALENTA INSTANT 450G (10), ŠAFRAM | 450 g | 12 | 398 | 1,89–3,53 /kg | high/name |  |
 | 7 | 3838700540116 | PALENTA INSTANT VR. PODRAVKA 250 g | 250 g | 10 | 418 | 3,00–4,88 /kg | high/name |  |
-| 8 | 3858884176048 | KUKURUZNA KRUPICA 450 gr ČAK.MLINOVI | 450 g | 9 | 274 | 1,89–4,42 /kg | high/name |  |
+| 8 | 3858884176048 | KUK. KRUPICA 450 G CAKOVECKI MLINOVI | 450 g | 9 | 274 | 1,89–4,42 /kg | high/name |  |
 | 9 | 3858893691365 | PALENTA XXL BRZA PRIPREMA 1000 G (5) | 1 kg | 7 | 257 | 0,89–1,49 /kg | high/name |  |
 | 10 | 3858891564517 | ULTRA INSTANT PALENTA 400GR.(12) (1080 #) | 400 g | 6 | 73 | 1,40–2,47 /kg | high/name |  |
 | 11 | 3858881327153 | KUKURUZNA KRUPICA 1000 g KLARA AA1069 | 1 kg | 5 | 156 | 1,80–2,89 /kg | high/name |  |
@@ -2039,7 +2041,7 @@ atributi: vrsta = sitne, krupne
 | 12 | 4000540050103 | ZOBENE PAHULJICE KOLLN 500 G | 500 g | 4 | 158 | 4,38–6,38 /kg | high/name |  |
 | 13 | 3858894620425 | ZOBENE PAHULJICE SITNE XXL ENCIAN 2 kg | 2 kg | 4 | 105 | 1,90–3,30 /kg | high/name | vrsta=sitne |
 | 14 | 4400045232613 | ZOBENE PAHULJICE 500G WURZENER KRUPNI TIP | 500 g | 4 | 21 | 3,28–4,98 /kg | high/name | vrsta=krupne |
-| 15 | 4008713011289 | PAHULJICE ZOBENE CIJELE 500g | 500 g | 4 | 9 | 2,18–3,88 /kg | high/name |  |
+| 15 | 4008713011289 | ZOBENE PAHULJICE CIJELE 500G | 500 g | 4 | 9 | 2,18–3,88 /kg | high/name |  |
 | 16 | 3859889259781 | ZOBENE PAHULJICE VR. 1 kg (15) PODRAVKA | 1 kg | 4 | 8 | 2,09–2,54 /kg | high/name |  |
 | 17 | 3838900820704 | ZOBENE PAHULJICE RISE & SMILE SITNE 500g | 500 g | 3 | 198 | 0,86–1,98 /kg | high/name | vrsta=sitne |
 | 18 | 8595054907723 | ZOBENE PAHULJICE NATURAL 350 G BIOPLOD | 350 g | 3 | 149 | 7,69–9,11 /kg | high/name |  |
@@ -2066,7 +2068,7 @@ atributi: vrsta = sitne, krupne
 <a id="krusne_mrvice"></a>
 ## krušne mrvice (`krusne_mrvice`)
 
-jedinica: **kg** · loose_produce: **false** · grupa: **115** · isključenih grupa: **12** · pakiranje: **200–2000**
+jedinica: **kg** · loose_produce: **false** · grupa: **109** · isključenih grupa: **19** · pakiranje: **200–2000**
 
 sinonimi: krusne mrvice, prezle, mrvice  
 must_match: `krusne mrvice | mrvice krusne | mrvice\b | prezle | panko`
@@ -2076,13 +2078,13 @@ must_match: `krusne mrvice | mrvice krusne | mrvice\b | prezle | panko`
 | 1 | 3858881322011 | MRVICE KRUŠNE KLARA ZP 500G -42/1- | 500 g | 18 | 884 | 2,98–6,35 /kg | high/name |  |
 | 2 | 3858881322059 | N-MRVICE KRUŠNE KLARA ZP 250G -60/1- | 250 g | 15 | 814 | 3,96–7,80 /kg | high/name |  |
 | 3 | 3858881322233 | MRVICE KRUŠNE KLARA ZP 1KG-15/1- A51338 | 1 kg | 12 | 381 | 2,59–6,29 /kg | high/name |  |
-| 4 | 5902898827163 | MRVICE PANKO ZA SUSHI 200G HOUSE OF ASIA | 200 g | 10 | 368 | 9,95–15,75 /kg | high/name |  |
+| 4 | 5902898827163 | MRVICE PANKO ZA SUSHI 200G HOUSE OF ASIA | 200 g | 10 | 368 | 9,95–15,25 /kg ⚠275 | high/name |  |
 | 5 | 3856016904644 | MRVICE KRUŠNE KLARA ZP XXL 600G -15/1 | 600 g | 9 | 409 | 3,75–4,98 /kg | high/name |  |
-| 6 | 8715035809703 | N-PANKO MRVICE KIKKOMAN 227G SITNE -12/1- | 227 g | 7 | 164 | 10,44–19,34 /kg | high/name |  |
-| 7 | 5999568625037 | It`s Us krušne mrvice bez glutena 300g | 300 g | 6 | 97 | 14,97–19,30 /kg | high/name |  |
+| 6 | 8715035809703 | N-PANKO MRVICE KIKKOMAN 227G SITNE -12/1- | 227 g | 7 | 164 | 10,44–14,93 /kg ⚠97 | high/name |  |
+| 7 | 5999568625037 | It`s Us krušne mrvice bez glutena 300g | 300 g | 6 | 97 | 14,97 /kg ⚠44 | high/name |  |
 | 8 | 3858881324060 | N-MRVICE KRUŠNE ULTRA+ KLARA ZP 480G A51926 -42/1- | 480 g | 5 | 73 | 2,44–3,31 /kg | high/name |  |
 | 9 | 3858881324039 | MRVICE KRUŠNE ULTRA+ KLARA ZP240G A51925 -60/1- | 240 g | 5 | 72 | 2,79–3,96 /kg | high/name |  |
-| 10 | 3858884717487 | KRUŠNE MRVICE 500 g BABIĆ | 500 g | 4 | 191 | 3,50–5,00 /kg | high/name |  |
+| 10 | 3858884717487 | KRUšNE MRVICE 500 g BABIĆ | 500 g | 4 | 191 | 3,50–5,00 /kg | high/name |  |
 | 11 | 3858881121713 | KRUSNE MRVICE 500 G MLINAR | 500 g | 4 | 80 | 1,72–3,98 /kg | high/name |  |
 | 12 | 3850104065149 | KRUšNE MRVICE 250g P ODRAVKA | 250 g | 4 | 29 | 2,32–3,48 /kg | high/name |  |
 | 13 | 3850334343741 | KRUŠNE MRVICE RIAL 500g (20) | 500 g | 4 | 12 | 1,78–2,69 /kg | high/name |  |
@@ -2101,13 +2103,13 @@ must_match: `krusne mrvice | mrvice krusne | mrvice\b | prezle | panko`
 | DEKOR DR OETKER 80G -10/1- KAKAO MRVICE | 17 | `dekor` |
 | DEKOR DR OETKER 80G ŠARENE MRVICE-10/1 | 17 | `dekor` |
 | BOMBONI ŠARENE MRVICE 100 g | 6 | `saren` |
-| DRAŽE ČOKOLADNE MRVICE 100 g KRAŠ (18) | 2 | `cokolad` |
+| DRAŽE ČOKOLADNE MRVICE 100 g KRAŠ (18) | 4 | `coko` |
+| Bauckhof eko mrvice od kukuruza 200g | 2 | `kukuruz` |
+| .KOZICE S PANKO MRVICAMA 200g | 1 | `kozic` |
 | 720G KOTANYI ŠARENE ŠEĆ MRVICE | 1 | `saren` |
-| KLC. Čokoladne mrvice mliječ. čok. 400 g | 1 | `cokolad` |
-| KLC.Čokoladne mrvice 100g | 1 | `cokolad` |
-| KLC.čokola.mrvice.mliječna.čokolada.100g | 1 | `cokolad` |
-| KLC.čokoladn.mrvice.bijela.čokolada.100g | 1 | `cokolad` |
-| KLC.čokoladne.mrvice.crna.čokolada.100g | 1 | `cokolad` |
+| 800G MC COKO MRVICE TAM GOC FO | 1 | `coko` |
+| GASTRO NUGGETSI PILEĆI U PANKO PANADI | 1 | `nugget` |
+| KLC. Čokoladne mrvice mliječ. čok. 400 g | 1 | `coko` |
 
 </details>
 
@@ -2127,22 +2129,22 @@ atributi: vrsta = suhi, svjezi
 | 2 | 3850104266577 | DOLCELA INSTANT SUHI KVASAC 7 g 4+1 GRATIS, PODRAVKA | 35 g | 20 | 1079 | 0,31–0,63 /vrecica | high/name | vrsta=suhi |
 | 3 | 3858887683444 | DI-GO pekarski svježi kvasac 42g | 42 g | 19 | 1354 | 0,11–1,09 /vrecica | high/name | vrsta=svjezi |
 | 4 | 3850104266003 | KVASAC SUHI INSTANT 7g DOLCELA PODRAVKA | 7 g | 18 | 1145 | 0,39–0,79 /vrecica | high/name | vrsta=suhi |
-| 5 | 3859889940153 | DI-GO INST. SUHI PEKARSKI KVASAC 7 g 4+1 GRAT (10) | 35 g | 17 | 858 | 0,12–5,43 /vrecica | high/name | vrsta=suhi |
+| 5 | 3859889940153 | DI-GO INST. SUHI PEKARSKI KVASAC 7 g 4+1 GRAT (10) | 35 g | 17 | 858 | 0,12–0,78 /vrecica | high/name | vrsta=suhi |
 | 6 | 4000521024444 | KVASAC DR OETKER 35G INSTANT 4+1 5*7G -50/1- | 35 g | 16 | 1011 | 0,25–0,55 /vrecica | high/name | vrsta=suhi |
-| 7 | 4000521000349 | KVASAC SUHI INSTANT 7g DR.OETKER | 7 g | 15 | 1025 | 0,01–0,75 /vrecica | high/name | vrsta=suhi |
-| 8 | 8690770323045 | KVASAC DR OETKER 100G INSTANT-30/1- | 100 g | 15 | 534 | 0,07–0,15 /vrecica | high/name | vrsta=suhi |
-| 9 | 3850104266027 | KVASAC SUHI INSTANT 450G DOLCELA PODRAVKA | 450 g | 14 | 333 | 0,04–0,10 /vrecica | high/name | vrsta=suhi |
-| 10 | 3850104266034 | INSTANT SUHI KVASAC 100G (30),PODRAVKA | 100 g | 13 | 449 | 0,08–0,11 /vrecica | high/name | vrsta=suhi |
-| 11 | 3859889940108 | 500G DI-GO KVASAC SUHI PEKARSKI | 500 g | 12 | 443 | 0,04–0,12 /vrecica | high/name | vrsta=suhi |
-| 12 | 4003834000112 | KVASAC SVJEŽI 42G DR.OETKER -24/1- | 42 g | 11 | 477 | 0,08–0,59 /vrecica | high/name | vrsta=svjezi |
-| 13 | 3859889940849 | KVASAC DI-GO INS.SUH.PEK.125 g | 125 g | 10 | 467 | 0,09–0,14 /vrecica | high/name | vrsta=suhi |
-| 14 | 8690770323052 | KVASAC INSTANT 450 g DR.OETKER | 450 g | 8 | 251 | 0,06–0,10 /vrecica | high/name | vrsta=suhi |
+| 7 | 4000521000349 | KVASAC SUHI INSTANT 7g DR.OETKER | 7 g | 15 | 1025 | 0,35–0,75 /vrecica ⚠155 | high/name | vrsta=suhi |
+| 8 | 8690770323045 | KVASAC DR OETKER 100G INSTANT-30/1- | 100 g | 15 | 534 | 0,11–0,15 /vrecica ⚠446 | high/name | vrsta=suhi |
+| 9 | 3850104266027 | KVASAC SUHI INSTANT 450G DOLCELA PODRAVKA | 450 g | 14 | 333 | – ⚠333 | – | vrsta=suhi |
+| 10 | 3850104266034 | INSTANT SUHI KVASAC 100G (30),PODRAVKA | 100 g | 13 | 449 | 0,11 /vrecica ⚠446 | high/name | vrsta=suhi |
+| 11 | 3859889940108 | 500G DI-GO KVASAC SUHI PEKARSKI | 500 g | 12 | 443 | 0,11–0,12 /vrecica ⚠311 | high/name | vrsta=suhi |
+| 12 | 4003834000112 | KVASAC SVJEŽI 42G DR.OETKER -24/1- | 42 g | 11 | 477 | 0,39–0,59 /vrecica ⚠37 | high/name | vrsta=svjezi |
+| 13 | 3859889940849 | KVASAC DI-GO INS.SUH.PEK.125 g | 125 g | 10 | 467 | 0,11–0,14 /vrecica ⚠129 | high/name | vrsta=suhi |
+| 14 | 8690770323052 | KVASAC INSTANT 450 G DR OETKER | 450 g | 8 | 251 | – ⚠251 | – | vrsta=suhi |
 | 15 | 3859889940832 | N-KVASAC DIGO 42G SVJEŽI -24/1-+-/PEKARSTVO | 42 g | 7 | 88 | 0,12–0,99 /vrecica | high/name | vrsta=svjezi |
 | 16 | 3850114203142 | KVASAC SVJEŽI 50g(2*25g) DUOS | 50 g | 5 | 259 | 0,29–0,43 /vrecica | high/name | vrsta=svjezi |
 | 17 | 8600947081913 | KVASAC ALEVA SUHI 10 g | 10 g | 4 | 53 | 0,18–0,34 /vrecica | high/name | vrsta=suhi |
 | 18 | 8008698005828 | KVASAC SUHI BEZ GLUTENA 20 G DR.SCHAR | 20 g | 3 | 196 | 0,59–0,68 /vrecica | high/name | vrsta=suhi |
 | 19 | 3859889940887 | DI-GO DOMAĆI SVJEŽI KVASAC 42 g (40) | 42 g | 3 | 20 | 0,65–0,99 /vrecica | high/name | vrsta=svjezi |
-| 20 | 3858887680627 | KVASAC SVJEŽI DI GO 500 g (20) | 500 g | 3 | 12 | 0,01–0,10 /vrecica | high/name | vrsta=svjezi |
+| 20 | 3858887680627 | KVASAC SVJEŽI DI GO 500 g (20) | 500 g | 3 | 12 | – ⚠12 | – | vrsta=svjezi |
 
 <details><summary>Najčešće isključeni (top 10)</summary>
 
@@ -2165,7 +2167,7 @@ must_match: `prasak za pecivo | pr za pecivo | prasak pecivo | backpulver`
 | 1 | 3850104242175 | PRAŠAK ZA PECIVO DOLCELA 5+1 GRATIS 6X12g PODRAVKA | 72 g | 23 | 863 | 0,08–0,33 /vrecica | high/name |  |
 | 2 | 3850104216770 | PRAŠAK ZA PECIVO 12G,(48) PODRAVKA (PAL 441) | 12 g | 18 | 1181 | 0,12–0,39 /vrecica | high/name |  |
 | 3 | 5997381375498 | PRAŠAK ZA PECIVO DR OETKER 12G -50/1- | 12 g | 14 | 1033 | 0,16–0,30 /vrecica | high/name |  |
-| 4 | 3850104219535 | PRAŠAK ZA PECIVO 1kg PODRAVKA (4) | 1 kg | 7 | 31 | 0,04–0,07 /vrecica | high/name |  |
+| 4 | 3850104219535 | PRAŠAK ZA PECIVO 1kg PODRAVKA (4) | 1 kg | 7 | 31 | 0,05–0,07 /vrecica ⚠1 | high/name |  |
 | 5 | 3856020275501 | PRAŠAK ZA PECIVO PODR 72G 6-PACK -16/1- 6*12G | 72 g | 6 | 660 | 0,16–0,25 /vrecica | high/name |  |
 | 6 | 5997381375511 | PRASAK ZA PECIVO 5+1 72 G DR.OETKER | 72 g | 6 | 416 | 0,08–0,19 /vrecica | high/name |  |
 | 7 | 5997381375504 | PRAŠAK ZA PECIVO 12 g 5+1 GRATIS DR.OETKER | 72 g | 6 | 404 | 0,17–0,22 /vrecica | high/name |  |
@@ -2179,7 +2181,7 @@ must_match: `prasak za pecivo | pr za pecivo | prasak pecivo | backpulver`
 | 15 | 3858881588196 | PRAŠAK ZA PECIVO 1 kg NADALINA | 1 kg | 3 | 23 | 0,06–0,12 /vrecica | high/name |  |
 | 16 | 8606104332430 | PRAŠAK ZA PECIVO 5+1 GRATIS 60g | 60 g | 3 | 4 | 0,08–0,10 /vrecica | high/name |  |
 | 17 | 38389719 | PRAŠAK ZA PECIVO 12 g PODRAVKA (48) | 12 g | 2 | 21 | 0,14–0,19 /vrecica | high/name |  |
-| 18 | 5997381346870 | PRAŠAK ZA PECIVO 6+2GR 96G DR.OETKER | 16 g | 2 | 6 | 0,74–1,46 /vrecica | high/name |  |
+| 18 | 5997381346870 | PRAŠAK ZA PECIVO 6+2GR 96G DR.OETKER | 96 g | 2 | 6 | 0,12–0,24 /vrecica | high/name |  |
 | 19 | 5997381375528 | PRAŠAK ZA PECIVO 6X12g DR OETKER | 72 g | 1 | 184 | 0,17–0,18 /vrecica | high/name |  |
 | 20 | 3856018261172 | PRASAK ZA PECIVO 5X12 G B B | 60 g | 1 | 155 | 0,10 /vrecica | high/name |  |
 
@@ -2197,19 +2199,19 @@ must_match: `vanilin secer | vanilinski secer | secer vanilin | vanilin\b`
 | 2 | 3856020258511 | DOLCELA VANILIN ŠEĆER 8 g PODRAVKA (44) | 8 g | 20 | 1202 | 0,12–0,39 /vrecica | high/name |  |
 | 3 | 5997381375542 | VANILIN ŠEĆER DR OETKER 8G -50/1- | 8 g | 13 | 1014 | 0,15–0,30 /vrecica | high/name |  |
 | 4 | 5997381337779 | VANILIN ŠEĆER BURBON 10G(50) DR.OETKER | 10 g | 13 | 640 | 0,29–0,55 /vrecica | high/name |  |
-| 5 | 9001414410127 | ZAČIN VANILIN ŠEĆER BOURBON KOTANYI 20 g | 20 g | 11 | 261 | 0,04–0,48 /vrecica | high/name |  |
+| 5 | 9001414410127 | ZAČIN VANILIN ŠEĆER BOURBON KOTANYI 20 g | 20 g | 11 | 261 | 0,19–0,48 /vrecica ⚠1 | high/name |  |
 | 6 | 5997381375566 | Dr.Oetker vanilin šećer 6x8g 1 gratis | 48 g | 8 | 461 | 0,15–0,22 /vrecica | high/name |  |
 | 7 | 5997381345750 | VANILIN ŠEČER BOURBON X3 30G (18) DR OETKER | 36 g | 8 | 257 | 0,24–0,42 /vrecica | high/name |  |
-| 8 | 3850104242151 | VANILIN ŠEĆER 10 g 5+1 GRATIS 4F PODRAV | 60 g | 8 | 196 | 0,08–1,93 /vrecica | high/name |  |
-| 9 | 3850104018886 | VANILIN ŠEĆER 1kg PODRAVKA (4) | 1 kg | 8 | 33 | 0,04–0,06 /vrecica | high/name |  |
+| 8 | 3850104242151 | Dolcela vanilin šećer vr.6x10g 1 gratis | 60 g | 8 | 196 | 0,08–0,19 /vrecica | high/name |  |
+| 9 | 3850104018886 | VANILIN ŠEĆER 1kg PODRAVKA (4) | 1 kg | 8 | 33 | 0,05–0,06 /vrecica ⚠30 | high/name |  |
 | 10 | 3856020275532 | DOLCELA VANILIN ŠEĆER 8 g 6 PAK PODRAVKA (16) | 48 g | 7 | 656 | 0,16–0,25 /vrecica | high/name |  |
 | 11 | 5997381375573 | Dr. Oetker vanilin šećer 10x8g 2 gratis | 80 g | 7 | 482 | 0,11–0,20 /vrecica | high/name |  |
 | 12 | 3850104018862 | VANILIN ŠEĆER 10 g PODRAVKA (48) | 10 g | 6 | 192 | 0,10–0,23 /vrecica | high/name |  |
-| 13 | 9001414502389 | KOTANYI BURBON,VANILIN ŠEĆER 10G VREĆICA | 10 g | 6 | 155 | 0,52–0,95 /vrecica | high/name |  |
-| 14 | 3856020270742 | VANILIN ŠEĆER U PRAHU 100 g DOLCELA | 100 g | 6 | 73 | 0,06–0,11 /vrecica | high/name |  |
+| 13 | 9001414502389 | KOTANYI BURBON,VANILIN ŠEĆER 10G VREĆICA | 10 g | 6 | 155 | 0,52–0,71 /vrecica ⚠122 | high/name |  |
+| 14 | 3856020270742 | ŠEĆER U PRAHU VANILIN 100 g DOLCELA | 100 g | 6 | 73 | 0,06–0,11 /vrecica | high/name |  |
 | 15 | 3858891565507 | VANILIN ŠEĆER 10G 5/1 50G ULTRA PLUS | 50 g | 6 | 71 | 0,06–0,19 /vrecica | high/name |  |
 | 16 | 5997381375559 | VANILIN ŠEĆER 5+1 DR.OETKER 8 g | 48 g | 5 | 383 | 0,17–0,22 /vrecica | high/name |  |
-| 17 | 3856020260767 | DOLCELA VANILIN ŠEĆER 8 g 10kom PODRAVKA | 80 g | 5 | 228 | 0,16–1,69 /vrecica | high/name |  |
+| 17 | 3856020260767 | DOLCELA VANILIN ŠEĆER 8 g 10kom PODRAVKA | 80 g | 5 | 228 | 0,16–0,18 /vrecica ⚠3 | high/name |  |
 | 18 | 9001414611791 | *NE*VANILIN AROMATIZIRANI ŠEĆER VREĆICA 70g | 70 g | 5 | 178 | 0,09–0,14 /vrecica | high/name |  |
 | 19 | 3850334197696 | VANILIN ŠEĆER 50g 5X10g SWEET CHEF (36) | 50 g | 4 | 185 | 0,06–0,15 /vrecica | high/name |  |
 | 20 | 5997381358279 | VANILIN ŠEĆER 40G XXL (25) DR.OETKER | 40 g | 4 | 46 | 0,06–0,17 /vrecica | high/name |  |
@@ -2222,8 +2224,8 @@ must_match: `vanilin secer | vanilinski secer | secer vanilin | vanilin\b`
 | SLADILO SWEET ZERO VANILIN 8 g DR.OETKER | 9 | `sladil` |
 | VANILIN KIFLICE 400G VOPEX | 5 | `kiflic` |
 | KEKS LILLY VANILIN KRAŠ 220 g (16) | 4 | `keks` |
+| KIFLICE PETRA 220g VANILIN | 2 | `kiflic` |
 | MJEŠ ZA VANILIN KIFLICE 360 g OETKER | 2 | `kiflic` |
-| PETRA VANILIN KIFLICE 220g | 2 | `kiflic` |
 | PUDING VANILIN 1 kg DOLCELA | 2 | `puding` |
 | DR g VANILIN KIFLICE 250g | 1 | `kiflic` |
 | K PLUS VANILIN KIFLICE 300 g | 1 | `kiflic` |
@@ -2255,7 +2257,7 @@ must_match: `kakao\b`
 | 12 | 3858890134360 | EKO KAKAO U PR.200 g EKOZONA | 200 g | 2 | 51 | 26,25–38,45 /kg | high/name |  |
 | 13 | 8004333017003 | PRALINE KAKAO BOŽIĆ 400 g ROVELLI | 400 g | 2 | 39 | 13,73–16,23 /kg | high/name |  |
 | 14 | 8019980032743 | KRAFNE KAKAO BEZ GLUTENA 111 g | 111 g | 2 | 23 | 17,93–35,95 /kg | high/name |  |
-| 15 | 3850102945085 | KAKAO PRAH 100 g KRAŠ (21) | 100 g | 2 | 20 | 14,90–235,90 /kg | high/name |  |
+| 15 | 3850102945085 | KAKAO PRAH 100 g KRAŠ (21) | 100 g | 2 | 20 | 14,90–24,30 /kg ⚠7 | high/name |  |
 | 16 | 3850120601239 | MOTO KAKAO 192G (12) KRAŠ (PAL-100) | 192 g | 2 | 19 | 8,07–11,93 /kg | high/name |  |
 | 17 | 3890000472580 | KAKAO TABLA ZA JELO I KUHANJE CRNA 250g CREMONTE | 250 g | 2 | 12 | 5,40–7,56 /kg | high/name |  |
 | 18 | 3858891046815 | KNEDLE SA KAKAO KREMOM 1000G FROZY | 1 kg | 2 | 10 | 2,99–3,31 /kg | high/name |  |
@@ -2269,8 +2271,8 @@ must_match: `kakao\b`
 | VAFEL KAKAO PRUTICI FRONDI 250 G KRAS | 23 | `vafel` |
 | KEKS KAROLINA 288G MOTO KAKAO -18/1- | 20 | `keks` |
 | KEKSI PREKRAŠNI KOLAČIĆI S KAKAO PUNJENJEM 220G KRAŠ | 20 | `keks` |
+| DORINA ČOKOLADICA KREM KAKAO 38 g (24) | 19 | `cokolad` |
 | LEDOLETTA KAKAO KREM 800g | 19 | `krem\b` |
-| ČOKOLADICA KREM KAKAO 38 g DORINA KRAŠ | 19 | `cokolad` |
 | DEKOR DR OETKER 80G -10/1- KAKAO MRVICE | 18 | `dekor` |
 | N-KEKS KAROLINA 192G MOTO KAKAO -12/1- | 18 | `keks` |
 | VAFEL KAKAO I MLIJEKO PRUTICI FRONDI 225 G KRAS | 18 | `vafel` |
@@ -2294,11 +2296,11 @@ must_match: `cokolada za kuhanje | cokolada za kuh | cok za kuh | cokolada za ko
 | 3 | 3850102008643 | DORINA BIJELA ČOKOLADA ZA KUHANJE 200 g (12) KRAŠ | 200 g | 16 | 633 | 9,95–31,95 /kg | high/name |  |
 | 4 | 3850102008681 | DORINA ČOKOLADA ZA KUHANJE 400 g (8) KRAŠ | 400 g | 7 | 153 | 5,98–20,48 /kg | high/name |  |
 | 5 | 3877000595778 | ČOKOLADA ZA KUH.XXL 300 g LA BOMBA | 300 g | 6 | 588 | 10,30–14,00 /kg | high/name |  |
-| 6 | 8004735020861 | ČOK ZA KUHANJE TAMNA 50% 200g ZAINI | 200 g | 6 | 211 | 5,00–99,75 /kg | high/name |  |
+| 6 | 8004735020861 | ČOK ZA KUHANJE TAMNA 50% 200g ZAINI | 200 g | 6 | 211 | 5,00–44,95 /kg ⚠1 | high/name |  |
 | 7 | 3856003953419 | ČOKOLADA ZA KUHANJE 300 g (14) SMIJEŠAK | 300 g | 5 | 499 | 10,30–14,00 /kg | high/name |  |
 | 8 | 3850102018857 | ČOKOLADA ZA KUHANJE RUM 200 g KRAŠ | 200 g | 5 | 240 | 14,95–24,95 /kg | high/name |  |
 | 9 | 3850102018864 | ČOKOLADA ZA KUH. PREM. 200 g KRAŠ | 200 g | 5 | 238 | 14,95–24,95 /kg | high/name |  |
-| 10 | 7613035587793 | COK. ZA KUH. MILK 170 G DESSERT NESTLE | 170 g | 4 | 218 | 0,80–34,41 /kg | high/name |  |
+| 10 | 7613035587793 | COK. ZA KUH. MILK 170 G DESSERT NESTLE | 170 g | 4 | 218 | 19,76–34,41 /kg ⚠2 | high/name |  |
 | 11 | 8004735065077 | ČOK.ZA KUHANJE BIJELA 200g EMILIA | 200 g | 4 | 129 | 15,00–53,45 /kg | high/name |  |
 | 12 | 3858891563046 | COK.ZA KUH.200G ULTRA PLUS | 200 g | 4 | 61 | 5,95–8,05 /kg | high/name |  |
 | 13 | 8606103719218 | ČOKOLADA ZA KUHANJE I JELO 200G KONDI | 200 g | 4 | 10 | 7,45–11,05 /kg | high/name |  |
@@ -2361,7 +2363,7 @@ must_match: `pilec prsa | pileca prsa | pileci file | pilec file | prsa pilec | 
 <a id="piletina"></a>
 ## piletina (cijelo pile, batak, zabatak, krila) (`piletina`)
 
-jedinica: **kg** · loose_produce: **false** · grupa: **617** · isključenih grupa: **210**
+jedinica: **kg** · loose_produce: **false** · grupa: **615** · isključenih grupa: **212**
 
 sinonimi: piletina, pile, pileci batak, pileca krila, zabatak  
 must_match: `pile\b | pilec batak | pileci batak | batak | zabatak | pilec krila | pileca krila | krilca | pileca zadnja | pilece meso | pilec zadnj`
@@ -2372,7 +2374,7 @@ atributi: dio = cijelo, batak, zabatak, krila
 |---|---|---|---|---|---|---|---|---|
 | 1 | 3850159111013 | CEKIN GRILL PILE SMRZNUTO, KOKA VINDIJA | 1 kg | 10 | 48 | 2,92–5,38 /kg | high/ean | dio=cijelo |
 | 2 | 3850159112829 | PILE KOKA 1 kg SVJ.HRVATSKO | 1 kg | 9 | 428 | 3,18–3,32 /kg | high/ean | dio=cijelo |
-| 3 | 3850220115773 | Međimursko pile - pileći batak 500g | 500 g | 7 | 635 | 3,98–6,98 /kg | high/name | dio=batak |
+| 3 | 3850220115773 | PILEĆI BATAK 500 g SVJEŽI PERUTNINA | 500 g | 7 | 635 | 3,98–6,98 /kg | high/name | dio=batak |
 | 4 | 3850159110269 | PILECA KRILA PODLOZAK CEKIN (11026) |  | 7 | 344 | 5,49–7,89 /kg | low/unit_price | dio=krila |
 | 5 | 3850159110054 | PILECI BATAK-ZABATAK PODLOZAK CEKIN (11005) | 1 kg | 7 | 317 | 4,79–6,89 /kg | high/ean | dio=batak |
 | 6 | 3850159110085 | PILECI ZABATAK PODLOZAK CEKIN (11008) | 1 kg | 7 | 181 | 4,19–6,89 /kg | high/ean | dio=zabatak |
@@ -2429,7 +2431,7 @@ atributi: vrsta = mijesano, junece, svinjsko, purece, pilece, telece
 | 7 | 3850139446517 | MIJESANO MLJEVENO MESO E540 G LIGHT | 540 g | 2 | 265 | 11,09–11,65 /kg | high/name | vrsta=mijesano |
 | 8 | 3858890183573 | MIJESANO MLJEVENO MESO E450 G MAP | 450 g | 2 | 159 | 6,64–9,98 /kg | high/name | vrsta=mijesano |
 | 9 | 3858881612198 | MIJESANO MLJEVENO MESO E850 G MAP | 850 g | 2 | 157 | 7,05–8,58 /kg | high/name | vrsta=mijesano |
-| 10 | 3850139415438 | JUN MLJEV MESO 850g MA PIK VRBOVEC | 850 g | 2 | 117 | 11,52–12,24 /kg | high/name | vrsta=mijesano |
+| 10 | 3850139415438 | JUN MLJEV MESO 850g MA PIK VRBOVEC | 850 g | 2 | 117 | 11,52–12,24 /kg | high/name | vrsta=mijesano (zadano) |
 | 11 | 3859893068461 | MIJEŠANO MLJEVENO MESO 450 g | 450 g | 2 | 57 | 8,20–9,31 /kg | high/name | vrsta=mijesano |
 | 12 | 3850139286281 | MIJEŠANO MLJEVENO MESO 1 KG | 1 kg | 2 | 14 | 6,29–7,49 /kg | high/name | vrsta=mijesano |
 | 13 | 3850139280371 | MIJEŠANO MLJEVENO MESO 750 g K PLUS | 750 g | 1 | 182 | 5,85 /kg | high/name | vrsta=mijesano |
@@ -2468,7 +2470,7 @@ atributi: dio = vrat, but, lopatica, kotlet, rebra, file
 | 11 | 3850139523003 | SVINJSKI BUT SK U KOŽI NEOB. RAV. R |  | 2 | 103 | 3,49–4,65 /kg | low/unit_price | dio=but |
 | 12 | 3850139523423 | SVJEŽA SVINJSKA REBRA PIK VRBOVEC |  | 2 | 103 | 5,99–6,99 /kg | low/unit_price | dio=rebra |
 | 13 | 3850139431469 | SV LOPATICA BK 4D UVOZ (VAK) |  | 2 | 16 | 4,38 /kg | low/unit_price | dio=lopatica |
-| 14 | 3850139540918 | CCA0,5KG SVINJSKI FILE VP | 1 kg | 2 | 16 | 8,13–229,75 /kg | high/ean | dio=file |
+| 14 | 3850139540918 | CCA0,5KG SVINJSKI FILE VP | 1 kg | 2 | 16 | 8,13–11,49 /kg ⚠8 | high/name | dio=file |
 | 15 | 3850139436914 | SVINJSKI VRAT BEZ KOSTI PIK |  | 2 | 7 | – | – | dio=vrat |
 | 16 | 3859893378447 | SVINJSKI BUT SK U KOŽI DALM.OBR MM |  | 2 | 5 | 4,04–4,91 /kg | low/unit_price | dio=but |
 | 17 | 3850139540925 | SVINJSKI FILE VAC |  | 1 | 186 | 5,99–10,99 /kg | low/unit_price | dio=file |
@@ -2515,7 +2517,7 @@ atributi: dio = but, vrat, lopatica, gulas, file, rebra
 | 6 | 3850139401547 | Juneći vrat bez kosti |  | 2 | 196 | 12,99–13,99 /kg | low/unit_price | dio=vrat |
 | 7 | 3858890182651 | PPK JUNEĆE MESO ZA GULAŠ 400 g | 400 g | 2 | 152 | 14,98–19,63 /kg | high/name | dio=gulas |
 | 8 | 3850139411164 | JUNEĆA LOPATICA B.K. PIK |  | 2 | 109 | 13,49 /kg | low/unit_price | dio=lopatica |
-| 9 | 3850139523119 | JUNEĆI VRAT BK RFZ |  | 2 | 108 | 2,60–6,99 /kg | low/unit_price | dio=vrat |
+| 9 | 3850139523119 | JUNEĆI VRAT BK RFZ |  | 2 | 108 | 6,99 /kg ⚠6 | low/unit_price | dio=vrat |
 | 10 | 3850139456424 | JUNEĆE GULAŠ KOCKE PIK VRBOVEC kg |  | 2 | 9 | 19,49 /kg | low/unit_price | dio=gulas |
 | 11 | 3856021210310 | Junetina za gulaš |  | 1 | 138 | 16,29 /kg | low/unit_price | dio=gulas |
 | 12 | 3856021210327 | Juneća rebra |  | 1 | 136 | 12,79 /kg | low/unit_price | dio=rebra |
@@ -2576,7 +2578,7 @@ atributi: oblik = narezana, kockice
 | 17 | 3858884937298 | ISTARSKA PANCETA VP 200 g kom PISINIUM GP338 | 200 g | 7 | 293 | 25,65–39,45 /kg | high/name |  |
 | 18 | 3859892946197 | ŠPEK DOMAĆI DIMLJENI E100 g MAP MEDVEN | 100 g | 7 | 290 | 22,90–36,90 /kg | high/name | oblik=narezana |
 | 19 | 3859893167249 | HISTRIS ISTARSKA PANCETA 80G -8/1- | 80 g | 6 | 328 | 32,38–52,38 /kg | high/name |  |
-| 20 | 3850133816750 | PANCETA NARESCI 150 g DOBRO | 150 g | 6 | 160 | 15,27–28,60 /kg | high/name | oblik=narezana |
+| 20 | 3850133816750 | PANCETA NAREZAK DOBRO 150 g | 150 g | 6 | 160 | 15,27–28,60 /kg | high/name | oblik=narezana |
 
 <details><summary>Najčešće isključeni (top 10)</summary>
 
@@ -2611,7 +2613,7 @@ atributi: vrsta = kuhana, pileca, pureca, delikates; oblik = narezana
 | 2 | 3850139250671 | N-VRB ŠUNKA FINA 150G PIK NAREZAK -10/1 | 150 g | 22 | 970 | 16,60–27,27 /kg | high/name | oblik=narezana |
 | 3 | 3850139171051 | SUNKA U OVITKU NAREZAK 125 G MA PIK VRBOVEC | 125 g | 20 | 994 | 11,92–24,72 /kg | high/name | oblik=narezana |
 | 4 | 3850159128813 | PUREĆA DELUXE ŠUNKA CLASSIC 100 g VINDON 12881 | 100 g | 19 | 926 | 15,90–31,90 /kg | high/name | vrsta=pureca |
-| 5 | 3850139173550 | PIK ŠUNKA U OVITKU 350G,PIK VRBOVEC, | 350 g | 19 | 793 | 9,97–16,71 /kg | high/name |  |
+| 5 | 3850139173550 | ŠUNKA U OVITKU 350G PIK VRBOVEC (12) | 350 g | 19 | 793 | 9,97–16,71 /kg | high/name |  |
 | 6 | 3858890209679 | N-GAV ŠUNKA MANDOLINA 340G-24/1 LIM GAVRILOVIĆ | 340 g | 19 | 688 | 13,21–24,09 /kg | high/name |  |
 | 7 | 3858892721292 | ŠUNKA U OVITKU 350G GAVRILOVIĆ (6) | 350 g | 19 | 664 | 11,54–17,11 /kg | high/name |  |
 | 8 | 3850139520453 | ŠUNKA PUREĆA DIMLJENA 100 g MA PIK VRBOVEC | 100 g | 18 | 902 | 12,90–35,90 /kg | high/name | vrsta=pureca, oblik=narezana |
@@ -2620,7 +2622,7 @@ atributi: vrsta = kuhana, pileca, pureca, delikates; oblik = narezana
 | 11 | 3858881227927 | ŠUNKA NAREZAK LIM. GAVRILOVIĆ 150 g | 150 g | 17 | 806 | 11,27–18,60 /kg | high/name | oblik=narezana |
 | 12 | 3850139350401 | PECENA SUNKA 125 G NAREZAK PIK VRBOVEC | 125 g | 16 | 771 | 17,52–30,32 /kg | high/name | oblik=narezana |
 | 13 | 3850139171723 | N-VRB ŠUNKA PIK DELIKATES 150G NAREZAK -10/1 | 150 g | 16 | 620 | 13,73–24,60 /kg | high/name | vrsta=delikates, oblik=narezana |
-| 14 | 3858890203295 | PURECA SUNKA STANCIJA NAREZAK 100 G GAVRILOVIC | 100 g | 14 | 580 | 6,90–30,90 /kg | high/name | vrsta=pureca, oblik=narezana |
+| 14 | 3858890203295 | PURECA SUNKA STANCIJA NAREZAK 100 G GAVRILOVIC | 100 g | 14 | 580 | 6,90–30,90 /kg | high/name | oblik=narezana, vrsta=pureca |
 | 15 | 3858886467731 | ŠUNKA NAREZAK LIMENKA 150 G (15) PODRAVKA | 150 g | 14 | 507 | 10,27–16,60 /kg | high/name | oblik=narezana |
 | 16 | 3858890207002 | N-GAV ŠUNKA NAREZAK PIKANT 150G -45/1- | 150 g | 14 | 471 | 10,13–18,60 /kg | high/name | oblik=narezana |
 | 17 | 3858886465713 | SUNKA U OVITKU 350 G PODRAVKA | 350 g | 14 | 389 | 8,80–16,26 /kg | high/name |  |
@@ -2632,7 +2634,7 @@ atributi: vrsta = kuhana, pileca, pureca, delikates; oblik = narezana
 
 | naziv | lanaca | isključio |
 |---|---|---|
-| SIR TOPLJENI ZDENKA ŠUNKA 140 g ZDENKA | 17 | `sir\b` |
+| N-SIR ZDK ZA MAZANJE 140G ŠUNKA -16/1- | 17 | `sir\b` |
 | N-VIVIS SVJEŽI KREM SIR 100G5892 ŠUNKA -22/1- | 16 | `sir\b` |
 | SIR ABC SUNKA 100 G BELJE ZVIJEZDA | 13 | `sir\b` |
 | KREKERI TUC BACON ŠUNKA 100G | 8 | `kreker` |
@@ -2658,21 +2660,21 @@ atributi: oblik = komadi, file, sjeckana; preljev = ulje, vlastiti_sok
 | # | id | naziv | pakiranje | lanaca | trgovina | €/jed | pouzdanost | atributi |
 |---|---|---|---|---|---|---|---|---|
 | 1 | 8004030595033 | TUNA KOMADI NATURALE RIO MARE 160 g (OCIJEĐENA MASA 122 g) ORBICO | 160 g | 21 | 1225 | 10,94–40,75 /kg | high/name | preljev=vlastiti_sok, oblik=komadi |
-| 2 | 3856020263096 | EVA TUNA FILETI U BILJNOM ULJU 100G (30) (PAL 161) | 100 g | 21 | 923 | 26,90–46,50 /kg | high/name | oblik=file, preljev=ulje |
+| 2 | 3856020263096 | EVA TUNA FILETI U BILJNOM ULJU 100G (30) (PAL 161) | 100 g | 21 | 923 | 26,90–46,50 /kg | high/name | preljev=ulje, oblik=file |
 | 3 | 8004030595002 | TUNA KOMADI U SUNCOKRET. ULJU RIO MARE 160 g (OCIJEĐENA NASA 122 g) ORBICO | 160 g | 20 | 1236 | 10,94–43,66 /kg | high/name | preljev=ulje, oblik=komadi |
 | 4 | 3850104267031 | EVA TUNA KOMADIĆI USITNJ.160G/112G, (48) (PAL 54)PODRAVKA | 160 g | 20 | 798 | 9,06–17,81 /kg | high/name | preljev=ulje, oblik=komadi |
 | 5 | 8594012796515 | TUNA ŽUTOPERAJNA ODREZ. U SUNC. ULJU 170g (OCJ. MASA 120g)GIANA | 170 g | 18 | 836 | 11,12–24,08 /kg | high/name | preljev=ulje, oblik=file |
-| 6 | 8004030345775 | N-TUNA RIO MARE 3*80G (NETTO3*52G)U MAS.ULJU -6/1 | 240 g | 18 | 776 | 20,79–106,58 /kg | high/name | preljev=ulje |
+| 6 | 8004030345775 | N-TUNA RIO MARE 3*80G (NETTO3*52G)U MAS.ULJU -6/1 | 240 g | 18 | 776 | 20,79–47,37 /kg ⚠1 | high/name | preljev=ulje |
 | 7 | 8004030100213 | N-TUNA RIO MARE 2*80G(NETTO 2*52G)U MAS.ULJU-24/1 | 160 g | 16 | 719 | 17,44–52,79 /kg | high/name | preljev=ulje |
 | 8 | 3856020263126 | EVA TUNA FILETI U MASLINOVOM ULJU 100G (30)(PAL690) PODRAVKA | 100 g | 16 | 454 | 15,00–44,90 /kg | high/name | preljev=ulje, oblik=file |
-| 9 | 8004030044005 | N-TUNA RIO MARE 160G U MAS.ULJU(netto 104g) -12/1 | 160 g | 16 | 444 | 19,88–179,69 /kg | high/name | preljev=ulje |
+| 9 | 8004030044005 | N-TUNA RIO MARE 160G U MAS.ULJU(netto 104g) -12/1 | 160 g | 16 | 444 | 19,88–41,25 /kg ⚠2 | high/name | preljev=ulje |
 | 10 | 8595241527901 | TUNA ODREZAK U MASLINOVOM ULJU FRANZ JOSEF 150g-ocijeđ.mase 102g | 150 g | 15 | 795 | 14,60–28,33 /kg | high/name | preljev=ulje |
 | 11 | 3856020278229 | TUNA STEAK KOMADI U BILJNOM ULJU 160g EVA PODRAVKA | 160 g | 14 | 750 | 8,44–28,06 /kg | high/name | preljev=ulje, oblik=komadi |
 | 12 | 8004030005051 | N-TUNA RIO MARE ULJE 4*80G UMASLINOVOM ULJ(NETTO 4*52G) | 320 g | 14 | 749 | 15,59–34,34 /kg | high/name | preljev=ulje |
 | 13 | 3850160108064 | TUNA FILET BILJNO ULJE 105 G ADRIATIC QUEEN SARDINA POSTIRA | 105 g | 14 | 690 | 36,10–77,41 /kg | high/name | preljev=ulje, oblik=file |
 | 14 | 3856020263218 | EVA TUNA U UMAKU OD RAJČICE 100G (30)(PAL690) PODRAVKA | 100 g | 14 | 411 | 19,50–26,90 /kg | high/name |  |
 | 15 | 80040248 | RIB.K.TUNA MASL.ULJE 80 g ( 0,052 g) RIO MARE ORBI | 80 g | 14 | 363 | 12,50–63,27 /kg | high/name | preljev=ulje |
-| 16 | 3850104231506 | EVA TUNA KOMADI U ULJU 160G/112G (24) (PAL 117) PODRAVKA | 160 g | 14 | 336 | 10,62–116,63 /kg | high/name | preljev=ulje, oblik=komadi |
+| 16 | 3850104231506 | EVA TUNA KOMADI U ULJU 160G/112G (24) (PAL 117) PODRAVKA | 160 g | 14 | 336 | 10,62–27,81 /kg ⚠1 | high/name | preljev=ulje, oblik=komadi |
 | 17 | 8004030344570 | N-TUNA RIO MARE NATURALE4*80G (NETTO 4*56G)-12/1 3503 | 320 g | 13 | 628 | 15,59–42,81 /kg | high/name | preljev=vlastiti_sok |
 | 18 | 3850160108538 | TUNA FILET MASLINOVOM ULJE 105 G ADRIATIC QUEEN SARDINA POST | 105 g | 13 | 545 | 21,71–71,97 /kg | high/name | preljev=ulje, oblik=file |
 | 19 | 8595241527857 | TUNA FRANZ JOSEF U SUNCOK.ULJU 4X80g - ocijeđ mase 4X52g | 320 g | 12 | 566 | 7,81–23,51 /kg | high/name | preljev=ulje |
@@ -2703,30 +2705,30 @@ jedinica: **kg** · loose_produce: **false** · grupa: **403** · isključenih g
 sinonimi: grah, grah zrno, crveni grah, bijeli grah  
 must_match: `grah\b | graha\b | grah zrn`
   
-atributi: vrsta = bijeli, crveni, sareni, smedi, crni; oblik = konzerva, smrznuto, svjeze, suho
+atributi: vrsta = bijeli, crveni, sareni, smedi, crni; oblik = konzerva, smrznuto, svjeze, suho, nepoznato
 
 | # | id | naziv | pakiranje | lanaca | trgovina | €/jed | pouzdanost | atributi |
 |---|---|---|---|---|---|---|---|---|
 | 1 | 3850104025389 | GRAH SMEĐI 800g LIM.PODRAVKA-ocijeđene mase 460g | 800 g | 23 | 1390 | 2,06–6,07 /kg | high/name | oblik=konzerva, vrsta=smedi |
-| 2 | 3850104020780 | GRAH BIJELI 800 g LIM PODRAVKA OC MASA 460 g (12) | 800 g | 23 | 1014 | 1,95–5,63 /kg | high/name | oblik=konzerva, vrsta=bijeli |
+| 2 | 3850104020780 | GRAH BIJELI 800g LIM.PODRAVKA-ocijeđene mase 460g | 800 g | 23 | 1014 | 1,95–5,63 /kg | high/name | oblik=konzerva, vrsta=bijeli |
 | 3 | 3850104024870 | GRAH SMEĐI 400g LIM.PODRAVKA-ocijeđene mase 230g | 400 g | 22 | 1099 | 2,38–7,61 /kg | high/name | oblik=konzerva, vrsta=smedi |
 | 4 | 3850104020759 | GRAH CRVENI 400g LIM PODRAVKA-OCIJEĐENA MASA 230g | 400 g | 21 | 882 | 2,38–8,65 /kg | high/name | oblik=konzerva, vrsta=crveni |
 | 5 | 3850104020728 | GRAH CRVENI 800 g LIM PODRAVKA OC MASA 460 g (12) | 800 g | 20 | 767 | 2,74–6,50 /kg | high/name | oblik=konzerva, vrsta=crveni |
 | 6 | 3850104020797 | GRAH BIJELI 400g LIM.PODRAVKA-OCIJEĐENA MASA 230g | 400 g | 19 | 855 | 2,23–7,61 /kg | high/name | oblik=konzerva, vrsta=bijeli |
-| 7 | 3856015309679 | N-GRAH SMEĐI ZVIJEZDA 800G 480G ČVRSTE TVARI -12/1- | 800 g | 14 | 607 | 2,11–4,15 /kg | high/name | oblik=suho, vrsta=smedi |
-| 8 | 8595241511276 | GRAH ŠARENI 800 gr (OCJ. MASA 480 g) GIANA | 800 g | 12 | 653 | 1,13–4,15 /kg | high/name | oblik=suho, vrsta=sareni |
+| 7 | 3856015309679 | N-GRAH SMEĐI ZVIJEZDA 800G 480G ČVRSTE TVARI -12/1- | 800 g | 14 | 607 | 2,11–4,15 /kg | high/name | oblik=nepoznato (zadano), vrsta=smedi |
+| 8 | 8595241511276 | GRAH ŠARENI 800 gr (OCJ. MASA 480 g) GIANA | 800 g | 12 | 653 | 1,13–4,15 /kg | high/name | oblik=nepoznato (zadano), vrsta=sareni |
 | 9 | 3850104025396 | GRAH SMEĐI 2500 g OCJ.MASA 1450 g PODRAVKA | 2,5 kg | 11 | 42 | 2,11–4,27 /kg | high/name | oblik=konzerva, vrsta=smedi |
-| 10 | 3859893124501 | GRAH ŠARENI 500G NATURA, MARJAN VOĆE | 500 g | 10 | 393 | 1,98–4,98 /kg | high/name | oblik=suho, vrsta=sareni |
-| 11 | 3856015309648 | N-GRAH SMEĐI ZVIJEZDA 400G 240G ČVRSTE TVARI -12/1- | 400 g | 10 | 329 | 1,85–5,79 /kg | high/name | oblik=suho, vrsta=smedi |
-| 12 | 3856020243432 | GRAH CRNI 400G LIM. PODRAVKA | 400 g | 10 | 226 | 2,38–5,48 /kg | high/name | oblik=suho, vrsta=crni |
-| 13 | 3850104275654 | GRAH CRV 2500 g NETO OC MASA 1450 g PODRAVKA (6) | 2,5 kg | 10 | 28 | 2,38–49,90 /kg | high/name | oblik=konzerva, vrsta=crveni |
-| 14 | 3083680009508 | N-GRAH BONDUELLE 400G CRVENI(NETTO 240G) -12/1 | 400 g | 9 | 379 | 4,22–8,96 /kg | high/name | oblik=suho, vrsta=crveni |
-| 15 | 3850104283536 | GRAH BIJELI KRUPNI 400 g (OCJ. MASA 230 g) PODRA | 400 g | 8 | 424 | 3,00–3,98 /kg | high/name | oblik=suho, vrsta=bijeli |
-| 16 | 3083680496117 | GRAH CRVENI 200/120g BONDUELLE | 200 g | 8 | 317 | 3,95–9,75 /kg | high/name | oblik=suho, vrsta=crveni |
-| 17 | 3859890236375 | GRAH ŠARENI 800G/480G, LARA(792) | 800 g | 7 | 58 | 1,86–3,31 /kg | high/name | oblik=suho, vrsta=sareni |
+| 10 | 3859893124501 | GRAH ŠARENI 500G NATURA, MARJAN VOĆE | 500 g | 10 | 393 | 1,98–4,98 /kg | high/name | oblik=nepoznato (zadano), vrsta=sareni |
+| 11 | 3856015309648 | N-GRAH SMEĐI ZVIJEZDA 400G 240G ČVRSTE TVARI -12/1- | 400 g | 10 | 329 | 1,85–5,79 /kg | high/name | oblik=nepoznato (zadano), vrsta=smedi |
+| 12 | 3856020243432 | GRAH CRNI 400G LIM. PODRAVKA | 400 g | 10 | 226 | 2,38–5,48 /kg | high/name | oblik=nepoznato (zadano), vrsta=crni |
+| 13 | 3850104275654 | GRAH CRV 2500 g NETO OC MASA 1450 g PODRAVKA (6) | 2,5 kg | 10 | 28 | 2,38–3,40 /kg ⚠4 | high/name | oblik=konzerva, vrsta=crveni |
+| 14 | 3083680009508 | N-GRAH BONDUELLE 400G CRVENI(NETTO 240G) -12/1 | 400 g | 9 | 379 | 4,22–8,96 /kg | high/name | oblik=nepoznato (zadano), vrsta=crveni |
+| 15 | 3850104283536 | GRAH BIJELI KRUPNI 400 g (OCJ. MASA 230 g) PODRA | 400 g | 8 | 424 | 3,00–3,98 /kg | high/name | oblik=nepoznato (zadano), vrsta=bijeli |
+| 16 | 3083680496117 | GRAH CRVENI 200/120g BONDUELLE | 200 g | 8 | 317 | 3,95–9,75 /kg | high/name | oblik=nepoznato (zadano), vrsta=crveni |
+| 17 | 3859890236375 | GRAH ŠARENI 800G/480G, LARA(792) | 800 g | 7 | 58 | 1,86–3,31 /kg | high/name | oblik=nepoznato (zadano), vrsta=sareni |
 | 18 | 3850104020766 | GRAH BIJELI LIM. 2.5 kg PODRAVKA OC. MASA 1450 g | 2,5 kg | 7 | 15 | 1,48–2,88 /kg | high/name | oblik=konzerva, vrsta=bijeli |
-| 19 | 8594012794948 | GRAH SARENI 400 G GIANA LIMENKA | 400 g | 6 | 253 | 1,22–2,73 /kg | high/name | oblik=suho, vrsta=sareni |
-| 20 | 3858894141869 | GRAH ŠARENI E BUONO 800 g 12/1 | 800 g | 6 | 252 | 1,24–3,73 /kg | high/name | oblik=suho, vrsta=sareni |
+| 19 | 8594012794948 | GRAH SARENI 400 G GIANA LIMENKA | 400 g | 6 | 253 | 1,22–2,73 /kg | high/name | oblik=nepoznato (zadano), vrsta=sareni |
+| 20 | 3858894141869 | GRAH ŠARENI E BUONO 800 g 12/1 | 800 g | 6 | 252 | 1,24–3,73 /kg | high/name | oblik=nepoznato (zadano), vrsta=sareni |
 
 <details><summary>Najčešće isključeni (top 10)</summary>
 
@@ -2753,30 +2755,30 @@ jedinica: **kg** · loose_produce: **false** · grupa: **137** · isključenih g
 sinonimi: leca, lece  
 must_match: `leca\b | lece\b | leca zelena | leca crvena`
   
-atributi: vrsta = zelena, crvena, crna, smeda; oblik = konzerva, smrznuto, svjeze, suho
+atributi: vrsta = zelena, crvena, crna, smeda; oblik = konzerva, smrznuto, svjeze, suho, nepoznato
 
 | # | id | naziv | pakiranje | lanaca | trgovina | €/jed | pouzdanost | atributi |
 |---|---|---|---|---|---|---|---|---|
 | 1 | 3850104272356 | LEĆA LIM 400 g NETO OC.MASA 240 g (12) PODRAVKA | 400 g | 18 | 489 | 2,97–8,71 /kg | high/name | oblik=konzerva |
-| 2 | 3859891427307 | LEĆA ZELENA 500G NATURA MARJAN VOĆE | 500 g | 11 | 372 | 3,10–4,72 /kg | high/name | oblik=suho, vrsta=zelena |
-| 3 | 3859890587019 | LEĆA CRVENA 500G NATURA MARJAN VOĆE | 500 g | 11 | 329 | 2,78–4,98 /kg | high/name | oblik=suho, vrsta=crvena |
-| 4 | 3859891427611 | LECA ZELENA RINF. |  | 6 | 101 | 2,04–3,49 /kg | low/unit_price | oblik=suho, vrsta=zelena |
-| 5 | 8003716003053 | LEĆA 240 g LIM. STRAINESSE VM2 | 400 g | 6 | 41 | 2,65–5,46 /kg | high/name | oblik=suho |
-| 6 | 3859890630777 | LEĆA ZELENA VEDRINI 500 g | 500 g | 4 | 232 | 2,04–3,78 /kg | high/name | oblik=suho, vrsta=zelena |
-| 7 | 3859890630807 | LEĆA CRVENA 500 g PRIMORAC D.O.O. | 500 g | 4 | 193 | 1,96–3,18 /kg | high/name | oblik=suho, vrsta=crvena |
-| 8 | 3858882920353 | LEĆA SMEĐA 500g PRIMAVITA ADVENT | 500 g | 4 | 163 | 2,78–5,18 /kg | high/name | oblik=suho, vrsta=smeda |
-| 9 | 3859891427604 | LECA CRVENA RFZ |  | 4 | 78 | 1,52–2,79 /kg | low/unit_price | oblik=svjeze, vrsta=crvena |
-| 10 | 3872084000644 | LEĆA ZELENA 500 g EUROCOMPANY | 500 g | 4 | 71 | 3,38–4,30 /kg | high/name | oblik=suho, vrsta=zelena |
-| 11 | 3872084001061 | LEĆA CRVENA 500 g EUROCOMPANY | 500 g | 3 | 230 | 2,50–4,50 /kg | high/name | oblik=suho, vrsta=crvena |
-| 12 | 3858886175513 | EKO BIO LEĆA 500 g CRVENA BIOVEGA | 500 g | 3 | 191 | 3,58–5,70 /kg | high/name | oblik=suho, vrsta=crvena |
-| 13 | 3858882920360 | LEĆA CRVENA 500g PRIMAVITA ADVENT | 500 g | 3 | 153 | 2,00–5,50 /kg | high/name | oblik=suho, vrsta=crvena |
-| 14 | 3858889333798 | LEĆA CRNA BELUGA VEDRINI 1000 g | 1 kg | 3 | 109 | 3,03–3,69 /kg | high/name | oblik=suho, vrsta=crna |
-| 15 | 3859888609686 | LEĆA 500 g MARCO POLO | 500 g | 3 | 61 | 3,64–5,98 /kg | high/name | oblik=suho |
-| 16 | 3083680996044 | Leća – Bonduelle – 265 g | 400 g | 3 | 47 | 4,47–6,73 /kg | high/name | oblik=suho |
-| 17 | 8595241513225 | LEĆA U SLANOM NALJEVU 425ml (OCJ. MASA 240 ML) GIANA | 425 ml | 3 | 18 | 1,98–3,47 /kg | high/name | oblik=suho |
-| 18 | 8009755002903 | LEĆA FIAMMA 400G-24/1- 0334032 | 400 g | 3 | 11 | 1,00–2,47 /kg | high/name | oblik=suho |
-| 19 | 3859891324293 | LEĆA ZELENA 500 g | 500 g | 2 | 464 | 3,78–4,78 /kg | high/name | oblik=suho, vrsta=zelena |
-| 20 | 3858886175520 | BIO LEĆA ZELENA 500 g EKOZONA | 500 g | 2 | 213 | 4,78–7,18 /kg | high/name | oblik=suho, vrsta=zelena |
+| 2 | 3859891427307 | LEĆA ZELENA 500G NATURA MARJAN VOĆE | 500 g | 11 | 372 | 3,10–4,72 /kg | high/name | oblik=nepoznato (zadano), vrsta=zelena |
+| 3 | 3859890587019 | LEĆA CRVENA 500G NATURA MARJAN VOĆE | 500 g | 11 | 329 | 2,78–4,98 /kg | high/name | oblik=nepoznato (zadano), vrsta=crvena |
+| 4 | 3859891427611 | LECA ZELENA RINF. |  | 6 | 101 | 2,04–3,49 /kg | low/unit_price | oblik=nepoznato (zadano), vrsta=zelena |
+| 5 | 8003716003053 | LEĆA 240 g LIM. STRAINESSE VM2 | 400 g | 6 | 41 | 2,65–5,46 /kg | high/name | oblik=nepoznato (zadano) |
+| 6 | 3859890630777 | LEĆA ZELENA VEDRINI 500 g | 500 g | 4 | 232 | 2,04–3,78 /kg | high/name | oblik=nepoznato (zadano), vrsta=zelena |
+| 7 | 3859890630807 | LEĆA CRVENA 500 g PRIMORAC D.O.O. | 500 g | 4 | 193 | 1,96–3,18 /kg | high/name | oblik=nepoznato (zadano), vrsta=crvena |
+| 8 | 3858882920353 | LEĆA SMEĐA 500g PRIMAVITA ADVENT | 500 g | 4 | 163 | 2,78–5,18 /kg | high/name | oblik=nepoznato (zadano), vrsta=smeda |
+| 9 | 3859891427604 | LEĆA CRVENA RFZ |  | 4 | 78 | 1,52–2,79 /kg | low/unit_price | oblik=svjeze, vrsta=crvena |
+| 10 | 3872084000644 | LEĆA ZELENA 500 g EUROCOMPANY | 500 g | 4 | 71 | 3,38–4,30 /kg | high/name | oblik=nepoznato (zadano), vrsta=zelena |
+| 11 | 3872084001061 | LEĆA CRVENA 500 g EUROCOMPANY | 500 g | 3 | 230 | 2,50–4,50 /kg | high/name | oblik=nepoznato (zadano), vrsta=crvena |
+| 12 | 3858886175513 | EKO BIO LEĆA 500 g CRVENA BIOVEGA | 500 g | 3 | 191 | 3,58–5,70 /kg | high/name | oblik=nepoznato (zadano), vrsta=crvena |
+| 13 | 3858882920360 | LEĆA CRVENA 500g PRIMAVITA ADVENT | 500 g | 3 | 153 | 2,00–5,50 /kg | high/name | oblik=nepoznato (zadano), vrsta=crvena |
+| 14 | 3858889333798 | LEĆA CRNA BELUGA VEDRINI 1000 g | 1 kg | 3 | 109 | 3,03–3,69 /kg | high/name | oblik=nepoznato (zadano), vrsta=crna |
+| 15 | 3859888609686 | LEĆA 500 g MARCO POLO | 500 g | 3 | 61 | 3,64–5,98 /kg | high/name | oblik=nepoznato (zadano) |
+| 16 | 3083680996044 | Leća – Bonduelle – 265 g | 400 g | 3 | 47 | 4,47–6,73 /kg | high/name | oblik=nepoznato (zadano) |
+| 17 | 8595241513225 | LEĆA U SLANOM NALJEVU 425ml (OCJ. MASA 240 ML) GIANA | 425 ml | 3 | 18 | 1,98–3,47 /kg | high/name | oblik=nepoznato (zadano) |
+| 18 | 8009755002903 | LEĆA FIAMMA 400G-24/1- 0334032 | 400 g | 3 | 11 | 1,00–2,47 /kg | high/name | oblik=nepoznato (zadano) |
+| 19 | 3859891324293 | LEĆA ZELENA 500 g | 500 g | 2 | 464 | 3,78–4,78 /kg | high/name | oblik=nepoznato (zadano), vrsta=zelena |
+| 20 | 3858886175520 | BIO LEĆA ZELENA 500 g EKOZONA | 500 g | 2 | 213 | 4,78–7,18 /kg | high/name | oblik=nepoznato (zadano), vrsta=zelena |
 
 <details><summary>Najčešće isključeni (top 10)</summary>
 
@@ -2803,30 +2805,30 @@ jedinica: **kg** · loose_produce: **false** · grupa: **126** · isključenih g
 sinonimi: slanutak, leblebija, cicer  
 must_match: `slanut | leblebij | cicer`
   
-atributi: oblik = konzerva, smrznuto, svjeze, suho
+atributi: oblik = konzerva, smrznuto, svjeze, suho, nepoznato
 
 | # | id | naziv | pakiranje | lanaca | trgovina | €/jed | pouzdanost | atributi |
 |---|---|---|---|---|---|---|---|---|
 | 1 | 3850104272349 | SLANUT. LIM 400 g NETO OC.MASA 240 g (12) PODRAVKA | 400 g | 21 | 801 | 2,97–7,88 /kg | high/name | oblik=konzerva |
 | 2 | 3850104275609 | SLANUTAK 800 g LIMENKA ( OCJ. MASA 480 g) PODRA | 800 g | 15 | 423 | 2,61–3,99 /kg | high/name | oblik=konzerva |
-| 3 | 3859890587026 | SLANUTAK 500 G MARJAN VOCE PVC | 500 g | 9 | 350 | 2,98–4,58 /kg | high/name | oblik=suho |
-| 4 | 8595241504872 | Giana slanutak 400g/240g | 400 g | 8 | 197 | 2,23–5,38 /kg | high/name | oblik=suho |
+| 3 | 3859890587026 | SLANUTAK 500 G MARJAN VOCE PVC | 500 g | 9 | 350 | 2,98–4,58 /kg | high/name | oblik=nepoznato (zadano) |
+| 4 | 8595241504872 | Giana slanutak 400g/240g | 400 g | 8 | 197 | 2,23–5,38 /kg | high/name | oblik=nepoznato (zadano) |
 | 5 | 3859891496839 | Slanutak kuhani vakum 350g | 350 g | 6 | 320 | 3,97–5,11 /kg | high/name | oblik=konzerva |
-| 6 | 3083681003949 | Bonduelle Slanutak Vapeur 310g/265g | 310 g | 6 | 260 | 4,22–6,74 /kg | high/name | oblik=suho |
-| 7 | 8001440009969 | SLANUTAK 400g VALFRUTTA-ocijeđena masa 250g | 400 g | 6 | 206 | 2,65–6,21 /kg | high/name | oblik=suho |
-| 8 | 8003716003046 | SLANUTAK 240 g LIM. STRAINESSE VM2 | 400 g | 6 | 11 | 2,23–5,25 /kg | high/name | oblik=suho |
+| 6 | 3083681003949 | Bonduelle Slanutak Vapeur 310g/265g | 310 g | 6 | 260 | 4,22–6,74 /kg | high/name | oblik=nepoznato (zadano) |
+| 7 | 8001440009969 | SLANUTAK 400g VALFRUTTA-ocijeđena masa 250g | 400 g | 6 | 206 | 2,65–6,21 /kg | high/name | oblik=nepoznato (zadano) |
+| 8 | 8003716003046 | SLANUTAK 240 g LIM. STRAINESSE VM2 | 400 g | 6 | 11 | 2,23–5,25 /kg | high/name | oblik=nepoznato (zadano) |
 | 9 | 3856020232306 | SLANUTAK LIM.2500 g OC.MASA 1450 g (6) PODRAVKA | 2,5 kg | 6 | 8 | 2,60–3,88 /kg | high/name | oblik=konzerva |
-| 10 | 3083681068146 | N-SLANUTAK BONDUELLE 160G 2*80G -6/1- | 160 g | 5 | 263 | 8,44–19,06 /kg | high/name | oblik=suho |
-| 11 | 3872084000651 | Perfect Day Slanutak 500 g | 500 g | 5 | 204 | 2,22–4,18 /kg | high/name | oblik=suho |
-| 12 | 3831029510266 | SLANUTAK 300 g NATU RETA | 300 g | 5 | 33 | 8,63–9,97 /kg | high/name | oblik=suho |
-| 13 | 8076809575157 | TJ.BARILLA SLANUTAK B.G. 250 g | 250 g | 4 | 168 | 13,28–23,40 /kg | high/name | oblik=suho |
-| 14 | 3858894141777 | SLANUTAK 400/240 g E BUONO | 400 g | 4 | 128 | 1,98–2,63 /kg | high/name | oblik=suho |
-| 15 | 3858886175537 | EKO SLANUTAK 500 g E KOZONA | 500 g | 4 | 42 | 4,50–6,10 /kg | high/name | oblik=suho |
-| 16 | 4007415018176 | SLANUTAK 2650 ml LIM.MIKADO | 2,65 l | 4 | 14 | 1,35–1,58 /l | high/ean | oblik=suho |
-| 17 | 3859890630517 | SLANUTAK VEDRINI 500 g | 500 g | 3 | 553 | 2,38–3,38 /kg | high/name | oblik=suho |
+| 10 | 3083681068146 | N-SLANUTAK BONDUELLE 160G 2*80G -6/1- | 160 g | 5 | 263 | 8,44–12,44 /kg ⚠35 | high/name | oblik=nepoznato (zadano) |
+| 11 | 3872084000651 | SLANUTAK 500 g EUROCOMPANY | 500 g | 5 | 204 | 2,22–4,18 /kg | high/name | oblik=nepoznato (zadano) |
+| 12 | 3831029510266 | SLANUTAK 300 g NATU RETA | 300 g | 5 | 33 | 8,63–9,97 /kg | high/name | oblik=nepoznato (zadano) |
+| 13 | 8076809575157 | TJ.BARILLA SLANUTAK B.G. 250 g | 250 g | 4 | 168 | 13,28–14,00 /kg ⚠159 | high/name | oblik=nepoznato (zadano) |
+| 14 | 3858894141777 | SLANUTAK 400/240 g E BUONO | 400 g | 4 | 128 | 1,98–2,63 /kg | high/name | oblik=nepoznato (zadano) |
+| 15 | 3858886175537 | EKO SLANUTAK 500 g E KOZONA | 500 g | 4 | 42 | 4,50–6,10 /kg | high/name | oblik=nepoznato (zadano) |
+| 16 | 4007415018176 | SLANUTAK 2650 ml LIM.MIKADO | 2,65 l | 4 | 14 | – /l | high/ean | oblik=nepoznato (zadano) |
+| 17 | 3859890630517 | SLANUTAK 500 G VEDRINI | 500 g | 3 | 553 | 2,38–3,38 /kg | high/name | oblik=nepoznato (zadano) |
 | 18 | 8001440001376 | SLANUTAK 360g VALFRUTTA-ocijeđena masa 230g | 360 g | 3 | 161 | 4,06–6,92 /kg | high/name | oblik=konzerva |
-| 19 | 3017800252451 | SLANUTAK 300g/265g D AUCY | 340 g | 3 | 160 | 2,91–5,25 /kg | high/name | oblik=suho |
-| 20 | 3859890587651 | SLANUTAK RINF. |  | 3 | 60 | 2,09–3,19 /kg | low/unit_price | oblik=suho |
+| 19 | 3017800252451 | SLANUTAK 300g/265g D AUCY | 340 g | 3 | 160 | 2,91–5,25 /kg | high/name | oblik=nepoznato (zadano) |
+| 20 | 3859890587651 | SLANUTAK RINF. |  | 3 | 60 | 2,09–3,19 /kg | low/unit_price | oblik=nepoznato (zadano) |
 
 <details><summary>Najčešće isključeni (top 10)</summary>
 
@@ -2853,37 +2855,37 @@ jedinica: **kg** · loose_produce: **false** · grupa: **157** · isključenih g
 sinonimi: kukuruz, kukuruz secerac  
 must_match: `kukuruz secerac | kukuruz sladak | secerac | kukuruz\b | kukuruza\b`
   
-atributi: oblik = konzerva, smrznuto, svjeze, suho
+atributi: oblik = konzerva, smrznuto, svjeze, suho, nepoznato
 
 | # | id | naziv | pakiranje | lanaca | trgovina | €/jed | pouzdanost | atributi |
 |---|---|---|---|---|---|---|---|---|
 | 1 | 3850104063435 | KUKURUZ ŠEĆERAC 340 g PODRAVKA (10) OC. MASA 280 g | 340 g | 21 | 1213 | 3,53–7,41 /kg | high/name | oblik=konzerva |
-| 2 | 3858882217071 | KUKURUZ ŠEĆERAC 340G OC.MASA 285G ZVIJEZDA (12) | 340 g | 19 | 849 | 4,91–10,21 /kg | high/name | oblik=konzerva |
+| 2 | 3858882217071 | KUKURUZ ŠEĆERAC 340G OC.MASA 285G ZVIJEZDA (12) | 340 g | 19 | 849 | 4,91–10,21 /kg | high/name | oblik=nepoznato (zadano) |
 | 3 | 3083680053303 | KUKURUZ ŠEĆERAC BONDUELLE GOLD 340 g (OCJ. MASA 285 g.) ORBICO | 340 g | 18 | 973 | 4,68–9,09 /kg | high/name | oblik=konzerva |
 | 4 | 3850104221682 | KUKURUZ ŠEĆERAC 150G/140G, PODRAVKA(12) (PAL 210) | 150 g | 16 | 562 | 7,93–11,07 /kg | high/name | oblik=konzerva |
 | 5 | 3083680074094 | N-KUKURUZ ŠEĆERAC 170G (NETTOMASA 140G)BONDUELLE-12/1 0504 | 170 g | 12 | 525 | 7,00–12,29 /kg | high/name | oblik=konzerva |
-| 6 | 3083681024258 | KUKURUZ BONDUELLE GOLD 670 g. (OCJ. MASA 570 g.) ORBICO | 670 g | 11 | 401 | 3,21–6,12 /kg | high/name | oblik=konzerva |
+| 6 | 3083681024258 | KUKURUZ BONDUELLE GOLD 670 g. (OCJ. MASA 570 g.) ORBICO | 670 g | 11 | 401 | 3,21–6,12 /kg | high/name | oblik=nepoznato (zadano) |
 | 7 | 3859891493371 | KUKURUZ KUHANI ŠEĆER 400g MADIG | 400 g | 9 | 519 | 4,47–8,88 /kg | high/name | oblik=konzerva |
-| 8 | 3083680015424 | KUKURUZ ŠEĆERAC BONDUELLE 530 g (OCJ. MASA 360 g) ORB | 530 g | 9 | 359 | 3,75–7,36 /kg | high/name | oblik=konzerva |
-| 9 | 8594012793385 | KUKURUZ ŠEĆERAC 285g OCIJEĐENA MASA | 340 g | 8 | 233 | 3,47–4,97 /kg | high/name | oblik=konzerva |
-| 10 | 3083681170658 | N-KUKURUZ ŠEĆERAC 510G 3*170G POSEBNA CIJENA | 510 g | 7 | 292 | 6,25–10,57 /kg | high/name | oblik=konzerva |
-| 11 | 3859892245283 | KUKURUZ ŠEĆERAC 425ML(340G NETTO) EVERY DAYS -12/1 ULTRA+ | 340 g | 7 | 77 | 2,91–5,85 /kg | high/name | oblik=konzerva |
+| 8 | 3083680015424 | KUKURUZ ŠEĆERAC BONDUELLE 530 g (OCJ. MASA 360 g) ORB | 530 g | 9 | 359 | 3,75–7,36 /kg | high/name | oblik=nepoznato (zadano) |
+| 9 | 8594012793385 | KUKURUZ ŠEĆERAC 285g OCIJEĐENA MASA | 340 g | 8 | 233 | 3,47–4,97 /kg | high/name | oblik=nepoznato (zadano) |
+| 10 | 3083681170658 | N-KUKURUZ ŠEĆERAC 510G 3*170G POSEBNA CIJENA | 510 g | 7 | 292 | 6,25–10,57 /kg | high/name | oblik=nepoznato (zadano) |
+| 11 | 3859892245283 | KUKURUZ ŠEĆERAC 425ML(340G NETTO) EVERY DAYS -12/1 ULTRA+ | 340 g | 7 | 77 | 2,91–5,85 /kg | high/name | oblik=nepoznato (zadano) |
 | 12 | 3850104209307 | KUKURUZ ŠEĆERAC LIMENKA 2150G/1775G PODRAVKA | 2,15 kg | 6 | 9 | 4,02–5,34 /kg | high/name | oblik=konzerva |
-| 13 | 3083681068184 | N-KUKURUZ ŠEĆERAC BONDUELLE 170G 2*85G -6/1- | 160 g | 5 | 285 | 6,81–19,35 /kg | high/name | oblik=konzerva |
-| 14 | 3859890236559 | KUKURUZ ŠEĆERAC LARA 2200G -6/1- | 2,2 kg | 5 | 19 | 2,50–3,27 /kg | high/name | oblik=konzerva |
+| 13 | 3083681068184 | N-KUKURUZ ŠEĆERAC BONDUELLE 170G 2*85G -6/1- | 160 g | 5 | 285 | 6,81–19,35 /kg | high/name | oblik=nepoznato (zadano) |
+| 14 | 3859890236559 | KUKURUZ ŠEĆERAC LARA 2200G -6/1- | 2,2 kg | 5 | 19 | 2,50–3,27 /kg | high/name | oblik=nepoznato (zadano) |
 | 15 | 3850116998114 | KUKURUZ ŠEĆERAC 2,5 kg LEDO | 2,5 kg | 4 | 35 | 2,00–3,92 /kg | high/name | oblik=smrznuto |
-| 16 | 3856003909850 | KUKURUZ ŠEĆERAC 340g ZORELA-OCIJEĐENA MASA 285g | 285 g | 3 | 476 | 2,91–4,21 /kg | high/name | oblik=konzerva |
-| 17 | 3858888530709 | KUKURUZ ŠEĆERAC 3/1 SVJEŽI |  | 3 | 135 | 3,98 /kg | low/unit_price | oblik=konzerva |
-| 18 | 3859890236443 | KUKURUZ ŠEĆERAC LARA 340G -24/1- | 340 g | 3 | 35 | 3,53–4,38 /kg | high/name | oblik=konzerva |
-| 19 | 3858883228519 | KUKURUZ ŠEĆERAC 400 g BAKINA KUHINJA | 400 g | 3 | 31 | 1,98–2,97 /kg | high/name | oblik=konzerva |
-| 20 | 3859891767199 | KUKURUZ ŠEĆERAC 3/1 |  | 3 | 22 | – | – | oblik=konzerva |
+| 16 | 3856003909850 | KUKURUZ ŠEĆERAC 340g ZORELA-OCIJEĐENA MASA 285g | 285 g | 3 | 476 | 2,91–4,21 /kg | high/name | oblik=nepoznato (zadano) |
+| 17 | 3858888530709 | KUKURUZ ŠEĆERAC 3/1 SVJEŽI |  | 3 | 135 | 3,98 /kg | low/unit_price | oblik=nepoznato (zadano) |
+| 18 | 3859890236443 | KUKURUZ ŠEĆERAC LARA 340G -24/1- | 340 g | 3 | 35 | 3,53–4,38 /kg | high/name | oblik=nepoznato (zadano) |
+| 19 | 3858883228519 | KUKURUZ ŠEĆERAC 400 g BAKINA KUHINJA | 400 g | 3 | 31 | 1,98–2,97 /kg | high/name | oblik=nepoznato (zadano) |
+| 20 | 3859891767199 | KUKURUZ ŠEĆERAC 3/1 |  | 3 | 22 | – | – | oblik=nepoznato (zadano) |
 
 <details><summary>Najčešće isključeni (top 10)</summary>
 
 | naziv | lanaca | isključio |
 |---|---|---|
 | N-SALATA RIO MARE 160G-18/1 KUKURUZ S TUNJEVINOM | 13 | `salata` |
-| KUKURUZ ZA KOKICE SLANI ZA MIKROV. PEĆNICU 3*80GR CHIO | 11 | `kokic` |
+| N-KUKURUZ KOKIČAR CHIO 240G ZA MIKROVALNU SLANI -16/1- | 11 | `kokic` |
 | KUKURUZ KOKICAR 400 G NATURA MARJAN VOCE | 9 | `kokic` |
 | KUKURUZ KOKIČAR CHIO 80G ZA MIKROVALNU SLANI -36/1- | 9 | `kokic` |
 | KUKURUZ ZA KOKICE 200G (12), ŠAFRAM | 9 | `kokic` |
@@ -2903,7 +2905,7 @@ jedinica: **kg** · loose_produce: **false** · grupa: **151** · isključenih g
 sinonimi: grasak  
 must_match: `grasak | graska\b`
   
-atributi: oblik = konzerva, smrznuto, svjeze, suho
+atributi: oblik = konzerva, smrznuto, svjeze, suho, nepoznato
 
 | # | id | naziv | pakiranje | lanaca | trgovina | €/jed | pouzdanost | atributi |
 |---|---|---|---|---|---|---|---|---|
@@ -2915,18 +2917,18 @@ atributi: oblik = konzerva, smrznuto, svjeze, suho
 | 6 | 3083680538404 | GRAŠAK BONDUELLE 200 g OCJ. MASA 130 g ORBICO | 200 g | 14 | 564 | 5,95–9,75 /kg | high/name | oblik=konzerva |
 | 7 | 3083680047364 | N-GRAŠAK BONDUELLE 400G(OCJ.MASA 265G) -12/1 | 400 g | 13 | 729 | 3,98–8,11 /kg | high/name | oblik=konzerva |
 | 8 | 3850116058627 | ZAMRZ LEDO 700 g GRAŠAK XXL | 700 g | 12 | 409 | 3,41–4,99 /kg | high/name | oblik=smrznuto |
-| 9 | 3858883228762 | GRAŠAK 400 g SM BAKINA KUHINJA STANIĆ | 400 g | 10 | 467 | 2,23–3,33 /kg | high/name |  |
+| 9 | 3858883228762 | GRAŠAK 400 g SM BAKINA KUHINJA STANIĆ | 400 g | 10 | 467 | 2,23–3,33 /kg | high/name | oblik=nepoznato (zadano) |
 | 10 | 3850116035451 | GRAŠAK 2,5 kg LEDO*** | 2,5 kg | 9 | 55 | 1,92–4,60 /kg | high/name | oblik=smrznuto |
-| 11 | 3856020279004 | O`Plant Grašak mladi smrznuti 400 g | 400 g | 8 | 350 | 2,80–4,47 /kg | high/name | oblik=smrznuto |
+| 11 | 3856020279004 | O`Plant Grašak mladi smrznuti 400 g | 400 g | 8 | 350 | 2,80–4,47 /kg | high/name | oblik=nepoznato (zadano) |
 | 12 | 3850104050800 | GRAŠAK 4,2kg LIM.PODRAVKA - ocijeđene mase 2300g | 4,2 kg | 8 | 25 | 1,78–2,62 /kg | high/name | oblik=konzerva |
 | 13 | 3850116876320 | FRESCO GRAŠAK 400G (22) LEDO | 400 g | 7 | 203 | 2,97–5,23 /kg | high/name | oblik=smrznuto |
-| 14 | 3858885110065 | GRAŠAK MLADI SMRZNUTI 450G, PODRAVKA | 450 g | 7 | 195 | 1,76–4,11 /kg | high/name | oblik=smrznuto |
-| 15 | 3859889284585 | N-GRAŠAK FROZY 400G -10/1- | 400 g | 6 | 41 | 2,97–3,33 /kg | high/name |  |
+| 14 | 3858885110065 | GRAŠAK MLADI SMRZNUTI 450G, PODRAVKA | 450 g | 7 | 195 | 1,76–4,11 /kg | high/name | oblik=nepoznato (zadano) |
+| 15 | 3859889284585 | N-GRAŠAK FROZY 400G -10/1- | 400 g | 6 | 41 | 2,97–3,33 /kg | high/name | oblik=nepoznato (zadano) |
 | 16 | 3850116613956 | GRAŠAK SMRZ.450 g U-GR LEDO | 450 g | 6 | 25 | 3,53–4,71 /kg | high/name | oblik=smrznuto |
-| 17 | 3083681036800 | GRAŠAK BONDUELLE VAPEUR 400 g | 400 g | 5 | 251 | 2,97–5,48 /kg | high/name |  |
-| 18 | 3850354013730 | GRAŠAK FINI SMRZ 450 g BRZO&FINO | 450 g | 5 | 157 | 3,00–4,56 /kg | high/name | oblik=smrznuto |
-| 19 | 3083681168594 | N-GRAŠAK BONDUELLE 600G 3*200G POSEBNA CIJENA | 600 g | 5 | 153 | 5,32–8,82 /kg | high/name | oblik=konzerva |
-| 20 | 3083680004275 | GRAŠAK LIM 530g BONDUELLE | 800 g | 5 | 141 | 2,65–6,58 /kg | high/name | oblik=konzerva |
+| 17 | 3083681036800 | GRAŠAK BONDUELLE VAPEUR 400 g | 400 g | 5 | 251 | 2,97–5,48 /kg | high/name | oblik=nepoznato (zadano) |
+| 18 | 3850354013730 | GRAŠAK FINI SMRZ 450 g BRZO&FINO | 450 g | 5 | 157 | 3,00–4,56 /kg | high/name | oblik=nepoznato (zadano) |
+| 19 | 3083681168594 | N-GRAŠAK BONDUELLE 600G 3*200G POSEBNA CIJENA | 600 g | 5 | 153 | 5,32–8,82 /kg | high/name | oblik=nepoznato (zadano) |
+| 20 | 3083680004275 | GRAŠAK LIM 530g BONDUELLE | 800 g | 5 | 141 | 2,65–6,58 /kg | high/name | oblik=nepoznato (zadano) |
 
 <details><summary>Najčešće isključeni (top 10)</summary>
 
@@ -2941,7 +2943,7 @@ atributi: oblik = konzerva, smrznuto, svjeze, suho
 | PROTEINSKI SNACK OD GRAŠKA 100G ENCIAN | 6 | `snack` |
 | FRESCO GRAŠAK-MRKVA 2.5KG LEDO | 5 | `mrkv` |
 | GRAŠAK+MRKVA KOCKA 400 g BONDUELLE | 5 | `mrkv` |
-| GRAŠAK MRKVA 450 g LEDO | 4 | `mrkv` |
+| GRAŠAK MRKVA KOCKE ZMH HORVAT (2,5kg) | 4 | `mrkv` |
 
 </details>
 
@@ -3008,7 +3010,7 @@ atributi: vrsta = zlatni_delicious, idared, granny_smith, crvena
 | 1 | 3857500007445 | JABUKA CRVENA 2 kg | 2 kg | 3 | 181 | 1,10 /kg | high/ean | vrsta=crvena |
 | 2 | 3850334173614 | JABUKA ZLATNI DELIŠES (7) |  | 2 | 197 | 1,29–2,05 /kg | low/unit_price | vrsta=zlatni_delicious |
 | 3 | 3850334386069 | JABUKA GALA (7) |  | 2 | 197 | 1,69–2,05 /kg | low/unit_price | vrsta=crvena |
-| 4 | 3858893252320 | Jabuka Granny Smith |  | 2 | 196 | 1,69–1,99 /kg | low/unit_price | vrsta=granny_smith |
+| 4 | 3858893252320 | Jabuka Granny S.rfs |  | 2 | 196 | 1,69–1,99 /kg | low/unit_price | vrsta=granny_smith |
 | 5 | 3850334173713 | JABUKA IDARED (7) |  | 2 | 194 | 1,69–2,05 /kg | low/unit_price | vrsta=idared |
 | 6 | 3850334173812 | JABUKA JONAGOLD (7) |  | 2 | 193 | 1,75–2,15 /kg | low/unit_price | vrsta=crvena |
 | 7 | 3859893211157 | JABUKA CRVENA 2kg PVC | 2 kg | 2 | 172 | 1,00–1,10 /kg | high/name | vrsta=crvena |
@@ -3030,7 +3032,7 @@ atributi: vrsta = zlatni_delicious, idared, granny_smith, crvena
 
 | naziv | lanaca | isključio |
 |---|---|---|
-| LEDOLETTE JABUKA KARAMELA 800 g LEDO | 8 | `ledolette` |
+| LEDOLETTE JABUKA KARAMELA LEDO 800 g | 8 | `ledolette` |
 | -ČAJ JABUKA CIMET 20/1 DAR PRIRODE AROMA OMOTAČ | 1 | `cimet` |
 | JABUKA MIX PODLOZAK | 1 | `mix\b` |
 | Jabuka pakirana mix 1kg | 1 | `mix\b` |
@@ -3046,7 +3048,7 @@ atributi: vrsta = zlatni_delicious, idared, granny_smith, crvena
 <a id="limun"></a>
 ## limun (`limun`)
 
-jedinica: **kg** · loose_produce: **true** · grupa: **100** · isključenih grupa: **23**
+jedinica: **kg** · loose_produce: **true** · grupa: **99** · isključenih grupa: **24**
 
 sinonimi: limun, limuni  
 must_match: `limun\b | limuna\b | limuni\b`
@@ -3152,7 +3154,7 @@ atributi: oblik = mljeveni, zrno, mlinac; vrsta = crni, bijeli, sareni
 | # | id | naziv | pakiranje | lanaca | trgovina | €/jed | pouzdanost | atributi |
 |---|---|---|---|---|---|---|---|---|
 | 1 | 9001414041116 | ZAČIN MLINAC PAPAR CRNI U ZRNU 36 g KOTANY | 36 g | 20 | 904 | 96,67–152,50 /kg | high/name | vrsta=crni, oblik=zrno |
-| 2 | 3859888163089 | PAPAR CRNI MLJEVENI 50G ŠAFRAM (25) | 50 g | 18 | 950 | 24,80–396,00 /kg | high/name | vrsta=crni, oblik=mljeveni |
+| 2 | 3859888163089 | PAPAR CRNI MLJEVENI 50G ŠAFRAM (25) | 50 g | 18 | 950 | 24,80–45,60 /kg ⚠1 | high/name | vrsta=crni, oblik=mljeveni |
 | 3 | 9001414040409 | ZAČIN PAPAR CRNI MLJEVENI STAKLO 50 g KOTANY | 50 g | 18 | 760 | 60,00–95,80 /kg | high/name | vrsta=crni, oblik=mljeveni |
 | 4 | 3859888163034 | PAPAR CRNI MLJEVENI 100 G VRECICA SAFRAM | 100 g | 18 | 713 | 21,00–34,90 /kg | high/name | oblik=mljeveni, vrsta=crni |
 | 5 | 9001414015469 | KOTANYI PAPAR CRNI MLJEVENI VREĆICA 17G (25) | 17 g | 18 | 654 | 53,53–111,18 /kg | high/name | vrsta=crni, oblik=mljeveni |
@@ -3168,7 +3170,7 @@ atributi: oblik = mljeveni, zrno, mlinac; vrsta = crni, bijeli, sareni
 | 15 | 9001414040799 | PAPAR S CESNJAKOM 72 G STAKLO KOTANYI | 70 g | 14 | 388 | 20,97–62,71 /kg | high/name |  |
 | 16 | 3856020233051 | VEGETA MAESTRO CRNI PAPAR ZRNO MLIN 42g PODRAVKA | 42 g | 13 | 574 | 35,71–109,29 /kg | high/name | vrsta=crni, oblik=zrno |
 | 17 | 3859888163096 | PAPAR CRNI MLJEVENI 10G (100), ŠAFRAM | 10 g | 13 | 397 | 40,00–75,00 /kg | high/name | vrsta=crni, oblik=mljeveni |
-| 18 | 9001414015452 | PAPAR CRNI ZRNO 17 G VRECICA KOTANYI | 17 g | 12 | 489 | 8,51–105,29 /kg | high/name | vrsta=crni, oblik=zrno |
+| 18 | 9001414015452 | PAPAR CRNI ZRNO 17 G VRECICA KOTANYI | 17 g | 12 | 489 | 53,53–105,29 /kg ⚠1 | high/name | vrsta=crni, oblik=zrno |
 | 19 | 3850104294822 | CRNI PAPAR MLJ.VREĆ.50G (20) (PAL 145),PODRAVKA | 50 g | 12 | 448 | 34,00–55,80 /kg | high/name | vrsta=crni, oblik=mljeveni |
 | 20 | 9001414040423 | KOTANYI 54G PAPAR BIJELI -4/MLJEVENI STAKLO | 54 g | 12 | 367 | 66,48–82,00 /kg | high/name | vrsta=bijeli, oblik=mljeveni |
 
@@ -3204,21 +3206,21 @@ atributi: vrsta = slatka, ljuta, dimljena
 | 1 | 3859888163065 | PAPRIKA SLATKA MLJEVENA 100 G VRECICA SAFRAM | 100 g | 18 | 1197 | 11,30–25,50 /kg | high/name | vrsta=slatka |
 | 2 | 3859888163058 | PAPRIKA LJUTA MLJEVENA 100 G VRECICA SAFRAM | 100 g | 18 | 1129 | 12,90–22,50 /kg | high/name | vrsta=ljuta |
 | 3 | 3850104294631 | PAPRIKA SLATKA MLJEVENA VRECICA100 G MAESTRO VEGETA PODRAVKA | 100 g | 18 | 772 | 9,90–21,90 /kg | high/name | vrsta=slatka |
-| 4 | 3850104294624 | PAPRIKA LJUTA MLJEVENA 100 G MAESTRO VEGETA PODRAVKA | 100 g | 17 | 579 | 9,90–99,00 /kg | high/name | vrsta=ljuta |
+| 4 | 3850104294624 | PAPRIKA LJUTA MLJEVENA 100 G MAESTRO VEGETA PODRAVKA | 100 g | 17 | 579 | 9,90–19,90 /kg ⚠1 | high/name | vrsta=ljuta |
 | 5 | 3859888163072 | PAPRIKA SLATKA MLJEVENA 200 G VRECICA SAFRAM | 200 g | 14 | 545 | 13,45–20,95 /kg | high/name | vrsta=slatka |
 | 6 | 3850104294648 | PAPRIKA SLATKA MLJEVENA 200 G MAESTRO VEGETA PODRAVKA | 200 g | 13 | 457 | 8,20–44,75 /kg | high/name | vrsta=slatka |
 | 7 | 3850104294594 | PAPRIKA SLATKA MLJEVENA 50 G VRECICA MAESTRO VEGETA PODRAVKA | 50 g | 12 | 547 | 13,20–23,00 /kg | high/name | vrsta=slatka |
-| 8 | 3859888163317 | PAPRIKA SLATKA MLJEVENA DELIKATES 100 G VRECICA SAFRAM | 100 g | 10 | 367 | 11,90–99,00 /kg | high/name | vrsta=slatka |
+| 8 | 3859888163317 | PAPRIKA SLATKA MLJEVENA DELIKATES 100 G VRECICA SAFRAM | 100 g | 10 | 367 | 11,90–23,90 /kg ⚠1 | high/name | vrsta=slatka |
 | 9 | 9001414119211 | PAPRIKA LJUTA MLJEVENA 35 G VRECICA KOTANYI | 35 g | 10 | 312 | 23,14–39,71 /kg | high/name | vrsta=ljuta |
 | 10 | 9001414119204 | PAPRIKA SLATKA MLJEVENA DELIKATES 35 G VRECICA KOTANYI | 35 g | 10 | 289 | 20,29–39,71 /kg | high/name | vrsta=slatka |
-| 11 | 3850104294600 | PAPRIKA SLATKA MLJEVENA 400 G VRECICA MAESTRO VEGETA PODRAVK | 400 g | 10 | 142 | 2,50–14,98 /kg | high/name | vrsta=slatka |
+| 11 | 3850104294600 | PAPRIKA SLATKA MLJEVENA 400 G VRECICA MAESTRO VEGETA PODRAVK | 400 g | 10 | 142 | 6,25–14,98 /kg ⚠14 | high/name | vrsta=slatka |
 | 12 | 3859890104124 | PAPRIKA MLJEVENA ZAČINSKA LJUTA 500G, ŠAFRAM | 500 g | 8 | 144 | 12,20–18,38 /kg | high/name | vrsta=ljuta |
 | 13 | 9001414009208 | PAPRIKA SLATKA MLJEVENA 100 G VRECICA KOTANYI | 100 g | 7 | 404 | 15,90–28,90 /kg | high/name | vrsta=slatka |
-| 14 | 3858881083127 | ZAČIN PAPRIKA SLATKAFRANCK 100 g | 100 g | 7 | 178 | 15,90–99,00 /kg | high/name | vrsta=slatka |
+| 14 | 3858881083127 | ZAČIN PAPRIKA SLATKAFRANCK 100 g | 100 g | 7 | 178 | 15,90–20,50 /kg ⚠1 | high/name | vrsta=slatka |
 | 15 | 3859890104698 | PAPRIKA SLATKA MLJEVENA 100G ULTRA PLUS | 100 g | 7 | 75 | 7,90–13,90 /kg | high/name | vrsta=slatka |
 | 16 | 3859892109868 | Š EXTRA PAPRIKA SLATKA ŠAFRAM 100 g (20) | 100 g | 7 | 63 | 7,50–10,60 /kg | high/name | vrsta=slatka |
 | 17 | 9001414119242 | KOTANYI 45G PAPRIKA SLATKAZAČINSKA -25/1- VREĆICA | 45 g | 6 | 318 | 13,78–30,89 /kg | high/name | vrsta=slatka |
-| 18 | 3858881735378 | PAPRIKA SLATKA ZAČIN 70G DERMA (20) | 70 g | 6 | 235 | 12,71–300,00 /kg | high/name | vrsta=slatka |
+| 18 | 3858881735378 | PAPRIKA SLATKA ZAČIN 70G DERMA (20) | 70 g | 6 | 235 | 12,71–21,29 /kg ⚠4 | high/name | vrsta=slatka |
 | 19 | 3858881582019 | ZAČIN PAPRIKA SLATKANADALINA 100 g | 100 g | 6 | 217 | 13,50–21,50 /kg | high/name | vrsta=slatka |
 | 20 | 9001414008140 | PAPRIKA SLATKA ZACINSKA XXL PACK 150 G KOTANYI | 150 g | 6 | 181 | 6,67–25,93 /kg | high/name | vrsta=slatka |
 
@@ -3265,9 +3267,9 @@ must_match: `vegeta\b | dodatak jelima | univerzalni dodatak | dodatak za jela`
 | 14 | 3850104254444 | VEGETA PODR 300G NATUR DOZA -12/1- | 300 g | 14 | 575 | 10,60–13,70 /kg | high/name |  |
 | 15 | 3850104047077 | VEGETA 2KG (8), PODRAVKA (PAL 24) | 2 kg | 14 | 110 | 5,78–8,29 /kg | high/name |  |
 | 16 | 3850104257933 | VEGETA NATUR 75G (12) PODRAVKA (PAL 100) | 75 g | 12 | 330 | 8,67–23,87 /kg | high/name |  |
-| 17 | 3856020235109 | VEGETA NATUR TEK.DODATAK JELIMA 170ML (12) (PAL 90) | 170 ml | 8 | 282 | 2,94–13,53 /l | high/name |  |
+| 17 | 3856020235109 | VEGETA NATUR TEK.DODATAK JELIMA 170ML (12) (PAL 90) | 170 ml | 8 | 282 | – /l | high/name |  |
 | 18 | 3856020278199 | VEGETA NATUR PASTA PAPRIKA BLAGA 190G (TUBA) | 190 g | 7 | 276 | 9,95–14,16 /kg | high/name |  |
-| 19 | 3856020221799 | VEGETA NATUR SALATA 60 g PODRAVKA | 60 g | 7 | 38 | 16,50–39,17 /kg | high/name |  |
+| 19 | 3856020221799 | VEGETA NATUR SALATA 60 g PODRAVKA | 60 g | 7 | 38 | 16,50–36,50 /kg ⚠2 | high/name |  |
 | 20 | 3856020276669 | VEGETA DIMLJENA 200 G VRECICA | 200 g | 6 | 373 | 7,95–11,75 /kg | high/name |  |
 
 <details><summary>Najčešće isključeni (top 10)</summary>
@@ -3281,16 +3283,16 @@ must_match: `vegeta\b | dodatak jelima | univerzalni dodatak | dodatak za jela`
 | VEGETA NATUR GRILL VRATINA 30g PODRAVKA | 13 | `grill` |
 | VEGETA GRILL MARINADA CLASSIC 75 g (20) | 12 | `marinad` |
 | VEGETA NATUR GRILL POVRĆE 30G (18) (PAL 252) PODRAVKA | 12 | `grill` |
-| VEGETA GRILL MARINADA PIKANTNA 75GR (20) | 11 | `marinad` |
+| VEGETA GRILL MARINADA BBQ 75 g (20) | 11 | `marinad` |
+| VEGETA GRILL MARINADA PIKANTNA 75 g (20) | 11 | `marinad` |
 | VEGETA TWIST ZLATN.PILETINA 30G (18) (PAL 18) PODRAVKA | 11 | `twist` |
-| ZAČIN GRILL MARINADA BBQ 75g VEGETA | 11 | `marinad` |
 
 </details>
 
 <a id="ocat"></a>
 ## ocat (alkoholni/vinski) (`ocat`)
 
-jedinica: **l** · loose_produce: **false** · grupa: **152** · isključenih grupa: **125** · pakiranje: **500–3000** · **pantry**
+jedinica: **l** · loose_produce: **false** · grupa: **128** · isključenih grupa: **152** · pakiranje: **500–3000** · **pantry**
 
 sinonimi: ocat, alkoholni ocat, vinski ocat, kvasina  
 must_match: `ocat\b | octa\b | kvasin`
@@ -3303,16 +3305,16 @@ atributi: vrsta = alkoholni, vinski
 | 2 | 3850164321117 | KISKO VINSKI OCAT 1L (12), BADEL | 1 l | 22 | 922 | 1,59–3,49 /l | high/name | vrsta=vinski |
 | 3 | 3850164310180 | OCAT BADEL ALKOHOLNI 3.0L BALON (9%) | 3 l | 21 | 1116 | 0,96–1,70 /l | high/name | vrsta=alkoholni |
 | 4 | 3850164310142 | OCAT KISKO ALKOHOLNI 0,5L LABUD | 500 ml | 21 | 788 | 1,68–3,18 /l | high/name | vrsta=alkoholni |
-| 5 | 3858882210928 | ALKOHOLNI OCAT 1L(12), ZVIJEZDA | 1 l | 19 | 862 | 0,96–19,25 /l | high/name | vrsta=alkoholni |
-| 6 | 3858882211154 | N-OCAT ZVIJEZDA VINSKI 1L -12/1-CRNO VINO | 1 l | 18 | 707 | 1,63–32,50 /l | high/name | vrsta=vinski |
+| 5 | 3858882210928 | OCAT ALKOHOLNI 1 l PET ZVIJEZDA | 1 l | 19 | 862 | 0,96–1,69 /l ⚠4 | high/name | vrsta=alkoholni |
+| 6 | 3858882211154 | N-OCAT ZVIJEZDA VINSKI 1L -12/1-CRNO VINO | 1 l | 18 | 707 | 1,63–2,59 /l ⚠4 | high/name | vrsta=vinski |
 | 7 | 3850164321148 | OCAT VINSKI KISKO 500 ml BADE | 500 ml | 17 | 821 | 2,24–3,98 /l | high/name | vrsta=vinski |
 | 8 | 3850164331116 | OCAT KVASINA 6% 1L KISKO BADEL | 1 l | 13 | 660 | 1,59–2,49 /l | high/name | vrsta=vinski |
-| 9 | 3858882211727 | OCAT ALKOHOLNI OCAT 3 l ZVIJEZDA (1) | 3 l | 13 | 443 | 0,88–19,08 /l | high/name | vrsta=alkoholni |
+| 9 | 3858882211727 | OCAT ALKOHOLNI OCAT 3 l ZVIJEZDA (1) | 3 l | 13 | 443 | 0,88–1,50 /l ⚠4 | high/name | vrsta=alkoholni |
 | 10 | 3859891093922 | ULTRA OCAT VINSKI 1L, PREHRANA (6) | 1 l | 8 | 84 | 0,89–1,69 /l | high/name | vrsta=vinski |
 | 11 | 3850164321186 | OCAT VINSKI 3L KISKO BADEL | 3 l | 8 | 64 | 1,13–1,80 /l | high/name | vrsta=vinski |
-| 12 | 3859891093908 | ULTRA OCAT ALKOHOLNI 1L, PREHRANA (6) (750PAL) | 1 l | 7 | 78 | 0,29–1,49 /l | high/name | vrsta=alkoholni |
+| 12 | 3859891093908 | ULTRA OCAT ALKOHOLNI 1L, PREHRANA (6) (750PAL) | 1 l | 7 | 78 | 0,69–1,49 /l ⚠2 | high/name | vrsta=alkoholni |
 | 13 | 3858889640018 | SEGESTICA ALKOHOLNI OCAT 9% 1L (12) | 1 l | 6 | 198 | 0,93–1,59 /l | high/name | vrsta=alkoholni |
-| 14 | 3858889640032 | SEGESTICA VINSKI OCAT 1L (12) LABUD | 1 l | 6 | 150 | 0,09–1,97 /l | high/name | vrsta=vinski |
+| 14 | 3858889640032 | SEGESTICA VINSKI OCAT 1L (12) LABUD | 1 l | 6 | 150 | 1,33–1,97 /l ⚠1 | high/name | vrsta=vinski |
 | 15 | 3859891093007 | OCAT ALKOHOLNI PREHRANA 9% 1 L | 1 l | 5 | 194 | 0,69–1,25 /l | high/name | vrsta=alkoholni |
 | 16 | 3858889362545 | NATUREL ALKOHOLNI OCAT 1 L (9 %) | 1 l | 5 | 82 | 0,89–1,39 /l | high/name | vrsta=alkoholni |
 | 17 | 3859892999063 | OCAT VIROVITIČKI PRIRODNI VINSKI 1 L | 1 l | 5 | 78 | 1,33–2,49 /l | high/name | vrsta=vinski |
@@ -3325,13 +3327,13 @@ atributi: vrsta = alkoholni, vinski
 | naziv | lanaca | isključio |
 |---|---|---|
 | OCAT JABUČNI 1L 5% KISKO LABUD | 21 | `jabuc` |
-| OCAT KISKO JABUČNI 0,5L LABUD | 20 | `jabuc` |
+| OCAT BADEL JABUČNI 0.5L-12/1- | 20 | `jabuc` |
 | JABUČNI PRIRODNI OCAT 1L (15), ZVIJEZDA | 16 | `jabuc` |
 | Encian Ocat jabučni 0,7l staklo | 14 | `jabuc` |
-| OCAT ACETO BALSAMICO 0,5L (12) ZVIJEZDA | 11 | `balsam` |
+| OCAT ACETO BALSAMICO 0,5L (12) ZVIJEZDA | 11 | `bals` |
+| OCAT ACETO BALSAMICO 250ML ORO DUE VITTORIE | 11 | `bals` |
 | OCAT MAUTNER 500ML JABUČNI BARRIQUE -6/1- | 11 | `jabuc` |
 | Mautner Ocat jabučni 5% oct.kisel.500ml | 10 | `jabuc` |
-| OCAT ACETO BALSAMICO 250ML ORO DUE VITTORIE | 10 | `balsam` |
 | Mautner Markhof Ocat jabučni 5% 1 l | 9 | `jabuc` |
 | SEGESTICA JABUČNI OCAT 1L (12) LABUD | 8 | `jabuc` |
 
@@ -3400,14 +3402,14 @@ must_match: `senf\b | gorusic | dijon`
 | 1 | 3850104023484 | Podravka senf estragon 350 g staklenka | 350 g | 24 | 1393 | 5,11–10,83 /kg | high/name |  |
 | 2 | 3850104023033 | SENF ESTRAGON PVC 140 g PODRAVKA (15) | 140 g | 21 | 1265 | 8,57–19,93 /kg | high/name |  |
 | 3 | 3850104023415 | Podravka senf estragon 700 g staklenka | 700 g | 20 | 610 | 3,41–7,91 /kg | high/name |  |
-| 4 | 3850104268069 | UMAK SENF ESTRAGON TUBA PODRAVKA 200 g | 200 g | 19 | 686 | 8,00–12,95 /kg | high/name |  |
+| 4 | 3850104268069 | SENF ESTRAGON TUBA 200G, PODRAVKA (24) | 200 g | 19 | 686 | 8,00–12,95 /kg | high/name |  |
 | 5 | 7613287084163 | SENF 200G BLAGI THOMY TUBA NESTLE | 200 g | 18 | 1009 | 8,45–14,95 /kg | high/name |  |
 | 6 | 3856015332523 | SENF DELIKATES 290 g STAKLO ZVIJEZDA | 290 g | 18 | 867 | 5,48–10,31 /kg | high/name |  |
 | 7 | 3856015332493 | N-SENF ZVIJEZDA 190G DELIKATES -12/1- | 190 g | 18 | 842 | 7,32–12,05 /kg | high/name |  |
 | 8 | 3850104092176 | SENF ESTRAGON BOČICA 200G (12), PODRAVKA | 200 g | 18 | 550 | 9,70–15,95 /kg | high/name |  |
 | 9 | 3850104023019 | SENF ESTRAGON 100 g TUBA PODRAVKA (24) | 100 g | 16 | 825 | 10,50–20,90 /kg | high/name |  |
-| 10 | 7613287084644 | SENF THOMY 100 g BLAGI LOT:618768839 | 100 g | 16 | 476 | 9,90–360,00 /kg | high/name |  |
-| 11 | 9001414040713 | Kotanyi gorušica zrno staklo 79 g | 79 g | 14 | 426 | 33,54–44,18 /kg | high/name |  |
+| 10 | 7613287084644 | SENF THOMY 100 g BLAGI LOT:618768839 | 100 g | 16 | 476 | 9,90–21,90 /kg ⚠4 | high/name |  |
+| 11 | 9001414040713 | Kotanyi gorušica zrno staklo 79 g | 79 g | 14 | 426 | 33,54–38,61 /kg ⚠288 | high/name |  |
 | 12 | 4025891136153 | Jutro Senf u krigli srednje ljuti 250 g | 250 g | 13 | 567 | 6,36–11,96 /kg | high/name |  |
 | 13 | 3830003054475 | SENF 290 G NATURETA STAKLO | 290 g | 13 | 318 | 3,45–9,97 /kg | high/name |  |
 | 14 | 3850104023064 | SENF ESTRAGON PVC 2.5 KG PODRAVKA (6) | 2,5 kg | 13 | 36 | 2,71–4,86 /kg | high/name |  |
@@ -3415,7 +3417,7 @@ must_match: `senf\b | gorusic | dijon`
 | 16 | 9011900139616 | Mautner Markhof Senf estragon tuba 200 g | 200 g | 12 | 455 | 7,00–11,45 /kg | high/name |  |
 | 17 | 4025891004254 | SENF JUTRO 250ML KRIGLA-12/1- | 250 g | 12 | 212 | 10,00–11,16 /kg | high/name |  |
 | 18 | 3856020268909 | SENF ESTRAGON SQUEEZE 310G PODRAVKA (6) | 310 g | 11 | 420 | 6,13–8,74 /kg | high/name |  |
-| 19 | 7610100999093 | Thomy senf delikatesni staklenka 700 g | 700 g | 11 | 185 | 0,66–133,93 /kg | high/name |  |
+| 19 | 7610100999093 | Thomy senf delikatesni staklenka 700 g | 700 g | 11 | 185 | 5,36–8,27 /kg ⚠6 | high/name |  |
 | 20 | 7613287203786 | Thomy Senf delikat.bez gl.340g STAKLO | 340 g | 10 | 451 | 8,21–9,68 /kg | high/name |  |
 
 <details><summary>Najčešće isključeni (top 10)</summary>
@@ -3446,8 +3448,8 @@ must_match: `majonez`
 | # | id | naziv | pakiranje | lanaca | trgovina | €/jed | pouzdanost | atributi |
 |---|---|---|---|---|---|---|---|---|
 | 1 | 8607100571137 | MAJONEZA 611G THOMY STAKLENKA NESTLE | 611 g | 23 | 878 | 5,71–13,08 /kg | high/name |  |
-| 2 | 3858882210263 | MAJONEZA DELIKATES TUBA 165 g ZVIJEZDA | 165 g | 22 | 1395 | 13,94–20,55 /kg | high/name |  |
-| 3 | 3856015325228 | MAJONEZA DELIKATES 85 g VREĆICA ZVIJEZDA | 85 g | 22 | 1391 | 8,82–18,59 /kg | high/name |  |
+| 2 | 3858882210263 | MAJONEZA DELIKATES 165 g ZVIJEZDA (24) | 165 g | 22 | 1395 | 13,94–20,55 /kg | high/name |  |
+| 3 | 3856015325228 | Zvijezda Majoneza delikates vrećica 85 g | 85 g | 22 | 1391 | 8,82–18,59 /kg | high/name |  |
 | 4 | 3856015321879 | MAJONEZA DELIKATES 620g STAKLENKA ZVIJEZDA | 620 g | 22 | 1377 | 6,34–11,60 /kg | high/name |  |
 | 5 | 7613287084606 | THOMY MAJONEZA DELIKATESNA TUBA 165G (20), NESTLE | 165 g | 21 | 1237 | 10,85–21,15 /kg | high/name |  |
 | 6 | 3858890178678 | MAJONEZA THOMY DOYPACK VREĆICA S ČEPOM 263 g ALCA | 263 g | 21 | 913 | 9,47–16,69 /kg | high/name |  |
@@ -3458,12 +3460,12 @@ must_match: `majonez`
 | 11 | 3856015333926 | MAJONEZA DELIKATES ZVIJEZDA 165g+110g GRATIS TUBA ZVIJEZDA | 165 g | 15 | 952 | 15,09–18,12 /kg | high/name |  |
 | 12 | 3856015321244 | N-MAJONEZA ZVIJEZDA 255G DELIKATES -12/1- | 255 g | 15 | 536 | 11,96–16,82 /kg | high/name |  |
 | 13 | 3856015321909 | N-MAJONEZA ZVIJEZDA 620G LIGHT- 6/1- STAKLENKA | 620 g | 15 | 392 | 6,92–10,79 /kg | high/name |  |
-| 14 | 3858890178692 | MAJONEZA THOMY 611 g+150 g GRATIS STAKLO ALCA | 611 g | 14 | 405 | 2,11–11,93 /kg | high/name |  |
+| 14 | 3858890178692 | MAJONEZA THOMY 611 g+150 g GRATIS STAKLO ALCA | 611 g | 14 | 405 | 4,09–11,93 /kg ⚠1 | high/name |  |
 | 15 | 8445292265522 | MAJONEZA THOMY 80 G VRECICA NESTLE | 80 g | 13 | 1067 | 8,75–22,38 /kg | high/name |  |
-| 16 | 7613287084545 | MAJONEZA THOMY 265 G TUBA NESTLE | 265 g | 13 | 573 | 13,55–285,85 /kg | high/name |  |
-| 17 | 8445291689152 | MAJONEZA THOMY 170G DOYPACK -18/1- | 170 g | 13 | 485 | 0,42–16,41 /kg | high/name |  |
-| 18 | 7613035904958 | MAJONEZA 380G DOYPACK XL VREĆICA S ČEPOM THOMY | 380 g | 13 | 453 | 0,48–13,13 /kg | high/name |  |
-| 19 | 3858882212946 | MAJONEZA SALATNA GASTRO 2kg ZVIJEZDA | 2 kg | 13 | 63 | 3,33–4,82 /kg | high/name |  |
+| 16 | 7613287084545 | MAJONEZA THOMY 265 G TUBA NESTLE | 265 g | 13 | 573 | 13,55–17,70 /kg ⚠4 | high/name |  |
+| 17 | 8445291689152 | MAJONEZA THOMY 170G DOYPACK -18/1- | 170 g | 13 | 485 | 13,47–16,41 /kg ⚠2 | high/name |  |
+| 18 | 7613035904958 | MAJONEZA 380G DOYPACK XL VREĆICA S ČEPOM THOMY | 380 g | 13 | 453 | 7,87–13,13 /kg ⚠2 | high/name |  |
+| 19 | 3858882212946 | N-MAJONEZA ZVIJEZDA GASTRO 2000G-6/1 | 2 kg | 13 | 63 | 3,33–4,82 /kg | high/name |  |
 | 20 | 3856015333148 | N-MAJONEZA ZVIJEZDA 270G + 230G GRATIS-12/1- DOYPACK | 270 g | 12 | 660 | 11,07–14,04 /kg | high/name |  |
 
 <details><summary>Najčešće isključeni (top 10)</summary>
@@ -3479,14 +3481,14 @@ must_match: `majonez`
 | MAJONEZA VREĆ 80 g CHILLI THOMY | 4 | `chilli` |
 | MAJONEZA MINI FELIX 18 g PAGO | 3 | `felix` |
 | N-MAJONEZA THOMY 190G TOP2 MAJONEZA + KETCHUP -10/1- | 3 | `ketchup` |
-| MAJONEZA MINI 18G FELIX | 2 | `felix` |
+| MAJONEZA CESNJAK 80 G THOMY | 2 | `cesnjak` |
 
 </details>
 
 <a id="kecap"></a>
 ## kečap (`kecap`)
 
-jedinica: **kg** · loose_produce: **false** · grupa: **181** · isključenih grupa: **38**
+jedinica: **kg** · loose_produce: **false** · grupa: **176** · isključenih grupa: **43**
 
 sinonimi: kecap, ketchup  
 must_match: `kecap | ketchup | kecup`
@@ -3500,7 +3502,7 @@ atributi: vrsta = blagi, ljuti
 | 3 | 3858882210881 | N-KETCHUP ZVIJEZDA 1000G BLAGI-8/1 | 1 kg | 20 | 1182 | 2,19–4,29 /kg | high/name | vrsta=blagi |
 | 4 | 3850104268731 | KETCHUP BLAGI 500 G (6) PODRAVKA (PAL 85) | 500 g | 20 | 989 | 2,38–4,78 /kg | high/name | vrsta=blagi |
 | 5 | 3850104240836 | KETCHUP BLAGI 1000 GR -PODRAVKA(6) (PAL 60) | 1 kg | 18 | 677 | 2,09–3,69 /kg | high/name | vrsta=blagi |
-| 6 | 3856015316752 | GASTRO KETCHUP ZVIJEZDA 15 g (100) | 15 g | 18 | 486 | 13,33–26,00 /kg | high/name | vrsta=blagi |
+| 6 | 3856015316752 | KETCHUP ZVIJEZDA 15G -100/1- BLAGI | 15 g | 18 | 486 | 13,33 /kg ⚠479 | high/name | vrsta=blagi |
 | 7 | 3850104268915 | KETCHUP LJUTI 500G(6) (PAL 85) PODRAVKA | 500 g | 17 | 698 | 3,38–4,98 /kg | high/name | vrsta=ljuti |
 | 8 | 8715700421469 | KETCHUP BLAGI HEINZ 570 G | 570 g | 15 | 710 | 5,07–9,63 /kg | high/name | vrsta=blagi |
 | 9 | 8715700421551 | HEINZ KETCHUP BLAGI 450G, ORBICO | 450 g | 14 | 728 | 4,42–8,27 /kg | high/name | vrsta=blagi |
@@ -3521,14 +3523,14 @@ atributi: vrsta = blagi, ljuti
 | naziv | lanaca | isključio |
 |---|---|---|
 | Zvijezda ketchup i majoneza tuba 165 g | 16 | `majonez` |
-| FLIPS TIP TOP 50G CUBICS KETCHUP -30/1- CHIO | 15 | `flips` |
+| CHIO TIP TOP CUBICS KETCHUP INTERSNACK 50 g (30) | 15 | `chio` |
 | FLIPS DINI 30G MARBO KETCHUP-35/1- | 14 | `flips` |
 | MAJONEZA S KETCHUP THOMY TUBA 190G THOMY (10) | 13 | `majonez` |
-| FLIPS KROKI KROKET KETCHUP 120 G CHIO | 12 | `flips` |
-| GRICKALICE POM BAR KETCHUP 50G CHIO | 12 | `grickal` |
-| Chio Chips Čips ketchup style 130 g | 11 | `chips` |
-| GRICKALICE KROKI KROKET TROKI KETCHUP 110G CHIO | 10 | `grickal` |
-| FLIPS STIX KETCHUP 35 g BOBI | 8 | `flips` |
-| BOBI FLIPS KETCHUP TOBY 40 G | 7 | `flips` |
+| CHIO KROKI KROKET KETCHUP V. INTERSNACK 120 g (10) | 12 | `chio` |
+| GRICKALICE POM BAR KETCHUP 50G CHIO | 12 | `chio` |
+| Chio Chips Čips ketchup style 130 g | 11 | `chio` |
+| GRICKALICE KROKI KROKET TROKI KETCHUP 110G CHIO | 10 | `chio` |
+| FLIPS STIX KETCHUP 35 G BOBI | 8 | `bobi` |
+| BOBI FLIPS KETCHUP TOBY 40 G | 7 | `bobi` |
 
 </details>

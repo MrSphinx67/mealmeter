@@ -110,6 +110,7 @@ _VARIABLE = re.compile(
 # broj komada uz jednu gramaturu: "4+1 GRATIS", "5+1", "3/1" (ne "-25/1-", to je broj u kartonu), "6 PAK"
 _PROMO = re.compile(r"(?<![\d.,])(\d{1,2})\s*\+\s*(\d)(?!\d)")
 _COUNT = re.compile(r"(?<![\d\-])(?<!-\s)(\d{1,3})\s*/\s*1(?!\d)(?!\s*-)")
+_PROMO_GRATIS = re.compile(r"(?<![\d.,])\d{1,2}\s*\+\s*\d(?!\d)\s*(?:gratis|grat\b\.?|gr\b\.?)?", re.I)
 _PAK = re.compile(r"(?<![\d.,])(\d{1,2})\s*-?\s*(?:pak|pack)\b", re.I)
 # zadnja opcija: "TUNA 2x80" bez jedinice (pretpostavljaju se grami)
 _MULTI_NOUNIT = re.compile(r"(?<![\d.,])([1-9]|1[0-2])\s*[x×*]\s*(\d{2,4})(?![\d.,])(?!\s*(?:cm|mm|m\b|x|[a-z]))", re.I)
@@ -152,22 +153,25 @@ def _piece_count(text: str) -> int | None:
 
 
 @lru_cache(maxsize=None)
-def analyze_pack(name: str | None) -> tuple[tuple[float, str] | None, float | None, bool]:
-    """(bruto gramatura, ocijeđena masa, promjenjiva težina) iz naziva.
+def analyze_pack(name: str | None) -> tuple[tuple[float, str] | None, float | None, bool, str | None]:
+    """(bruto gramatura, ocijeđena masa, promjenjiva težina, pack_confidence) iz naziva.
 
-    - Bruto: (količina, 'g' | 'ml' | 'kom') ili None. Prioritet: višestruko pakiranje
-      ("6x0,33 l", "30G*20", "7GX5") > bruto iz "bruto/ocijeđeno" > masa/volumen > komadi.
-      Jedna mala gramatura uz "4+1", "3/1" ili "6 PAK" množi se brojem komada ("7 g 4+1" -> 35 g),
-      osim ako je očito već ukupna ("35G 4+1", "5+1 48GR").
+    - Bruto (neto s tekućinom kod konzervi): (količina, 'g' | 'ml' | 'kom') ili None. Prioritet:
+      višestruko pakiranje ("6x0,33 l", "30G*20", "7GX5") > bruto iz "bruto/ocijeđeno" >
+      masa/volumen > komadi. Jedna mala gramatura uz "4+1", "3/1" ili "6 PAK" množi se brojem
+      komada ("7 g 4+1" -> 35 g), osim ako je očito već ukupna ("35G 4+1", "5+1 48GR").
     - Ocijeđena masa u g/ml ("185/140g" -> 140, "3x80/56 g" -> 168, "OC. MASA 280 g" -> 280).
     - Promjenjiva težina ("cca", "1-1,5 kg"): bruto je None, cijena je po kg.
+    - pack_confidence: "low" kad gramatura ovisi o heuristici (broj komada uz "4+1"/"3/1"/"PAK",
+      "2x80" bez jedinice, višestruko pakiranje uz "gratis"), inače "high"; None bez gramature.
     Oznake "-12/1-" (broj u kartonu) i "(10)" se ne tumače.
     """
     if not name:
-        return None, None, False
+        return None, None, False, None
     if _VARIABLE.search(name):
-        return None, None, True
+        return None, None, True, None
     text, gross, drained = name, None, None
+    gratis = bool(re.search(r"gratis|\bgrat\b", name, re.I))
 
     if m := _SLASH_MULTI.search(text):
         n, unit_b = int(m.group(1)), m.group(6)
@@ -187,27 +191,33 @@ def analyze_pack(name: str | None) -> tuple[tuple[float, str] | None, float | No
         drained = _to_base(m.group(1), m.group(2))[0]
         text = _blank(text, m)
     if gross:
-        return gross, drained, False
+        return gross, drained, False, "high"
 
     if (m := _MULTI.search(text)) and int(m.group(1)) > 0 and _num(m.group(2)) > 0:
         amount, unit = _to_base(m.group(2), m.group(3))
-        return (round(int(m.group(1)) * amount, 3), unit), drained, False
+        return (round(int(m.group(1)) * amount, 3), unit), drained, False, "low" if gratis else "high"
     if (m := _MULTI_REV.search(text)) and int(m.group(3)) > 0 and _num(m.group(1)) > 0:
         amount, unit = _to_base(m.group(1), m.group(2))
-        return (round(int(m.group(3)) * amount, 3), unit), drained, False
+        return (round(int(m.group(3)) * amount, 3), unit), drained, False, "low" if gratis else "high"
 
-    found = [_to_base(m.group(1), m.group(2)) for m in _SINGLE.finditer(text) if not _is_age(text, m)]
+    k_all = _piece_count(text)
+    # "4+1 GR." / "4+1 GRATIS": "GR." je kratica za gratis, ne grami
+    singles_text = _PROMO_GRATIS.sub(lambda m: " " * len(m.group(0)), text)
+    found = [_to_base(m.group(1), m.group(2)) for m in _SINGLE.finditer(singles_text) if not _is_age(singles_text, m)]
     found = [f for f in found if f[0] > 0]
     pick = next((f for f in found if f[1] != "kom"), found[0] if found else None)
     if pick:
         amount, unit = pick
-        k = _piece_count(text) if unit != "kom" else None
-        if k and amount <= _SACHET_MAX and amount / k < 5:
-            amount = round(amount * k, 3)
-        return (amount, unit), drained, False
+        k = k_all if unit != "kom" else None
+        confidence = "high"
+        if k:
+            confidence = "low"  # "4+1"/"3/1"/"PAK": je li gramatura po komadu ili ukupna, procjena je
+            if amount <= _SACHET_MAX and amount / k < 5:
+                amount = round(amount * k, 3)
+        return (amount, unit), drained, False, confidence
     if m := _MULTI_NOUNIT.search(text):
-        return (float(int(m.group(1)) * int(m.group(2))), "g"), drained, False
-    return None, drained, False
+        return (float(int(m.group(1)) * int(m.group(2))), "g"), drained, False, "low"
+    return None, drained, False, None
 
 
 def parse_pack(name: str | None) -> tuple[float, str] | None:
@@ -223,6 +233,11 @@ def parse_drained(name: str | None) -> float | None:
 def is_variable_weight(name: str | None) -> bool:
     """Artikl promjenjive težine ("CCA 1 kg", "1-1,5KG"): cijena je po kg, gramatura nije pakiranje."""
     return analyze_pack(name)[2]
+
+
+def pack_confidence(name: str | None) -> str | None:
+    """"high" / "low" (heuristika višestrukog pakiranja) / None (nema gramature), vidi analyze_pack."""
+    return analyze_pack(name)[3]
 
 
 def is_clearance(name: str | None) -> bool:

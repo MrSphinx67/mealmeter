@@ -60,11 +60,11 @@ for row in stats["quality"]:
 
 st = dict(stats["staples"])
 suspects = st.pop("suspect_prices")
-print("\n=== Osnovne namirnice (staples.yaml):", st)
-print("\n=== Cijene izvan plausible_per_unit (price_suspect: izvan min/max i plan_basket)")
-print(f"{'namirnica':<18}{'odbačeno':>10}{'od':>10}{'%':>7}")
-for staple, n_bad, n_all in suspects:
-    print(f"{staple:<18}{n_bad:>10}{n_all:>10}{100 * n_bad / n_all:>7.1f}")
+print("\n=== Osnovne namirnice (staples.yaml):", {k: v for k, v in st.items() if k != "auto_ranges"})
+print(f"\n=== Cijene izvan granica (price_suspect: izvan min/max i plan_basket); automatskih granica: {st.pop('auto_ranges')}")
+print(f"{'namirnica':<20}{'granice':<8}{'odbačeno':>10}{'od':>10}{'%':>7}")
+for staple, source, n_bad, n_all in suspects:
+    print(f"{staple:<20}{source:<8}{n_bad:>10}{n_all:>10}{100 * n_bad / n_all:>7.1f}")
 print("\n=== Proizvodi izbačeni iz namirnica (drop_reason)")
 for reason, n in con.execute("""
         SELECT split_part(drop_reason, ':', 1) || CASE WHEN drop_reason LIKE 'kategorija:%' THEN ':*' ELSE '' END,

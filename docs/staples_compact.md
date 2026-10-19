@@ -46,14 +46,14 @@ atributi: tip = glatko, ostro, polubijelo, integralno; vrsta = psenicno, pirovo,
 | 2 | 3850104052552 | BRAŠNO KUKURUZNO 1KG (10) (PAL 60), PODRAVKA | 1 kg | 19 | 674 | 1,21–1,89 /kg | high/name | vrsta=kukuruzno |
 | 3 | 3850104223624 | BRAŠNO GLATKO T-550 1KG (10) (PAL 60) PODRAVKA | 1 kg | 18 | 1167 | 0,62–0,83 /kg | high/name | oznaka=t550, tip=glatko, vrsta=psenicno |
 | 4 | 3850104223631 | BRAŠNO PŠEN. T-400 OŠTRO 1 KG (10) (PAL60) PODRAVKA | 1 kg | 17 | 926 | 0,69–0,83 /kg | high/name | oznaka=t400, tip=ostro, vrsta=psenicno |
-| 5 | 3858884172637 | BRASNO T-400 1 KG CAKOVECKI MLINOVI - OSTRO ZA KOLACE | 1 kg | 16 | 953 | 0,82–0,83 /kg ⚠9 | high/name | tip=ostro, oznaka=t400, vrsta=psenicno |
+| 5 | 3858884172637 | BRASNO T-400 1 KG CAKOVECKI MLINOVI - OSTRO ZA KOLACE | 1 kg | 16 | 953 | 0,82–0,83 /kg ⚠9 | high/name | oznaka=t400, tip=ostro, vrsta=psenicno |
 
 <details><summary>Najčešće isključeni (top 5)</summary>
 
 | naziv | lanaca | isključio |
 |---|---|---|
 | SMJESA ZA KRUH (BEZGLUTENSKO BRAŠNO) DR.SCHÄR MIX B 1KG (10) | 15 | `mix\b` |
-| KOKOS BRAŠNO 200G (10), ŠAFRAM | 14 | `kokos` |
+| KOKOS BRAŠNO 200 g ŠAFRAM (10) | 14 | `kokos` |
 | HELJDINO BRAŠNO 1 kg PODRAVKA (10) | 13 | `heljd` |
 | SUPERFOODS eko kokosovo brašno 250g | 10 | `kokos` |
 | KOKOS BRAŠNO 200G(20) NATURA, MARJAN VOĆE | 8 | `kokos` |
@@ -74,7 +74,7 @@ atributi: vrsta = u_prahu, smedi, kocke, bijeli
 |---|---|---|---|---|---|---|---|---|
 | 1 | 3858881087460 | ŠEĆER U PRAHU 250 g FRANCK VREĆ. (10) | 250 g | 16 | 1058 | 3,76–5,16 /kg | high/name | vrsta=u_prahu |
 | 2 | 3858881087477 | ŠEĆER U PRAHU 500 g FRANCK VREĆ. (10) | 500 g | 15 | 754 | 3,18–4,98 /kg | high/name | vrsta=u_prahu |
-| 3 | 3859888279476 | ŠEĆER KOCKA BIJELI RIO-PAK 500 g | 500 g | 11 | 733 | 2,66–5,50 /kg | high/name | vrsta=kocke |
+| 3 | 3859888279476 | SECER KOCKA BIJELA 500 G RIO PAK | 500 g | 11 | 733 | 2,66–5,50 /kg | high/name | vrsta=kocke |
 | 4 | 9007829025017 | Agragold Šećer kristal 1kg_OC | 1 kg | 11 | 392 | 0,65–1,33 /kg | high/name | vrsta=bijeli |
 | 5 | 3859893641008 | Viro Šećer bijeli kristal 1 kg_OC | 1 kg | 10 | 759 | 0,75–0,99 /kg | high/name | vrsta=bijeli |
 
@@ -93,7 +93,7 @@ atributi: vrsta = u_prahu, smedi, kocke, bijeli
 <a id="sol"></a>
 ## sol (`sol`)
 
-jedinica: **kg** · loose_produce: **false** · grupa: **175** · isključenih grupa: **245** · plausible: **0.2–8 €/kg** · pakiranje: **250–5000** · zadano bez: **vrsta=himalajska** · **pantry**
+jedinica: **kg** · loose_produce: **false** · grupa: **162** · isključenih grupa: **258** · plausible: **0.2–8 €/kg** · pakiranje: **250–5000** · zadano bez: **vrsta=himalajska** · **pantry**
 
 sinonimi: sol, kuhinjska sol  
 must_match: `sol\b`
@@ -123,12 +123,12 @@ atributi: vrsta = morska, himalajska, kamena, jodirana; zrno = sitna, krupna
 <a id="ulje"></a>
 ## ulje (suncokretovo/biljno) (`ulje`)
 
-jedinica: **l** · loose_produce: **false** · grupa: **168** · isključenih grupa: **803** · plausible: **1–12 €/l** · pakiranje: **500–5000**
+jedinica: **l** · loose_produce: **false** · grupa: **176** · isključenih grupa: **777** · plausible: **1–12 €/l** · pakiranje: **500–5000** · zadano bez: **vrsta=avokado, vrsta=sezam, vrsta=kokos, vrsta=grozde, vrsta=specijalno**
 
 sinonimi: ulje, suncokretovo ulje, biljno ulje, jestivo ulje  
 must_match: `ulje\b`
   
-atributi: vrsta = suncokretovo, repicino, biljno
+atributi: vrsta = avokado, sezam, kokos, grozde, specijalno, suncokretovo, repicino, biljno
 
 | # | id | naziv | pakiranje | lanaca | trgovina | €/jed | pouzdanost | atributi |
 |---|---|---|---|---|---|---|---|---|
@@ -142,9 +142,9 @@ atributi: vrsta = suncokretovo, repicino, biljno
 
 | naziv | lanaca | isključio |
 |---|---|---|
-| ULJE MASLINOVO EXTRA DJEVICANSKO 1 L ZVIJEZDA STAKLO | 22 | `maslin` |
-| ULJE MASLINOVO EXTRA DJEVICANSKO 0.5 L ZVIJEZDA STAKLO | 19 | `maslin` |
-| N-ULJE MASL. 1L ORGULA TRADICIJA EXTRA DJEVIČANSKO -6/1- EKO | 16 | `masl\b` |
+| ULJE MASLINOVO EXTRA DJEVICANSKO 1 L ZVIJEZDA STAKLO | 22 | `masli` |
+| ULJE MASLINOVO EXTRA DJEVICANSKO 0.5 L ZVIJEZDA STAKLO | 19 | `masli` |
+| N-ULJE MASL. 1L ORGULA TRADICIJA EXTRA DJEVIČANSKO -6/1- EKO | 16 | `dev` |
 | ULJE BUCINO 500 ML ZVIJEZDA STAKLO | 16 | `bucin` |
 | RIO MARE TUNA MAS.ULJE 2x80 g OC.MASA 104 g (48) | 12 | `mas\b` |
 
@@ -153,7 +153,7 @@ atributi: vrsta = suncokretovo, repicino, biljno
 <a id="maslac"></a>
 ## maslac (`maslac`)
 
-jedinica: **kg** · loose_produce: **false** · grupa: **222** · isključenih grupa: **241** · plausible: **6–40 €/kg** · pakiranje: **100–1000**
+jedinica: **kg** · loose_produce: **false** · grupa: **198** · isključenih grupa: **265** · plausible: **6–40 €/kg** · pakiranje: **100–1000**
 
 sinonimi: maslac, puter, butter  
 must_match: `maslac | puter\b | butter\b | markenbutter`
@@ -183,7 +183,7 @@ atributi: vrsta = slani, neslani
 <a id="mlijeko"></a>
 ## mlijeko (`mlijeko`)
 
-jedinica: **l** · loose_produce: **false** · grupa: **264** · isključenih grupa: **395** · plausible: **0.5–4 €/l** · pakiranje: **500–2000** · zadano bez: **laktoza=bez**
+jedinica: **l** · loose_produce: **false** · grupa: **258** · isključenih grupa: **401** · plausible: **0.5–4 €/l** · pakiranje: **500–2000** · zadano bez: **laktoza=bez**
 
 sinonimi: mlijeko, kravlje mlijeko  
 must_match: `mlijek`
@@ -196,7 +196,7 @@ atributi: mast = 0, 0.5, 0.9, 1.5, 2.8, 3.2, 3.5, 3.8; vrsta = trajno, svjeze; l
 | 2 | 3850354016830 | N-MLIJEKO DUKAT 1.00L 2.8%MM EDGE -12/1- 11214 | 1 l | 23 | 1320 | 0,78–1,03 /l | high/name | mast=2.8, vrsta=trajno |
 | 3 | 3850108020656 | N-MLIJEKO Z BREGOV 2.00L 2.80%MM -6/1- ČEP VINDIJA 2065 | 2 l | 23 | 1298 | 0,81–1,22 /l | high/name | mast=2.8, vrsta=trajno |
 | 4 | 3850108020908 | MLIJEKO ZBREGOV 2.8% MM SA ČEPOM 1L (12), VINDIJA | 1 l | 23 | 1290 | 0,85–1,03 /l | high/name | mast=2.8, vrsta=trajno |
-| 5 | 3838800040578 | MLIJEKO ALPSKO 3,5% 1 L LJUBLJANSKE MLEKARNE(780/PAL) | 1 l | 22 | 918 | 1,39–2,16 /l | high/name | vrsta=trajno, mast=3.5 |
+| 5 | 3838800040578 | MLIJEKO ALPSKO 3,5% 1 L LJUBLJANSKE MLEKARNE(780/PAL) | 1 l | 22 | 918 | 1,39–2,16 /l | high/name | mast=3.5, vrsta=trajno |
 
 <details><summary>Najčešće isključeni (top 5)</summary>
 
@@ -213,7 +213,7 @@ atributi: mast = 0, 0.5, 0.9, 1.5, 2.8, 3.2, 3.5, 3.8; vrsta = trajno, svjeze; l
 <a id="jaja"></a>
 ## jaja (`jaja`)
 
-jedinica: **kom** · loose_produce: **false** · grupa: **367** · isključenih grupa: **866** · plausible: **0.1–1.5 €/kom** · pakiranje: **4–30** · grupira po: **velicina**
+jedinica: **kom** · loose_produce: **false** · grupa: **353** · isključenih grupa: **880** · plausible: **0.1–1.5 €/kom** · pakiranje: **4–30** · grupira po: **velicina**
 
 sinonimi: jaja, jaje, kokosja jaja  
 must_match: `jaja\b | jaje\b`
@@ -225,14 +225,14 @@ atributi: velicina = xl, l, m, s; uzgoj = slobodni, podni, bio
 | 1 | jaja:m | N-JAJA LUKAČ A KLASA 10KOM RAZRED M KAVEZNI UZGOJ -18/1 | 10 kom | 24 | 1335 | 0,14–1,30 /kom ⚠27 | high/name | velicina=m, uzgoj=podni |
 | 2 | jaja:l | N-JAJA NUJIĆ A KLASA 10KOM RAZRED L -36/1 SLOBODNI UZGOJ | 10 kom | 21 | 1171 | 0,10–0,47 /kom ⚠27 | high/name | velicina=l, uzgoj=podni |
 | 3 | jaja:xl | JAJA XL RAZRED 10/1 PODNI UZGOJ VRANA |  | 6 | 207 | 0,30–0,51 /kom | high/name | velicina=xl, uzgoj=podni |
-| 4 | 3858894520787 | OBUCI JAJE TERMOSKUPLJAJUĆA FOLIJA 12/1 | 12 kom | 3 | 251 | 0,23–0,32 /kom | high/name |  |
-| 5 | 3858895340025 | Gala Jaja svj.Aklas.Mraz.podni uzgoj10/1 | 10 kom | 3 | 177 | 0,19–0,30 /kom | high/name | uzgoj=podni |
+| 4 | 3858895340025 | Gala Jaja svj.Aklas.Mraz.podni uzgoj10/1 | 10 kom | 3 | 177 | 0,19–0,30 /kom | high/name | uzgoj=podni |
+| 5 | jaja:s | Žito Jaja iz podnog uzgoja razred S | 10 kom | 3 | 128 | 0,11–0,26 /kom | high/name | velicina=s, uzgoj=podni |
 
 <details><summary>Najčešće isključeni (top 5)</summary>
 
 | naziv | lanaca | isključio |
 |---|---|---|
-| N-FERRERO KINDER JAJE SURPRISE 20G -72/1- | 15 | `ferrero` |
+| JAJE ČOKOLADNO KINDER SURPRISE 20G T1x192 | 15 | `coko` |
 | N-ČOK.JAJE MICKEY MOUSE 20GRATTOUILLE -48/1- | 14 | `cok\b` |
 | ČOKOLADNO JAJE HOT WHEELS 20g ZAINI | 12 | `coko` |
 | N-ČOK.JAJE PRINCES -SHIMMERiSHINE20G -48/1- | 11 | `cok\b` |
@@ -243,37 +243,37 @@ atributi: velicina = xl, l, m, s; uzgoj = slobodni, podni, bio
 <a id="luk"></a>
 ## luk (crveni/žuti) (`luk`)
 
-jedinica: **kg** · loose_produce: **true** · grupa: **194** · isključenih grupa: **49**
+jedinica: **kg** · loose_produce: **true** · grupa: **207** · isključenih grupa: **36** · zadano bez: **vrsta=mladi, vrsta=ljutika**
 
 sinonimi: luk, crveni luk, zuti luk, kapula  
 must_match: `luk\b | kapula`
   
-atributi: vrsta = mladi, crveni, zuti, bijeli
+atributi: vrsta = mladi, ljutika, crveni, zuti, bijeli
 
 | # | id | naziv | pakiranje | lanaca | trgovina | €/jed | pouzdanost | atributi |
 |---|---|---|---|---|---|---|---|---|
-| 1 | 3859891348275 | LUK CRVENI PAK. 1 kg | 1 kg | 2 | 463 | 0,99–1,45 /kg | high/name | vrsta=crveni |
-| 2 | 3858890133004 | LUK CRVENI 1KG EKOZONA | 1 kg | 2 | 206 | 1,49–2,19 /kg | high/name | vrsta=crveni |
-| 3 | 3858893252184 | LUK MLADI - VEZICA |  | 2 | 197 | – | – | vrsta=mladi |
-| 4 | 3850334173034 | LUK LJUBIČASTI (10) |  | 2 | 192 | 1,01–1,29 /kg | low/unit_price | vrsta=crveni |
-| 5 | 3850334386205 | LUK SREBRENAC (10) |  | 2 | 118 | 1,83–1,99 /kg | low/unit_price | vrsta=zuti |
+| 1 | 3859889644716 | LUK LJUBIČASTI RUKAVAC 4/1 |  | 4 | 519 | 2,58–3,78 /kg | low/assumed | vrsta=crveni |
+| 2 | 3859889644709 | LUK CRVENI RUKAVAC 4/1 |  | 4 | 339 | 1,98–2,90 /kg | low/assumed | vrsta=crveni |
+| 3 | 3859891348275 | LUK CRVENI PAK. 1 kg | 1 kg | 2 | 463 | 0,99–1,45 /kg | high/name | vrsta=crveni |
+| 4 | 3858890133004 | LUK CRVENI 1KG EKOZONA | 1 kg | 2 | 206 | 1,49–2,19 /kg | high/name | vrsta=crveni |
+| 5 | 3850334173034 | LUK LJUBIČASTI (10) |  | 2 | 192 | 1,01–1,29 /kg | low/unit_price | vrsta=crveni |
 
 <details><summary>Najčešće isključeni (top 5)</summary>
 
 | naziv | lanaca | isključio |
 |---|---|---|
 | LUK REZANI 3000G TERMIČKI OBRAĐEN -5/1- VREĆA | 6 | `termick` |
-| LUK CRVENI RUKAVAC 4/1 | 4 | `rukavac` |
 | LUK KOCKICE SMRZNUTI 2,5KG LEDO | 4 | `smrz` |
-| LUK LJUBIČASTI RUKAVAC 4/1 | 4 | `rukavac` |
 | ZAČIN LUK PRŽENI 1000 g KOTANY | 4 | `przeni` |
+| IGRAČKA LUK I STRIJELA AY32-1A NIRD | 3 | `igrack` |
+| LUK DINSTANI 3 kg C.A.K. | 3 | `dinst` |
 
 </details>
 
 <a id="krumpir"></a>
 ## krumpir (`krumpir`)
 
-jedinica: **kg** · loose_produce: **true** · grupa: **258** · isključenih grupa: **178**
+jedinica: **kg** · loose_produce: **true** · grupa: **238** · isključenih grupa: **198**
 
 sinonimi: krumpir, krompir, kumpir  
 must_match: `krumpir`
@@ -292,8 +292,8 @@ atributi: namjena = kuhanje, pecenje, salata; vrsta = mladi, crveni, zuti, bijel
 
 | naziv | lanaca | isključio |
 |---|---|---|
-| PEKARSKI KRUMPIR, KRIŠKE S KOROM 2,5 KG LEDO | 9 | `ledo` |
-| KRUMPIR PEKARSKI ZAČINJENI 750g LEDO | 8 | `ledo` |
+| PEKARSKI KRUMPIR, KRIŠKE S KOROM 2,5 KG LEDO | 9 | `pekarsk` |
+| KRUMPIR PEKARSKI ZAČINJENI 750g LEDO | 8 | `pekarsk` |
 | KRUMPIR KRIŠKE JACKET WEDGES 2500 g ( ZAPRIMATI NA KG ) | 4 | `kriske` |
 | KRUMPIR PIRE 3KG VR PODRAVKA (1) | 4 | `pire` |
 | KRUMPIROVI KROKETI 2.5KG LEDO | 4 | `ledo` |
@@ -312,7 +312,7 @@ atributi: vrsta = basmati, jasmin, arborio, carnaroli, originario, parboiled, in
 
 | # | id | naziv | pakiranje | lanaca | trgovina | €/jed | pouzdanost | atributi |
 |---|---|---|---|---|---|---|---|---|
-| 1 | 8001860100017 | Riso Scotti riža originario okr.zrno 1kg | 1 kg | 21 | 1152 | 2,25–5,40 /kg | high/name | vrsta=originario |
+| 1 | 8001860100017 | RIŽA SCOTTI 1KG ORIGINARIO U-1054 -10/1- | 1 kg | 21 | 1152 | 2,25–5,40 /kg | high/name | vrsta=originario |
 | 2 | 3838700540291 | RIŽA ZA DOMAĆA JELA ZLATO POLJE PODRAVKA 1 kg (12) | 1 kg | 19 | 919 | 2,07–4,39 /kg | high/name | vrsta=originario |
 | 3 | 3838700540369 | RIŽA ZLATO POLJE BLAZINICA PODRAVKA 800 g (9) | 800 g | 17 | 547 | 1,25–4,00 /kg | high/name |  |
 | 4 | 8001860201011 | Riso Scotti riža arborio dugo zrno 1kg | 1 kg | 16 | 961 | 2,95–5,99 /kg | high/name | vrsta=arborio |
@@ -344,7 +344,7 @@ atributi: oblik = spageti, penne, fusilli, makaroni, tagliatelle, farfalle, puzi
 |---|---|---|---|---|---|---|---|---|
 | 1 | 8076802085738 | BARILLA PENNE RIGATE 73 (MAKARON) TJESTENINA 500G (30) | 500 g | 23 | 1384 | 2,38–4,78 /kg | high/name | oblik=penne |
 | 2 | 8076802085981 | BARILLA FUSSILI 98 (VIJAK) TJESTENINA 500G (30) | 500 g | 22 | 1398 | 1,90–5,02 /kg | high/name | oblik=fusilli |
-| 3 | 8076800195057 | N-TJEST BARILLA 5 500G SPAGHETU-1326 -24/1- | 500 g | 21 | 1398 | 2,12–4,12 /kg | high/name | oblik=spageti |
+| 3 | 8076800195057 | TJESTENINA SPAGHETTI 5 500 G BARILLA KUTIJA | 500 g | 21 | 1398 | 2,12–4,12 /kg | high/name | oblik=spageti |
 | 4 | 3859888666399 | TJEST MARODI SPAGHETTI n.5 400G -24/1- | 400 g | 21 | 759 | 2,47–5,63 /kg | high/name | oblik=spageti |
 | 5 | 3859888666061 | TJEST MARODI CHIFFERI RIGATI / PUŽIĆI SREDNJI 400G-12/1 | 400 g | 21 | 727 | 2,47–5,98 /kg | high/name | oblik=puzici |
 
@@ -352,7 +352,7 @@ atributi: oblik = spageti, penne, fusilli, makaroni, tagliatelle, farfalle, puzi
 
 | naziv | lanaca | isključio |
 |---|---|---|
-| BISTRA JUHA S TJEST.45G (16) (PAL 145) PODRAVKA | 18 | `juha` |
+| JUHA BISTRA S TJESTENINOM 45 G VRECICA PODRAVKA | 18 | `juha` |
 | TALIANETTA MAKARONI BOLOGNESE VR.160G (12) PODRAVKA | 18 | `tal?ianetta` |
 | ARGETA SALATA PILETINA TJESTENINA 160 G ATLANTIC | 16 | `piletin` |
 | TALIANETTA TJESTENINA SA 4 SIRA VR.145G (12) PODRAVKA | 15 | `tal?ianetta` |
@@ -363,7 +363,7 @@ atributi: oblik = spageti, penne, fusilli, makaroni, tagliatelle, farfalle, puzi
 <a id="rajcica"></a>
 ## rajčica (svježa) (`rajcica`)
 
-jedinica: **kg** · loose_produce: **true** · grupa: **203** · isključenih grupa: **199**
+jedinica: **kg** · loose_produce: **true** · grupa: **201** · isključenih grupa: **201**
 
 sinonimi: rajcica, paradajz, pomidor  
 must_match: `rajcic | paradajz | pomidor`
@@ -412,7 +412,7 @@ must_match: `kakao\b`
 |---|---|---|
 | VAFEL KAKAO PRUTICI FRONDI 250 G KRAS | 23 | `vafel` |
 | KEKS KAROLINA 288G MOTO KAKAO -18/1- | 20 | `keks` |
-| PREKRAŠNI KOLAČIĆI KEKS KAKAO 220G (10) (PAL40) KRAŠ | 20 | `keks` |
+| KEKSI PREKRAŠNI KOLAČIĆI S KAKAO PUNJENJEM 220G KRAŠ | 20 | `keks` |
 | DORINA ČOKOLADICA KREM KAKAO 38 g (24) | 19 | `cokolad` |
 | LEDOLETTA KAKAO KREM 800g | 19 | `krem\b` |
 
@@ -433,8 +433,8 @@ atributi: dio = korijen, list
 | 1 | 3870547029850 | PERŠIN BERLINSKI POLUDUGI STANDARD |  | 2 | 10 | – | – | dio=korijen |
 | 2 | 3870547029867 | PERŠIN LISNATI - DOMAĆI LIŠČAR - STANDARD vrećica |  | 2 | 7 | – | – | dio=list |
 | 3 | 3859891136254 | PERSIN KORJEN LIST KOM CCA. 250 G |  | 1 | 155 | – | – | dio=list |
-| 4 | gavranovic:072047 | PERŠIN LIST |  | 1 | 118 | 4,99–7,09 /kg | low/unit_price | dio=list |
-| 5 | lidl:0082766 | Peršin korijen list 250g | 250 g | 1 | 116 | 6,36 /kg | high/name | dio=korijen |
+| 4 | gavranovic:072047 | PERŠIN LIST |  | 1 | 118 | – /kg | low/unit_price | dio=list |
+| 5 | lidl:0082766 | Peršin korijen list 250g | 250 g | 1 | 116 | – /kg | high/name | dio=korijen |
 
 <details><summary>Najčešće isključeni (top 5)</summary>
 
