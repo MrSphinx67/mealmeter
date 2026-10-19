@@ -19,6 +19,12 @@
 #   compare_by      unit (zadano, cijena po kg/l/kom) | pack: cijena po vrećici od sachet_g grama
 #                   (sachet_g_by: {atribut: {vrijednost: grama}} za iznimke, npr. svježi kvasac 42 g)
 #   pantry          začini i sl.: u košarici se računa samo utrošeni dio (cost_used)
+#   compare_by: count + count_regex  cijena po komadu iz broja u nazivu ("10/1", "10 KOM")
+#   group_by        atribut po kojem se grupira umjesto EAN-a (jaja: velicina)
+#   require_any     dodatni uzorci: barem jedan mora pogoditi (npr. dio mesa: but, vrat...)
+#   default_attributes  zadani filtar ako atribut nije zadan (mljeveno meso: vrsta=mijesano)
+#   disabled        namirnica postoji, ali nije u v1 (ne gradi se i ne može se tražiti)
+#   attributes._default  vrijednost atributa kad nijedan uzorak ne pogodi
 #   loose_produce   svježe voće/povrće. Dodatno pravilo: riječ namirnice je prva ili druga riječ
 #                   naziva, a proizvod je bez globalnog EAN-a (vaga/PLU), bez gramature ili >= 500 g,
 #                   i nije tekućina (inače "banana" pogađa bombone i sokove s okusom banane)
@@ -478,11 +484,28 @@ rajcica:
 pasirana_rajcica:
   name: pasirana rajčica
   synonyms: [pasirana rajčica, pasirana rajcica, passata, rajčica pasirana]
-  must_match: [pasirana rajcica, rajcica pasirana, pasir rajcica, rajcica pasir, passata, polpa]
+  must_match: [pasirana rajcica, rajcica pasirana, pasir rajcica, rajcica pasir, passata]
   must_not_match: [bosiljak, bosiljk, umak, luk\b, cesnjak, ljut, origano, papric]
   unit: kg
   max_pack: 3000
   min_pack: 200
+  loose_produce: false
+
+rajcica_konzerva:
+  name: "rajčica (konzerva: sjeckana, pelati, polpa)"
+  synonyms: [sjeckana rajčica, sjeckana rajcica, pelati, polpa, rajčica u konzervi, rajcica u konzervi]
+  must_match: [pelat, polpa, sjeckana rajcic, rajcica sjeckan, sjeck rajcic, rajcica sjeck, sjec rajcic,
+               rajcica sjec, rajcica u komad, rajcica komadi, cijela rajcica, rajcica cijela, rajcica oljust,
+               oljustena rajcic]
+  must_not_match: [umak, pizza, juha, sok\b, pesto, ketchup, kecap, tuna, grah, sardin, skus, chili]
+  unit: kg
+  min_pack: 200
+  max_pack: 5000
+  attributes:
+    oblik:
+      pelati: '\bpelat|\bcijel|\boljust'
+      polpa: '\bpolpa'
+      sjeckana: '\bsjec|\bkomad|\bkock'
   loose_produce: false
 
 koncentrat_rajcice:
@@ -572,12 +595,51 @@ kiseli_kupus:
   loose_produce: false
 
 zelena_salata:
-  name: zelena salata
-  synonyms: [zelena salata, salata, matovilac, rikola, rukola]
-  must_match: [zelena salata, salata zelena, ledena salata, salata ledena, kristal salata, matovilac,
-               rikola, rukola, radic, endivij, lollo, puterica, salata glavica]
-  must_not_match: [krumpir, tuna, piletin, grah, kupus, mix\b, pesto, umak, prelje, dresing, ulje, sjeme,
-                   rezana, sendvic, tjestenin]
+  name: zelena salata (glavice)
+  synonyms: [zelena salata, salata, iceberg, ledenka, kristalka, puterica]
+  must_match: [salata iceberg, iceberg salata, salata ledenk, ledenk, salata kristalk, kristalka salata,
+               salata puteric, puterica, salata zelena puteric, lollo, zelena salata, salata zelena,
+               salata glav]
+  must_not_match: [sjeme, sjem\b, edt, homme, after, case\b, casa\b, sa sirom, s sirom, tuna, piletin,
+                   mix\b, krumpir, grah, kupus, umak, prelje, dresing, sendvic, tjestenin]
+  unit: kg
+  attributes:
+    vrsta:
+      iceberg: '\biceberg|\bledenk'
+      kristalka: '\bkristal'
+      puterica: '\bputeric'
+      lollo: '\blollo'
+  loose_produce: true
+
+rukola:
+  name: rukola
+  synonyms: [rukola, rikola, rucola]
+  must_match: [rukol, rikol, rucola]
+  must_not_match: [sjeme, sjem\b, pesto, umak, sir\b, pizza, mix\b, salama, prsut, chips, krem\b]
+  unit: kg
+  loose_produce: true
+
+matovilac:
+  name: matovilac
+  synonyms: [matovilac, motovilac]
+  must_match: [matovil, motovil]
+  must_not_match: [sjeme, sjem\b, mix\b, radic]
+  unit: kg
+  loose_produce: true
+
+radic:
+  name: radič
+  synonyms: [radič, radic, cikorija]
+  must_match: [radic\b, radica\b, cikorij]
+  must_not_match: [sjeme, sjem\b, kava, zamjen, kavovin, matovil, radicant]
+  unit: kg
+  loose_produce: true
+
+endivija:
+  name: endivija
+  synonyms: [endivija, frizé, frise]
+  must_match: [endivij, frisee, frize\b]
+  must_not_match: [sjeme, sjem\b, radic]
   unit: kg
   loose_produce: true
 
@@ -615,6 +677,12 @@ gljive:
                    staklo, konzerv, susen, tortelin, tortellin, burek, pita, salata, kocka, zacin]
   unit: kg
   attributes:
+    oblik:
+      konzerva: '\blim\.|\blimenk|\blim\b|\bkonz|\bocij|\bocj|\boc\.|\bo\.m\.|\bstaklo|\bstaklenk|\btetra|\bkuhan|\bvakum|\bvak\b|netto|neto|\d+\s*(?:g|gr)\.?\s*/\s*\d+'
+      smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen'
+      suho: '\bsuh|\brinfuz|\bvrecic|\bpvc\b'
+      svjeze: '\bsvjez|\bsvj\.|\brfz\b|\brfs\b'
+      _default: svjeze
     vrsta:
       sampinjoni: '\bsampinjon'
       bukovace: '\bbukovac'
@@ -678,6 +746,7 @@ kruh:
   must_not_match: [mrvic, prezl, noz\b, kutija, kosar, kalup, mjesavin, smjes, brasno, pekar\b, toster,
                    tost\b, pudding, svjeze pecen, cips, dvopek, krutoni, pecivo]
   unit: kg
+  disabled: true
   attributes:
     vrsta:
       bijeli: '\bbijel'
@@ -831,16 +900,18 @@ mljeveno_meso:
                mljeveno purece, mljeveno pilece, mljeveno telece, mljev meso]
   must_not_match: [posipac, secer, papar, aluminij, veggie, polpete, cevap, pljeskav, burger]
   unit: kg
+  default_attributes: {vrsta: mijesano}
   max_pack: 2000
   min_pack: 300
   attributes:
     vrsta:
       mijesano: '\bmijes|\bmjes'
-      junece: '\bjunec|\bjun\.|\bgoved'
+      junece: '\bjunec|\bjunet|\bjun\.|\bgoved'
       svinjsko: '\bsvinj'
-      purece: '\bpurec'
-      pilece: '\bpilec'
-      telece: '\btelec'
+      purece: '\bpurec|\bpuret'
+      pilece: '\bpilec|\bpilet'
+      telece: '\btelec|\btelet'
+      _default: mijesano
   loose_produce: false
 
 svinjetina:
@@ -849,9 +920,11 @@ svinjetina:
   must_match: [svinjetin, svinjski vrat, svinjski but, svinjska lopatic, svinjski kotlet, svinjsko meso,
                svinjski file, svinjska rebra, svinjski karee, svinjski lungic, sv vrat, sv but, sv lopatic,
                sv kotlet, sv karee]
-  must_not_match: [svinjetinom, dimljen, kuhan, narez, salam, pasteta, kobas, hrenov, sunka, pecen, pohan, panir, mast\b,
+  must_not_match: [empanad, burrito, rolic, instant, usoljen, susen, porcij, svinjetinom, dimljen,
+                   kuhan, narez, salam, pasteta, kobas, hrenov, sunka, pecen, pohan, panir, mast\b,
                    cvarc, juha, gulas, gotov, konzerv, lim\b, mljev, kotanyi, zacin, cca\b]
   unit: kg
+  require_any: [gulas, but\b, lopatic, ramstek, file, rebr, vrat, juh, prsa, kotlet, karee]
   attributes:
     dio:
       vrat: '\bvrat'
@@ -865,13 +938,16 @@ svinjetina:
 junetina:
   name: junetina / govedina (svježe meso)
   synonyms: [junetina, govedina, juneće meso, junece meso, goveđe meso, govede meso, junetina za gulaš]
-  must_match: [junetin, govedin, junec but, junec vrat, junec lopatic, junec gulas, junec ramstek,
-               junec rebr, junec file, junec meso, goveda prsa, govede meso, junec\b]
-  must_not_match: [kroket, burek, mm\b, pekar, alu\b, artu, grasak, gastro, zelatin, posl\b, govedinom, simply, dimljen, kuhan, narez, salam, pasteta, kobas, hrenov, pecen, pohan, juha, gulas gotov,
-                   gotov, konzerv, lim\b, mljev, kocka, temeljac, kotanyi, zacin, burger, cevap, pljeskav,
+  must_match: [junec, junetin, govedin, junec but, junec vrat, junec lopatic, junec gulas,
+               junec ramstek, junec rebr, junec file, junec meso, goveda prsa, govede meso]
+  must_not_match: [empanad, burrito, rolic, instant, usoljen, susen, porcij, kroket, burek, mm\b,
+                   pekar, alu\b, artu, grasak, gastro, zelatin, posl\b, govedinom, simply, dimljen,
+                   kuhan, narez, salam, pasteta, kobas, hrenov, pecen, pohan, juha, gulas gotov, gotov,
+                   konzerv, lim\b, mljev, kocka, temeljac, kotanyi, zacin, burger, cevap, pljeskav,
                    macke, pse\b, hrana, felix, whiskas, piletin, puretin, povrce, umak, jela\b, cca\b,
                    pastet, carpaccio, prsut, mesnat]
   unit: kg
+  require_any: [gulas, but\b, lopatic, ramstek, file, rebr, vrat, juh, prsa]
   attributes:
     dio:
       but: '\bbut\b'
@@ -948,7 +1024,11 @@ grah:
       smedi: '\bsmed'
       crni: '\bcrni'
     oblik:
-      konzerva: '\blim\.|\blimenk|\bkonz|\bocijed|\bkuhan|\bmasa\b|\bstaklo|\btetra'
+      konzerva: '\blim\.|\blimenk|\blim\b|\bkonz|\bocij|\bocj|\boc\.|\bo\.m\.|\bstaklo|\bstaklenk|\btetra|\bkuhan|\bvakum|\bvak\b|netto|neto|\d+\s*(?:g|gr)\.?\s*/\s*\d+'
+      smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen'
+      svjeze: '\bsvjez|\bsvj\.|\brfz\b|\brfs\b'
+      suho: '\bsuh|\brinfuz|\bvrecic|\bpvc\b'
+      _default: suho
   loose_produce: false
 
 leca:
@@ -967,7 +1047,11 @@ leca:
       crna: '\bcrna|\bbeluga'
       smeda: '\bsmed'
     oblik:
-      konzerva: '\blim\.|\blimenk|\bkonz|\bocijed|\bkuhan'
+      konzerva: '\blim\.|\blimenk|\blim\b|\bkonz|\bocij|\bocj|\boc\.|\bo\.m\.|\bstaklo|\bstaklenk|\btetra|\bkuhan|\bvakum|\bvak\b|netto|neto|\d+\s*(?:g|gr)\.?\s*/\s*\d+'
+      smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen'
+      svjeze: '\bsvjez|\bsvj\.|\brfz\b|\brfs\b'
+      suho: '\bsuh|\brinfuz|\bvrecic|\bpvc\b'
+      _default: suho
   loose_produce: false
 
 slanutak:
@@ -980,7 +1064,11 @@ slanutak:
   min_pack: 150
   attributes:
     oblik:
-      konzerva: '\blim\.|\blimenk|\bkonz|\bocijed|\bkuhan|\bstaklo|\btetra'
+      konzerva: '\blim\.|\blimenk|\blim\b|\bkonz|\bocij|\bocj|\boc\.|\bo\.m\.|\bstaklo|\bstaklenk|\btetra|\bkuhan|\bvakum|\bvak\b|netto|neto|\d+\s*(?:g|gr)\.?\s*/\s*\d+'
+      smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen'
+      svjeze: '\bsvjez|\bsvj\.|\brfz\b|\brfs\b'
+      suho: '\bsuh|\brinfuz|\bvrecic|\bpvc\b'
+      _default: suho
   loose_produce: false
 
 kukuruz:
@@ -993,6 +1081,13 @@ kukuruz:
   unit: kg
   max_pack: 5000
   min_pack: 150
+  attributes:
+    oblik:
+      konzerva: '\blim\.|\blimenk|\blim\b|\bkonz|\bocij|\bocj|\boc\.|\bo\.m\.|\bstaklo|\bstaklenk|\btetra|\bkuhan|\bvakum|\bvak\b|netto|neto|\d+\s*(?:g|gr)\.?\s*/\s*\d+'
+      smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen'
+      svjeze: '\bsvjez|\bsvj\.|\brfz\b|\brfs\b'
+      suho: '\bsuh|\brinfuz|\bvrecic|\bpvc\b'
+      _default: konzerva
   loose_produce: false
 
 grasak:
@@ -1006,8 +1101,10 @@ grasak:
   min_pack: 150
   attributes:
     oblik:
-      smrznuti: '\bsmrz|\bledo|\bduboko'
-      konzerva: '\blim\.|\blimenk|\bkonz|\bocijed|\bstaklo'
+      konzerva: '\blim\.|\blimenk|\blim\b|\bkonz|\bocij|\bocj|\boc\.|\bo\.m\.|\bstaklo|\bstaklenk|\btetra|\bkuhan|\bvakum|\bvak\b|netto|neto|\d+\s*(?:g|gr)\.?\s*/\s*\d+'
+      smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen'
+      svjeze: '\bsvjez|\bsvj\.|\brfz\b|\brfs\b'
+      suho: '\bsuh|\brinfuz|\bvrecic|\bpvc\b'
   loose_produce: false
 
 banana:
@@ -1158,6 +1255,7 @@ kava:
                    krem\b, sapun, piling, gel\b, instant napitak, cappuccino, latte, mocha, caj\b, zamjen,
                    cikorij, kavomat, za kavu, kava mix, 3in1, 2in1, 3 u 1, 2 u 1]
   unit: kg
+  disabled: true
   attributes:
     oblik:
       mljevena: '\bmljeven|\bmlj\.|\bmlj\b|\bground'
@@ -1202,4 +1300,5 @@ voda:
                    osvjez, vitamin, sprej, cvjetn, cist, odmasc, posuda, boca za, filter, cedevita, sok\b,
                    ledeni, caj\b, citrus, naranc, zero\b, plus\b, fit\b, sport]
   unit: l
+  disabled: true
   loose_produce: false

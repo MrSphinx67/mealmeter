@@ -12,6 +12,9 @@ import yaml
 from mealmeter.normalize import norm_text
 
 STAPLES_PATH = Path(__file__).with_name("staples.yaml")
+# loose_produce: nazivi staklenki/konzervi koji prolaze pravilo ">= 500 g" ("KRASTAVCI 6-9 cm 1580g ...
+# ocijeđene mase", "KISELI ..."): kalibar u cm, ocijeđena masa, kiselo. Uzorak je na name_norm.
+LOOSE_REJECT_REGEX = r"\d+ \d+ cm|(^| )ocj|(^| )ocij|(^| )kis"
 # Skupine kategorija (normalize.category_group) čiji se proizvodi nikad ne vežu za namirnicu
 NONFOOD_GROUPS = ("kozmetika", "higijena", "kucanstvo", "djeca", "sunce", "igracke", "ljubimci")
 UNITS = ("kg", "l", "kom")
@@ -37,6 +40,15 @@ class Staple:
     pantry: bool = False
     count_regex: str | None = None
     group_by: str | None = None
+    require_any: tuple[str, ...] = ()
+    attribute_defaults: dict[str, str] = field(default_factory=dict, hash=False, compare=False)
+    disabled: bool = False
+    default_attributes: dict[str, str] = field(default_factory=dict, hash=False, compare=False)
+
+    @property
+    def require_regex(self) -> str | None:
+        """Dodatni uvjet: barem jedan od ovih uzoraka na početku riječi (npr. dio mesa)."""
+        return _word_start(self.require_any) if self.require_any else None
 
     @property
     def compare_unit(self) -> str:
@@ -95,7 +107,8 @@ def attr_text(name: str) -> str:
 
 
 @lru_cache(maxsize=4)
-def load_staples(path: Path = STAPLES_PATH) -> dict[str, Staple]:
+def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> dict[str, Staple]:
+    """Namirnice iz staples.yaml; one s `disabled: true` samo uz include_disabled=True."""
     raw = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
     defaults = raw.pop("_defaults", {}) or {}
     default_not = [_fold(p) for p in defaults.get("must_not_match", [])]
@@ -111,9 +124,13 @@ def load_staples(path: Path = STAPLES_PATH) -> dict[str, Staple]:
         must_not = [_fold(p) for p in d.get("must_not_match") or []]
         if not d.get("no_defaults"):
             must_not += [p for p in default_not if p not in must_not]
-        attrs = {
-            a: {str(v): _fold(rx) for v, rx in values.items()} for a, values in (d.get("attributes") or {}).items()
-        }
+        raw_attrs = d.get("attributes") or {}
+        # "_default" je vrijednost atributa kad nijedan uzorak ne pogodi (npr. grah oblik=suho)
+        defaults = {a: str(v.pop("_default")) for a, v in raw_attrs.items() if "_default" in v}
+        attrs = {a: {str(v): _fold(rx) for v, rx in values.items()} for a, values in raw_attrs.items()}
+        for a, v in defaults.items():
+            if v not in attrs[a]:
+                raise ValueError(f"{key}: _default {a}={v} nije među vrijednostima atributa")
         st = Staple(
             key=key,
             name=d.get("name", key),
@@ -133,7 +150,16 @@ def load_staples(path: Path = STAPLES_PATH) -> dict[str, Staple]:
             pantry=bool(d.get("pantry", False)),
             count_regex=d.get("count_regex"),
             group_by=d.get("group_by"),
+            require_any=tuple(_fold(p) for p in d.get("require_any", [])),
+            attribute_defaults=defaults,
+            disabled=bool(d.get("disabled", False)),
+            default_attributes={a: str(v) for a, v in (d.get("default_attributes") or {}).items()},
         )
+        for a, v in st.default_attributes.items():
+            if v not in attrs.get(a, {}):
+                raise ValueError(f"{key}: default_attributes {a}={v} nije definiran atribut")
+        if st.disabled and not include_disabled:
+            continue
         if st.group_by and st.group_by not in attrs:
             raise ValueError(f"{key}: group_by {st.group_by} nije definiran atribut")
         if st.compare_by == "count" and not st.count_regex:
@@ -177,6 +203,8 @@ def name_match(staple: Staple, name: str) -> str | None:
     text = norm_text(name) or ""
     if not re.search(staple.match_regex, text):
         return None
+    if staple.require_regex and not re.search(staple.require_regex, text):
+        return None
     if staple.exclude_regex and re.search(staple.exclude_regex, text):
         return "excluded"
     return "match"
@@ -191,6 +219,9 @@ def extract_attributes(staple: Staple, name: str) -> dict[str, str]:
             if re.search(rx, text):
                 out[attr] = value
                 break
+        else:
+            if attr in staple.attribute_defaults:
+                out[attr] = staple.attribute_defaults[attr]
     return out
 
 
@@ -210,14 +241,18 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
         excl = "regexp_matches(name_norm, ?)" if st.exclude_regex else "false"
         params = ([st.exclude_regex] if st.exclude_regex else []) + [st.match_regex]
         loose = ""
+        if st.require_regex:
+            loose += " AND regexp_matches(name_norm, ?)"
+            params.append(st.require_regex)
         if st.loose_produce:
             # Svježe voće/povrće: riječ namirnice kao prva ili druga riječ naziva, i proizvod
             # na vagu (bez globalnog EAN-a), bez poznate gramature ili pakiranje >= 500 g;
             # nikad tekućina. Inače "banana" pogađa bombone, sokove i čokolade s okusom banane.
-            loose = """AND regexp_matches(name_norm, ?)
+            # Staklenke ("KRASTAVCI 6-9 cm 1580g ... ocijeđene mase") odbija LOOSE_REJECT_REGEX.
+            loose += """ AND regexp_matches(name_norm, ?)
                        AND (NOT ean_global OR pack_unit IS NULL OR (pack_unit = 'g' AND pack_amount >= 500))
-                       AND pack_unit IS DISTINCT FROM 'ml'"""
-            params.append(st.loose_regex)
+                       AND pack_unit IS DISTINCT FROM 'ml' AND NOT regexp_matches(name_norm, ?)"""
+            params += [st.loose_regex, LOOSE_REJECT_REGEX]
         con.execute(
             f"""INSERT INTO clean.product_staples
                 SELECT chain, product_id, '{st.key}', {excl},

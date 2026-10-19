@@ -101,6 +101,9 @@ def find_products(
         staple = resolve_ingredient(query)
         if staple:
             query = None  # upit je samo naziv namirnice
+    if staple and staple.default_attributes:
+        # zadani filtar namirnice (npr. mljeveno meso: vrsta=mijesano) osim ako je atribut zadan
+        attributes = {**staple.default_attributes, **(attributes or {})}
     if attributes:
         unknown = {a: v for a, v in attributes.items() if v not in staple.attributes.get(a, {})}
         if unknown:

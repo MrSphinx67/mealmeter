@@ -33,7 +33,8 @@ def test_wrong_exclusions_removed(key, name):
     ("junetina", "Purina One hrana za pse govedina"),
 ])
 def test_dog_food_still_excluded(key, name):
-    assert name_match(S[key], name) == "excluded"
+    # "excluded" (za pse) ili None (nema dijela mesa iz require_any, Korak 2A2.5)
+    assert name_match(S[key], name) != "match"
 
 
 @pytest.mark.parametrize("key,name", [
@@ -342,3 +343,115 @@ def test_eggs_compare_by_class():
 ])
 def test_potato_purpose(name, namjena):
     assert extract_attributes(S["krumpir"], name).get("namjena") == namjena
+
+
+# --- 5. sadržaj ---------------------------------------------------------------
+
+from mealmeter.staples import LOOSE_REJECT_REGEX, resolve_ingredient  # noqa: E402
+from mealmeter.normalize import norm_text  # noqa: E402
+
+
+def test_disabled_staples():
+    for key in ("voda", "kruh", "kava"):
+        assert key not in S and resolve_ingredient(key) is None
+        assert load_staples(include_disabled=True)[key].disabled
+
+
+@pytest.mark.parametrize("name,oblik", [
+    ("BIO PELAT 400g", "pelati"),
+    ("RAJČICA PELATI OGULJENA CIJELA 400G ULTRA", "pelati"),
+    ("RAJČICA MUTTI 400G POLPA-12/1- SITNO SJECKANA 41050", "polpa"),
+    ("RAJČICA SJEC.SIT.MUTTI 3X400 g", "sjeckana"),
+])
+def test_canned_tomato(name, oblik):
+    assert name_match(S["rajcica_konzerva"], name) == "match"
+    assert extract_attributes(S["rajcica_konzerva"], name)["oblik"] == oblik
+    assert name_match(S["pasirana_rajcica"], name) != "match"
+
+
+@pytest.mark.parametrize("key,name,oblik", [
+    ("grah", "GRAH SMEĐI 800g LIM.PODRAVKA-ocijeđene mase 460g", "konzerva"),
+    ("grah", "GRAH ŠARENI NATURA 500 g", "suho"),
+    ("grah", "GRAH 1 kg ZLATNO ZRNO", "suho"),
+    ("leca", "LEĆA LIM 400 g NETO OC.MASA 240 g (12) PODRAVKA", "konzerva"),
+    ("leca", "LEĆA ZELENA 500G NATURA MARJAN VOĆE", "suho"),
+    ("slanutak", "SLANUTAK 800 g LIMENKA ( OCJ. MASA 480 g) PODRA", "konzerva"),
+    ("slanutak", "SLANUTAK 500 G MARJAN VOCE PVC", "suho"),
+    ("grasak", "N-LEDO GRAŠAK 400G -18/1- 065672", "smrznuto"),
+    ("grasak", "GRAŠAK U LIMENCI 850G/520G I KVALITETA (6),(PAL 96) PODRAVKA", "konzerva"),
+    ("kukuruz", "KUKURUZ ŠEĆERAC 340 g PODRAVKA (10) OC. MASA 280 g", "konzerva"),
+    ("gljive", "ŠAMPINJONI 500G BEZ KORIJENA(PODLOŽAK) 1150", "svjeze"),
+    ("gljive", "ULTRA ŠAMPINJONI REZANI 400GR./200GR. (12)", "konzerva"),
+])
+def test_form_attribute(key, name, oblik):
+    assert extract_attributes(S[key], name)["oblik"] == oblik
+
+
+@pytest.mark.parametrize("key,name,expected", [
+    ("junetina", "Junetina za gulaš", "match"),
+    ("junetina", "JUNEĆI BUT BK", "match"),
+    ("junetina", "INSTANT NOODLI GOVEDINA 93 G U CASI YAKISOBA", None),  # nema dijela mesa
+    ("junetina", "BUREK JUNETINA DS 190G PEKAR TOMO", None),
+    ("svinjetina", "N-SVINJSKI VRAT SK PIK 640G ODREZAK -3/1- MAP", "match"),
+    ("svinjetina", "Ajinmoto Gyoza sa svinjetinom 600 g", None),
+])
+def test_meat_requires_cut(key, name, expected):
+    assert name_match(S[key], name) == expected
+
+
+@pytest.mark.parametrize("name,vrsta", [
+    ("MLJEVENO MESO MJEŠANO", "mijesano"),
+    ("Mljeveno meso junetina", "junece"),
+    ("PURECE MLJEVENO MESO 500 G VINDON (41304)", "purece"),
+    ("MLJEVENO MESO ZA KOBASICE", "mijesano"),  # bez oznake vrste -> _default
+])
+def test_minced_meat_default(name, vrsta):
+    assert extract_attributes(S["mljeveno_meso"], name)["vrsta"] == vrsta
+
+
+def test_minced_meat_default_filter():
+    assert S["mljeveno_meso"].default_attributes == {"vrsta": "mijesano"}
+
+
+def test_default_attributes_applied(con, monkeypatch):
+    only_ostro = replace(S["brasno"], default_attributes={"tip": "ostro"})
+    monkeypatch.setattr(search, "resolve_ingredient", lambda _: only_ostro)
+    assert [r["id"] for r in search.find_products(ingredient="brasno", con=con)] == ["3850104223631"]
+    glatko = search.find_products(ingredient="brasno", attributes={"tip": "glatko"}, con=con)
+    assert glatko and all(r["attributes"]["tip"] == "glatko" for r in glatko)
+
+
+@pytest.mark.parametrize("key,name,expected", [
+    ("zelena_salata", "SALATA ICEBERG KOMAD", "iceberg"),
+    ("zelena_salata", "SALATA PUTERICA KOMAD", "puterica"),
+    ("zelena_salata", "SALATA KRISTALKA -KOMAD", "kristalka"),
+    ("zelena_salata", "1KG MC SALATA ICEBERG LEDENKA", "iceberg"),
+])
+def test_lettuce_heads(key, name, expected):
+    assert name_match(S[key], name) == "match"
+    assert extract_attributes(S[key], name)["vrsta"] == expected
+
+
+@pytest.mark.parametrize("key,name,expected", [
+    ("zelena_salata", "SJEME SALATA KRISTALKA", "excluded"),
+    ("zelena_salata", "RIKOLA 100 g", None),
+    ("rukola", "RIKOLA 100 g", "match"),
+    ("rukola", "Salata rukola", "match"),
+    ("matovilac", "MATOVILAC 100 G", "match"),
+    ("radic", "SALATA RADIČ 250g", "match"),
+    ("radic", "MATOVILAC RADIČ 125 grama", "excluded"),
+    ("endivija", "SALATA ENDIVIJA kom", "match"),
+])
+def test_leafy_split(key, name, expected):
+    assert name_match(S[key], name) == expected
+
+
+@pytest.mark.parametrize("name,rejected", [
+    ("KRASTAVCI 6-9 cm 1580g ZORELA ocijeđene mase 820g", True),
+    ("KRASTAVCI KISELI 1500G DELIKATES", True),
+    ("KRASTAVCI 4 kg MARI UG.", False),
+    ("KRASTAVAC MINI 250G.", False),
+])
+def test_loose_produce_rejects_jars(name, rejected):
+    import re
+    assert bool(re.search(LOOSE_REJECT_REGEX, norm_text(name))) is rejected
