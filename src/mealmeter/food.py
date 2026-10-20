@@ -136,9 +136,53 @@ def chain_group(category: str | None, name: str | None, cmap: dict[str, str] | N
     return group
 
 
-def words_group(name: str | None) -> str | None:
+# Tvrda neprehrana: naziv koji ih pogađa u bilo kojem lancu isključuje cijelu grupu iz namirnice
+# (clean.products.hard_nonfood, staples.build_staple_groups).
+HARD_NONFOOD_REGEX = r"(^| )(?:sjeme\b|igrack|sapun|sampon|motorn|svijec|baterij|stolic|glazben)"
+# "GARDEN" je neprehrana samo uz sjeme ili u kategoriji vrtnog programa (Boso "ZELENI PROGRAM": "GARDEN 100 g
+# GRAH ŽUTI BER" je vrećica sjemena). Doslovno pravilo "GARDEN je uvijek neprehrana" isključilo bi hranu:
+# Konzumov "GARDEN GOOD", bio "Garden riža/leća/slanutak", "GARDEN GOURMET", Garden pivo.
+_GARDEN_RX = re.compile(r"(^| )garden\b")
+_GARDEN_CONTEXT = re.compile(r"(^| )(?:sjem|zeleni program|vrt|cvijec)")
+_HARD_RX = re.compile(HARD_NONFOOD_REGEX)
+_SEED_RX = re.compile(r"(^| )sjeme\b")
+_FRUIT_VEG_CATEGORY = re.compile(r"(^| )(?:voc|povrc)")
+
+
+def seed_status(name: str | None, category: str | None, pack_unit: str | None) -> str | None:
+    """"SJEME" u nazivu: 'food' (kategorija voće ili povrće i težina u g, "BUČINO SJEME 150 g II KL"),
+    'unsure' (težina u g bez takve kategorije: ostaje 'unknown'), 'nonfood' (GARDEN ili bez težine),
+    None ako naziv nema "sjeme"."""
+    text = norm_text(name) or ""
+    if not _SEED_RX.search(text):
+        return None
+    if _GARDEN_RX.search(text):
+        return "nonfood"
+    if pack_unit == "g":
+        return "food" if _FRUIT_VEG_CATEGORY.search(norm_text(category or "") or "") else "unsure"
+    return "nonfood"
+
+
+def hard_nonfood(name: str | None, category: str | None = None, pack_unit: str | None = None) -> bool:
+    """Naziv s tvrdom neprehranom (sjeme, igračka, sapun, šampon, motorno, svijeća, baterija, stolica,
+    glazbeno; GARDEN uz sjeme ili vrtni program). Sjeme uz kategoriju voća/povrća i težinu u g (ili kad je
+    nesigurno) nije tvrdo."""
+    text = norm_text(name) or ""
+    if _GARDEN_RX.search(text) and _GARDEN_CONTEXT.search(text + " " + (norm_text(category or "") or "")):
+        return True
+    hits = {m.group(0).strip() for m in _HARD_RX.finditer(text)}
+    if not hits:
+        return False
+    if hits <= {"sjeme"} and seed_status(name, category, pack_unit) in ("food", "unsure"):
+        return False
+    return True
+
+
+def words_group(name: str | None, category: str | None = None, pack_unit: str | None = None) -> str | None:
     """Skupina iz naziva za proizvode bez kategorije: neprehrambena riječ ili alkoholno piće."""
     text = norm_text(name) or ""
+    if seed_status(name, category, pack_unit) in ("food", "unsure"):
+        return None  # sjeme u g: jestivo ili nesigurno, ostaje 'unknown'
     for rx, group in _NONFOOD_RX:
         if rx.search(text):
             return group
@@ -155,19 +199,20 @@ def build_food(con: duckdb.DuckDBPyConnection) -> dict:
     unmapped: dict[str, int] = {}
 
     def rows():
-        for chain, pid, category, name in con.execute(
-                "SELECT chain, product_id, category, name FROM clean.products").fetchall():
+        for chain, pid, category, name, pack_unit in con.execute(
+                "SELECT chain, product_id, category, name, pack_unit FROM clean.products").fetchall():
             if category and norm_text(category) not in cmap:
                 unmapped[category] = unmapped.get(category, 0) + 1
             group, refined = chain_group(category, name, cmap), None
             if group in FOOD_GROUPS:
                 # neprehrana u kategoriji hrane: strogi popis svuda, širi za nepouzdane kategorije lanaca
-                refined = nonfood_in_food(name, broad=norm_text(category or "") in verify.get(chain, ()))
-            yield chain, pid, refined or group, words_group(name) if group == "unknown" else None, bool(refined)
+                refined = nonfood_in_food(name, norm_text(category or "") in verify.get(chain, ()), category, pack_unit)
+            words = words_group(name, category, pack_unit) if group == "unknown" else None
+            yield chain, pid, refined or group, words, bool(refined), hard_nonfood(name, category, pack_unit)
 
     _temp_table(con, "food_tmp", {
         "chain": "VARCHAR", "product_id": "VARCHAR", "chain_group": "VARCHAR", "words_group": "VARCHAR",
-        "refined": "BOOLEAN",
+        "refined": "BOOLEAN", "hard_nonfood": "BOOLEAN",
     }, rows())
     food = ", ".join(f"'{g}'" for g in FOOD_GROUPS)
     nonfood = ", ".join(f"'{g}'" for g in NONFOOD_GROUPS)
@@ -190,7 +235,7 @@ def build_food(con: duckdb.DuckDBPyConnection) -> dict:
                     WHEN i.share > 0.5 THEN 'ean_inherited'
                     WHEN f.words_group IS NOT NULL THEN 'words'
                     ELSE 'none' END AS category_source,
-               i.share IS NOT NULL AND i.share <= 0.5 AS ean_conflict
+               i.share IS NOT NULL AND i.share <= 0.5 AS ean_conflict, f.hard_nonfood
         FROM clean.products p JOIN food_tmp f USING (chain, product_id)
         -- inherit sadrži samo globalne EAN-ove (globalnost ovisi samo o kodu)
         LEFT JOIN inherit i ON i.ean_norm = p.ean_norm
@@ -211,7 +256,7 @@ def build_food(con: duckdb.DuckDBPyConnection) -> dict:
         CREATE OR REPLACE TABLE clean.products AS
         SELECT p.*, f.food_group,
                CASE WHEN f.food_group IN ({food}) THEN true WHEN f.food_group IN ({nonfood}) THEN false END AS is_food,
-               f.category_source
+               f.category_source, f.hard_nonfood
         FROM clean.products p JOIN food_final f USING (chain, product_id)
     """)
     return {
@@ -258,10 +303,11 @@ _STRICT_RX = [(re.compile(r"(^| )(?:" + p + ")"), g) for p, g in STRICT_NONFOOD_
 _BROAD_RX = [(re.compile(r"(^| )(?:" + p + ")"), g) for p, g in BROAD_NONFOOD_IN_FOOD]
 
 
-def nonfood_in_food(name: str | None, broad: bool = False) -> str | None:
+def nonfood_in_food(name: str | None, broad: bool = False, category: str | None = None,
+                    pack_unit: str | None = None) -> str | None:
     """Neprehrambena skupina za proizvod iz kategorije hrane čiji naziv to otkriva, ili None."""
     text = norm_text(name) or ""
-    if _EDIBLE_GUARD.search(text):
+    if _EDIBLE_GUARD.search(text) or seed_status(name, category, pack_unit) in ("food", "unsure"):
         return None
     for rx, group in (_BROAD_RX if broad else _STRICT_RX):
         if rx.search(text):

@@ -555,7 +555,8 @@ def build_staple_groups(con: duckdb.DuckDBPyConnection) -> list[tuple]:
     - 'member' / match_quality 'strong': m > 50 % i x < 10 %;
     - 'member' / 'weak': x = 0, m >= 25 %, jedinica spojiva, barem jedan proizvod u min/max pakiranja
       (izvan raspona su već izbačeni) i medijan cijene po jedinici u granicama (ako je poznat);
-    - inače 'ambiguous' ako je m > 0, a 'excluded' ako je m = 0.
+    - inače 'ambiguous' ako je m > 0, a 'excluded' ako je m = 0;
+    - 'excluded' i kad naziv bilo kojeg lanca u grupi pogađa tvrdu neprehranu (clean.products.hard_nonfood).
     Vrijednost atributa grupe: najprije iz naziva (how name > inferred > heuristic > default), zatim
     po broju lanaca, pa abecedno. Vraća (namirnica, snažnih, slabih, dvosmislenih, isključenih).
     """
@@ -576,6 +577,11 @@ def build_staple_groups(con: duckdb.DuckDBPyConnection) -> list[tuple]:
           LEFT JOIN clean.product_staples ps ON ps.chain = p.chain AND ps.product_id = p.product_id
                AND ps.staple = b.staple
         ),
+        h AS (  -- tvrda neprehrana u nazivu bilo kojeg lanca isključuje grupu (food.HARD_NONFOOD_REGEX)
+          SELECT b.staple, b.bkey, bool_or(p.hard_nonfood) AS hard
+          FROM staple_bkeys b JOIN product_bkeys pb USING (bkey) JOIN clean.products p USING (chain, product_id)
+          GROUP BY ALL
+        ),
         n AS (SELECT staple, bkey, count(DISTINCT chain) AS n_chains,
                      count(DISTINCT chain) FILTER (WHERE hit) AS n_match,
                      count(DISTINCT chain) FILTER (WHERE miss) AS n_miss,
@@ -595,14 +601,16 @@ def build_staple_groups(con: duckdb.DuckDBPyConnection) -> list[tuple]:
         g AS (
           SELECT n.*, n.n_match / n.n_chains AS share_match, n.n_miss / n.n_chains AS share_excluded,
                  coalesce(u.unit_ok, true) AS unit_ok,
-                 coalesce(pr.ppu_med IS NULL OR pr.lo IS NULL OR pr.ppu_med BETWEEN pr.lo AND pr.hi, true) AS price_ok
-          FROM n LEFT JOIN u USING (staple, bkey) LEFT JOIN pr USING (staple, bkey)
+                 coalesce(pr.ppu_med IS NULL OR pr.lo IS NULL OR pr.ppu_med BETWEEN pr.lo AND pr.hi, true) AS price_ok,
+                 coalesce(h.hard, false) AS hard_nonfood
+          FROM n LEFT JOIN u USING (staple, bkey) LEFT JOIN pr USING (staple, bkey) LEFT JOIN h USING (staple, bkey)
         )
-        SELECT staple, bkey, n_chains, n_usable, share_match, share_excluded, unit_ok, price_ok,
-               CASE WHEN share_match > {STRONG_SHARE} AND share_excluded < {STRONG_MAX_EXCLUDED} THEN 'strong'
+        SELECT staple, bkey, n_chains, n_usable, share_match, share_excluded, unit_ok, price_ok, hard_nonfood,
+               CASE WHEN hard_nonfood THEN NULL WHEN share_match > {STRONG_SHARE} AND share_excluded < {STRONG_MAX_EXCLUDED} THEN 'strong'
                     WHEN share_excluded = 0 AND share_match >= {WEAK_SHARE} AND unit_ok AND price_ok
                          AND n_usable > 0 THEN 'weak' END AS match_quality,
-               CASE WHEN share_match > {STRONG_SHARE} AND share_excluded < {STRONG_MAX_EXCLUDED} THEN 'member'
+               CASE WHEN hard_nonfood THEN 'excluded'
+                    WHEN share_match > {STRONG_SHARE} AND share_excluded < {STRONG_MAX_EXCLUDED} THEN 'member'
                     WHEN share_excluded = 0 AND share_match >= {WEAK_SHARE} AND unit_ok AND price_ok
                          AND n_usable > 0 THEN 'member'
                     WHEN n_match > 0 THEN 'ambiguous' ELSE 'excluded' END AS status

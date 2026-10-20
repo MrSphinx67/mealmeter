@@ -12,11 +12,14 @@ S = load_staples()
 # --- 1. pripadnost grupe (EAN) namirnici ------------------------------------------------
 
 def _mini_groups(rows, pack_unit=None):
-    """build_staple_groups nad malom bazom: rows = [(chain, ean, name_norm, excluded | None)]."""
+    """build_staple_groups nad malom bazom: rows = [(chain, ean, name_norm, excluded | None)];
+    hard_nonfood se računa iz naziva (food.hard_nonfood)."""
+    from mealmeter.food import hard_nonfood
+
     c = duckdb.connect()
     c.execute("CREATE SCHEMA clean")
     c.execute("""CREATE TABLE clean.products (chain VARCHAR, product_id VARCHAR, ean_norm VARCHAR,
-                 ean_global BOOLEAN, name_norm VARCHAR, pack_unit VARCHAR)""")
+                 ean_global BOOLEAN, name_norm VARCHAR, pack_unit VARCHAR, hard_nonfood BOOLEAN)""")
     c.execute("""CREATE TABLE clean.product_staples (chain VARCHAR, product_id VARCHAR, staple VARCHAR,
                  excluded BOOLEAN, drop_reason VARCHAR, n_units DOUBLE, assumed_g DOUBLE)""")
     c.execute("""CREATE TABLE clean.product_attrs (chain VARCHAR, product_id VARCHAR, staple VARCHAR,
@@ -26,7 +29,8 @@ def _mini_groups(rows, pack_unit=None):
     c.execute("""CREATE TABLE clean.prices (chain VARCHAR, product_id VARCHAR, price_eff DOUBLE, per_unit VARCHAR,
                  price_per_unit DOUBLE)""")
     for i, (chain, ean, name, excluded) in enumerate(rows):
-        c.execute("INSERT INTO clean.products VALUES (?, ?, ?, true, ?, ?)", [chain, str(i), ean, name, pack_unit])
+        c.execute("INSERT INTO clean.products VALUES (?, ?, ?, true, ?, ?, ?)",
+                  [chain, str(i), ean, name, pack_unit, hard_nonfood(name, None, pack_unit)])
         if excluded is not None:
             c.execute("INSERT INTO clean.product_staples VALUES (?, ?, 'x', ?, NULL, NULL, NULL)", [chain, str(i), excluded])
     build_staple_groups(c)
@@ -425,3 +429,43 @@ def _groups_for(staple_key: str, names: list[str], pack_unit="g"):
 def test_cavatappi_weak_member():
     # samo jedan od dva naziva sadrži "tjestenina": m = 50 %, x = 0 -> slabi član
     assert _groups_for("tjestenina", ["TJ.CAVATAPPI 63 500 g", "TJESTENINA CAVATAPPI 63 500G"]) == ("member", "weak")
+
+
+# --- 2E.2 tvrda neprehrana na razini grupe ---------------------------------------------------
+
+@pytest.mark.parametrize("name,category,unit,hard", [
+    ("SJEME GARDEN KARANFIL FIORI SEMP", "ZELENI PROGRAM", None, True),
+    ("SJEME KUKURUZ SECERAC", None, None, True),
+    ("BUČINO SJEME 150 g II KL", "VOĆE I POVRĆE", "g", False),
+    ("SUNCOKRETOVO SJEME OLJUŠTENO 200 g", None, "g", False),  # nesigurno: ostaje unknown
+    ("GRAH ŽUTI GARDEN 100 g", "ZELENI PROGRAM", "g", True),
+    ("IGRAČKA S BOMBONIMA", "HRANA", None, True), ("SAPUN TEKUĆI 500 ml", None, "ml", True),
+    ("SVIJEĆA MIRISNA", None, None, True), ("BATERIJE AA", None, None, True),
+    ("GLAZBENA ČESTITKA", None, None, True), ("MLIJEKO 1L", "HRANA", "ml", False),
+])
+def test_hard_nonfood(name, category, unit, hard):
+    from mealmeter.food import hard_nonfood
+
+    assert hard_nonfood(name, category, unit) is hard
+
+
+def test_hard_nonfood_excludes_group():
+    rows = [("a", "1", "grasak", False), ("b", "1", "grasak", False), ("c", "1", "sjeme garden grasak", True)]
+    assert _mini_groups(rows)["1"] == ("excluded", None)
+
+
+def test_seed_words_unsure_stays_unknown():
+    from mealmeter.food import words_group
+
+    assert words_group("SUNCOKRETOVO SJEME OLJUŠTENO 200 g", None, "g") is None
+    assert words_group("SJEME KUKURUZ SECERAC", None, None) == "ostalo"
+
+
+
+@pytest.mark.parametrize("name", ["GRAH CRVENI GARDEN GOOD 3X210/140 g", "AJVAR GARDEN GOOD BLAGI PREM 290g",
+                                  "OKRUGLICE VEGAN GARDEN GOURMET 300g", "DANISH WHITE 800 g DIVAN GARDEN",
+                                  "Garden eko riža integralna 500g", "Garden Leća crvena bio 500 g"])
+def test_garden_food_brands_not_hard(name):
+    from mealmeter.food import hard_nonfood
+
+    assert not hard_nonfood(name, "HRANA", "g")

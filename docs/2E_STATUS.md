@@ -3,5 +3,6 @@
 | točka | stanje |
 |---|---|
 | 1 | gotovo |
+| 2 | gotovo |
 
-Sljedeća točka: 2.
+Sljedeća točka: 3.

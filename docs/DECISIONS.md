@@ -568,3 +568,12 @@ Izvještaji: [STEP2E_REVIEW.md](STEP2E_REVIEW.md) (`scripts/step2e_review.py`) i
     - Granice cijena (`set_auto_ranges`) računaju se prije grupa, jer ih slabi član treba.
     - Arhiva 2026-10-20: 15.819 snažnih, 546 slabih, 1.020 dvosmislenih grupa. Promjene naspram 2D su u
       `docs/data/groups_changes_2e1.csv`.
+69. **Tvrda neprehrana na razini grupe** (`clean.products.hard_nonfood`, `food.hard_nonfood`). Ako naziv bilo
+    kojeg lanca u grupi pogađa sjeme, igračk-, sapun, šampon, motorn-, svijeć-, baterij-, stolic- ili glazben-,
+    grupa je `excluded` za namirnicu.
+    - „SJEME“ uz kategoriju voća ili povrća i težinu u g je hrana („BUČINO SJEME 150 g II KL“).
+    - Sjeme u g bez takve kategorije je nesigurno: nije tvrda neprehrana, a popis riječi ga ostavlja `unknown`.
+    - **Odstupanje od zahtjeva:** „GARDEN“ je tvrda neprehrana samo uz sjeme ili u vrtnom programu (Boso „ZELENI
+      PROGRAM“: „GARDEN 100 g GRAH ŽUTI BER“ je vrećica sjemena). Doslovno pravilo isključilo bi hranu: Konzumov
+      „GARDEN GOOD“ (19 grupa graha, ajvar, suho voće), bio „Garden“ rižu, leću i slanutak, „GARDEN GOURMET“
+      i Garden pivo.
