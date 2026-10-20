@@ -122,3 +122,30 @@ def test_loose_piece_with_global_ean(tmp_path):
     got = {pid: st for pid, st in c.execute("""SELECT product_id, staple FROM clean.product_staples
                                                WHERE product_id IN ('K1', 'K2', 'K3') AND NOT excluded""").fetchall()}
     assert got.get("K1") == "krastavac" and "K3" not in got
+
+
+# --- 4. slabi članovi --------------------------------------------------------------------------
+
+def _row(pid, price, quality, grams=500):
+    return {"product_id": pid, "price_eff": price, "pack_amount": grams, "pack_unit": "g", "price_per_unit": None,
+            "per_unit": "kg", "match_quality": quality}
+
+
+def test_weak_only_without_strong():
+    from mealmeter.basket import choose_product
+
+    pick = choose_product([_row("weak", 0.50, "weak"), _row("strong", 0.90, "strong")], 400, "g", "kg", loose=False)
+    assert pick["product_id"] == "strong" and pick["match_quality"] == "strong"
+    pick = choose_product([_row("weak", 0.50, "weak")], 400, "g", "kg", loose=False)
+    assert pick["product_id"] == "weak" and pick["match_quality"] == "weak" and not pick["fallback"]
+
+
+@pytest.mark.parametrize("key,name", [
+    ("grasak", "POLI SALAMA S GRAŠKOM"), ("med", "ČOKOLADA RIKI PŠENICA I MED KANDIT 230 g"),
+    ("med", "MEDENJACI 400g LAMBERTS MLIJEČ.ČOKOLADA"), ("med", "LAMBERTZ SRCA ML.ČOK. 400G"),
+    ("med", "KEKS S MEDOM 200 g"),
+])
+def test_point4_exclusions(key, name):
+    from mealmeter.staples import name_match
+
+    assert name_match(S[key], name) in ("excluded", None)

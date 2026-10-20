@@ -88,7 +88,7 @@ def basket_lines(con) -> list[str]:
         best = res["best_store"]
         rows = [(it["ingredient"], it["name"][:34], f"{it['n_packs']} x {hr(it['pack_qty'], 0)} {it['need_unit']}"
                  if it["n_packs"] else "na vagu", hr(it["cost_pack"]), hr(it["cost_used"]),
-                 f"{it['unit_confidence']}/{it['pack_source']}" + (" slabi" if "weak_match" in it["flags"] else ""))
+                 f"{it['unit_confidence']}/{it['pack_source']}" + (" slabi" if it.get("match_quality") == "weak" else ""))
                 for it in best["items"]]
         out += [f"**{data['name']}**: {best['chain']}, {best['address']} · {best['n_matched']}/{best['n_ingredients']} · "
                 f"**total_to_buy {hr(best['total_to_buy'])} €**, total_used {hr(best['total_used'])} € · {best['date_hr']}", "",

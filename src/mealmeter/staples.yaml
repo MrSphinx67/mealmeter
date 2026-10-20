@@ -1264,7 +1264,8 @@ grasak:
   must_match: [grasak, graska\b]
   must_not_match: [mrkv, juha, rizi bizi, salata, sjeme, chips, cips, snack, wasabi, protein, mix\b,
                    povrce, kukuruz,
-                   kob\b, sipa, brudet, orzo]
+                   kob\b, sipa, brudet, orzo,
+                   poli\b, salam]
   unit: kg
   ambiguous_form: true
   # bez oznake u nazivu: suho ako je pakiranje 400-1000 g, nema oznake konzerve ni smrznutog, a unit je
@@ -1409,7 +1410,8 @@ med:
   must_not_match: [medvjed, medved, medeni, medenjak, medic, medi\b, medalj, medit, medium, medjed, medicin,
                    kremom, keks, bombon, caj\b, rakij, liker, jogurt, mlijek, musli, pahuljic, zitaric,
                    senf, umak, sampon, krema, gel\b, sapun, balzam, losion, slanina, sunka, oraha, orasi,
-                   cimet, pastil, sirup, pastile, lizalic, napitak, kolac, kroasan, zlatni med, bar\b]
+                   cimet, pastil, sirup, pastile, lizalic, napitak, kolac, kroasan, zlatni med, bar\b,
+                   cokolad, riki\b, medenjak, lambertz, keks]
   unit: kg
   attributes:
     vrsta:

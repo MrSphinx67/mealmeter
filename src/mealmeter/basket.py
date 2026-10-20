@@ -28,7 +28,6 @@ FLAG_TEXT = {
     "price_suspect": "cijena izvan granica",
     "pack_confidence_low": "nesigurna gramatura (višestruko pakiranje)",
     "chain_suspect": "lanac sa sumnjivim podacima",
-    "weak_match": "slaba pripadnost namirnici (manjina lanaca ima naziv namirnice)",
 }
 
 
@@ -164,8 +163,6 @@ def flags_of(row: dict) -> list[str]:
         out.append("pack_confidence_low")
     if row.get("data_quality") == "suspect":
         out.append("chain_suspect")
-    if row.get("match_quality") == "weak":
-        out.append("weak_match")
     return out
 
 
@@ -190,6 +187,9 @@ def choose_product(rows: list[dict], need: float, need_unit: str, by_weight_unit
             options.append({**r, "qty": None, "notes": ["na vagu"], "flags": flags_of(r), "by_weight": True})
     if not options:
         return None
+    # slabi članovi namirnice (clean.staple_groups.match_quality = 'weak') samo kad u trgovini nema snažnog
+    strong = [o for o in options if o.get("match_quality") != "weak"]
+    options = strong or options
     clean = [o for o in options if not o["flags"]]
     pool = clean or options
 
@@ -465,6 +465,7 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
                 "is_special": pick["is_special"], "flags": pick["flags"], "notes": pick["notes"] + subst,
                 "fallback": pick["fallback"], "food_unverified": pick["is_food"] is None,
                 "date": pick["date"].isoformat(), "date_hr": date_hr(pick["date"]), "stale_days": pick["stale_days"],
+                "match_quality": pick.get("match_quality"),
             }
 
     n_needs = len(needs)

@@ -687,3 +687,10 @@ Sažetak: [REVIEW_2F.md](REVIEW_2F.md) (`scripts/review_2f.py`).
       „KRASTAVAC SALATAR“ svježi salatni krastavac (18 proizvoda).
     - Lijevak, konačno (zbroj 8 lanaca): krastavac 30 → 37, luk 43 → 48; rajčica, mrkva, paprika i tikvica
       bez promjene (`docs/data/funnel_*_2f3.json`).
+84. **Slabi članovi.**
+    - `plan_basket` bira slabog člana samo kad trgovina za taj sastojak nema nijednog snažnog. Stavka nosi
+      `match_quality`; zastavica `weak_match` je maknuta jer bi i snažnom izboru kvarila rang trgovine.
+    - U `find_products` slabi članovi ostaju, uz oznaku.
+    - Isključenja: grašak `poli\b`, `salam`; med `cokolad`, `riki\b`, `medenjak`, `lambertz`, `keks`.
+    - `scripts/weak_suspects.py`: slabi članovi kojima nijedan naziv nema riječ namirnice među prve tri riječi
+      (na 20.10. 39 od 447). Popis je u REVIEW_2F.md.
