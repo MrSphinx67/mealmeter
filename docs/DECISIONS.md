@@ -710,3 +710,7 @@ Sažetak: [REVIEW_2F.md](REVIEW_2F.md) (`scripts/review_2f.py`).
       mlijeko 2,8% 1l“ 0,52 €/l, „Viro Kristalni šećer 1kg“). Granica 0,6x pogađa jeftine trgovačke marke, a
       greške jedinice su obično faktor 10 ili više. Prijedlog: 0,3x–3x (`UNIT_SUSPECT_RATIO`). Tablica je u
       REVIEW_2F.md.
+87. **docs/REVIEW_2F.md** (`scripts/review_2f.py`, najviše 100 redaka): lažni EAN-ovi, testovi točaka 2 i 3 (pokreću
+    se pri izradi), lijevak prije i poslije točke 3, 20 sumnjivih slabih članova, tablica Lidla za točku 6 i
+    košarice u Osijeku. Medijan šećera je oko 3,8 €/kg, jer uključuje šećer u prahu, smeđi i mala pakiranja.
+    Zato je i ispravni kristal šećer na omjeru 0,2–0,3, što dodatno govori protiv granice 0,6x.
