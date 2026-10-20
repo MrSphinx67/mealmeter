@@ -227,13 +227,14 @@ def test_clearance(name, expected):
     assert is_clearance(name) is expected
 
 
-@pytest.mark.parametrize("key,amount,attrs,expected", [
-    ("kvasac", 35, {}, 5), ("kvasac", 7, {"vrsta": "suhi"}, 1), ("kvasac", 42, {"vrsta": "svjezi"}, 1),
-    ("vanilin_secer", 48, {}, 6), ("prasak_za_pecivo", 1000, {}, pytest.approx(83.333, rel=1e-3)),
-    ("brasno", 1000, {}, None),
+@pytest.mark.parametrize("key,name,amount,expected", [
+    # Korak 2D: broj vrećica iz naziva, inače 1 (gramatura se ne dijeli veličinom vrećice)
+    ("kvasac", "KVASAC DI-GO -10/1 35G 5*7G SUHI", 35, 5), ("kvasac", "KVASAC SUHI 7 g", 7, 1),
+    ("kvasac", "KVASAC SVJEŽI 42g", 42, 1), ("vanilin_secer", "6X8G DOLCELA VANILIN ŠEĆER 5+1", 48, 6),
+    ("prasak_za_pecivo", "1KG ARO PRAŠAK ZA PECIVO", 1000, 1), ("brasno", "BRAŠNO 1 kg", 1000, None),
 ])
-def test_sachet_units(key, amount, attrs, expected):
-    assert S[key].units_in_pack("", amount, "g", attrs) == expected
+def test_sachet_units(key, name, amount, expected):
+    assert S[key].units_in_pack(name, amount, "g", {}) == expected
 
 
 def test_new_staple_fields():

@@ -219,3 +219,40 @@ def test_wholesale_excluded_by_default(con):
     assert get_prices("metro:226729", con=con, include_wholesale=True)
     res = plan_basket([{"name": "jaja", "amount": 2, "unit": "kom"}], "Osijek", con=con)
     assert not any(s["chain"] == "metro" for s in res["stores"])
+
+
+# --- 7. vrećice ------------------------------------------------------------------------
+
+@pytest.mark.parametrize("name,count", [
+    ("VANIL ŠEĆER 8 g DOLCELA 5+1 GRAT", 6), ("PRAŠAK ZA PECIVO 3 PAK", 3), ("6X8G DOLCELA VANILIN ŠEĆER", 6),
+    ("12GX6 DOLCELA PRAŠAK ZA PECIVO", 6), ("DOLCELA VANILIN ŠEĆER 8 g 10kom PODRAVKA", 10),
+    ("VANILIN AROMA (5VRE.)2G", 5), ("KVASAC SVJEŽI 50g(2*25g) DUOS", 2), ("KVASAC SUH.10g ALEVA", 1),
+    ("KVASAC 500 g RINFUZA", 1),
+])
+def test_sachet_count(name, count):
+    from mealmeter.staples import sachet_count
+
+    assert sachet_count(name) == count
+
+
+@pytest.mark.parametrize("key,name,price,suspect", [
+    ("vanilin_secer", "KOTANYI BOURBON VANILIN ŠEĆER 10g", 1.19, False),
+    ("kvasac", "KVASAC SUH.10g ALEVA", 0.36, False),
+    ("kvasac", "KLC.Suhi kvasac 7 g", 0.13, False),
+    ("kvasac", "42G DI-GO DOMAĆI SVJ. KVAS.", 19.50, True),
+    ("prasak_za_pecivo", "12GX6 DOLCELA PRAŠAK ZA PECIVO", 32.40, True),  # 5,40 €/vrećica
+])
+def test_sachet_price_ranges(con, key, name, price, suspect):
+    from mealmeter.staples import staple_suspect_sql
+
+    n = S[key].units_in_pack(name, None, None, {})
+    lo, hi = S[key].plausible_per_pack
+    got = con.execute(f"SELECT {staple_suspect_sql(str(price / n), str(n))} FROM (SELECT ? AS ppu_min, ? AS ppu_max) r",
+                      [lo, hi]).fetchone()[0]
+    assert got is suspect
+
+
+def test_sachet_ranges_values():
+    assert S["kvasac"].plausible_per_pack == (0.10, 1.50)
+    assert S["prasak_za_pecivo"].plausible_per_pack == (0.10, 0.60)
+    assert S["vanilin_secer"].plausible_per_pack == (0.10, 1.80)

@@ -20,8 +20,9 @@
 #                   (ne ulaze u raspon cijena ni u plan_basket)
 #   min_pack, max_pack  dopušteno pakiranje u g/ml/kom (porcije i ugostiteljska pakiranja ispadaju)
 #   default_exclude_variants  ["atribut=vrijednost", ...] isključeno ako nije izričito traženo
-#   compare_by      unit (zadano, cijena po kg/l/kom) | pack: cijena po vrećici od sachet_g grama
-#                   (sachet_g_by: {atribut: {vrijednost: grama}} za iznimke, npr. svježi kvasac 42 g)
+#   compare_by      unit (zadano, cijena po kg/l/kom) | pack: cijena po vrećici, a vrećica je proizvod kakav
+#                   se prodaje (broj vrećica iz naziva: "5+1", "3 PAK", "6x8g", inače 1); sachet_g (i sachet_g_by,
+#                   npr. svježi kvasac 42 g) služi samo za pretvorbu grama iz recepta u vrećice
 #   pantry          začini i sl.: u košarici se računa samo utrošeni dio (cost_used)
 #   compare_by: count + count_regex  cijena po komadu iz broja u nazivu ("10/1", "10 KOM")
 #   group_by        atribut ili popis atributa po kojima se grupira umjesto EAN-a (jaja: [velicina, uzgoj])
@@ -925,9 +926,9 @@ kvasac:
   sachet_g_by: {vrsta: {svjezi: 42}}
   sachet_g: 7
   compare_by: pack
-  # cijena po vrećici: granice umjesto automatskih (0.25x-4x medijana) su [p5, 1.25 x p95] cijene
-  # pojedinačnih vrećica (arhiva 2026-10-19, prijedlog za pregled); rinfuza smije biti jeftinija
-  plausible_per_pack: [0.30, 1.25]
+  # jedinica je proizvod kakav se prodaje (broj vrećica iz naziva, inače 1); granice po vrećici (vlasnik,
+  # Korak 2D), višestruka pakiranja po vrećici
+  plausible_per_pack: [0.10, 1.50]
   attributes:
     vrsta:
       suhi: '\bsuh|\binstant|\binst\.'
@@ -942,9 +943,9 @@ prasak_za_pecivo:
   unit: kg
   sachet_g: 12
   compare_by: pack
-  # cijena po vrećici: granice umjesto automatskih (0.25x-4x medijana) su [p5, 1.25 x p95] cijene
-  # pojedinačnih vrećica (arhiva 2026-10-19, prijedlog za pregled); rinfuza smije biti jeftinija
-  plausible_per_pack: [0.10, 0.40]
+  # jedinica je proizvod kakav se prodaje (broj vrećica iz naziva, inače 1); granice po vrećici (vlasnik,
+  # Korak 2D), višestruka pakiranja po vrećici
+  plausible_per_pack: [0.10, 0.60]
   loose_produce: false
 
 vanilin_secer:
@@ -955,9 +956,9 @@ vanilin_secer:
   unit: kg
   sachet_g: 8
   compare_by: pack
-  # cijena po vrećici: granice umjesto automatskih (0.25x-4x medijana) su [p5, 1.25 x p95] cijene
-  # pojedinačnih vrećica (arhiva 2026-10-19, prijedlog za pregled); rinfuza smije biti jeftinija
-  plausible_per_pack: [0.10, 0.85]
+  # jedinica je proizvod kakav se prodaje (broj vrećica iz naziva, inače 1); granice po vrećici (vlasnik,
+  # Korak 2D), višestruka pakiranja po vrećici
+  plausible_per_pack: [0.10, 1.80]
   loose_produce: false
 
 kakao:

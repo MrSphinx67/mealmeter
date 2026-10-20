@@ -104,12 +104,11 @@ class Staple:
                 if any(groups):
                     return float(next(g for g in groups if g))
             return pack_amount if pack_unit == "kom" and not wholesale else None
-        if self.compare_by != "pack" or not pack_amount or pack_unit != "g":
+        if self.compare_by != "pack":
             return None
-        size = self.sachet_g
-        for attr, by_value in self.sachet_g_by.items():
-            size = by_value.get(attrs.get(attr), size)
-        return round(pack_amount / size, 3) if size else None
+        # vrećica = proizvod kakav se prodaje: broj vrećica iz naziva ("5+1", "3 PAK", "6x8g"), inače 1;
+        # gramatura se ne dijeli veličinom vrećice (rinfuza od 500 g je jedno pakiranje)
+        return float(sachet_count(name))
 
     @property
     def match_regex(self) -> str:
@@ -129,6 +128,24 @@ class Staple:
     @property
     def exclude_regex(self) -> str | None:
         return _word_start(self.must_not_match) if self.must_not_match else None
+
+
+# broj vrećica u pakiranju (attr_text): "5+1", "3 PAK", "10kom", "(5VRE.)", "6x8g", "2*25g", "12GX6"
+_SACHET_COUNT = [
+    (re.compile(r"(?<![\d.])(\d{1,2})\s*\+\s*(\d)(?!\d)"), lambda m: int(m.group(1)) + int(m.group(2))),
+    (re.compile(r"(?<![\d.])(\d{1,2})\s*[x×*]\s*\d+(?:\.\d+)?\s*g"), lambda m: int(m.group(1))),
+    (re.compile(r"(?<![\d.])\d+(?:\.\d+)?\s*g\s*[x×*]\s*(\d{1,2})(?!\d)"), lambda m: int(m.group(1))),
+    (re.compile(r"(?<![\d.])(\d{1,2})\s*-?\s*(?:pak|pack|kom|vre|vr\.)"), lambda m: int(m.group(1))),
+]
+
+
+def sachet_count(name: str) -> int:
+    """Broj vrećica u proizvodu iz naziva, inače 1 (compare_by: pack)."""
+    text = attr_text(name)
+    for rx, count in _SACHET_COUNT:
+        if (m := rx.search(text)) and count(m) > 0:
+            return count(m)
+    return 1
 
 
 def _fold(s: str) -> str:
@@ -569,11 +586,9 @@ STAPLE_PPU_SQL = """CASE
     WHEN ps.assumed_g > 0 THEN round(c.price_eff / ps.assumed_g * 1000, 2)
     WHEN c.per_unit = r.unit THEN c.price_per_unit END"""
 AUTO_RANGE = (0.25, 4.0)  # automatske granice: 0.25x do 4x medijana namirnice
-# Je li cijena po jedinici `ppu` izvan granica (r = clean.staple_rules). Granice po vrećici
-# (range_source 'pack', plausible_per_pack): skupo je sve iznad gornje granice, a jeftino samo
-# pojedinačna vrećica (n_units <= 1,5) ispod donje, jer su rinfuza i višestruka pakiranja stvarno
-# jeftinija po vrećici. Inače: izvan [ppu_min, ppu_max].
-SINGLE_PACK_UNITS = 1.5
+# Je li cijena po jedinici `ppu` izvan granica [ppu_min, ppu_max] (r = clean.staple_rules). Kod vrećica
+# (range_source 'pack') ppu je cijena jedne vrećice, i u višestrukom pakiranju (Korak 2D).
+SINGLE_PACK_UNITS = 1.5  # "pojedinačna vrećica" u izvještajima (n_units <= 1,5)
 
 
 def _envelope(by: dict) -> tuple[float, float] | None:
@@ -587,9 +602,8 @@ def staple_suspect_sql(ppu: str, n_units: str, ps: str | None = None) -> str:
     (plausible_by, npr. svježa/smrznuta prsa); bez njega vrijede granice namirnice (r)."""
     lo = f"coalesce({ps}.ppu_min, r.ppu_min)" if ps else "r.ppu_min"
     hi = f"coalesce({ps}.ppu_max, r.ppu_max)" if ps else "r.ppu_max"
-    return f"""(CASE WHEN r.range_source = 'pack'
-                     THEN ({ppu}) > {hi} OR (coalesce({n_units}, 0) <= {SINGLE_PACK_UNITS} AND ({ppu}) < {lo})
-                     ELSE NOT (({ppu}) BETWEEN {lo} AND {hi}) END)"""
+    # range_source 'pack' (vrećice): ppu je cijena po vrećici, i za višestruka pakiranja
+    return f"""(NOT (({ppu}) BETWEEN {lo} AND {hi}))"""
 
 
 def set_auto_ranges(con: duckdb.DuckDBPyConnection) -> int:

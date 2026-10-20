@@ -493,3 +493,10 @@ Izvještaji: [STEP2D_REVIEW.md](STEP2D_REVIEW.md) (`scripts/step2d_review.py`) i
     - **Metro** je `clean.stores.store_type = 'cash_and_carry'` i isključen je iz `find_products`, `get_prices` i
       `plan_basket`, osim uz `include_wholesale=True` (CLI `--include-wholesale`).
     - Kod Metroa se „10/1“ i „30/1“ ne tumače kao broj jaja (to su kartoni), a „30 KOM“ da.
+60. **Vrećice (kvasac, prašak za pecivo, vanilin šećer).** Mijenja odluku 51.
+    - Jedinica usporedbe je proizvod kakav se prodaje. Broj vrećica čita se iz naziva („5+1“, „3 PAK“,
+      „6x8g“, „12GX6“, „10kom“, „(5VRE.)“), inače je 1. Gramatura se više ne dijeli veličinom vrećice
+      (`sachet_g` služi samo za pretvorbu grama iz recepta).
+    - Granice po vrećici (vlasnik): kvasac 0,10–1,50, prašak 0,10–0,60, vanilin šećer 0,10–1,80 €. Vrijede
+      i za višestruka pakiranja (cijena / broj vrećica), u oba smjera.
+    - Rinfuza od 500 g sada je jedno „pakiranje“ i obično je izvan granica (samo rezerva u košarici).

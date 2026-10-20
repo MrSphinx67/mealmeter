@@ -223,13 +223,14 @@ def test_sachet_staples_use_pack_ranges(key, con):
 
 
 def test_pack_suspect_rule(con):
+    # Korak 2D: cijena po vrećici mora biti u granicama i za višestruka pakiranja
     from mealmeter.staples import staple_suspect_sql
 
     sql = staple_suspect_sql("ppu", "n")
     rows = con.execute(f"""
-        SELECT ppu, n, {sql} FROM (SELECT 'pack' AS range_source, 0.30 AS ppu_min, 1.25 AS ppu_max) r,
-        (VALUES (0.10, 70.0), (0.10, 1.0), (0.60, 1.0), (19.5, 1.0), (2.0, 30.0)) v(ppu, n)""").fetchall()
-    assert [s for _, _, s in rows] == [False, True, False, True, True]
+        SELECT ppu, n, {sql} FROM (SELECT 'pack' AS range_source, 0.10 AS ppu_min, 1.50 AS ppu_max) r,
+        (VALUES (0.05, 70.0), (0.13, 1.0), (0.60, 1.0), (19.5, 1.0), (2.0, 6.0)) v(ppu, n)""").fetchall()
+    assert [s for _, _, s in rows] == [True, False, False, True, True]
 
 
 # --- 11. oblik mahunarki ---------------------------------------------------------------
