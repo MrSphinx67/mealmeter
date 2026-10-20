@@ -447,9 +447,27 @@ def section_api(con) -> str:
     ])
 
 
+def section_found(con) -> str:
+    return "\n".join([
+        "## Otkriveno usput (nije ispravljano u Koraku 2C)", "",
+        "Košarica `data/recipes/test_bolonjez.json` u Osijeku (Konzum) bira tri kriva proizvoda. Uzrok je stariji "
+        "od ovog koraka: grupa (EAN) ulazi u namirnicu ako joj **jedan** naziv odgovara, a zatim ulaze svi "
+        "proizvodi grupe.", "",
+        "- **mljeveno meso → „PUREĆE MLJEVENO MESO 500g VINDIJA“**: zadano je `vrsta=mijesano`, a naziv istog EAN-a "
+        "u drugom lancu nema vrstu (pa se računa kao miješano), pa cijela grupa prolazi.",
+        "- **maslinovo ulje → „KUPUS KIS MASL ULJE ČEŠNJAK 250g“**: `must_match` „masl ulje“ pogađa kiseli kupus "
+        "u maslinovom ulju; nedostaje `kupus`/`kis` u `must_not_match`.",
+        "- **parmezan → „PROIZ BILJ BAZ OKUS PARMEZ RIB 100g“** (biljni nadomjestak): ulazi preko istog EAN-a kao "
+        "naziv koji odgovara parmezanu.",
+        "- `_defaults.must_not_match` sadrži `felix`, a Felix je i marka kečapa i kiselih krastavaca: 6 proizvoda "
+        "kečapa je isključeno.",
+        "- „PERŠIN KOR LIS 250 gVOĆARNA“: gramatura bez razmaka iza jedinice se ne čita.",
+    ])
+
+
 SECTIONS = [section_chicken, section_onion, section_food, section_eggs, section_variants, section_kakao,
             section_salt, section_milk, section_parsley, section_units, section_sachets,
-            section_forms, section_api]
+            section_forms, section_api, section_found]
 
 
 def main() -> None:
@@ -457,7 +475,14 @@ def main() -> None:
     con = duckdb.connect(db_path, read_only=True)
     date = con.execute("SELECT max(date) FROM clean.prices").fetchone()[0]
     parts = [f"# Jutarnji pregled: Korak 2C (arhiva {date.isoformat()})", "",
-             "Izvještaj generira `scripts/morning_review.py`. Točke 4 i 5 čekaju potvrdu vlasnika.", ""]
+             "Izvještaj generira `scripts/morning_review.py` nad izgrađenom bazom. Točke 4 i 5 su na vrhu jer "
+             "čekaju potvrdu. Uz njih treba pogledati i vrijednosti označene kao prijedlog:", "",
+             "- **4.** pileća prsa „Jeli“ privremeno isključena; donja granica 5 €/kg odbacuje stvarna svježa prsa po 4,69 €",
+             "- **5.** luk: nazivi s bojom, mapiranje nije mijenjano",
+             "- **1.** jaja: `plausible_per_unit` [0,19; 0,47] (5.–95. percentil); bio jaja su djelomično iznad",
+             "- **9.** mjere i gustoće (sve procjene)",
+             "- **10.** granice po vrećici za kvasac, prašak i vanilin šećer",
+             "- **0.** `data/category_map.yaml` (1.334 kategorije, ručno ispravljiva) i 20 sumnjivih „hrana“ proizvoda", ""]
     parts += [f(con) + "\n" for f in SECTIONS]
     OUT.write_text("\n".join(parts), encoding="utf-8")
     print(f"{OUT}: {len(SECTIONS)} odjeljaka")

@@ -13,7 +13,7 @@ from pathlib import Path
 
 import duckdb
 
-from mealmeter.staples import STAPLE_PPU_SQL, load_staples, staple_price_suspects
+from mealmeter.staples import STAPLE_PPU_SQL, load_staples, staple_price_suspects, staple_suspect_sql
 
 db_path = sys.argv[1] if len(sys.argv) > 1 else "data/mealmeter.duckdb"
 con = duckdb.connect(db_path, read_only=True)
@@ -33,7 +33,8 @@ lines = [
     "",
     f"Generirano skriptom `scripts/staple_reports.py` iz arhive {date}. Za svaku namirnicu s više od 5 %",
     "cijena izvan granica (`price_suspect`) ispisano je 15 grupa proizvoda s najviše odbačenih cijena.",
-    "Granice su ručne (`plausible_per_unit` u staples.yaml) ili automatske (0,25x–4x medijana namirnice).",
+    "Granice su ručne (`plausible_per_unit` u staples.yaml), po vrećici (`plausible_per_pack`: skupo iznad",
+    "gornje, jeftino samo pojedinačna vrećica ispod donje) ili automatske (0,25x–4x medijana namirnice).",
     "Odbačena cijena ne ulazi u raspon cijena ni u plan_basket. Česte odbačene grupe obično su krivi pogoci",
     "rječnika (→ `must_not_match`) ili krivo pročitana gramatura.",
     "",
@@ -53,14 +54,15 @@ for key, lo, hi, unit, pct in heavy:
         SELECT any_value(p.name), count(*) AS n, count(DISTINCT p.chain), median(ppu), min(ppu), max(ppu),
                any_value(p.pack_amount), any_value(p.pack_unit), any_value(ps.assumed_g)
         FROM (
-          SELECT ps.*, {STAPLE_PPU_SQL} AS ppu, c.store_id
+          SELECT ps.*, {STAPLE_PPU_SQL} AS ppu, c.store_id,
+                 {staple_suspect_sql(STAPLE_PPU_SQL, "ps.n_units")} AS suspect
           FROM clean.product_staples ps JOIN clean.staple_rules r USING (staple)
           JOIN clean.prices c USING (chain, product_id)
           WHERE ps.staple = ? AND NOT ps.excluded AND ps.drop_reason IS NULL
         ) ps JOIN clean.products p USING (chain, product_id)
-        WHERE ps.ppu IS NOT NULL AND ps.ppu NOT BETWEEN ? AND ?
+        WHERE ps.ppu IS NOT NULL AND ps.suspect
         GROUP BY {GKEY} ORDER BY n DESC LIMIT 15
-    """, [key, lo, hi]).fetchall()
+    """, [key]).fetchall()
     lines += ["", f"## {staples[key].name} (`{key}`): {pct:.1f} % odbačeno, granice {money(lo)}–{money(hi)} €/{unit}", "",
               "| naziv | odbačenih cijena | lanaca | €/jed (medijan) | raspon | pakiranje |", "|---|---|---|---|---|---|"]
     for name, n, n_chains, med, mn, mx, amount, pack_unit, assumed in rows:
