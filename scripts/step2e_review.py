@@ -63,7 +63,36 @@ def section_tiers(con) -> str:
     ])
 
 
-SECTIONS = {"1": section_tiers}
+def section_synonyms(con) -> str:
+    changes = f"read_csv('{DATA / 'groups_changes_2e4.csv'}', header=true, all_varchar=true, quote='\"')"
+    per = con.execute(f"""
+        SELECT staple, count(*) FILTER (WHERE before <> 'member' AND after = 'member'),
+               count(*) FILTER (WHERE before = 'member' AND after <> 'member')
+        FROM {changes} GROUP BY staple ORDER BY 2 DESC, 3 DESC""").fetchall()
+    con.execute("SELECT setseed(0.44)")
+    examples = con.execute(f"""
+        SELECT o.staple, g.match_quality, {_names()} FROM {changes} o
+        JOIN clean.staple_groups g USING (staple, bkey)
+        WHERE o.before <> 'member' AND o.after = 'member' ORDER BY random() LIMIT 30""").fetchall()
+    return "\n".join([
+        "## 4. Sinonimi i kratice", "",
+        "`data/abbrev.yaml` proširuje kratice prije podudaranja (`clean.products.match_norm`; izvorni naziv i "
+        "`name_norm` ostaju): praš. pec. → prašak za pecivo, braš. → brašno, mlij. → mlijeko, jog. → jogurt, "
+        "tj./tje./tjest. → tjestenina, vrh. → vrhnje, pil. → pileći, kuh. → kuhanje, „ŠIR VALJ“ → široki. "
+        "„pec.“ i „sv.“ sami se ne šire (peč./pečeni, svinjski/svježe).", "",
+        "Novi `must_match`: tjestenina (oblici i marke iz zahtjeva), jogurt `jog\\b`, pileća prsa (odresci, file od "
+        "prsa, pileći file; `odresc` više nije isključen), svinjetina (rebra), vrhnje za kuhanje (creme cuisine), "
+        "tvrdi sir (leerdammer, emmental, maasdam, edam\\b, cheddar). Tuna isključuje cous, bowl, sal, salat. "
+        "Uz „školjke“ i „tj“ dodana su isključenja (morski plodovi, pralines, čarape, „za tj“ = za tijelo, gotove "
+        "lazanje).", "",
+        "Grupe vraćene u namirnicu (i izgubljene) po namirnici:", "",
+        md_table(["namirnica", "vraćeno", "izgubljeno"], per), "",
+        "30 nasumičnih vraćenih grupa:", "",
+        md_table(["namirnica", "razina", "nazivi po lancu"], examples),
+    ])
+
+
+SECTIONS = {"1": section_tiers, "4": section_synonyms}
 
 
 def main() -> None:

@@ -2,6 +2,7 @@ data/*
 !data/recipes/
 !data/category_map.yaml
 !data/units.yaml
+!data/abbrev.yaml
 *.duckdb
 *.duckdb.wal
 .env

@@ -585,3 +585,22 @@ Izvještaji: [STEP2E_REVIEW.md](STEP2E_REVIEW.md) (`scripts/step2e_review.py`) i
       bi jogurt u bocama od 1 l, passatu, majonezu, kečap i senf u ml te vrhnje u g.
     - Komad je spojiv samo ako namirnica ima masu komada u `units.yaml` („SALATA PUTERICA 1KOM“; dodana
       endivija, 300 g). Na arhivi 2026-10-20 ispada 80 proizvoda, od toga 64 „jaja“ (čokoladna i igračke).
+71. **Kratice i sinonimi.**
+    - `data/abbrev.yaml` (regex na tekstu s točkama) daje `clean.products.match_norm`, na kojem se radi
+      podudaranje s namirnicama. `name` i `name_norm` ostaju.
+    - Proširuju se samo nedvosmislene kratice: „pec.“ sam je i „peč.“ (pečeni), a „sv.“ je i svinjski i
+      svježe, pa se ne šire. „ŠIR VALJ/REZ“ je široki, jer bi inače „sir“ isključio tjesteninu.
+    - Novi `must_match`:
+      - tjestenina: oblici i marke iz zahtjeva; lazanje više nisu u `must_not_match`;
+      - jogurt: `jog\b`;
+      - pileća prsa: odresci, file od prsa, pileći file, „pileci prsa“; `odresc` više nije isključen;
+      - svinjetina: rebra;
+      - vrhnje za kuhanje: creme cuisine;
+      - tvrdi sir: leerdammer, emmental, maasdam, `edam\b`, cheddar.
+    - Novi `must_not_match`:
+      - tuna: cous, bowl, sal, salat;
+      - moja isključenja za krive pogotke novih uzoraka: tjestenina (mesni rezanci, školjke kao morski
+        plodovi, pralines, čarape, nož, „za tj“ = za tijelo, gotove lazanje, ricotta), tvrdi sir (umak, sos,
+        dip), mlijeko (set, ker, keram: posuđe).
+    - Vraćeno grupa: tjestenina 450, tvrdi sir 206, jogurt 89, mlijeko 35, pileća prsa 27, svinjetina 24;
+      `docs/data/groups_changes_2e4.csv`.

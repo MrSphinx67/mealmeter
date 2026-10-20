@@ -427,9 +427,11 @@ def _groups_for(staple_key: str, names: list[str], pack_unit="g"):
     return _mini_groups(rows, pack_unit=pack_unit)["1"]
 
 
-def test_cavatappi_weak_member():
-    # samo jedan od dva naziva sadrži "tjestenina": m = 50 %, x = 0 -> slabi član
-    assert _groups_for("tjestenina", ["TJ.CAVATAPPI 63 500 g", "TJESTENINA CAVATAPPI 63 500G"]) == ("member", "weak")
+def test_cavatappi_member():
+    # Korak 2E.1: bez kratica samo "TJESTENINA ..." prolazi (m = 50 %) -> slabi član. Od točke 4 se "TJ."
+    # proširuje u "tjestenina" (data/abbrev.yaml), pa oba naziva prolaze i grupa je snažni član.
+    assert _groups_for("tjestenina", ["TJ.CAVATAPPI 63 500 g", "TJESTENINA CAVATAPPI 63 500G"]) == ("member", "strong")
+    assert _groups_for("tjestenina", ["RUMMO 63 500 g", "TJESTENINA CAVATAPPI 63 500G"]) == ("member", "weak")
 
 
 # --- 2E.2 tvrda neprehrana na razini grupe ---------------------------------------------------
@@ -490,3 +492,54 @@ def test_egg_in_grams_dropped(tmp_path):
                             WHERE product_id IN ('E1', 'E2', 'S1', 'V1') AND NOT excluded""").fetchall())
     assert got == {"E1": "jedinica", "E2": "ok", "S1": "ok", "V1": "ok"}
 
+
+
+# --- 2E.4 kratice i sinonimi --------------------------------------------------------------------
+
+@pytest.mark.parametrize("name,expected", [
+    ("PRAŠ. PEC. 12 g Dr.Oetker", "prasak za pecivo 12 g dr oetker"),
+    ("BRAŠ.PŠ.GLATKO T-550", "brasno ps glatko t 550"),
+    ("MLIJ.ČOK. 0,5L", "mlijeko cok 0 5l"),
+    ("JOG.2,8% 330g MEGGLE", "jogurt 2 8 330g meggle"),
+    ("TJ.CAVATAPPI 63 500 g", "tjestenina cavatappi 63 500 g"),
+    ("PEČ.SLANI KUKURUZ", "pec slani kukuruz"),  # "pec." sam nije pecivo
+])
+def test_match_text_abbrev(name, expected):
+    from mealmeter.staples import match_text
+
+    assert match_text(name) == expected
+
+
+@pytest.mark.parametrize("key,name,expected", [
+    ("tjestenina", "CONCHIGLIE 500 g", "match"), ("tjestenina", "ŠKOLJKE DAGNJE 1 kg", "excluded"),
+    ("tjestenina", "PILEĆI REZANCI 400 g", "excluded"), ("tjestenina", "LAZANJE 500g LISTOVI", "match"),
+    ("jogurt", "JOG.2,8% 330g MEGGLE", "match"), ("pileca_prsa", "ODRESCI PILEĆI FILE 500 g", "match"),
+    ("pileca_prsa", "PILEĆI FILE OD PRSA", "match"), ("svinjetina", "SV REBRA", "match"),
+    ("vrhnje_za_kuhanje", "CREME CUISINE 200ml", "match"), ("tvrdi_sir", "LEERDAMMER 200 g", "match"),
+    ("tvrdi_sir", "EDAMAME 300g", None), ("tuna", "TUNA SAL.RIO MARE COUS 2X160 g", "excluded"),
+    ("prasak_za_pecivo", "PRAŠ. PEC. 12 g Dr.Oetker", "match"),
+])
+def test_point4_rules(key, name, expected):
+    from mealmeter.staples import name_match
+
+    assert name_match(S[key], name) == expected
+
+
+def test_tuna_cous_cous_not_member():
+    assert _groups_for("tuna", ["TUNA SAL.RIO MARE COUS 2X160 g", "Rio Mare Insal.sal.tuna cous cous2x160g",
+                                "TUNJ SALATA COUS COUS 2X160g RIO MARE"])[0] != "member"
+
+
+@pytest.mark.parametrize("key,name,expected", [
+    ("pileca_prsa", "Cekin Pil. prsa bk, svj. 650g", "match"),  # "cca" je namjerno isključen
+    ("tvrdi_sir", "UMAK SM CHEDDAR PINATA 3000g", "excluded"),
+    ("mlijeko", "SET.SEC./MLIJ.KER.MORE 027756 MJ", "excluded"),
+    ("tjestenina", "RANA LASAGNE RICOTTA SPIN 350 g", "excluded"),
+    ("tjestenina", "TIJESTO ŠIR VALJ REZANCI S JAJIMA 400g", "match"),
+    ("tjestenina", "PRAL.SPAR PREMIUM ŠKOLJK.250 g", "excluded"),
+    ("tjestenina", "ELINA ARGAN MLIJEKO ZA TJ 250ml", "excluded"),
+])
+def test_point4_false_hits(key, name, expected):
+    from mealmeter.staples import name_match
+
+    assert name_match(S[key], name) == expected

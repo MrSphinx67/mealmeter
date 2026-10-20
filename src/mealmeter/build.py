@@ -8,7 +8,7 @@ from pathlib import Path
 import duckdb
 
 from mealmeter.food import build_food
-from mealmeter.staples import build_staples
+from mealmeter.staples import build_staples, match_text
 from mealmeter.normalize import (
     CITY_ALIASES,
     analyze_pack,
@@ -130,13 +130,13 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
             if pack is None and not variable and (pack := parse_pack_unit_field(unit)):
                 source, confidence = "unit", "high"
             amount, pack_unit = pack or (None, None)
-            yield (chain, pid, ean, valid, glob, norm_text(name), amount, pack_unit,
+            yield (chain, pid, ean, valid, glob, norm_text(name), match_text(name), amount, pack_unit,
                    source if pack else None, unit_hint(unit, quantity),
                    drained, variable, is_clearance(name), confidence)
 
     _temp_table(con, "product_derived", {
         "chain": "VARCHAR", "product_id": "VARCHAR", "ean_norm": "VARCHAR", "ean_valid": "BOOLEAN",
-        "ean_global": "BOOLEAN", "name_norm": "VARCHAR", "pack_amount": "DOUBLE", "pack_unit": "VARCHAR",
+        "ean_global": "BOOLEAN", "name_norm": "VARCHAR", "match_norm": "VARCHAR", "pack_amount": "DOUBLE", "pack_unit": "VARCHAR",
         "pack_source": "VARCHAR", "unit_hint": "VARCHAR",
         "drained_amount": "DOUBLE", "variable_weight": "BOOLEAN", "clearance": "BOOLEAN",
         "pack_confidence": "VARCHAR",
@@ -144,7 +144,7 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
     con.execute("""
         CREATE OR REPLACE TABLE clean.products AS
         SELECT r.chain, r.product_id, r.barcode, d.ean_norm, d.ean_valid, d.ean_global,
-               r.name, d.name_norm, r.brand, r.category, r.unit, r.quantity,
+               r.name, d.name_norm, d.match_norm, r.brand, r.category, r.unit, r.quantity,
                d.pack_amount, d.pack_unit, d.pack_source, d.unit_hint,
                d.drained_amount, d.variable_weight, d.clearance, d.pack_confidence
         FROM products r JOIN product_derived d USING (chain, product_id)

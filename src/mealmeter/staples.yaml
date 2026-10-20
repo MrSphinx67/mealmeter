@@ -305,7 +305,7 @@ mlijeko:
                    kras\b, bijela cokolada, prahu, zamjen, zamj\b, nan\b, junior, kiselo, jogurt,
                    sir\b, sladoled, puding, kroasan, croissant, bombon, cokoladic, med\b, sun\b,
                    suncanje, disney, dorina, ciste, cisti, pjena za, ukrasn, proteinsk, kefir, kondenz,
-                   lgg\b, aktiv, acidofil, acedofil, kis\b, palacink, protein, cokol]
+                   lgg\b, aktiv, acidofil, acedofil, kis\b, palacink, protein, cokol, set\b, ker\b, keram]
   unit: l
   default_exclude_variants: [laktoza=bez]
   # zadano trajno 2,8 %; masnoća 2,8-3,8 % je zamjenjiva (svježe i trajno su zasebne vrste)
@@ -338,7 +338,7 @@ mlijeko:
 jogurt:
   name: jogurt
   synonyms: [jogurt, tekući jogurt, tekuci jogurt]
-  must_match: [jogurt]
+  must_match: [jogurt, jog\b]
   must_not_match: [badem, pistacij, ribizl, cimet, vanil, kolac, vocn, voce, jagod, visnj, borovnic,
                    sumsko, vanilij, smoothie, protein, cokolad, keks, musli, zitaric, kokos, breskv,
                    mango, banan, jabuk, ananas, lesnjak, kava\b, aroma, jogobella, frutek]
@@ -378,7 +378,7 @@ kiselo_vrhnje:
 vrhnje_za_kuhanje:
   name: vrhnje za kuhanje
   synonyms: [vrhnje za kuhanje, kuhinjsko vrhnje]
-  must_match: [vrhnje za kuhanje, vrhnje za kuh, vrh za kuh, kuhinjsko vrhnje, vrhnje kuhanje]
+  must_match: [vrhnje za kuhanje, vrhnje za kuh, vrh za kuh, kuhinjsko vrhnje, vrhnje kuhanje, creme cuisine]
   must_not_match: [luk\b]
   unit: l
   max_pack: 1000
@@ -414,8 +414,9 @@ svjezi_sir:
 tvrdi_sir:
   name: tvrdi sir (gauda, trapist, edamac)
   synonyms: [tvrdi sir, gauda, gouda, trapist, edamac, edamer, polutvrdi sir]
-  must_match: [gauda, gouda, trapist, edamac, edamer, tvrdi sir, sir tvrdi, polutvrdi, polutv\b, tilzit]
-  must_not_match: [krem\b, topljen, namaz, cips, kreker, sunka, burek, pita,
+  must_match: [gauda, gouda, trapist, edamac, edamer, tvrdi sir, sir tvrdi, polutvrdi, polutv\b, tilzit,
+               leerdammer, emmental, maasdam, edam\b, cheddar]
+  must_not_match: [krem\b, topljen, namaz, cips, kreker, sunka, burek, pita, umak, sos\b, dip\b,
                    biljn, vegan, greenvie, green vie, zamjen]
   unit: kg
   max_pack: 1000
@@ -826,10 +827,18 @@ tjestenina:
   name: tjestenina
   synonyms: [tjestenina, pasta, špageti, spageti, penne, fusilli, makaroni]
   must_match: [tjestenin, spaget, spaghett, penne, fusill, makaron, tagliatell, farfalle, rigatoni,
-               linguine, tortiglioni, puzic, svrdl, mascice, leptiric, pipe rigate, sedanini, tjest\b]
+               linguine, tortiglioni, puzic, svrdl, mascice, leptiric, pipe rigate, sedanini, tjest\b,
+               # Korak 2E: oblici i marke (lazanje su sada tjestenina; gotova jela isključuju gotov/bolognese/smrz)
+               cavatappi, elicoidali, elicodiali, gomiti, ljiljan, zlatica, rezanc, pipette, fusil, fuzi, spirali,
+               lasagn, lazanj, conchiglie, skoljk, tj\b]
   must_not_match: ['tal?ianetta', napolitana, juha, instant, bolognese, piletin, goved, kokosj, salata,
-                   umak, gotov, sira\b, punjen, tortelin, tortellin, ravioli, njoki, lazanj, lasagn,
-                   maggi, carbonara, pesto, mesn, sir\b, skus, tuna, povrce]
+                   umak, gotov, sira\b, punjen, tortelin, tortellin, ravioli, njoki,
+                   maggi, carbonara, pesto, mesn, sir\b, skus, tuna, povrce,
+                   # mesni rezanci i školjke (morski plodovi), smrznute lazanje
+                   pilec, pilet, junec, svinj, purec, dagnj, kamenic, vongol, plodovi mora, morsk, smrz,
+                   # "školjke" i "tj" koje nisu tjestenina; gotove lazanje
+                   cappasante, pral\b, pralin, sokn, carap, noz\b, pjescanik, pijescanik, zitn, chocapic, cok\b,
+                   za tj\b, argan, bolog, meso\b, zamrz, ricott]
   unit: kg
   default_exclude_variants: [vrsta=integralna, vrsta=bez_glutena]
   max_pack: 5000
@@ -988,8 +997,9 @@ pileca_prsa:
   name: pileća prsa / file
   synonyms: [pileća prsa, pileca prsa, pileći file, pileci file, piletina file]
   must_match: [pilec prsa, pileca prsa, pileci file, pilec file, prsa pilec, file pilec, pileci filet,
-               pil prsa, pil file]
-  must_not_match: [nar\b, naresc, narezak, zabatk, batk, zabatak, dimcek, narzak, gavelino, odresc,
+               pil prsa, pil file, pileci prsa, 'odresc\w* pilec\w* file', file od prsa, 'pilec\w* file']
+  # "odresc" više nije isključen: "ODRESCI PILEĆI FILE" su svježa prsa (Korak 2E)
+  must_not_match: [nar\b, naresc, narezak, zabatk, batk, zabatak, dimcek, narzak, gavelino,
                    kids, panir, pohan, dimljen, kuhan, narez, salam, pasteta, hrenov, kobas, sunka,
                    grill sir, juha, nuggets, medaljon, odrez, cordon, stapic, macke, pse\b, felix,
                    kebab, gyros, marinir, rolica, salata, sendvic, tortilj, wrap, mini\b, cca\b,
@@ -1054,7 +1064,7 @@ svinjetina:
   synonyms: [svinjetina, svinjsko meso, svinjski vrat, svinjski but, svinjska lopatica, svinjski kotlet]
   must_match: [svinjetin, svinjski vrat, svinjski but, svinjska lopatic, svinjski kotlet, svinjsko meso,
                svinjski file, svinjska rebra, svinjski karee, svinjski lungic, sv vrat, sv but, sv lopatic,
-               sv kotlet, sv karee]
+               sv kotlet, sv karee, 'sv\.?\s*rebra', 'svinjsk\w* rebra']
   must_not_match: [empanad, burrito, rolic, instant, usoljen, susen, porcij, svinjetinom, dimljen,
                    kuhan, narez, salam, pasteta, kobas, hrenov, sunka, pecen, pohan, panir, mast\b,
                    cvarc, juha, gulas, gotov, konzerv, lim\b, mljev, kotanyi, zacin, cca\b]
@@ -1127,7 +1137,8 @@ tuna:
   synonyms: [tuna, tunjevina]
   must_match: [tuna\b, tune\b, tunj]
   must_not_match: [salata, grah, kukuruz, pasteta, namaz, sendvic, pizza, tjestenin, riza\b, macke, felix,
-                   whiskas, gourmet, pse\b, povrce, meksick, rio\b mare insalat, kus\b, krem\b, kus kus]
+                   whiskas, gourmet, pse\b, povrce, meksick, rio\b mare insalat, kus\b, krem\b, kus kus,
+                   cous, bowl, sal\b, salat]
   unit: kg
   max_pack: 1000
   min_pack: 50

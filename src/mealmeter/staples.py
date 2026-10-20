@@ -13,6 +13,7 @@ from mealmeter.normalize import norm_text
 from mealmeter.units import piece_weight
 
 STAPLES_PATH = Path(__file__).with_name("staples.yaml")
+ABBREV_PATH = Path(__file__).resolve().parents[2] / "data" / "abbrev.yaml"
 # loose_produce: nazivi staklenki/konzervi koji prolaze pravilo ">= 500 g" ("KRASTAVCI 6-9 cm 1580g ...
 # ocijeđene mase", "KISELI ..."): kalibar u cm, ocijeđena masa, kiselo. Uzorak je na name_norm.
 LOOSE_REJECT_REGEX = r"\d+ \d+ cm|(^| )ocj|(^| )ocij|(^| )kis"
@@ -297,13 +298,33 @@ def resolve_ingredient(text: str | None, staples: dict[str, Staple] | None = Non
     return None
 
 
+@lru_cache(maxsize=2)
+def load_abbrev(path: Path = ABBREV_PATH) -> tuple[tuple[re.Pattern, str], ...]:
+    """Kratice iz data/abbrev.yaml kao (regex, zamjena), redom."""
+    if not Path(path).exists():
+        return ()
+    raw = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or []
+    return tuple((re.compile(e["pattern"]), e["replace"]) for e in raw)
+
+
+def match_text(name: str | None) -> str | None:
+    """Tekst za podudaranje s namirnicama: name_norm nakon proširenja kratica (data/abbrev.yaml),
+    "PRAŠ. PEC. 12 g" -> "prasak za pecivo 12 g". Izvorni naziv i name_norm ostaju."""
+    if name is None:
+        return None
+    text = attr_text(name)
+    for rx, repl in load_abbrev():
+        text = rx.sub(repl, text)
+    return norm_text(text)
+
+
 def name_match(staple: Staple, name: str) -> str | None:
     """Kako pravila namirnice vide jedan naziv: "match", "excluded" ili None (nije kandidat).
 
     Provjerava samo must_match/must_not_match (bez loose_produce i kategorije), za testove i
-    pregled; build to radi u SQL-u istim uzorcima.
+    pregled; build to radi u SQL-u istim uzorcima, na match_norm (nazivu nakon proširenja kratica).
     """
-    text = norm_text(name) or ""
+    text = match_text(name) or ""
     if not re.search(staple.match_regex, text):
         return None
     if staple.require_regex and not re.search(staple.require_regex, text):
@@ -389,26 +410,26 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
           chain VARCHAR, product_id VARCHAR, staple VARCHAR, excluded BOOLEAN, drop_reason VARCHAR)
     """)
     for st in staples.values():
-        excl = "regexp_matches(name_norm, ?)" if st.exclude_regex else "false"
+        excl = "regexp_matches(match_norm, ?)" if st.exclude_regex else "false"
         params = ([st.exclude_regex] if st.exclude_regex else []) + [st.match_regex]
         loose = ""
         if st.require_regex:
-            loose += " AND regexp_matches(name_norm, ?)"
+            loose += " AND regexp_matches(match_norm, ?)"
             params.append(st.require_regex)
         if st.loose_produce:
             # Svježe voće/povrće: riječ namirnice kao prva ili druga riječ naziva, i proizvod
             # na vagu (bez globalnog EAN-a), bez poznate gramature ili pakiranje >= 500 g;
             # nikad tekućina. Inače "banana" pogađa bombone, sokove i čokolade s okusom banane.
             # Staklenke ("KRASTAVCI 6-9 cm 1580g ... ocijeđene mase") odbija LOOSE_REJECT_REGEX.
-            loose += """ AND regexp_matches(name_norm, ?)
+            loose += """ AND regexp_matches(match_norm, ?)
                        AND (NOT ean_global OR pack_unit IS NULL OR (pack_unit = 'g' AND pack_amount >= 500))
-                       AND pack_unit IS DISTINCT FROM 'ml' AND NOT regexp_matches(name_norm, ?)"""
+                       AND pack_unit IS DISTINCT FROM 'ml' AND NOT regexp_matches(match_norm, ?)"""
             params += [st.loose_regex, LOOSE_REJECT_REGEX]
         con.execute(
             f"""INSERT INTO clean.product_staples
                 SELECT chain, product_id, '{st.key}', {excl},
                        CASE WHEN NOT is_food OR food_group = 'alkohol' THEN 'kategorija:' || food_group END
-                FROM clean.products WHERE regexp_matches(name_norm, ?) {loose}""",
+                FROM clean.products WHERE regexp_matches(match_norm, ?) {loose}""",
             params,
         )
 
@@ -444,7 +465,7 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
                 FROM clean.products p
                 WHERE p.chain = ps.chain AND p.product_id = ps.product_id AND ps.staple = ?
                   AND ps.drop_reason IS NULL AND NOT ps.excluded AND p.pack_amount IS NULL
-                  AND regexp_matches(p.name_norm, ?)
+                  AND regexp_matches(p.match_norm, ?)
             """, [st.key, _word_start(st.require_pack)])
 
     rows = con.execute("""

@@ -1,0 +1,17 @@
+# Kratice u nazivima proizvoda -> puna riječ, za podudaranje s namirnicama (clean.products.match_norm).
+# Izvorni naziv i name_norm ostaju. Uzorak je Python regex na tekstu s točkama (mala slova, bez
+# dijakritika, zarez -> točka; staples.attr_text), primjenjuje se redom. Dodaju se samo nedvosmislene
+# kratice: "pec." može biti i "peč." (pečeni), a "sv." i svinjski i svježe, pa ne stoje sami.
+- {pattern: '\bpras\.?\s*pec\.?(?=\s|$)', replace: 'prasak za pecivo'}
+- {pattern: '\bpras\.(?=\s|\w|$)', replace: 'prasak '}
+- {pattern: '\bbras\.(?=\s|\w|$)', replace: 'brasno '}
+- {pattern: '\bmlij\.(?=\s|\w|$)', replace: 'mlijeko '}
+- {pattern: '\bjog\.(?=\s|\w|$)', replace: 'jogurt '}
+- {pattern: '\btj\.(?=\s|\w|$)', replace: 'tjestenina '}
+- {pattern: '\btje\.(?=\s|\w|$)', replace: 'tjestenina '}
+- {pattern: '\btjest\.(?=\s|\w|$)', replace: 'tjestenina '}
+- {pattern: '\bvrh\.(?=\s|\w|$)', replace: 'vrhnje '}
+- {pattern: '\bpil\.(?=\s|\w|$)', replace: 'pileci '}
+- {pattern: '\bkuh\.(?=\s|\w|$)', replace: 'kuhanje '}
+# "TIJESTO ŠIR VALJ REZANCI": "šir" je široki (inače bi bio "sir" i isključio tjesteninu)
+- {pattern: '\bsir\.?\s*(?=valj|rez|tjest|tijest)', replace: 'siroki '}
