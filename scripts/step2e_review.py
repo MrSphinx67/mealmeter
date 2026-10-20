@@ -10,7 +10,7 @@ from pathlib import Path
 import duckdb
 
 sys.path.insert(0, str(Path(__file__).parent))
-from morning_review import md_table  # noqa: E402
+from morning_review import hr, md_table  # noqa: E402
 
 from mealmeter.search import _candidates  # noqa: E402
 from mealmeter.staples import BKEY_SQL, STAPLE_PPU_SQL, load_staples, staple_suspect_sql  # noqa: E402
@@ -234,8 +234,34 @@ def section_eurospin(con) -> str:
     return "\n".join(out)
 
 
+def section_prefix(con) -> str:
+    rules = con.execute("""SELECT prefix, n_train, food_group, purity, n_test, accuracy FROM clean.prefix_rules
+                           WHERE applied ORDER BY length(prefix), prefix""").fetchall()
+    n_test, acc = con.execute("""SELECT sum(n_test), sum(n_test * accuracy) / sum(n_test) FROM clean.prefix_rules
+                                 WHERE applied AND n_test > 0""").fetchone()
+    by_group = con.execute("""SELECT food_group, count(*) FROM clean.products WHERE chain = 'plodine'
+                              AND category_source = 'prefix' GROUP BY 1 ORDER BY 2 DESC""").fetchall()
+    n_unknown = con.execute("SELECT count(*) FROM clean.products WHERE chain = 'plodine' AND food_group = 'unknown'").fetchone()[0]
+    con.execute("SELECT setseed(0.61)")
+    sample = con.execute("""SELECT product_id, name, food_group FROM clean.products WHERE chain = 'plodine'
+                            AND category_source = 'prefix' ORDER BY random() LIMIT 30""").fetchall()
+    n_prefix = sum(n for _, n in by_group)
+    return "\n".join([
+        "## 11. Plodine: skupina iz prefiksa šifre", "",
+        "Učenje na Plodinama sa skupinom iz EAN-a (`category_source = 'ean_inherited'`; Plodine nemaju kategorija), "
+        "prefiksi od 2, 3 i 4 znaka, 80 % učenje i 20 % odloženo (po hashu šifre). Primjenjuju se samo prefiksi "
+        "čistoće ≥ 95 % s ≥ 30 primjera, najduži ima prednost (`category_source = 'prefix'`, `clean.prefix_rules`).", "",
+        f"Primijenjeno {len(rules)} prefiksa; točnost na odloženom skupu {hr(100 * acc, 1)} % ({n_test} proizvoda). "
+        f"Iz `unknown` izlazi **{n_prefix}** Plodina ("
+        + ", ".join(f"{g} {n}" for g, n in by_group) + f"); `unknown` ostaje {n_unknown}.", "",
+        md_table(["prefiks", "primjera (učenje)", "skupina", "čistoća", "odloženo", "točnost"], rules), "",
+        "30 primjera:", "",
+        md_table(["šifra", "naziv", "skupina"], sample),
+    ])
+
+
 SECTIONS = {"1": section_tiers, "4": section_synonyms, "5": section_cvijet, "9": section_funnel,
-            "10": section_eurospin}
+            "10": section_eurospin, "11": section_prefix}
 
 
 def main() -> None:

@@ -7,7 +7,8 @@ Redoslijed izvora (category_source):
    nasljeđuje većinsku skupinu istog globalnog EAN-a iz lanaca s kategorijom (> 50 % glasova);
    ako se skupine razilaze, ostaje 'unknown'.
 3. `words`: popis neprehrambenih riječi (NONFOOD_WORDS) ili naziv alkoholnog pića.
-4. `none`: ništa od navedenog; food_group = 'unknown', is_food = NULL.
+4. `prefix`: Plodine bez skupine dobivaju je iz prefiksa interne šifre (learn_prefix_rules).
+5. `none`: ništa od navedenog; food_group = 'unknown', is_food = NULL.
 
 is_food: true za hrana/pice/alkohol, false za neprehrambene skupine, NULL za 'unknown'.
 """
@@ -192,6 +193,74 @@ def words_group(name: str | None, category: str | None = None, pack_unit: str | 
     return "alkohol" if is_alcohol(name) else None
 
 
+# Lanci bez kategorije čija interna šifra proizvoda nosi skupinu (Plodine: prefiks šifre)
+PREFIX_CHAINS = ("plodine",)
+PREFIX_LENGTHS = (4, 3, 2)  # najduži prefiks koji vrijedi ima prednost
+PREFIX_MIN_PURITY, PREFIX_MIN_EXAMPLES, PREFIX_HOLDOUT = 0.95, 30, 0.20
+
+
+def _holdout(product_id: str) -> bool:
+    """Deterministička podjela 80/20 (po hashu šifre, ne ovisi o redoslijedu)."""
+    import zlib
+
+    return zlib.crc32(product_id.encode()) % 100 < PREFIX_HOLDOUT * 100
+
+
+def learn_prefix_rules(con: duckdb.DuckDBPyConnection) -> list[tuple]:
+    """Za PREFIX_CHAINS nauči prefiks šifre -> food_group iz proizvoda s poznatom skupinom
+    (category_source 'ean_inherited' ili 'chain') i primijeni ga na 'unknown' (category_source 'prefix').
+
+    Učenje na 80 %, točnost na odloženih 20 %. Primjenjuju se samo prefiksi čistoće >= 95 % (udio
+    većinske skupine u učenju) s >= 30 primjera; najduži prefiks ima prednost. Statistika ide u
+    clean.prefix_rules (chain, prefix, n_train, food_group, purity, n_test, accuracy, applied).
+    """
+    from collections import Counter
+
+    rules, out = {}, []
+    for chain in PREFIX_CHAINS:
+        known = con.execute("""SELECT product_id, food_group FROM food_final
+                               WHERE chain = ? AND category_source IN ('ean_inherited', 'chain')""", [chain]).fetchall()
+        train = [(pid, g) for pid, g in known if not _holdout(pid)]
+        test = [(pid, g) for pid, g in known if _holdout(pid)]
+        for length in PREFIX_LENGTHS:
+            by_pre: dict[str, Counter] = {}
+            for pid, g in train:
+                by_pre.setdefault(pid[:length], Counter())[g] += 1
+            test_by: dict[str, list] = {}
+            for pid, g in test:
+                test_by.setdefault(pid[:length], []).append(g)
+            for pre, cnt in by_pre.items():
+                group, n_major = cnt.most_common(1)[0]
+                n = sum(cnt.values())
+                purity = n_major / n
+                tests = test_by.get(pre, [])
+                accuracy = sum(g == group for g in tests) / len(tests) if tests else None
+                applied = purity >= PREFIX_MIN_PURITY and n >= PREFIX_MIN_EXAMPLES
+                out.append((chain, pre, n, group, round(purity, 4), len(tests),
+                            round(accuracy, 4) if accuracy is not None else None, applied))
+                if applied:
+                    rules[(chain, pre)] = group
+    con.execute("""CREATE OR REPLACE TABLE clean.prefix_rules (chain VARCHAR, prefix VARCHAR, n_train BIGINT,
+                   food_group VARCHAR, purity DOUBLE, n_test BIGINT, accuracy DOUBLE, applied BOOLEAN)""")
+    if out:
+        con.executemany("INSERT INTO clean.prefix_rules VALUES (?, ?, ?, ?, ?, ?, ?, ?)", out)
+    fixes = []
+    for chain in PREFIX_CHAINS:
+        for (pid,) in con.execute("SELECT product_id FROM food_final WHERE chain = ? AND food_group = 'unknown'",
+                                  [chain]).fetchall():
+            for length in PREFIX_LENGTHS:
+                if (g := rules.get((chain, pid[:length]))):
+                    fixes.append((chain, pid, g))
+                    break
+    if fixes:
+        from mealmeter.build import _temp_table  # izbjegava kružni import
+
+        _temp_table(con, "prefix_fix", {"chain": "VARCHAR", "product_id": "VARCHAR", "grp": "VARCHAR"}, fixes)
+        con.execute("""UPDATE food_final f SET food_group = x.grp, category_source = 'prefix' FROM prefix_fix x
+                       WHERE f.chain = x.chain AND f.product_id = x.product_id""")
+    return out
+
+
 def build_food(con: duckdb.DuckDBPyConnection) -> dict:
     """Dodaje clean.products.food_group, is_food i category_source. Vraća statistiku za ispis."""
     from mealmeter.build import _temp_table  # izbjegava kružni import
@@ -253,6 +322,7 @@ def build_food(con: duckdb.DuckDBPyConnection) -> dict:
             _temp_table(con, "food_fix", {"chain": "VARCHAR", "product_id": "VARCHAR", "grp": "VARCHAR"}, fixes)
             con.execute("""UPDATE food_final f SET food_group = x.grp, category_source = 'words' FROM food_fix x
                            WHERE f.chain = x.chain AND f.product_id = x.product_id""")
+    prefix_stats = learn_prefix_rules(con)
     con.execute(f"""
         CREATE OR REPLACE TABLE clean.products AS
         SELECT p.*, f.food_group,

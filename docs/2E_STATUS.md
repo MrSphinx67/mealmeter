@@ -2,7 +2,7 @@
 
 | točka | stanje |
 |---|---|
-| 1-9 | gotovo |
-| 10 | gotovo |
+| 1-10 | gotovo |
+| 11 | gotovo |
 
-Sljedeća točka: 11.
+Sljedeće: docs/REVIEW_2E.md.

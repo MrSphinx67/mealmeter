@@ -649,3 +649,10 @@ Izvještaji: [STEP2E_REVIEW.md](STEP2E_REVIEW.md) (`scripts/step2e_review.py`) i
     - **Prijedlog (nije primijenjen, utječe i na košaricu):** EAN koji jedan lanac koristi za ≥ 5 različitih
       `name_norm` tretirati kao neglobalan (ključ grupe lanac + `name_norm`). Na arhivi 20.10. to pogađa samo
       9999999999994.
+79. **Plodine: skupina iz prefiksa šifre** (`food.learn_prefix_rules`, `clean.prefix_rules`, `category_source = 'prefix'`).
+    - Učenje na Plodinama s poznatom skupinom (`ean_inherited`), prefiksi od 2, 3 i 4 znaka, podjela 80/20
+      po hashu šifre.
+    - Primjenjuju se prefiksi čistoće ≥ 95 % s ≥ 30 primjera učenja, najduži prvi. Na 20.10. to je 37 prefiksa,
+      uz točnost na odloženom skupu 99,3 % (769 proizvoda).
+    - 1.681 Plodina izlazi iz `unknown` (hrana 1.524, kućanstvo 119, pića 33, alkohol 5), među njima i svježe
+      povrće („LUK ZUTI“, „ROTKVA CRNA“). Ono sada ulazi i u `find_products`.

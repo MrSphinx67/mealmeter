@@ -112,3 +112,26 @@ def test_basket_loose_produce_allows_unverified(con):
                                   "HRANA ZA MAČKE WHISKAS 85G TASTY MIX KREMASTA KREACIJA"])
 def test_pet_food_in_food_category(name):
     assert chain_group("Hrana", name) == "kucni_ljubimci"
+
+
+def test_learn_prefix_rules():
+    """Korak 2E.11: prefiks šifre Plodina -> skupina, samo čisti prefiksi s dovoljno primjera."""
+    import duckdb
+
+    from mealmeter.food import learn_prefix_rules
+
+    c = duckdb.connect()
+    c.execute("CREATE SCHEMA clean")
+    c.execute("CREATE TEMP TABLE food_final (chain VARCHAR, product_id VARCHAR, food_group VARCHAR, category_source VARCHAR)")
+    rows = [("plodine", f"12{i:04d}", "hrana", "ean_inherited") for i in range(60)]  # čist prefiks
+    rows += [("plodine", f"34{i:04d}", "hrana" if i % 2 else "kucanstvo", "ean_inherited") for i in range(60)]  # 50/50
+    rows += [("plodine", f"56{i:04d}", "kozmetika", "ean_inherited") for i in range(10)]  # premalo primjera
+    rows += [("plodine", "129999", "unknown", "none"), ("plodine", "349999", "unknown", "none"),
+             ("plodine", "569999", "unknown", "none")]
+    c.executemany("INSERT INTO food_final VALUES (?, ?, ?, ?)", rows)
+    stats = learn_prefix_rules(c)
+    got = dict(c.execute("SELECT product_id, food_group || '/' || category_source FROM food_final "
+                         "WHERE product_id LIKE '%9999'").fetchall())
+    assert got == {"129999": "hrana/prefix", "349999": "unknown/none", "569999": "unknown/none"}
+    applied = {(pre, g) for _, pre, _, g, _, _, _, ok in stats if ok}
+    assert ("12", "hrana") in applied and not any(pre.startswith(("34", "56")) for pre, _ in applied)
