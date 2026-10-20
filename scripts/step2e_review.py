@@ -3,6 +3,7 @@
 Upotreba: python scripts/step2e_review.py [db_path] [odjeljak ...]   (zadano: data/mealmeter.duckdb, svi)
 """
 
+import random
 import sys
 from pathlib import Path
 
@@ -11,7 +12,7 @@ import duckdb
 sys.path.insert(0, str(Path(__file__).parent))
 from morning_review import md_table  # noqa: E402
 
-from mealmeter.staples import BKEY_SQL  # noqa: E402
+from mealmeter.staples import BKEY_SQL, STAPLE_PPU_SQL, load_staples, staple_suspect_sql  # noqa: E402
 
 OUT = Path("docs/STEP2E_REVIEW.md")
 DATA = Path("docs/data")
@@ -118,7 +119,91 @@ def section_cvijet(con) -> str:
     ])
 
 
-SECTIONS = {"1": section_tiers, "4": section_synonyms, "5": section_cvijet}
+FUNNEL_STAPLES = ("rajcica", "mrkva", "krastavac", "zelena_salata", "luk", "paprika", "tikvica")
+FUNNEL_CHAINS = ("konzum", "spar", "plodine", "lidl", "kaufland", "tommy", "studenac", "eurospin")
+FUNNEL_STAGES = ("kandidati", "kategorija", "pripadnost", "varijante", "pakiranje", "price_suspect",
+                 "rasprodaja", "konačno")
+
+
+def funnel(con, key: str) -> tuple[dict, list[tuple]]:
+    """Po lancu broj proizvoda kroz faze (svaka faza je podskup prethodne) i proizvodi s fazom gubitka."""
+    st = load_staples()[key]
+    chains = ", ".join(f"'{c}'" for c in FUNNEL_CHAINS)
+    req = f"AND regexp_matches(p.match_norm, '{st.require_regex}')" if st.require_regex else ""
+    excl = " OR ".join(f"(a.attr = '{a}' AND a.value = '{v}')" for a, v in st.default_exclude_variants) or "false"
+    rows = con.execute(f"""
+        WITH c AS (
+          SELECT p.*, {BKEY_SQL} AS bkey FROM clean.products p
+          WHERE p.chain IN ({chains}) AND regexp_matches(p.match_norm, '{st.match_regex}') {req}
+        ),
+        f AS (
+          SELECT c.chain, c.product_id, c.name,
+                 NOT (coalesce(c.is_food = false, false) OR c.food_group = 'alkohol') AS cat_ok,
+                 ps.staple IS NOT NULL AND NOT ps.excluded AND coalesce(g.status = 'member', false) AS member_ok,
+                 NOT EXISTS (SELECT 1 FROM clean.staple_group_attrs a WHERE a.staple = '{key}' AND a.bkey = c.bkey
+                             AND ({excl})) AS variant_ok,
+                 coalesce(ps.drop_reason NOT IN ('pakiranje', 'jedinica', 'bez_gramature'), true) AS pack_ok,
+                 EXISTS (SELECT 1 FROM clean.prices pr JOIN clean.staple_rules r ON r.staple = '{key}'
+                         JOIN clean.product_staples ps2 ON ps2.chain = pr.chain AND ps2.product_id = pr.product_id
+                              AND ps2.staple = '{key}'
+                         WHERE pr.chain = c.chain AND pr.product_id = c.product_id
+                           AND NOT coalesce(({STAPLE_PPU_SQL.replace('ps.', 'ps2.').replace('c.', 'pr.')}) IS NOT NULL
+                                            AND {staple_suspect_sql(STAPLE_PPU_SQL.replace('ps.', 'ps2.').replace('c.', 'pr.'),
+                                                                    'ps2.n_units', 'ps2')}, false)) AS price_ok,
+                 NOT c.clearance AS sale_ok,
+                 (coalesce(c.is_food, false) OR (c.is_food IS NULL AND {str(st.loose_produce).lower()}))
+                   AND EXISTS (SELECT 1 FROM clean.prices pr JOIN clean.stores s USING (chain, store_id)
+                               WHERE pr.chain = c.chain AND pr.product_id = c.product_id
+                                 AND s.store_type <> 'cash_and_carry') AS final_ok
+          FROM c LEFT JOIN clean.product_staples ps ON ps.chain = c.chain AND ps.product_id = c.product_id
+                      AND ps.staple = '{key}'
+                 LEFT JOIN clean.staple_groups g ON g.staple = '{key}' AND g.bkey = c.bkey
+        )
+        SELECT chain, product_id, name, cat_ok, member_ok, variant_ok, pack_ok, price_ok, sale_ok, final_ok FROM f
+    """).fetchall()
+    counts = {ch: [0] * len(FUNNEL_STAGES) for ch in FUNNEL_CHAINS}
+    lost = []
+    for chain, pid, name, *flags in rows:
+        counts[chain][0] += 1
+        stage = None
+        for i, ok in enumerate(flags, start=1):
+            if not ok:
+                stage = FUNNEL_STAGES[i]
+                break
+            counts[chain][i] += 1
+        if stage:
+            lost.append((chain, name, stage))
+    return counts, lost
+
+
+def section_funnel(con) -> str:
+    out = ["## 9. Lijevak za svježe povrće", "",
+           "Broj proizvoda po fazi (svaka faza je podskup prethodne): kandidati (`must_match` na nazivu) → nakon "
+           "kategorije (bez neprehrane i alkohola) → nakon pripadnosti (pravilo svježeg povrća i `must_not_match` "
+           "po proizvodu, grupa `member`) → nakon zadano isključenih varijanti → nakon pakiranja (min/max, "
+           "jedinica) → nakon `price_suspect` (barem jedna cijena u granicama) → nakon rasprodaje → konačno "
+           "(filtar hrane kao u `plan_basket`: provjerena hrana ili nepoznata skupina za svježe povrće; bez "
+           "veleprodaje). Ćelija je „kandidati → … → konačno“.", "",
+           "Zapažanje: „pripadnost“ su većinom prerađeni proizvodi (krekeri, sokovi, konzerve, tjestenina s "
+           "mrkvom), ali pravilo za svježe povrće izbacuje i stvarno povrće koje se prodaje na komad uz "
+           "globalni EAN („KRASTAVAC SALATAR kom“, Lidl „Salata Iceberg“), jer traži bez gramature ili ≥ 500 g.", ""]
+    for key in FUNNEL_STAPLES:
+        counts, lost = funnel(con, key)
+        rows = [(ch, " → ".join(str(n) for n in counts[ch])) for ch in FUNNEL_CHAINS]
+        reasons = {}
+        for _, _, stage in lost:
+            reasons[stage] = reasons.get(stage, 0) + 1
+        top = max(reasons, key=reasons.get) if reasons else None
+        pool = [(ch, name) for ch, name, stage in lost if stage == top]
+        examples = random.Random(key).sample(pool, min(10, len(pool)))
+        out += [f"### {key}", "", md_table(["lanac", " → ".join(FUNNEL_STAGES)], rows), "",
+                f"Najčešći razlog gubitka: **{top}** ({reasons.get(top, 0)} proizvoda; svi razlozi: "
+                + ", ".join(f"{k} {v}" for k, v in sorted(reasons.items(), key=lambda kv: -kv[1])) + "). Primjeri:", "",
+                md_table(["lanac", "naziv"], examples), ""]
+    return "\n".join(out)
+
+
+SECTIONS = {"1": section_tiers, "4": section_synonyms, "5": section_cvijet, "9": section_funnel}
 
 
 def main() -> None:

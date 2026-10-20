@@ -637,3 +637,8 @@ Izvještaji: [STEP2E_REVIEW.md](STEP2E_REVIEW.md) (`scripts/step2e_review.py`) i
 76. **Prethodna arhiva = učitana arhiva** (`update._previous`). Uzima se iz `clean.archive_info`, a ne kao
     najveći datum u `archive_stats`. Inače ponovno učitavanje starijeg dana (`--force`) pa novijeg ne bi
     prepoznalo prethodni dan, pa ne bi bilo ni carry-forwarda.
+77. **Lijevak za svježe povrće** (samo izvještaj, STEP2E_REVIEW.md, točka 9).
+    - Za rajčicu, mrkvu, krastavac, zelenu salatu, luk, papriku i tikvicu po lancu, kroz faze kandidati →
+      kategorija → pripadnost → varijante → pakiranje → price_suspect → rasprodaja → konačno.
+    - Najveći gubitak je u pripadnosti: većinom prerađeni proizvodi, ali i povrće na komad s globalnim EAN-om
+      („KRASTAVAC SALATAR kom“), koje pravilo za svježe povrće odbija.
