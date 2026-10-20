@@ -107,6 +107,8 @@ vrijednost se uspješno parsirala.
 | date | DATE, dan iz naziva arhive |
 | price, special_price, unit_price, best_price_30, anchor_price | kao u sirovim podacima, ali `0.00` → NULL |
 | price_eff | cijena koju kupac plaća: `coalesce(special_price, price)` |
+| price_date | datum cijene: dan arhive, ili raniji dan kod prenesene cijene (carry-forward, `update.py`) |
+| stale_days | starost cijene u danima (dan arhive − `price_date`); 0 za cijene iz same arhive |
 | is_special | `special_price IS NOT NULL` |
 | price_per_unit, per_unit | cijena po `kg` / `l` / `kom` |
 | unit_confidence | `high` (iz gramature), `low` (iz lančevog `unit_price`), NULL. Ukupno 73,1 % high, 3,0 % low, 23,9 % bez cijene po jedinici |
@@ -268,5 +270,8 @@ Ostaje:
   `updated` se ne učitava ponovno, a ponovno objavljena arhiva (novi `updated`) se učitava. Zato su dva
   dnevna pokretanja (15:30 i 23:30, `--print-schedule`) sigurna.
 - Ispis nakon učitavanja uključuje razlike po lancu (trgovine, proizvodi, cijene) naspram prethodne arhive.
+- **Carry-forward:** trgovina koja nedostaje u novoj arhivi ili ima više od 10 % manje cijena nego u prethodnoj
+  zadržava prethodne cijene (sirovi retci stores/products/prices s izvornim datumom), najviše 3 dana. U
+  `clean.prices` takvi retci imaju `stale_days` > 0. U `price_history` ulaze samo cijene dana arhive.
 - `uv run python scripts/update.py --print-schedule` ispisuje cron (`30 15,23 * * *`) i systemd timer s dva
   `OnCalendar`; ništa se ne instalira.

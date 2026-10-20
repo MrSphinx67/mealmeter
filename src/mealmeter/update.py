@@ -24,6 +24,9 @@ LIST_URL = "https://api.cijene.dev/v0/list"
 ARCHIVE_URL = "https://api.cijene.dev/v0/archive/{date}.zip"
 KEEP_DAYS = 30
 MAX_DROP = 0.20
+# carry-forward: trgovina koja nedostaje ili ima > 10 % manje cijena zadržava prethodne cijene, najviše 3 dana
+CARRY_DROP = 0.10
+CARRY_DAYS = 3
 
 SCHEDULE = """\
 # Dva pokretanja dnevno (15:30 i 23:30). Najnovija arhiva uzima se iz /v0/list, a ne po satu: 20.10. je
@@ -161,6 +164,53 @@ def validate(new: list[tuple], old: list[tuple], max_drop: float = MAX_DROP) -> 
     return warnings
 
 
+# --- carry-forward po trgovini -------------------------------------------------------------
+
+def carry_forward(con, old_db: Path, date: str, max_drop: float = CARRY_DROP, max_days: int = CARRY_DAYS) -> list[tuple]:
+    """Sirove tablice nove arhive (stores, products, prices) dopuni prethodnim cijenama trgovina koje
+    nedostaju ili imaju više od `max_drop` manje cijena nego prije. Prethodni redak zadržava svoj datum
+    (prices.date), a prenosi se samo ako nije stariji od `max_days` dana, pa se ni preneseni ne prenose
+    zauvijek. Dodaje samo (lanac, trgovina, proizvod) kojih u novoj arhivi nema. Vraća
+    (lanac, trgovina, prije, sada, preneseno)."""
+    if not old_db.exists():
+        return []
+    con.execute(f"ATTACH '{old_db}' AS prev (READ_ONLY)")
+    try:
+        tables = {r[0] for r in con.execute(
+            "SELECT table_name FROM duckdb_tables() WHERE database_name = 'prev' AND schema_name = 'main'").fetchall()}
+        if not {"stores", "products", "prices"} <= tables:
+            return []
+        cutoff = (dt.date.fromisoformat(date) - dt.timedelta(days=max_days)).isoformat()
+        con.execute(f"""
+            CREATE OR REPLACE TEMP TABLE carry_stores AS
+            WITH o AS (SELECT chain, store_id, count(*) AS n_old FROM prev.main.prices
+                       WHERE date >= DATE '{cutoff}' AND date < DATE '{date}' GROUP BY ALL),
+                 n AS (SELECT chain, store_id, count(*) AS n_new FROM prices GROUP BY ALL)
+            SELECT o.chain, o.store_id, o.n_old, coalesce(n.n_new, 0) AS n_new
+            FROM o LEFT JOIN n USING (chain, store_id)
+            WHERE coalesce(n.n_new, 0) < o.n_old * (1 - {max_drop})
+        """)
+        con.execute(f"""
+            CREATE OR REPLACE TEMP TABLE carry_prices AS
+            SELECT o.* FROM prev.main.prices o JOIN carry_stores USING (chain, store_id)
+            WHERE o.date >= DATE '{cutoff}' AND o.date < DATE '{date}'
+              AND NOT EXISTS (SELECT 1 FROM prices n WHERE n.chain = o.chain AND n.store_id = o.store_id
+                              AND n.product_id = o.product_id)
+        """)
+        con.execute("""INSERT INTO stores SELECT o.* FROM prev.main.stores o JOIN carry_stores USING (chain, store_id)
+                       WHERE NOT EXISTS (SELECT 1 FROM stores n WHERE n.chain = o.chain AND n.store_id = o.store_id)""")
+        con.execute("""INSERT INTO products SELECT o.* FROM prev.main.products o
+                       WHERE (o.chain, o.product_id) IN (SELECT chain, product_id FROM carry_prices)
+                         AND NOT EXISTS (SELECT 1 FROM products n WHERE n.chain = o.chain AND n.product_id = o.product_id)""")
+        con.execute("INSERT INTO prices SELECT * FROM carry_prices")
+        return con.execute("""
+            SELECT s.chain, s.store_id, s.n_old, s.n_new, count(c.product_id)
+            FROM carry_stores s LEFT JOIN carry_prices c USING (chain, store_id)
+            GROUP BY ALL ORDER BY s.chain, s.store_id""").fetchall()
+    finally:
+        con.execute("DETACH prev")
+
+
 # --- izgradnja i zamjena ---------------------------------------------------------------
 
 def compare_stats(new: list[tuple], old: list[tuple]) -> list[tuple]:
@@ -225,6 +275,8 @@ def build_database(root: Path, date: str, db_path: Path, keep_days: int = KEEP_D
         load_raw(con, root, date)
         stats = archive_stats(con)
         warnings = validate(stats, prev_stats if prev_date != date else [], max_drop)
+        # provjera gleda stvarnu arhivu; zatim nepotpune trgovine nasljeđuju prethodne cijene
+        carried = carry_forward(con, db_path, date) if prev_date and prev_date != date else []
         build_clean(con)
 
         # statistika arhiva i povijest cijena (zadnjih keep_days dana, uključujući današnji)
@@ -257,15 +309,17 @@ def build_database(root: Path, date: str, db_path: Path, keep_days: int = KEEP_D
                        loaded_at TIMESTAMP)""")
         con.execute("INSERT INTO clean.archive_info VALUES (?, ?, ?, ?, now())",
                     [date, (info or {}).get("updated"), (info or {}).get("size"), (info or {}).get("url")])
+        # samo cijene ovog dana: preneseni retci (carry-forward) već su u povijesti pod svojim datumom
         con.execute("""INSERT INTO clean.price_history
                        SELECT date, chain, store_id, product_id, price, special_price, price_eff,
-                              price_per_unit, per_unit FROM clean.prices""")
+                              price_per_unit, per_unit FROM clean.prices WHERE date = ?""", [date])
         summary = {
             "date": date, "previous_date": prev_date, "warnings": warnings,
             "chains": len(stats), "stores": sum(r[1] for r in stats), "products": sum(r[2] for r in stats),
             "price_rows": sum(r[3] for r in stats),
             "price_rows_previous": sum(r[3] for r in prev_stats) if prev_stats else None,
             "diff": compare_stats(stats, prev_stats) if prev_stats and prev_date != date else [],
+            "carried": carried,
             "clean_prices": con.execute("SELECT count(*) FROM clean.prices").fetchone()[0],
             "history_days": [d.isoformat() for (d,) in con.execute(
                 "SELECT DISTINCT date FROM clean.price_history ORDER BY date").fetchall()],
@@ -353,6 +407,10 @@ def run(argv: list[str] | None = None) -> int:
     print(f"  povijest:        {len(summary['history_days'])} dana ({summary['history_days'][0]} .. {summary['history_days'][-1]})")
     for w in summary["warnings"]:
         print(f"  ! {w}")
+    if summary["carried"]:
+        n_rows = sum(r[4] for r in summary["carried"])
+        chains = sorted({r[0] for r in summary["carried"]})
+        print(f"  carry-forward:   {len(summary['carried'])} trgovina, {n_rows} cijena ({', '.join(chains)})")
     if summary["diff"]:
         print(f"\n  razlike naspram {summary['previous_date']} (sirove tablice):")
         print(f"  {'lanac':<28}{'trgovina':>9}{'Δ':>6}{'proizvoda':>11}{'Δ':>8}{'cijena':>11}{'Δ':>9}")

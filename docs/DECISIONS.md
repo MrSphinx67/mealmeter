@@ -620,3 +620,12 @@ Izvještaji: [STEP2E_REVIEW.md](STEP2E_REVIEW.md) (`scripts/step2e_review.py`) i
     - Novi parametar `already_have` (lista namirnica, CLI `--have "sol,papar"`): stavke ostaju, uz `have=true`.
       Nepoznata namirnica daje upozorenje.
     - Trgovine se rangiraju po `total_to_buy`.
+74. **Carry-forward po trgovini** (`update.carry_forward`).
+    - Prije `build_clean` trgovine koje nedostaju ili imaju više od 10 % manje cijena dobivaju prethodne
+      sirove retke (stores, products, prices) za proizvode kojih u novoj arhivi nema.
+    - Redak zadržava svoj datum i prenosi se samo dok nije stariji od 3 dana.
+    - Provjera (`validate`) gleda arhivu prije prenošenja.
+    - `clean.prices` dobiva `price_date` i `stale_days`; `price_history` ne duplicira prenesene retke.
+    - Testovi: nedostaje lanac, pad 18 % (2 od 11 cijena), pad 9 % (ne prenosi se), 4. dan (ne prenosi se).
+    - Baza je već na nepotpunoj arhivi 20.10., a 19.10. nije u sirovim tablicama, pa se Stanić neće vratiti
+      sam od sebe. To bi tražilo ponovno učitavanje 19.10. pa 20.10. (`update.py --date … --force`).

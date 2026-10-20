@@ -185,6 +185,8 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
             ORDER BY price_eff, unit_price NULLS LAST, anchor_price NULLS LAST, best_price_30 NULLS LAST) = 1
         )
         SELECT d.chain, d.store_id, d.product_id, d.date,
+               -- datum cijene (preneseni redak trgovine bez novih cijena zadržava svoj) i starost u danima
+               d.date AS price_date, (SELECT max(date) FROM prices) - d.date AS stale_days,
                d.price, d.special_price, d.price_eff, d.special_price IS NOT NULL AS is_special,
                d.unit_price, d.best_price_30, d.anchor_price,
                round(CASE
