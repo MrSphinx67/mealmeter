@@ -327,3 +327,52 @@ def test_all_units_estimates():
     for section in ("measures", "densities", "pieces"):
         assert all(v["estimate"] for v in raw[section].values()), section
     assert not any(st.piece_g for st in S.values())  # mase komada su samo u units.yaml
+
+
+# --- 10. filtar hrane: neprehrana u kategoriji hrane ---------------------------------------------
+
+@pytest.mark.parametrize("name,broad,group", [
+    ("IGRAČKA HUGI WUGI BLOW BUBBLE 12/1", False, "ostalo"),
+    ("SALVETE DAISY MI BOŽIĆNA ZVIJEZDA 20/1", False, "kucanstvo"),
+    ("BOŽ.SVIJEĆA 12 cm BIJELA", False, "kucanstvo"),
+    ("BATERIJE AA 4/1", False, "kucanstvo"),
+    ("SJEME KUKURUZ SECERAC", False, "ostalo"),
+    ("TANJURIĆI STAKLO 15X15cm HO-rasprodaja", False, None),  # samo širi popis
+    ("TANJURIĆI STAKLO 15X15cm HO-rasprodaja", True, "kucanstvo"),
+    ("KUHINJSKA KRPA SET 2/1 50X70CM", True, "kucanstvo"),
+    ("CVIJE ORHID.POSUD.CIKL.47 cm", True, "ostalo"),
+    ("SLADOLED ČAŠA VANILIJA 150 ml", True, None),  # "ČAŠA" u sladoledu je pakiranje
+    ("KRUH KALUP 500g", True, None),
+    ("WHISKY BALLANTINES 2 ČAŠE 0,7 l", True, "kucanstvo"),
+    ("DEKOR ŠARENO PISMO 76 g DR.OET", True, None),
+    ("BOMBONI 4g +IGRAČKA PONY", False, None),
+])
+def test_nonfood_in_food(name, broad, group):
+    from mealmeter.food import nonfood_in_food
+
+    assert nonfood_in_food(name, broad=broad) == group
+
+
+def test_chain_verify_map():
+    from mealmeter.food import load_chain_verify
+
+    v = load_chain_verify()
+    assert v["gavranovic"] == {"hrana"} and v["boso"] == {"zeleni program"} and v["studenac"] == {"hrana"}
+    assert v["plodine"] == {"ean_inherited"}
+
+
+def test_cup_rule_words():
+    from mealmeter.food import words_group
+
+    assert words_group("ČAŠE ZA VODU 6/1 280 ml") == "kucanstvo"
+    assert words_group("ČAŠA ZA PIVO 565ml") == "kucanstvo"
+    assert words_group("JOG.TEK.0.9% 500 G ČAŠA VINDIJA") is None
+
+
+@pytest.mark.parametrize("name", ["KULENOV CVIJET NARESCI 80g GAVRILOVIĆ", "Milka Paket s plišanom igračkom 96 g",
+                                  "FLIPS S IGRAČKOM 60 g GUSTO", "KOŠARICE ZA PRINCES KRAFNE 120 g",
+                                  "BIO CVIJET SOLI 125 g ADRIATIQ"])
+def test_nonfood_in_food_edible_guard(name):
+    from mealmeter.food import nonfood_in_food
+
+    assert nonfood_in_food(name, broad=True) is None

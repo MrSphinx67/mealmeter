@@ -5,6 +5,15 @@
 # Prijedlog je izrađen pravilima (scripts/make_category_map.py); ispravci se upisuju ovdje.
 # Komentar uz redak: broj proizvoda i lanci.
 
+# Ručne iznimke po lancu: hrana iz ovih kategorija (ili naslijeđena preko EAN-a, "ean_inherited")
+# provjerava se širim popisom neprehrambenih riječi (food.BROAD_NONFOOD_IN_FOOD), jer lanac u njih
+# stavlja i posuđe, krpe i cvijeće (Korak 2D)
+_chain_verify:
+  gavranovic: [Hrana]
+  boso: [ZELENI PROGRAM]
+  studenac: [HRANA]
+  plodine: [ean_inherited]
+
 # --- hrana (778 kategorija, 162648 proizvoda)
 "hrana": hrana  # 134600, branka,bure,dukat,eurospin,gavranovic,jadranka_trgovina,kaufland,konzum,ktc,lidl,metro,ntl,ribola,spar,stanic,stridon,studenac,trgocentar,trgovina-krk
 "svjezi odeli": hrana  # 3065, tommy

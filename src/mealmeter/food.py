@@ -20,6 +20,7 @@ import duckdb
 import yaml
 
 from mealmeter.normalize import FOOD_GROUP_VALUES, FOOD_GROUPS, NONFOOD_GROUPS, category_group, norm_text
+from mealmeter.staples import attr_text
 
 CATEGORY_MAP_PATH = Path(__file__).resolve().parents[2] / "data" / "category_map.yaml"
 
@@ -33,14 +34,16 @@ NONFOOD_WORDS = [
     (r"pelene", "djeca"),
     (r"zubn", "higijena"),
     (r"motorn|igrac|sjeme\b|dekor|stolic", "ostalo"),
-    # proširenje popisa: čaše i pribor za piće, inače bi ih alkoholna riječ označila kao piće
-    # ("ČAŠA ZA PIVO"); "JOG.TEK. 500 G CASA" je jogurt u čaši, pa vrijedi _CUP_FOOD
-    (r"casa\b|case\b|garn\b|depozit|otvarac|vadicep|clip\b", "kucanstvo"),
+    # proširenje popisa: pribor za piće, inače bi ga alkoholna riječ označila kao piće; čaše vidi _CUPS
+    (r"garn\b|depozit|otvarac|vadicep|clip\b", "kucanstvo"),
 ]
 _NONFOOD_RX = [(re.compile(r"(^| )(?:" + p + ")"), g) for p, g in NONFOOD_WORDS]
 # Hrana za ljubimce u lančevoj kategoriji "Hrana" ("HRANA ZA PSE FRISK.VITAL."): naziv ima prednost
 _PET_RX = re.compile(r"(^| )(?:hrana za (?:pse|macke|ptice|ribice|glodavce)|za pse\b|za macke|poslastic\w* za (?:pse|macke)|"
                      r"whiskas|friskies|pedigree|kitekat|purina|gourmet gold|dreamies|brit care)")
+# "ČAŠA" je i pakiranje hrane ("JOGURT 500 G ČAŠA", "SLADOLED ČAŠA"), pa je neprehrana samo množina
+# "ČAŠE" ili dodatak uz piće ("WHISKY 0,7 L + ČAŠA"); provjera na attr_text (zadržava "+")
+_CUPS = re.compile(r"(^|[\s(/.,])case\b|\+\s*cas|(^|[\s(/.,])casa za\b")  # i "ČAŠA ZA PIVO" (moja dopuna)
 _CUP_FOOD = re.compile(r"(^| )(?:jog|vrhnj|puding|desert|kefir|sir\b|namaz|mlijek|napitak|sok\b|sladoled)")
 
 # Alkoholna pića po nazivu (name_norm, na početku riječi). Opće riječi vrijede za skupinu `pice`
@@ -81,10 +84,21 @@ def load_category_map(path: Path = CATEGORY_MAP_PATH) -> dict[str, str]:
     if not Path(path).exists():
         return {}
     raw = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+    raw.pop("_chain_verify", None)
     bad = {k: v for k, v in raw.items() if v not in FOOD_GROUP_VALUES}
     if bad:
         raise ValueError(f"{path}: nepoznate skupine {bad}; dopuštene: {FOOD_GROUP_VALUES}")
     return {norm_text(str(k)): v for k, v in raw.items()}
+
+
+@lru_cache(maxsize=2)
+def load_chain_verify(path: Path = CATEGORY_MAP_PATH) -> dict[str, set[str]]:
+    """{lanac: {norm_text(kategorija) | "ean_inherited"}}: kategorije čija se hrana provjerava širim popisom
+    neprehrambenih riječi (category_map.yaml, _chain_verify)."""
+    if not Path(path).exists():
+        return {}
+    raw = (yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}).get("_chain_verify") or {}
+    return {chain: {norm_text(c) if c != "ean_inherited" else c for c in cats} for chain, cats in raw.items()}
 
 
 def is_alcohol(name: str | None, drink: bool = False) -> bool:
@@ -126,8 +140,10 @@ def words_group(name: str | None) -> str | None:
     """Skupina iz naziva za proizvode bez kategorije: neprehrambena riječ ili alkoholno piće."""
     text = norm_text(name) or ""
     for rx, group in _NONFOOD_RX:
-        if rx.search(text) and not (rx is _NONFOOD_RX[-1][0] and _CUP_FOOD.search(text)):
+        if rx.search(text):
             return group
+    if _CUPS.search(attr_text(name)) and not _CUP_FOOD.search(text):
+        return "kucanstvo"
     return "alkohol" if is_alcohol(name) else None
 
 
@@ -135,7 +151,7 @@ def build_food(con: duckdb.DuckDBPyConnection) -> dict:
     """Dodaje clean.products.food_group, is_food i category_source. Vraća statistiku za ispis."""
     from mealmeter.build import _temp_table  # izbjegava kružni import
 
-    cmap = load_category_map()
+    cmap, verify = load_category_map(), load_chain_verify()
     unmapped: dict[str, int] = {}
 
     def rows():
@@ -143,11 +159,15 @@ def build_food(con: duckdb.DuckDBPyConnection) -> dict:
                 "SELECT chain, product_id, category, name FROM clean.products").fetchall():
             if category and norm_text(category) not in cmap:
                 unmapped[category] = unmapped.get(category, 0) + 1
-            group = chain_group(category, name, cmap)
-            yield chain, pid, group, words_group(name) if group == "unknown" else None
+            group, refined = chain_group(category, name, cmap), None
+            if group in FOOD_GROUPS:
+                # neprehrana u kategoriji hrane: strogi popis svuda, širi za nepouzdane kategorije lanaca
+                refined = nonfood_in_food(name, broad=norm_text(category or "") in verify.get(chain, ()))
+            yield chain, pid, refined or group, words_group(name) if group == "unknown" else None, bool(refined)
 
     _temp_table(con, "food_tmp", {
         "chain": "VARCHAR", "product_id": "VARCHAR", "chain_group": "VARCHAR", "words_group": "VARCHAR",
+        "refined": "BOOLEAN",
     }, rows())
     food = ", ".join(f"'{g}'" for g in FOOD_GROUPS)
     nonfood = ", ".join(f"'{g}'" for g in NONFOOD_GROUPS)
@@ -166,7 +186,7 @@ def build_food(con: duckdb.DuckDBPyConnection) -> dict:
                     WHEN i.share > 0.5 THEN i.grp
                     WHEN f.words_group IS NOT NULL THEN f.words_group
                     ELSE 'unknown' END AS food_group,
-               CASE WHEN f.chain_group <> 'unknown' THEN 'chain'
+               CASE WHEN f.refined THEN 'words' WHEN f.chain_group <> 'unknown' THEN 'chain'
                     WHEN i.share > 0.5 THEN 'ean_inherited'
                     WHEN f.words_group IS NOT NULL THEN 'words'
                     ELSE 'none' END AS category_source,
@@ -175,6 +195,18 @@ def build_food(con: duckdb.DuckDBPyConnection) -> dict:
         -- inherit sadrži samo globalne EAN-ove (globalnost ovisi samo o kodu)
         LEFT JOIN inherit i ON i.ean_norm = p.ean_norm
     """)
+    # hrana naslijeđena preko EAN-a u lancima iz _chain_verify (Plodine): širi popis neprehrambenih riječi
+    inherited_chains = [c for c, cats in verify.items() if "ean_inherited" in cats]
+    if inherited_chains:
+        names = con.execute(f"""
+            SELECT f.chain, f.product_id, p.name FROM food_final f JOIN clean.products p USING (chain, product_id)
+            WHERE f.category_source = 'ean_inherited' AND f.food_group IN ({food})
+              AND f.chain IN ({", ".join("?" for _ in inherited_chains)})""", inherited_chains).fetchall()
+        fixes = [(c, pid, g) for c, pid, name in names if (g := nonfood_in_food(name, broad=True))]
+        if fixes:
+            _temp_table(con, "food_fix", {"chain": "VARCHAR", "product_id": "VARCHAR", "grp": "VARCHAR"}, fixes)
+            con.execute("""UPDATE food_final f SET food_group = x.grp, category_source = 'words' FROM food_fix x
+                           WHERE f.chain = x.chain AND f.product_id = x.product_id""")
     con.execute(f"""
         CREATE OR REPLACE TABLE clean.products AS
         SELECT p.*, f.food_group,
@@ -201,13 +233,52 @@ def build_food(con: duckdb.DuckDBPyConnection) -> dict:
     }
 
 
-# Za provjeru: riječi koje u "hrani" upućuju na neprehrambeni proizvod (izvještaj, ne filtar)
+# Neprehrana unutar "hrane" (na početku riječi u name_norm) -> skupina. STRICT vrijedi za sve proizvode s
+# is_food = true; BROAD samo za kategorije lanaca s poznatim neprehrambenim artiklima (category_map.yaml,
+# _chain_verify: Gavranović "Hrana", Boso "ZELENI PROGRAM", Studenac "HRANA", Plodine preko EAN-a).
+STRICT_NONFOOD_IN_FOOD = [
+    (r"igrac|sjeme\b|cvijet", "ostalo"),
+    (r"svijec|baterij|salvet|ukrasn", "kucanstvo"),
+]
+BROAD_NONFOOD_IN_FOOD = STRICT_NONFOOD_IN_FOOD + [
+    (r"sampon|regenerator|gel za tus|tus gel|krema za (?:lice|ruke|tijelo|suncanje)|losion|dezodor", "kozmetika"),
+    (r"toaletni papir|maramic|pelen|ulosc|tampon|cetkic|zubna pasta|britv|sapun", "higijena"),
+    (r"hrana za (?:pse|macke)|za pse|za macke|psec|macj|pijesak za|granule za", "kucni_ljubimci"),
+    (r"igrack|cigaret|duhan|olovk|biljeznic|baloni|cestitk|naljepnic|cvijec|orhid|lonc", "ostalo"),
+    (r"deterdz|omeksiv|sredstvo za|spuzv|krpa|krpe|vrecice za smece|vrece za|aluminijsk|papirnat|ubrus|"
+     r"zarulj|upaljac|kalup za|posud|tanjur|lonac|tava|noz\b|vilic|kuhac|ukras|stolnjak|tegla za|"
+     r"vrecica ukrasn|kosaric", "kucanstvo"),
+]
+# Jestivo usprkos riječi s popisa ("CVJETIĆI UKRASNI" od šećera, "DEKOR ŠARENO PISMO DR.OETKER",
+# "BOMBONI + IGRAČKA", "KOŠARICE CVIJET" od čokolade, "KULENOV CVIJET NARESCI", "FLIPS S IGRAČKOM")
+_EDIBLE_GUARD = re.compile(r"(^| )(?:jestiv|secern|cokol|marcipan|fondan|bombon|lizalic|zvak|keks|sladoled|"
+                           r"kruh|jogurt|dr oet|oetker|tort|kolac|posip\b|confileta|sir\b|narez|naresc|kulen|"
+                           r"igrackom|milka|flips|krafn|cips|smoki|salam|cvijet soli|soli\b)")
+_STRICT_RX = [(re.compile(r"(^| )(?:" + p + ")"), g) for p, g in STRICT_NONFOOD_IN_FOOD]
+_BROAD_RX = [(re.compile(r"(^| )(?:" + p + ")"), g) for p, g in BROAD_NONFOOD_IN_FOOD]
+
+
+def nonfood_in_food(name: str | None, broad: bool = False) -> str | None:
+    """Neprehrambena skupina za proizvod iz kategorije hrane čiji naziv to otkriva, ili None."""
+    text = norm_text(name) or ""
+    if _EDIBLE_GUARD.search(text):
+        return None
+    for rx, group in (_BROAD_RX if broad else _STRICT_RX):
+        if rx.search(text):
+            return group
+    if broad and _CUPS.search(attr_text(name or "")) and not _CUP_FOOD.search(text):
+        return "kucanstvo"
+    return None
+
+
+# Za provjeru: riječi koje u "hrani" upućuju na neprehrambeni proizvod (izvještaj, ne filtar). "ČAŠA" i
+# "KALUP" samo kao "ČAŠE"/"KALUP ZA" ("SLADOLED ČAŠA", "KRUH KALUP" su hrana)
 SUSPECT_NONFOOD_REGEX = (
     r"(^| )(?:sampon|regenerator|gel za tus|tus gel|krema za (?:lice|ruke|tijelo|suncanje)|losion|dezodor|"
-    r"deterdz|omeksiv|sredstvo za|spuzv|krpa|krpe|vrecice za smece|vrece za|folij|aluminijsk|papirnat|"
+    r"deterdz|omeksiv|sredstvo za|spuzv|krpa|krpe|vrecice za smece|vrece za|aluminijsk|papirnat|"
     r"salvet|ubrus|toaletni papir|maramic|pelen|ulosc|tampon|cetkic|zubna pasta|britv|sapun|svijec|"
-    r"baterij|zarulj|upaljac|igrack|igrac|kalup|posud|tanjur|casa|case\b|lonac|tava|noz\b|vilic|zlic|"
-    r"posip za|kuhac|ukras|dekor|naljepnic|stolnjak|hrana za (?:pse|macke)|za pse|za macke|psec|"
+    r"baterij|zarulj|upaljac|igrack|igrac|kalup za|posud|tanjur|case\b|lonac|tava|noz\b|vilic|"
+    r"kuhac|ukrasn|naljepnic|stolnjak|hrana za (?:pse|macke)|za pse|za macke|psec|"
     r"macj|pijesak za|granule za|cigaret|duhan|olovk|biljeznic|baloni|cestitk|cvijet|sjeme\b|tegla za)"
 )
 

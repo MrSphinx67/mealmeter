@@ -91,7 +91,47 @@ def section_chicken(con) -> str:
     ])
 
 
-SECTIONS = [section_groups, section_chicken]
+# proizvodi kojima je Korak 2D.10 promijenio skupinu (chain, product_id, before, after), iz snimke prije promjene
+FOOD_CHANGES = Path("docs/data/food_changes_2d10.csv")
+
+
+def section_food(con) -> str:
+    from mealmeter.food import SUSPECT_NONFOOD_REGEX
+
+    changes = f"read_csv('{FOOD_CHANGES}', header=true, all_varchar=true, quote='\"')"
+    moved = con.execute(f"SELECT before || ' → ' || after, count(*) FROM {changes} GROUP BY 1 ORDER BY 2 DESC").fetchall()
+    con.execute("SELECT setseed(0.3)")
+    sample = con.execute(f"""
+        SELECT p.chain, p.name, p.category, o.before, p.food_group, p.category_source FROM clean.products p
+        JOIN {changes} o USING (chain, product_id)
+        WHERE o.before IN ('hrana', 'pice') AND p.is_food IS DISTINCT FROM true ORDER BY random() LIMIT 20""").fetchall()
+    con.execute("SELECT setseed(0.42)")
+    suspects = con.execute("""SELECT chain, name, category, food_group, category_source FROM clean.products
+                              WHERE is_food AND regexp_matches(name_norm, ?) ORDER BY random() LIMIT 20""",
+                           [SUSPECT_NONFOOD_REGEX]).fetchall()
+    n_susp = con.execute("SELECT count(*) FROM clean.products WHERE is_food AND regexp_matches(name_norm, ?)",
+                         [SUSPECT_NONFOOD_REGEX]).fetchone()[0]
+    return "\n".join([
+        "## 10. Filtar hrane: neprehrana u kategoriji hrane", "",
+        "- Strogi popis (igrač, svijeć, baterij, sjeme, cvijet, salvet, ukrasn) vrijedi za sve proizvode s "
+        "`is_food = true`; pogođeni idu u `ostalo` ili `kucanstvo` (`category_source = 'words'`).",
+        "- Širi popis (posuđe, krpe, kozmetika, higijena, cvijeće…) vrijedi za ručne iznimke u "
+        "`category_map.yaml` (`_chain_verify`): Gavranović „Hrana“, Boso „ZELENI PROGRAM“, Studenac „HRANA“ i "
+        "Plodine naslijeđene preko EAN-a.",
+        "- Jestivo usprkos riječi ostaje hrana (šećerni ukrasi, čokolada, Dr. Oetker, bomboni s igračkom).",
+        "- „ČAŠA“ je neprehrana samo kao „ČAŠE“, „+ ČAŠ…“ ili „ČAŠA ZA“ (moja dopuna), pa „SLADOLED ČAŠA“ "
+        "ostaje hrana; „KALUP“ samo kao „KALUP ZA“.", "",
+        "Promjene skupine (prije → poslije):", "",
+        md_table(["promjena", "proizvoda"], moved), "",
+        "20 nasumičnih proizvoda koji su bili hrana ili piće, a sada nisu:", "",
+        md_table(["lanac", "naziv", "kategorija", "prije", "poslije", "izvor"], sample), "",
+        f"20 nasumičnih „hrana“ proizvoda koji i dalje izgledaju neprehrambeno (od {n_susp}; u Koraku 2C "
+        "ih je bilo 2.168, ali s drugim popisom za izvještaj):", "",
+        md_table(["lanac", "naziv", "kategorija", "skupina", "izvor"], suspects),
+    ])
+
+
+SECTIONS = [section_groups, section_chicken, section_food]
 
 
 def main() -> None:

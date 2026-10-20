@@ -15,7 +15,7 @@ Namirnice s promjenama (broj grupa):
 | tjestenina | 1429 | 1229 | 223 | 202 | 2 |
 | tvrdi_sir | 986 | 864 | 125 | 123 | 1 |
 | jogurt | 396 | 336 | 127 | 63 | 3 |
-| med | 462 | 409 | 82 | 57 | 4 |
+| med | 456 | 403 | 82 | 57 | 4 |
 | cokolada_za_kuhanje | 57 | 35 | 22 | 22 | 0 |
 | svjezi_sir | 154 | 134 | 31 | 20 | 0 |
 | dodatak_jelima | 106 | 86 | 32 | 20 | 0 |
@@ -33,80 +33,80 @@ Namirnice s promjenama (broj grupa):
 | riza | 452 | 443 | 16 | 9 | 0 |
 | papar | 241 | 239 | 13 | 8 | 6 |
 | vanilin_secer | 70 | 63 | 10 | 8 | 1 |
-| rajcica_konzerva | 191 | 184 | 7 | 7 | 0 |
+| kiselo_vrhnje | 127 | 120 | 7 | 7 | 0 |
 | palenta | 83 | 76 | 7 | 7 | 0 |
 | slanina | 705 | 698 | 12 | 7 | 0 |
-| kiselo_vrhnje | 127 | 120 | 7 | 7 | 0 |
+| rajcica_konzerva | 191 | 184 | 7 | 7 | 0 |
 | pileca_prsa | 228 | 224 | 11 | 6 | 2 |
-| jaja | 343 | 338 | 29 | 6 | 1 |
+| jaja | 347 | 342 | 29 | 6 | 1 |
 | parmezan | 111 | 105 | 6 | 6 | 0 |
-| mozzarella | 211 | 205 | 10 | 6 | 0 |
 | krastavac | 72 | 66 | 18 | 6 | 0 |
-| grasak | 152 | 147 | 6 | 5 | 0 |
-| kecap | 177 | 172 | 13 | 5 | 0 |
-| mljeveno_meso | 106 | 101 | 5 | 5 | 0 |
-| kukuruz | 157 | 152 | 8 | 5 | 0 |
+| mozzarella | 211 | 205 | 10 | 6 | 0 |
 | ocat | 121 | 116 | 14 | 5 | 0 |
-| junetina | 288 | 283 | 6 | 5 | 0 |
+| kecap | 177 | 172 | 13 | 5 | 0 |
+| kukuruz | 157 | 152 | 8 | 5 | 0 |
 | pasirana_rajcica | 139 | 134 | 7 | 5 | 0 |
+| mljeveno_meso | 106 | 101 | 5 | 5 | 0 |
+| junetina | 288 | 283 | 6 | 5 | 0 |
+| grasak | 152 | 147 | 6 | 5 | 0 |
 | kiseli_kupus | 131 | 128 | 9 | 4 | 1 |
 | grah | 401 | 398 | 17 | 4 | 1 |
-| koncentrat_rajcice | 40 | 36 | 4 | 4 | 0 |
-| brasno | 383 | 379 | 9 | 4 | 0 |
-| prasak_za_pecivo | 48 | 44 | 4 | 4 | 0 |
 | jabuka | 394 | 390 | 4 | 4 | 0 |
+| brasno | 383 | 379 | 9 | 4 | 0 |
+| koncentrat_rajcice | 40 | 36 | 4 | 4 | 0 |
+| prasak_za_pecivo | 48 | 44 | 4 | 4 | 0 |
 | senf | 136 | 135 | 6 | 3 | 2 |
 | zobene_pahuljice | 69 | 67 | 4 | 3 | 1 |
-| mrkva | 122 | 119 | 3 | 3 | 0 |
 | svinjetina | 454 | 451 | 3 | 3 | 0 |
-| persin | 64 | 61 | 3 | 3 | 0 |
 | sol | 160 | 161 | 2 | 2 | 3 |
-| luk | 207 | 205 | 7 | 2 | 0 |
-| krumpir | 238 | 236 | 3 | 2 | 0 |
 | limun | 98 | 96 | 2 | 2 | 0 |
-| ulje | 166 | 164 | 5 | 2 | 0 |
+| mrkva | 121 | 119 | 2 | 2 | 0 |
 | slanutak | 121 | 119 | 3 | 2 | 0 |
+| ulje | 166 | 164 | 5 | 2 | 0 |
+| krumpir | 238 | 236 | 3 | 2 | 0 |
+| luk | 207 | 205 | 7 | 2 | 0 |
 | gljive | 112 | 112 | 3 | 1 | 1 |
 | tuna | 448 | 448 | 51 | 1 | 1 |
-| secer | 226 | 225 | 3 | 1 | 0 |
+| persin | 62 | 61 | 1 | 1 | 0 |
 | naranca | 112 | 111 | 2 | 1 | 0 |
 | zelena_salata | 73 | 72 | 1 | 1 | 0 |
+| secer | 226 | 225 | 3 | 1 | 0 |
 | rajcica | 201 | 200 | 8 | 1 | 0 |
 
 30 nasumičnih promijenjenih grupa (s više od jednog lanca):
 
 | namirnica | grupa | promjena | lanaca | % naziva namirnice | % isključenog naziva | nazivi |
 |---|---|---|---|---|---|---|
-| tvrdi_sir | 3858881196650 | član → ambiguous | 6 | 33,00 | 0,00 | vrutak: SIR S TARTUFIMA ŠPIN 230G -16/1; konzum: SIR TVRDI S TARTUFIMA 230g; metro: 230G ŠPIN SIR S TARTUFIMA; plodine: SIR S TARTUFIMA 230 G AGROLAGUNA; spar: SIR KRAVLJI ŠPIN TARTUF. 230 g; jadranka_trgovina: SIR TVRDI KRAVLJI S TARTUFIMA 230G ŠPIN |
-| tjestenina | 3838700011463 | član → ambiguous | 7 | 14,00 | 0,00 | gavranovic: TJ.ZP REZANCI DOMAĆI JUŠNI 250g; studenac: REZANCI DOMAĆI ZA JUHU 250G; plodine: TJESTENINA REZANCI GNIJEZDA 250G VRECICA ZLATNO POLJE; ktc: REZANCI JUŠNI DOMAĆI JAJ.250g ZLATOPOLJE; tommy: TJ. JUŠNI DOMAĆI REZANCI 250 g ZP; konzum: TJE REZAN GNJEZ DOM JAJ 250g ZLATOPOLJE; spar: TJE.ZL.POLJE JUŠ.REZANCI 250 g |
-| med | 3858889333774 | član → ambiguous | 4 | 25,00 | 0,00 | ribola: DATULJ MEDJOUL 500 gSVJEŽA; metro: 500G DATULJA MEDJOUL SVJEŽA; plodine: DATULJA MEDJOOL SVJEZA 500 G; konzum: DATULJA MEDJ SVJ 500g |
-| tvrdi_sir | 3858891773872 | član → ambiguous | 5 | 20,00 | 0,00 | konzum: SIR TVRDI JADRANSKI 190 g GLIGORA; vrutak: SIR JADRANSKI GLIGORA 190G -8/1-; spar: SIR JADRANSKI GLIGORA 190 g; tommy: SIR JADRANSKI 190 g GLIGORA; ribola: SIR JADRAN.190 g GLIGORA |
-| tjestenina | 3859888499874 | član → ambiguous | 15 | 20,00 | 0,00 | studenac: TJ. FUŽI 500 g; ribola: TJ.FUŽI ISTAR. 500 g KLARA MARIĆ; lorenco: DOMAĆI ISTARSKI FUŽI 500g; roto: TIJESTO FUŽI 500g KLARA M (10); bure: TJ.FUŽI 500 g ISTARSKI; spar: TJ.KL.MARIĆ FUŽI ISTARS.500 g; djelo_vodice: TJE.ISTARSKI FUŽI 500G KLARA; plodine: TJESTENINA DOMACI ISTARSKI FUZI 500 G KLARA MARIC; konzum: TIJESTO FUŽI 500g KLARA M; metro: 500G KLARA M. DOM IST FUŽ JAJA; stanic: DOMAĆI ISTARSKI FUŽI 500 g KLARA MARIĆ; jadranka_trgovina: TJESTENINA FUŽI ISTARSKI 500g KLARA MARIĆ; tommy: TJ.DOM.ISTAR. FUŽI 500 g KLAR; kaufland: Klara M domaći istarski fuži 500g; vrutak: TJEST KLARA M DOMAĆI ISTARSKI FUŽI 500G -10/1 108 |
-| tjestenina | 3859889154567 | član → ambiguous | 2 | 50,00 | 0,00 | lorenco: DOMAĆI FIDELINI MRKVA 250g; plodine: TJESTENINA DOMACI FIDELINI MRKVA 250 G RAGUSA VRECICA |
-| griz | 3858881327290 | član → ambiguous | 4 | 25,00 | 0,00 | djelo_vodice: PŠENIČNI GRIZ 1KG ULTRA; ribola: GRIS PŠ.KRUP 1 kg ULTRA; bure: PŠEN.KRUPICA 1 kg ULTRA; trgocentar: ULTRA KRUPICA PŠENIČNA 1KG, KLARA (20)(GRIS) |
-| tjestenina | 3858881323063 | član → ambiguous | 8 | 25,00 | 0,00 | gavranovic: TJ.KLARA 500g REZANCI ŠIROKI; plodine: TJ.REZANCI SIROKI 500 G KLARA VRECICA; lorenco: REZANCI ŠIROKI KLARA; trgovina-krk: TIJ.REZANCI ŠIROKI 500G KLARA; trgocentar: REZANAC ŠIROKI TJESTENINA 0,500KG, KLARA(7); tommy: TJ.REZANCI ŠIROKI 500 g KLARA; vrutak: N-TJEST.KLARA ZP REZAN.ŠIROKI 500G -7/1- A60001; studenac: TJ.KLARA REZANCI 500 |
-| slatko_vrhnje | 3850354017233 | član → ambiguous | 2 | 50,00 | 0,00 | ribola: VRH.ZA ŠLAG VAN.500gDUKAT; gavranovic: VRHNJE ZA ŠLAG VANILIJA 500g DUKAT |
-| jogurt | 3850354017745 | član → ambiguous | 5 | 20,00 | 0,00 | ribola: JOG.500g BOT.RUŽA SENSIA FIBERS; stridon: SENSIA FIBERS BOTANICAL RUŽA 500g; gavranovic: JOGURT SENSIA BOTANICAL RUŽA 500g; lorenco: SENSIA FIBERS BOTANICA RUŽA; tommy: SENSIA FIBERS BOTANICAL RUŽA 500 g |
-| tjestenina | 3858894930586 | član → ambiguous | 5 | 20,00 | 0,00 | konzum: ŠKOLJKICE 350 g KARLA; kaufland: Karla Tjestenina školjkice 350 g; spar: TJESTEN. ŠKOLJKICE KARLA 350 g; ktc: ŠKOLJKICE KARLA 350g; plodine: SKOLJKICE 350 G KARLA |
-| pasirana_rajcica | 8003496005308 | član → ambiguous | 2 | 50,00 | 0,00 | tommy: RAJČICA PAS. IL DELIC. 500 g; trgovina-krk: RAJČICA PASIRANA PETTI 500 gr BRIK DELICATO |
-| med | 3838977041477 | član → ambiguous | 10 | 10,00 | 0,00 | trgovina-krk: MEDALJONI PILEĆI PANIRANI SA SIROM 500g PERUTNINA; lorenco: PILEĆI MEDALJ.SA SIROM 500g PERUTNI; ribola: PIL.MED.SIR 500 g PE RUTNINA; vrutak: N-PER MEDALJONI PILEĆI 500G SA SIROM -14/1-; studenac: PIL. MEDALJ. SIR PAN. SMRZ. 500 g; boso: PILEĆI PIPO 500 g MEDALJ.SA SIR.; plodine: SMRZNUTI PILECI MEDALJONI SA SIROM 500 G PERUTNINA; kaufland: Perutnina Pileći medaljoni sir 500 g; tommy: PILEĆI MEDALJONI SA SIROM 500g; ntl: MEDALJONI PILEĆI PANIRANI SA SIROM SM 500 g PERUTNINA |
-| majoneza | 7613287084491 | član → ambiguous | 4 | 50,00 | 0,00 | spar: MAJONEZA THOMY DELI.TUBA 280 g; metro: 280G THOMY MAJONEZA DELIGHT; plodine: DELIGHT TUBA 280 G THOMY; kaufland: Thomy mayonnaise delight Tube 280 g. |
-| tjestenina | 3858881323216 | član → ambiguous | 7 | 43,00 | 0,00 | stridon: TJ.VIJCI 133 KLARA 500 g A60020; gavranovic: TJ.KLARA 500g VIJAK; vrutak: N-TJEST.KLARA ZP VIJAK BR. 13329040. 500G -24/1- A60020; trgocentar: VIJAK 133 TJESTENINA 0,500KG (24), KLARA; trgovina-krk: TIJ.VIJAK 500G KLARA; ntl: TJEST.VIJAK 133 500 g ZP KLARA; lorenco: VIJCI 500g KLARA |
-| griz | 3858881086401 | član → ambiguous | 15 | 7,00 | 0,00 | stridon: INSTANT GRIS 200 g VREĆ. FRANCK (16); trgocentar: GRIS INST.V.200G(16), FRANCK; ktc: GRIS INSTANT 200g FRANCK; lorenco: INSTANT GRIS 200g FRANCK; spar: GRIS INSTANT FRANCK 200 g; branka: GRIS INSTANT 200 g; tommy: GRIZ INSTANT VR.200 g FRANCK; vrutak: GRIS FRANCK INST 200G -16/1-; roto: KRUPICA PŠEN GRIS 200G FRANCK (14); ribola: GRIS PŠ.KRUP. 200 g FRANCK; bure: GRIS 200 g FRANCK; studenac: GRIS INSTANT FRANCK 200 g; plodine: GRIS INSTANT 200 G FRANCK; trgovina-krk: GRIS INST V.200 FRANCK; konzum: KRUPICA PŠEN GRIS 200g FRANCK |
-| junetina | 3859893373831 | član → ambiguous | 2 | 50,00 | 0,00 | eurospin: CHUCK EYE STEAK JUNEĆI VRAT 235g; konzum: CHUCK EYE STEAK 235 g SKIN |
-| tjestenina | 3859893533402 | član → ambiguous | 9 | 22,00 | 0,00 | lorenco: AURELIA MAKARUNI 250g; ribola: MAKARUNI SVJ.250 g AURELIA; branka: MAKARUNI SVJEŽI 250g; djelo_vodice: TJESTENINA MAKARUNI 250G AURELIA; jadranka_trgovina: TJESTENINA MAKARUNI SVJEŽI 250G AURELIA; plodine: AURELIA MAKARUNI 250 G; konzum: MAKARUNI SVJEŽI 250g AURELIA; vrutak: N-MAKARUNI SVJEŽI AURELIA 250G -8/1-; tommy: MAKARUNI SVJEŽI 250 g AURELIA |
-| vrhnje_za_kuhanje | 5411188132455 | član → ambiguous | 6 | 17,00 | 0,00 | tommy: VRHNJE OD ZOBI 250 ml ALPRO; ribola: VRH. ZA KUH. 250 ml ZOBENO APLRO; dm: alpro za kuhanje od zobi 0,25 l; konzum: KREMA ZA KUHANJE ZOB 250 ml ALPRO; spar: ZOB.PROIZ.ZA KUH.ALPRO 0,25 L; plodine: ZOB ZA KUHANJE 250 ML ALPRO |
-| tvrdi_sir | 3859889426619 | član → ambiguous | 2 | 50,00 | 0,00 | plodine: SIR PRAMENKO 1/4 PASKA SIRANA; konzum: SIR TVRDI PRAMENKO VAC PAŠKA SIRANA |
-| tvrdi_sir | 3850355001811 | član → ambiguous | 14 | 7,00 | 0,00 | trgocentar: PRESIDENT SIR ZA PIZZU 350G, DUKAT; plodine: SIR PIZZA PRESIDENT 350 G DUKAT; lorenco: SIR ZA PIZZU 350g SIRELA; ribola: SIR ZA PIZZU 350g PD; trgovina-krk: SIR ZA PIZZU PRESIDENT 350 g DUKAT; konzum: SIR POLUTV PRESIDENT ZA PIZZU 350g; kaufland: President Sir za pizzu 350 g; studenac: SIR ZA PIZZU DUKAT 350 g; spar: SIR ZA PIZZU PRESIDENT 350 g; dukat: PDT SIR ZA PIZZU A LA MARGARITA 350 g; tommy: SIR ZA PIZZU 350 g PRESIDENT; ktc: SIR ZA PIZZU 350g PRESIDENT DUKAT; vrutak: N-SIR PRESIDENT 350G ZA PIZZU RIBANI -8/1- 15033; ntl: SIR ZA PIZZU PRESIDENT 350 g DUKAT |
-| tjestenina | 3859890293286 | član → ambiguous | 2 | 50,00 | 0,00 | trgovina-krk: TJEST. ŠURLICE KRČKE 500g SMR. MARIOLINA; tommy: KRČKE ŠURLICE 500 g MARIOLINA |
-| palenta | 3859891976324 | član → ambiguous | 2 | 50,00 | 0,00 | dm: EKO JAZO EKO krupica kukuruzna 500g; plodine: KUKURUZNA KRUPICA EKO 500 G EKO-JAZO |
-| jogurt | 3850354019084 | član → ambiguous | 19 | 16,00 | 0,00 | tommy: YOSHAKE LIMUN CHEESECAKE DUKAT 300 g; trgovina-krk: DUKAT YOSHAKE LEMON CHEESECAKE 300G; branka: NAPITAK YOSHAKE LIMUN CHEESECAKE 300g; djelo_vodice: YOSHAKE LIMUN CHEESECAKE 300G DUKAT; jadranka_trgovina: JOGURT DUKAT YOSHAKE 300G LEMON CHEESECAKE DUKAT; plodine: YOSHAKE LIMUN - CHEESECAKE 300 G DUKAT; boso: JOGUR DUKAT 300 g YOSH.LIM.CHEES; dukat: DUKAT YOSHAKE LIMUN CHEESECAKE 300g; gavranovic: YOSHAKE LEMON CHEESECAKE 300g DUKAT; stridon: YOSHAKE LIMUN CHEESCAKE 300 g DUKAT; ribola: YOSH.LI/CHE.300 g DU KAT; vrutak: N-\*DUKAT YOSHAKE 300G LIMUN CHEESECAKE -8/1-; studenac: YOSHAKE CHEESECAKEE 300 g DUKAT; trgocentar: DUKAT YOSHAKE CHEESECAKE 300G; kaufland: Dukat Jogurt limun Yoshake 300g; ntl: JOGURT YOSHAKE LIMUN CHEESECAKE 300 g DUKAT; spar: YOSHAKE LIMUN/CHEE.DUKAT 300 g; ktc: DUKAT YOSHAKE LEMON CHEESECAKE 300g; konzum: JOG YOSHAKE LEMON CHEES 300 g DUKAT |
-| ulje | 3858885153116 | član → ambiguous | 2 | 50,00 | 50,00 | dm: Biofarm Natura line ulje cr.kima 60 kps; spar: KAPSULE ULJE CRNOG KIMA 60/1 |
-| mljevena_paprika | 3859892109233 | član → ambiguous | 7 | 14,00 | 0,00 | branka: PAPRIKA TUCANA 35g BOČICA; spar: TUCANA PAPRIKA ŠAFRAM 35 g; studenac: PAPRIKA TUCANA 35g; trgocentar: PAPRIKA TUCANA 35G U ST.BOČICI ,ŠAFRAM; vrutak: PAPRIKA TUCANA ŠAFRAM 35GSTAKLO; trgovina-krk: PAPRIKA TUCANA 35 g ŠAFRA; jadranka_trgovina: PAPRIKA LJUTA TUCANA 35G ST ŠAFRAM |
-| tjestenina | 3859888666030 | član → ambiguous | 18 | 22,00 | 0,00 | kaufland: Marodi male krpice s jajima 400 g; studenac: TJ. MARODI M. KRPICE JAJA 400 g; konzum: TIJESTO KRPICE MALE JAJ 400g MARODI; metro: 400G MARODI MALE KRPICE S JAJ; ntl: TJ.MALE KRPICE 400g MARODI; djelo_vodice: MALE KRPICE 400G MARODI; boso: TJEST MARODI 400 g MALE KRP.JAJ.; branka: TJESTENINA KRPICE MALE JAJA 400G; gavranovic: TJ.MARODI 400g KRPICE MALE S JAJIMA; ktc: KRPICE MALE DOM.S JAJIMA 400g MARODI; stridon: MALE KRPICE S JAJIMA 400 g MARODI; bure: TJ. MALE KRPICE 400 g; trgovina-krk: TJEST. KRPICE MALE S JAJIMA 400 g MAR; vrutak: TJEST MARODI KRPICE MALE400G-12/1; trgocentar: MARODI MALE KRPICE S JAJIMA 400G (12) (PAL 90); lorenco: MALE KRP.SA SVJ.JAJ.MARODI 400g; roto: TIJESTO KRPICE MALE JAJ 400g MARODI (12); tommy: TJ.MALE KRPICE 400 g MARODI |
-| vanilin_secer | 3850104249488 | član → ambiguous | 6 | 33,00 | 0,00 | konzum: VANILIN ŠEĆER BOURBON 10g DOLCELA; ribola: BOURBON VANILIJA POD .; kaufland: Dolcela burbon vanilin šećer 10 g; lorenco: BURBON VANILIJA ŠEĆER 10g; plodine: DOLCELA VAN.SEC.BUR.10G; studenac: ŠEĆER BOURBON VANILI JA 10G |
-| tjestenina | 8004350130242 | član → ambiguous | 4 | 50,00 | 0,00 | studenac: TJESTENINA PERLINE 500g PASTA ZARA; trgovina-krk: TJESTENINA PASTA ZARA 024 PERLINE 500G; konzum: TIJESTO PERLINE 24 500g PASTA ZARA; lorenco: TJ.24 PERLINE 500g |
-| vanilin_secer | 9001414711811 | član → ambiguous | 10 | 10,00 | 0,00 | ribola: ŠEĆER NARANČA 50 g PRIR. AROMA KOTANY; tommy: ŠEĆER AROMA NARANČA 50 g KOTAN; konzum: ŠEĆER S AROMOM NARANČE 50G KOTANYI; bure: NARANDŽA AROMA.50 g ŠEĆER KOTANYI; plodine: SECER S AROMOM NARANCE 50 G KOTANYI; spar: ŠEĆ.S PRIR.ARO.NAR.KOTANY 50 g; kaufland: Kotanyi Šećer s prir.aromom naranče 50g; studenac: ZAČIN ŠEĆER S PR. AROM. NAR. 50 g KOT; lorenco: ORANGE AROMATIZIRANI ŠEĆER; gavranovic: KOTANYI VANILIN ŠEĆER AROMA NARANČA 50g |
+| jogurt | 3870311003185 | član → ambiguous | 8 | 13,00 | 0,00 | dukat: DOMAĆE BLAGO AYRAN 1.9% m.m. 225 g HR; jadranka_trgovina: MLIJEČNI NAPITAK AYRAN 225G DOMAĆE BLAGO DUKAT; ktc: AYRAN 225g DUKAT; vrutak: DUKAT AYRAN 225G 1,9%MM DOMAĆE BLAGO -20/1- 32368; ntl: AYRAN 1,9% mm 225 g DOMAĆE BLAGO DUKAT; spar: AYRAN 1,9% DOMAĆE BLAGO 225 g; metro: 225G DOMAĆE BLAGO AYRAN 1,9%MM; tommy: JOGURT AYRAN 225 g DOMAĆE BLAGO |
+| tjestenina | 8008857300634 | član → ambiguous | 2 | 50,00 | 0,00 | bure: TJ.CAVATAPPI 63 500 g; jadranka_trgovina: TJESTENINA CAVATAPPI 63 500G REGGIA |
+| tjestenina | 3858881682801 | član → ambiguous | 2 | 50,00 | 0,00 | tommy: TJ.ŠPAG. 10 400 g BEZ JAJA CE; ribola: TJ.ŠPAGETI 400 g BEZJAJA BR.10 TJ.CETIN |
+| med | 5900658735505 | član → ambiguous | 6 | 33,00 | 0,00 | ntl: MEDENJACI MIX S TAMNOM ČOKOLADOM 400 g LAMBERTZ; trgocentar: MED.LAMBERTZ POLONIA ZARTBITTE 400G (10); ribola: MED.SRC.TAM.ČO.400 g ULTRA; djelo_vodice: LAMBERTZ SRCA TAMNA ČOK. 400G; gavranovic: MEDENJACI MIX 400g TAMNA ČOKOLADA LAMBERTZ; ktc: MEDENJACI 400g LAMBERTZ TAMNA ČOKOLADA |
+| tvrdi_sir | 8721800082110 | član → ambiguous | 16 | 6,00 | 0,00 | ribola: SIR LEERDAM.250 g DU; studenac: SIR LEERDAMMER ORGINAL 250 g; gavranovic: SIR LEERDAMMER ORIGINAL 250g; jadranka_trgovina: SIR LEERDAMMER ORIGINAL 250G; konzum: SIR POLUTVRDI 250g LEERDAMMER; kaufland: Leerdammer Sir kravlji 45% Original 250g; tommy: SIR LEERDAMMER ORIGINAL 250 g DUKAT; spar: SIR LEERDAMMER ORIGINAL 250 g; plodine: SIR EMMENTALER ORIGINAL 250 G LEERDAMMER; boso: SIR LEERDAMMER 250 g ORIGINAL; vrutak: SIR LEERDAMMER ORIGINAL 250G -12/1-; trgovina-krk: SIR LEERDAMMER ORIGINAL 250 gr; ktc: SIR LEERDAMMER 250g DUKAT; lorenco: LEERDAMMER ORIGINAL 250G; branka: SIR LEERDAMMER ORIGINAL 250g; dukat: LEERDAMMER ORIGINAL 250g |
+| pileca_prsa | 3850159113383 | član → ambiguous | 15 | 13,00 | 0,00 | trgocentar: PILEĆI FILE OD PRSA 400G,VINDIJA; kaufland: Cekin odresci pilećeg filea od prsa 400g; ntl: PILEĆI ODRESCI OD FILE-A PRSIJU 400 g VINDIJA; studenac: ODRES. PIL.FILEA OD PRSA 400g; spar: PILEĆI ODRESCI OD FILEA 400 g; ribola: PIL.ODRE.FIL.400 g VNDIJA; gavranovic: CEKIN PILEĆI ODRESCI OD FILEA PRSIJU 400g; trgovina-krk: PILEĆI ODRESCI OD FILEA PRSIJU 400 g VIND; vrutak: N-VIN.PIL.ODRESCI 400G OD FILEA PRSIJU; konzum: ODRESCI PILEĆEG FILE OD PRSA 400g; lorenco: ODRESCI PILEĆEg FILEA OD PRSA 400g; metro: 400GR ODRESCI PILEĆEG FILEA; djelo_vodice: VIN.ODRESCI FILE PRSIJU 400G; tommy: PILEĆI ODR./FILE PRSIJU 400 g; plodine: PILECI ODRESCI FILEA 400 G VINDIJA |
+| tjestenina | 8005121000221 | član → ambiguous | 4 | 50,00 | 0,00 | vrutak: TJEST DIVELLA 500G ELICOIDALI 22 -24/1-; stridon: ELICODIALI 22 500G (24) DIVELLA (IT); branka: TJESTENINA ELICODIALI 500g; djelo_vodice: ELICOIDALI 500g |
+| svinjetina | 3859893378447 | član → ambiguous | 2 | 50,00 | 0,00 | studenac: SVINJSKI BUT SK U KOŽI DALM.OBR MM; metro: CCA12KG SVINJ.BUT SK OBRAĐEN |
+| jogurt | 3850257061067 | član → ambiguous | 3 | 33,00 | 0,00 | kaufland: Kravica Kraljica Tek.jog.2,8%m.m.1kg PET; spar: JOG.TEKUĆI 2,8% KRALJ.KRAV 1kg; ktc: JOGURT TEKUĆI 2,8% M.M. 1kg |
+| jaja | 8699462605148 | član → ambiguous | 2 | 50,00 | 0,00 | stridon: PRINCESS MILKY CREAM 15 g (24); branka: JAJE PRINCESS SUPRISE 15g |
+| papar | 3859891493609 | član → ambiguous | 8 | 25,00 | 0,00 | plodine: PREMIUM SALATA KIS.KUPUS S CES.,PAP.I CRVENOM PAPRIKOM 250GR; kaufland: Sal.kis.kup.češ.pap.i crv.pap.250g/220g; ribola: KIS.KUP.CR PAP 250 g; lorenco: PREM.SAL.MADIG PAPAR+CRV.PAPR.250g; studenac: SALATA KIS. ZELJE ČEŠ/PAP/C.PA 250 g; tommy: SAL.KIS.KUPUS 250g CRV.PAPR.; spar: KUPUS KIS ČEŠNJ,PAP.CR.P 250 g; konzum: KUPUS KIS PAPRIKA ČEŠNJAK PAPAR 250g |
+| jogurt | 3850108037654 | član → ambiguous | 8 | 38,00 | 0,00 | stridon: Z BREGOV EUFORIJA CRISPY MIX 150 g (kokos-nugat); lorenco: EUFORIJA KREM JOG.KOKOS I NOUG.150g; ribola: JOG.CRIS.MIX 150 g V INDIJA; branka: JOGURT EUFORIJA CRISPY MIX 150g; studenac: JOGURT EUFORIJA CRIS Z BREGOV 150g; plodine: Z.BREGOV EUFORIJA CRISPY MIX 150 G VINDIJA; tommy: JOGURT EUFORIJA 150 g CRISPY MIX Z BREGOV; trgovina-krk: FRESKA EUFORIJA CRISPY MIX 150g |
+| vrhnje_za_kuhanje | 4034900027801 | član → ambiguous | 2 | 50,00 | 0,00 | roto: VRHNJE ZA KUH CREME CUISINE 15% BM 1L (12); metro: 1L MEGGLE CREME CUISINE |
+| tjestenina | 3859888499102 | član → ambiguous | 7 | 29,00 | 0,00 | lorenco: LJILJANI 500g KLARA MARIĆ; studenac: TJESTENINA LJILJANI 500g KLARA MARIĆ; vrutak: TJEST KLARA M LJILJANI 500G -10/1 111; konzum: TIJESTO LJILJANI 500g KLARA M; ribola: TJ.LJILJANI 500 g KLARA MARIĆ; tommy: TJ.LJILJANI 500 g KLARA M; kaufland: Klara M ljiljani 500g |
+| tjestenina | 3838700010480 | član → ambiguous | 4 | 25,00 | 0,00 | tommy: TJ.REZANCI VALJANI 400 G ZLATO; bure: TJ.REZANCI 400g VALJANI; konzum: TJEST. FETTUCCINE 8 JAJ 400g ZLATOPOLJE; spar: TJE.ZL.POLJE VALJANI REZ.400 g |
+| grasak | 3838977044508 | član → ambiguous | 4 | 25,00 | 0,00 | tommy: POLI GREEN MINI 220 g; kaufland: Poli Salama od graška Green 220g; studenac: POLI GREEN MINI 220 g; ribola: POLI GREEN 220 g PER UTNINA |
+| krastavac | 3858891564364 | član → ambiguous | 4 | 25,00 | 0,00 | ribola: ULT.PL.1400g KRASTAVCI; djelo_vodice: KRASTAVCI ULTRA 1500ML; vrutak: KRASTAVCI I.KL (3-6CM) 1500ML1400G (NETO 800G) ULTRA+ -6/1; trgocentar: ULTRA KRASTAVCI (3-6) 1400G-800G (6) |
+| dodatak_jelima | 40804873 | član → ambiguous | 3 | 33,00 | 0,00 | studenac: DODATAK JELIMA DRES. JOGURT 250 ml; bure: JOGURT SALAT.250 ml KUHNE; lorenco: SALATFIX JOGURT 250ML |
+| svinjetina | 3850139523423 | član → ambiguous | 2 | 50,00 | 0,00 | studenac: SVJEŽA SVINJSKA REBRA PIK VRBOVEC; konzum: SV REBRA |
+| grah | 8000627300431 | član → ambiguous | 3 | 67,00 | 33,00 | ntl: GRAH ZRNAŠ NISKI 250G; trgovina-krk: SJEME GRAH ZRNAŠ 250 g MARCON; plodine: GRAH ZRNAS NISKI |
+| med | 5900658800807 | član → ambiguous | 3 | 33,00 | 0,00 | trgocentar: MED.LAMBERTZ SPRING COOKIES 350G(6); konzum: KEKS SPRING PVC 350 g LAMBERTZ; djelo_vodice: LAMBERTZ SPRING COOKIES 350G |
+| grasak | 8000627400339 | član → ambiguous | 2 | 50,00 | 50,00 | ntl: GRAŠAK ČUDO KELVEDONA 250 G; plodine: SJEME GRASAK CUDO KLEVEDONA |
+| tjestenina | 8076802085868 | član → ambiguous | 6 | 33,00 | 0,00 | lorenco: TJEST.PIPETTE RIGATE 500 g BARI; kaufland: Barilla Tjes.Pipette Rigate 500g; plodine: TJESTENINA PIPETE RIGATE 86 500 G BARILA KUTIJA; ribola: TJ.BARILLA PIP 500 g PIPETTE RIGATE; tommy: TJ. BARILLA PIPETTE RIGATE BR.86 500 g; spar: TJES.BARILLA PIPETTE RIGT.500g |
+| med | 3850220408806 | član → ambiguous | 3 | 33,00 | 0,00 | trgovina-krk: MARINIRANI PILEĆI MINI FILE MEĐ.PILE 400G; spar: PILEĆI MARINIRANI FILE 400 g; konzum: MARINIRANI PILEĆI MINI FILE 400g |
+| tuna | 8004030860025 | izvan → član | 7 | 57,00 | 14,00 | kaufland: Rio Mare Insal.sal.tuna cous cous2x160g; konzum: TUNJ SALATA COUS COUS 2X160g RIO MARE; spar: TUNA SAL.RIO MARE COUS 2X160 g; tommy: TUNA SALATA CUS CUS 2X160 G RIO MARE; lorenco: TUNA -COUS-COUS SAL.2\*160g BOWL.; plodine: TUNA COUS-COUS SAL.2X160G BOWL; metro: 160GX2 RIO MARE INSALA.CUS CUS |
+| tjestenina | 8008857300603 | član → ambiguous | 4 | 50,00 | 0,00 | vrutak: TJEST REGGIA 500G GOMITI RIGATI U-21127 -24/1-; bure: TJ.GOMITI 60 500 g RIGATI REGGIA; trgocentar: GOMITI RIGATI 500G; jadranka_trgovina: TJESTENINA GOMITI RIGATI 60 500G REGGIA |
+| tjestenina | 3838700015669 | član → ambiguous | 7 | 43,00 | 0,00 | branka: TJESTENINA GRANDE ZLATICA 45 400g; spar: TJES.ZL.POLJE REZA.KUKUR.400 g; tommy: TJ. ZLATICA ŠIROKA 400 g ZLATO P; konzum: TJEST. ZLATICA 45 400g ZP; lorenco: GRANDE ZLATICA BR.45 400 g; studenac: TJ. ZL. POLJE BR.45 REZANCI 400 g; trgocentar: ZP TJEST.ZLATICA 45 400G (15) PODRAVKA |
+| riza | 8710447482179 | član → ambiguous | 2 | 50,00 | 0,00 | lorenco: DOVE SAPUN TEK LOT.FLOiR.MILK 500ML; plodine: DOVE TEK.SAP. REFIL 500 ML LOT.FLOWER RICE MILK |
+| med | 3850220428507 | član → ambiguous | 3 | 33,00 | 0,00 | konzum: MEĐ.PILE PILEĆI MIX MINI 500 g; spar: PILEĆI MINI MIX 500 g; plodine: MEDJIMURSKO PILE PILECI MIX MINI 500 G PERUTNINA |
+| slatko_vrhnje | 3850104230585 | član → ambiguous | 5 | 20,00 | 0,00 | stridon: DOLCELA ŠLAG 5 TEK. BILJ. ŠLAG 1 L PODRAVKA (12); ktc: ŠLAG PRIPRAVAK 1L DOLCELA; lorenco: ŠLAg 1 L PODRAVKA; djelo_vodice: VRHNJE ZA ŠLAG 1L PODRAVKA; ribola: ŠLAG TEK.BILJNI 1l P ODRAVKA |
 
 ## 4. Pileća prsa: stanje
 
@@ -116,3 +116,82 @@ Atribut `stanje`: smrznuto ako naziv sadrži SMRZ, LEDO, FROZ, ZAMRZ ili BRAZIL,
 |---|---|---|---|---|---|---|
 | smrznuto | 30 | 2,00 | 12,00 | 30 | 324 | 6,99 |
 | svjeze | 259 | 3,00 | 20,00 | 14 | 10289 | 9,39 |
+
+## 10. Filtar hrane: neprehrana u kategoriji hrane
+
+- Strogi popis (igrač, svijeć, baterij, sjeme, cvijet, salvet, ukrasn) vrijedi za sve proizvode s `is_food = true`; pogođeni idu u `ostalo` ili `kucanstvo` (`category_source = 'words'`).
+- Širi popis (posuđe, krpe, kozmetika, higijena, cvijeće…) vrijedi za ručne iznimke u `category_map.yaml` (`_chain_verify`): Gavranović „Hrana“, Boso „ZELENI PROGRAM“, Studenac „HRANA“ i Plodine naslijeđene preko EAN-a.
+- Jestivo usprkos riječi ostaje hrana (šećerni ukrasi, čokolada, Dr. Oetker, bomboni s igračkom).
+- „ČAŠA“ je neprehrana samo kao „ČAŠE“, „+ ČAŠ…“ ili „ČAŠA ZA“ (moja dopuna), pa „SLADOLED ČAŠA“ ostaje hrana; „KALUP“ samo kao „KALUP ZA“.
+
+Promjene skupine (prije → poslije):
+
+| promjena | proizvoda |
+|---|---|
+| hrana → kucanstvo | 421 |
+| kucanstvo → unknown | 334 |
+| hrana → ostalo | 289 |
+| unknown → kucanstvo | 65 |
+| hrana → higijena | 59 |
+| hrana → kozmetika | 48 |
+| alkohol → kucanstvo | 38 |
+| kucanstvo → alkohol | 23 |
+| pice → ostalo | 18 |
+| unknown → kozmetika | 8 |
+| unknown → higijena | 7 |
+| hrana → unknown | 6 |
+| pice → kucanstvo | 5 |
+| hrana → kucni_ljubimci | 3 |
+| djeca → higijena | 1 |
+| pice → unknown | 1 |
+| unknown → ostalo | 1 |
+
+20 nasumičnih proizvoda koji su bili hrana ili piće, a sada nisu:
+
+| lanac | naziv | kategorija | prije | poslije | izvor |
+|---|---|---|---|---|---|
+| studenac | RUKOLA POSUDICA SNIŽ. 100 g | HRANA | hrana | kucanstvo | words |
+| gavranovic | ULOŠCI FEMME 8/1 SUPER NTL | Hrana | hrana | higijena | words |
+| gavranovic | GRANA RUŽE S PUPOM 68cm, 2 CVIJETA, KREM rasprodaja | Hrana | hrana | ostalo | words |
+| gavranovic | SYOSS ŠAMPON COLOR GUARD 440 ml | Hrana | hrana | kozmetika | words |
+| gavranovic | ŽARULJA PHILIPS LED A55 9W (65 W) E27 | Hrana | hrana | kucanstvo | words |
+| gavranovic | POSUDA ZA ČUVANJE DUBOKA 575 ml-rasprodaja | Hrana | hrana | kucanstvo | words |
+| gavranovic | IGR.BALONI ZA PUHANJE rasprodaja | Hrana | hrana | ostalo | words |
+| tommy | ZAČIN SJEME SEZAMA 40 g UBENA | PAKIRANA HRANA I PIĆE | pice | ostalo | words |
+| plodine | GRANA RUZE S PUPOM 68CM KREM 196 IC |  | hrana | ostalo | ean_inherited |
+| gavranovic | TANJUR MELAMINE | Hrana | hrana | kucanstvo | words |
+| gavranovic | BOŽ.UKRAS PATULJAK 35cm 2023-rasprodaja | Hrana | hrana | kucanstvo | words |
+| gavranovic | BOŽ.UKRASNA GRANČICA 22cm 2023-rasprodaja | Hrana | hrana | kucanstvo | words |
+| gavranovic | GLISS ŠAMPON OIL NUTRITIVE 250ml | Hrana | hrana | kozmetika | words |
+| lorenco | SOLNI CVIJET 125g VREĆICA |  | hrana | unknown | none |
+| ktc | PRALINE MINI CVIJET 120g KAMILA | HRANA | hrana | ostalo | words |
+| gavranovic | POSUDA ZA ČUVANJE DUBOKA 1075 ml-rasprodaja | Hrana | hrana | kucanstvo | words |
+| gavranovic | UPALJAČ GRADOVI | Hrana | hrana | kucanstvo | words |
+| ntl | BROKULA CVIJET 2,5kg ZMH | Hrana | hrana | ostalo | words |
+| ntl | SELAGINELA DECO BOŽIĆ FI 9 | Ostalo | hrana | kucanstvo | ean_inherited |
+| gavranovic | BOŽ.UKRAS SOB 16X10X14cm 2023-rasprodaja | Hrana | hrana | kucanstvo | words |
+
+20 nasumičnih „hrana“ proizvoda koji i dalje izgledaju neprehrambeno (od 590; u Koraku 2C ih je bilo 2.168, ali s drugim popisom za izvještaj):
+
+| lanac | naziv | kategorija | skupina | izvor |
+|---|---|---|---|---|
+| spar | WHISKEY SHANKYS + ČAŠE | Pića | alkohol | chain |
+| metro | 0,7L JAMESON + 2 ČAŠE | piće | alkohol | chain |
+| djelo_vodice | LIKER JAGERMEISTER 0,7L + 2 ČAŠE | BILJNI LIKERI | alkohol | chain |
+| spar | CVIJET SOLI ADRIATIQ BIO 250 g | Hrana | hrana | chain |
+| metro | 0,7L J.WALKER WHISKY RL+2 ČAŠE | piće | alkohol | chain |
+| stridon | PJENUŠAC FREIXENET CARTA NEVADA POK.PAKET+2 ČAŠE | PIĆA | alkohol | chain |
+| trgovina-krk | KRUH SJEME 400 g SVJ. PEČ. BEZ GLUTENA RATV | Hrana | hrana | chain |
+| vrutak | N-GAV KULENOV CVIJET NAREZAK 80G | MESO | hrana | chain |
+| tommy | PAKET MILKA MIX 96 g + IGRAČKA | PAKIRANA HRANA I PIĆE | pice | chain |
+| plodine | CVIJET SOLI 125 G SOLANA NIN |  | hrana | ean_inherited |
+| lorenco | CVIJET SOLI KUTIJICA 125g |  | hrana | ean_inherited |
+| zabac | BOSANSKI LONAC 400G, BAKINA KUHINJA | Smrznuta hrana | hrana | chain |
+| tommy | KOBASICA KULEN CVIJET NAR.80 g | HLAĐENO I SMRZNUTO | hrana | chain |
+| roto | WHISKEY JACK DANIELS 0,70 GUITAR CASE (1)\* | ŽESTOKO | alkohol | chain |
+| studenac | WHISKEY JAMESON 2 ČAŠE 0,7 l | PIĆE | alkohol | chain |
+| roto | RAKIJA ZLATNA DUNJA 0,70 + 2 ČAŠE(1)\* | ŽESTOKO | alkohol | chain |
+| kaufland | Badel prima brand 35% 0,7 l + 2 čaše | PIĆE | alkohol | chain |
+| lorenco | SUNCOKRETOVO SJEME OLJUŠTENE PEČENE |  | hrana | ean_inherited |
+| stridon | SVINJSKA CRIJEVA 34/36 10M POSUDA RADAUER | HRANA | hrana | chain |
+| roto | COGNAC MARTELL VS+2 ČAŠE 0,70 (6)\* | ŽESTOKO | alkohol | chain |

@@ -511,3 +511,12 @@ Izvještaji: [STEP2D_REVIEW.md](STEP2D_REVIEW.md) (`scripts/step2d_review.py`) i
       jabuka 180, limun 120, naranča 200, banana 150 g. Uz njih krastavac, kupus, zelena salata, jaje i vezica peršina.
     - `piece_g` je maknut iz `staples.yaml`; mase komada su samo u `units.yaml`.
     - `units.convert()` prima i komade („kom“, „glavica“, „češanj“, „vezica“).
+63. **Filtar hrane: neprehrana u kategoriji hrane** (`food.nonfood_in_food`).
+    - Strogi popis (igrač, svijeć, baterij, sjeme, cvijet, salvet, ukrasn) vrijedi za svu hranu: pogođeni idu
+      u `ostalo` ili `kucanstvo`, uz `category_source = 'words'`.
+    - Širi popis (posuđe, krpe, kozmetika, higijena, ljubimci, cvijeće…) vrijedi samo za ručne iznimke u
+      `data/category_map.yaml` (`_chain_verify`: Gavranović „Hrana“, Boso „ZELENI PROGRAM“, Studenac „HRANA“,
+      Plodine `ean_inherited`).
+    - Zaštita za jestivo (šećerni ukrasi, Dr. Oetker, čokolada, bomboni ili flips s igračkom, naresci).
+    - „ČAŠA“ je neprehrana samo kao „ČAŠE“, „+ ČAŠ“ ili „ČAŠA ZA“ (moja dopuna); „KALUP“ samo kao „KALUP ZA“.
+    - Promjene su u `docs/data/food_changes_2d10.csv` i STEP2D_REVIEW.md.

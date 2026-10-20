@@ -42,6 +42,14 @@ lines = [
     "# takvi proizvodi nasljeđuju skupinu preko EAN-a ili popisa riječi (vidi src/mealmeter/food.py).",
     "# Prijedlog je izrađen pravilima (scripts/make_category_map.py); ispravci se upisuju ovdje.",
     "# Komentar uz redak: broj proizvoda i lanci.",
+    "",
+    "# Ručne iznimke po lancu: hrana iz ovih kategorija (ili naslijeđena preko EAN-a, \"ean_inherited\")",
+    "# provjerava se širim popisom neprehrambenih riječi (food.BROAD_NONFOOD_IN_FOOD)",
+    "_chain_verify:",
+    "  gavranovic: [Hrana]",
+    "  boso: [ZELENI PROGRAM]",
+    "  studenac: [HRANA]",
+    "  plodine: [ean_inherited]",
 ]
 for group in FOOD_GROUP_VALUES:
     items = sorted(by_group.get(group, []), key=lambda kv: -kv[1]["n"])
