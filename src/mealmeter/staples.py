@@ -659,6 +659,18 @@ def build_staple_groups(con: duckdb.DuckDBPyConnection) -> list[tuple]:
                     WHEN n_match > 0 THEN 'ambiguous' ELSE 'excluded' END AS status
         FROM g
     """)
+    # early_name: barem jedan naziv grupe ima riječ namirnice među prve tri riječi (Staple.early_regex);
+    # plan_basket uzima slabog člana samo uz to ("KORA ZA BAKLAVU RAMA" nije margarin)
+    con.execute("ALTER TABLE clean.staple_groups ADD COLUMN early_name BOOLEAN DEFAULT false")
+    cols = {r[0] for r in con.execute("DESCRIBE clean.products").fetchall()}
+    norm_col = "match_norm" if "match_norm" in cols else "name_norm"  # sintetske tablice u testovima
+    for st in load_staples().values():
+        con.execute(f"""
+            UPDATE clean.staple_groups SET early_name = true
+            FROM (SELECT DISTINCT pb.bkey FROM product_bkeys pb JOIN clean.products cp USING (chain, product_id)
+                  WHERE regexp_matches(cp.{norm_col}, ?)) e
+            WHERE clean.staple_groups.staple = ? AND clean.staple_groups.bkey = e.bkey""",
+                    [st.early_regex, st.key])
     con.execute(f"""
         CREATE OR REPLACE TABLE clean.staple_group_attrs AS
         SELECT staple, bkey, attr, value, how FROM (

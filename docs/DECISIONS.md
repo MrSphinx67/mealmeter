@@ -723,3 +723,13 @@ Sažetak: [REVIEW_2F.md](REVIEW_2F.md) (`scripts/review_2f.py`).
       označen, „Milkland“ 0,39 €/l jest.
     - Isti EAN s drugom gramaturom već ispada kao `drop_reason = 'pakiranje'`. Omjer prema EAN-u zato hvata
       samo istu gramaturu s cijenom drugog pakiranja (Dolcela 6x12 g po cijeni jedne vrećice?).
+89. **Slabi članovi, Korak 4 (0.2).**
+    - `find_products` ih zadano ne vraća (`include_weak=False`).
+    - `plan_basket` uzima slabog člana samo kad trgovina nema snažnog i kad grupa ima `early_name` (riječ
+      namirnice među prve tri riječi barem jednog naziva, na `match_norm`; `staple_groups.early_name`).
+    - Opća isključenja u `_defaults`: keks, galett, petit beu (i „PETIT BEU.“), golosin, croasan, kora/kore za,
+      sisac, airwav, zardinjer, shaker, cjedil, wafer, mais riso, u octu.
+    - Po namirnici: tjestenina `krupica durum`; papar `tuna` i `tunj\b` (Konzum piše „TUNJ“).
+    - Na 20.10.: 433 slaba, 406 s `early_name`. U uzorku od 40 (REVIEW_4.md) i dalje ima krivih koje test riječi
+      propušta: KIBLA kao jogurt, „MED.“ (mediteransko ulje) kao med, AGAPANTHUS kao tjestenina, EAN s
+      mrkvom i jabukom kao kukuruz. Nije popravljeno, čeka pregled.

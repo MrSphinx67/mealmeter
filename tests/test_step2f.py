@@ -232,3 +232,63 @@ def test_unit_suspect_basket_fallback():
     assert pick["product_id"] == "ok" and not pick["fallback"]
     pick = choose_product([sus], 500, "g", None)
     assert pick["product_id"] == "sus" and pick["fallback"] and "unit_suspect" in pick["flags"]
+
+
+# --- Korak 4, 0.2: slabi članovi zadano izvan find_products; u košarici samo s riječju namirnice rano ---------
+
+@pytest.fixture(scope="module")
+def weak_db(tmp_path_factory):
+    from mealmeter.build import build_clean, load_raw
+    from tests.conftest import FIXTURE
+
+    c = duckdb.connect(str(tmp_path_factory.mktemp("weak") / "w.duckdb"))
+    load_raw(c, FIXTURE, "2026-10-19")
+    e1, e2 = _ean("385999000001"), _ean("385999000002")
+    # dvije grupe s m = 50 % (slabi članovi): u prvoj je "margarin" prva riječ, u drugoj tek peta
+    c.executemany("INSERT INTO products (chain, product_id, barcode, name, category, unit) VALUES (?, ?, ?, ?, 'Hrana', 'kom')", [
+        ("konzum", "W1", e1, "MARGARIN ZLATNI 250 g"), ("spar", "W2", e1, "ZLATNI 250 g"),
+        ("konzum", "W3", e2, "PECIVO MINI MARELICA I MARGARIN 250 g"), ("spar", "W4", e2, "PECIVO MINI MARELICA 250 g")])
+    c.executemany("INSERT INTO prices (chain, store_id, product_id, price, date) VALUES (?, ?, ?, 1.20, DATE '2026-10-19')",
+                  [("konzum", "0907", "W1"), ("konzum", "0907", "W3"), ("spar", "87089", "W2"), ("spar", "87089", "W4")])
+    build_clean(c)
+    return c, e1, e2
+
+
+def test_weak_groups_early_name(weak_db):
+    c, e1, e2 = weak_db
+    got = dict(c.execute(f"""SELECT bkey, (match_quality, early_name) FROM clean.staple_groups
+                             WHERE staple = 'margarin' AND bkey IN ('{e1}', '{e2}')""").fetchall())
+    assert got == {e1: ("weak", True), e2: ("weak", False)}
+
+
+def test_find_products_include_weak(weak_db):
+    c, _, _ = weak_db
+    default = {r["name"] for r in find_products(ingredient="margarin", con=c, limit=200)}
+    assert not any("ZLATNI" in n or "PECIVO MINI" in n for n in default)
+    weak = [r for r in find_products(ingredient="margarin", con=c, limit=200, include_weak=True)
+            if "ZLATNI" in r["name"] or "PECIVO MINI" in r["name"]]
+    assert len(weak) == 2 and all(r["match_quality"] == "weak" for r in weak)
+
+
+def test_basket_weak_needs_early_word(weak_db):
+    from mealmeter.basket import _rows_for
+
+    c, _, _ = weak_db
+    ids = {r["product_id"] for r in _rows_for(c, S["margarin"], {}, None)}
+    assert {"W1", "W2"} <= ids and not ids & {"W3", "W4"}
+
+
+@pytest.mark.parametrize("key,name", [
+    ("maslac", "LA GALETTE ALL BUTTER ST MICHEL 130"), ("maslac", "PREMIUM PETIT BEU. 13% MASLACA KOESTLIN 250 g"),
+    ("maslac", "PECIVO GOLOSINI S MASLACEM I PUNJENJEM OD MARELICE 200 g"),
+    ("maslac", "MINI CROASANI S MASLACEM PUNJENI ČOKOLADOM 200 g"), ("margarin", "KORA ZA BAKLAVU RAMA 500 g"),
+    ("mlijeko", "SISAC ANTI-COLIK SILIKON 2/2 MLIJEKO"), ("med", "AIRWAV.HONEY LEM.DR. 33,5 G"),
+    ("riza", "SHAKER + BOJA + MAGIČNA RIŽA ORIO"), ("riza", "CJEDILO ZA RIŽU"),
+    ("jogurt", "LAMBERTZ WAFER YOGURT-LIME 200G"), ("riza", "PENNE RIGATE MAIS/RISO 400 GR (12) DIVELLA (IT)"),
+    ("ocat", "CITRES LUK SREDNJI U OCTU 1550 g"), ("tjestenina", "KRUPICA DURUM ZA TJEST 1 kg FARINA"),
+    ("papar", "TUNJ U MASL ULJ LIMUN PAPAR 3X52g RM"),
+])
+def test_step4_exclusions(key, name):
+    from mealmeter.staples import name_match
+
+    assert name_match(S[key], name) != "match"

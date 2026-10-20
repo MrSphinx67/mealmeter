@@ -58,6 +58,23 @@
 
 _defaults:
   must_not_match:
+    # slabi članovi koji su krivi (Korak 4, 0.2): keksi i peciva s maslacem, kore za baklavu, dude,
+    # osvježivači daha, žardinjere, igračke, cjedila, vafli, tjestenina od riže, povrće u octu
+    - keks
+    - galett
+    - petit beu
+    - golosin
+    - croasan
+    - kora za
+    - kore za
+    - sisac
+    - airwav
+    - zardinjer
+    - shaker
+    - cjedil
+    - wafer
+    - mais riso
+    - u octu
     # hrana za ljubimce ("felix" nije ovdje: Felix je i marka kečapa i krastavaca; hrana za mačke
     # Felix isključena je kroz "macke", "za pse", "hrana za")
     - hrana za
@@ -839,7 +856,7 @@ tjestenina:
                    pilec, pilet, junec, svinj, purec, dagnj, kamenic, vongol, plodovi mora, morsk, smrz,
                    # "školjke" i "tj" koje nisu tjestenina; gotove lazanje
                    cappasante, pral\b, pralin, sokn, carap, noz\b, pjescanik, pijescanik, zitn, chocapic, cok\b,
-                   za tj\b, argan, bolog, meso\b, zamrz, ricott]
+                   za tj\b, argan, bolog, meso\b, zamrz, ricott, krupica durum]
   unit: kg
   default_exclude_variants: [vrsta=integralna, vrsta=bez_glutena]
   max_pack: 5000
@@ -1346,7 +1363,7 @@ papar:
   synonyms: [papar, crni papar]
   must_match: [papar\b]
   must_not_match: [sol\b, mlinac set, set\b, kobas, salam, sir\b, umak, chips, cips, pastrm, odrez, file,
-                   zacin za, mix\b, kreker, slanina, pancet, steak]
+                   zacin za, mix\b, kreker, slanina, pancet, steak, tuna, tunj\b]
   unit: kg
   pantry: true
   max_pack: 500

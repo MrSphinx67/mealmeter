@@ -101,7 +101,7 @@ def _required_attrs_sql(staple, required: dict | None) -> str:
 def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | None,
                 include_clearance: bool, food_sql: str | None = None,
                 include_ambiguous: bool = False, include_wholesale: bool = False,
-                required: dict | None = None) -> tuple[str, list, str]:
+                required: dict | None = None, weak: str = "all") -> tuple[str, list, str]:
     """SQL (CTE-ovi g, hit, x) za kandidate: jedan redak po (trgovina, proizvod).
 
     x sadrži sve proizvode iz grupa koje odgovaraju upitu/namirnici, s cijenom po jedinici u
@@ -111,6 +111,8 @@ def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | 
     Grupe (bkey: EAN, inače lanac + naziv) biraju se po clean.staple_groups (status 'member'; uz
     include_ambiguous i 'ambiguous') i atributima grupe (clean.staple_group_attrs). Kod namirnice s
     group_by (jaja) izlazni ključ gkey je klasa, a izbor je i dalje po EAN grupi.
+    `weak`: slabi članovi (staple_groups.match_quality 'weak'): 'all' svi, 'none' nijedan, 'early' samo
+    grupe s riječju namirnice među prve tri riječi barem jednog naziva (staple_groups.early_name).
     `required`: izričito traženi atributi ("špageti" -> oblik=spageti). Proizvod ih mora imati u svom
     nazivu (product_attrs.how nije 'default'), inače ispada, i kad ih grupa (isti EAN) ima.
     Vraća (sql, parametri, stupac relevantnosti za razinu grupe).
@@ -128,7 +130,9 @@ def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | 
         hit_params += likes
     if staple:
         statuses = "'member', 'ambiguous'" if include_ambiguous else "'member'"
-        hit_parts.append(f"SELECT bkey FROM clean.staple_groups WHERE staple = ? AND status IN ({statuses})")
+        weak_sql = {"all": "TRUE", "none": "match_quality IS DISTINCT FROM 'weak'",
+                    "early": "(match_quality IS DISTINCT FROM 'weak' OR early_name)"}[weak]
+        hit_parts.append(f"SELECT bkey FROM clean.staple_groups WHERE staple = ? AND status IN ({statuses}) AND {weak_sql}")
         hit_params.append(staple.key)
         for attr, value in (attributes or {}).items():
             # zamjenjive vrijednosti (mlijeko: mast 2.8 = 3.2 = 3.5 = 3.8)
@@ -236,6 +240,7 @@ def find_products(
     include_unverified: bool = False,
     include_ambiguous: bool = False,
     include_wholesale: bool = False,
+    include_weak: bool = False,
 ) -> list[dict]:
     """Pronađi proizvode po nazivu ili po osnovnoj namirnici (staples.yaml).
 
@@ -245,7 +250,8 @@ def find_products(
     takvih nosi `food_unverified = true`. Za namirnicu se zadano vraćaju samo grupe sa statusom
     'member' (clean.staple_groups: većina lanaca ima naziv namirnice); `include_ambiguous` dodaje
     dvosmislene grupe ("KUPUS KIS MASL ULJE" kod maslinovog ulja). Veleprodaja (Metro,
-    store_type 'cash_and_carry') zadano nije uključena (`include_wholesale`).
+    store_type 'cash_and_carry') zadano nije uključena (`include_wholesale`). Slabi članovi namirnice
+    (match_quality 'weak': manjina lanaca ima naziv namirnice) zadano nisu uključeni (`include_weak`).
 
     - Slobodan upit: proizvod odgovara ako normalizirani naziv sadrži sve riječi upita. Ako je
       upit točno sinonim namirnice ("mlijeko", "brašno"), automatski se koristi namirnica.
@@ -294,7 +300,8 @@ def find_products(
     con = con or connect()
     food_sql = _food_filter(include_nonfood, include_alcohol, "yes" if include_unverified else "no")
     cand_sql, cand_params, cov_col = _candidates(staple, tokens, attributes, city, include_clearance, food_sql,
-                                                 include_ambiguous, include_wholesale, required)
+                                                 include_ambiguous, include_wholesale, required,
+                                                 "all" if include_weak else "none")
     best = "x.unit_confidence = pick.conf AND x.per_unit = pick.per_unit AND NOT x.price_suspect"
     sql = f"""
         {cand_sql},
