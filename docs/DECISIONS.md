@@ -604,3 +604,9 @@ Izvještaji: [STEP2E_REVIEW.md](STEP2E_REVIEW.md) (`scripts/step2e_review.py`) i
         dip), mlijeko (set, ker, keram: posuđe).
     - Vraćeno grupa: tjestenina 450, tvrdi sir 206, jogurt 89, mlijeko 35, pileća prsa 27, svinjetina 24;
       `docs/data/groups_changes_2e4.csv`.
+72. **„cvijet“ i dječji pjenušac.**
+    - „cvijet“ je samo u širem popisu (ručne iznimke po lancu), uz zaštite: čaj, brokula, cvjetača, sol,
+      kulen, kamilica, bazga, neven, lipa, ukrasni cvjetići. Na 20.10. 78 proizvoda s „cvijet“ vraćeno je u hranu.
+    - Vrećica sjemena ostaje neprehrana i prije zaštite za jestivo („SJEME GARDEN CVJETAČA“).
+    - Dječji pjenušac (dječj…, spužva bob, bez alkohola, 0,0) i kategorija „DJEČJI PJENUŠCI“ su `pice`.
+      Ta kategorija je u mapi bila `djeca`, a sada je `pice`.

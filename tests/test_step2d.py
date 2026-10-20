@@ -543,3 +543,40 @@ def test_point4_false_hits(key, name, expected):
     from mealmeter.staples import name_match
 
     assert name_match(S[key], name) == expected
+
+
+# --- 2E.5 cvijet i dječji pjenušac -----------------------------------------------------------------
+
+@pytest.mark.parametrize("name,broad,expected", [
+    ("CVIJET 70 cm-rasprodaja", False, None),  # strogi popis više nema "cvijet"
+    ("CVIJET 70 cm-rasprodaja", True, "ostalo"),
+    ("ČAJ OD CVIJETA LIPE 20 g", True, None), ("BROKULA CVIJET 500 g", True, None),
+    ("CVJETAČA CVIJET 1 kg", True, None), ("KULENOV CVIJET NARESCI 80g", True, None),
+    ("KAMILICA CVIJET ČAJ", True, None), ("BAZGA CVIJET SIRUP", True, None),
+])
+def test_cvijet_only_broad_with_guards(name, broad, expected):
+    from mealmeter.food import nonfood_in_food
+
+    assert nonfood_in_food(name, broad=broad) == expected
+
+
+@pytest.mark.parametrize("category,name", [
+    ("Piće", "DJEČJI PJENUŠAC JAGODA 0.75L (6), BADEL"), ("SOKOVI", "*PJENUŠAC DJEČJI SPUŽVA BOB 0.75L"),
+    ("DJEČJI PJENUŠCI", "PJENUŠAC DJEČJI HELLO KITTY JAGODA 0,75L"), ("PJENUŠCI DOMAĆI", "PJENUŠAC 0,0% 0,75 L"),
+])
+def test_kids_sparkling_is_drink(category, name):
+    from mealmeter.food import chain_group
+
+    assert chain_group(category, name) == "pice"
+
+
+def test_kids_category_sparkling_without_word():
+    from mealmeter.food import chain_group
+
+    assert chain_group("DJEČJI PJENUŠCI", "PJENUŠAC BATMAN 0,75L") == "pice"
+
+
+def test_seed_packet_not_guarded():
+    from mealmeter.food import nonfood_in_food
+
+    assert nonfood_in_food("SJEME GARDEN CVJETAČA PALL DE NE", category="ZELENI PROGRAM") == "ostalo"

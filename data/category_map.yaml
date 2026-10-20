@@ -1290,7 +1290,7 @@ _chain_verify:
 "decji sampon": djeca  # 16, djelo_vodice
 "decji keksi": djeca  # 14, djelo_vodice
 "decji sokovi": djeca  # 12, djelo_vodice
-"decji pjenusci": djeca  # 11, djelo_vodice
+"decji pjenusci": pice  # 11, djelo_vodice (ručno: dječji pjenušac je bezalkoholno piće, Korak 2E)
 "pelene": djeca  # 10, vrutak
 "pelene 4": djeca  # 9, djelo_vodice
 "decja kozmetika": djeca  # 9, djelo_vodice

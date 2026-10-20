@@ -92,7 +92,33 @@ def section_synonyms(con) -> str:
     ])
 
 
-SECTIONS = {"1": section_tiers, "4": section_synonyms}
+def section_cvijet(con) -> str:
+    changes = f"read_csv('{DATA / 'food_changes_2e5.csv'}', header=true, all_varchar=true, quote='\"')"
+    moved = con.execute(f"SELECT before || ' → ' || after, count(*) FROM {changes} GROUP BY 1 ORDER BY 2 DESC").fetchall()
+    cvijet = f"""FROM clean.products p JOIN {changes} o USING (chain, product_id)
+                 WHERE o.after = 'hrana' AND regexp_matches(p.name_norm, '(^| )(cvijet|cvjet)')"""
+    n = con.execute(f"SELECT count(*) {cvijet}").fetchone()[0]
+    con.execute("SELECT setseed(0.5)")
+    sample = con.execute(f"SELECT p.chain, p.name, p.category, o.before {cvijet} ORDER BY random() LIMIT 20").fetchall()
+    kids = con.execute(f"""SELECT p.chain, p.name, o.before, o.after FROM clean.products p JOIN {changes} o
+                           USING (chain, product_id) WHERE o.after = 'pice' ORDER BY p.chain, p.name LIMIT 12""").fetchall()
+    return "\n".join([
+        "## 5. „cvijet“ i dječji pjenušac", "",
+        "„cvijet“ više nije u strogom popisu neprehrane (vrijedi za sve proizvode), nego samo u širem popisu za ručne "
+        "iznimke po lancu, uz zaštite: čaj, brokula, cvjetača, sol, kulen, kamilica, bazga, neven, lipa, ukrasni "
+        "cvjetići. Dječji pjenušac (dječj…, spužva bob, bez alkohola, 0,0, i kategorija „DJEČJI PJENUŠCI“) je "
+        "`pice`, ne `alkohol`.", "",
+        md_table(["promjena", "proizvoda"], moved), "",
+        f"Vraćeno u `hrana` s „cvijet“ u nazivu: **{n}**. 20 primjera:", "",
+        md_table(["lanac", "naziv", "kategorija", "prije"], sample), "",
+        "Napomena: Metro „BEGONIJA CVIJET KOM“ (biljka u kategoriji hrane) se vraća u hranu, jer Metro nije među "
+        "ručnim iznimkama po lancu; vrećice sjemena („SJEME GARDEN CVJETAČA“) ostaju neprehrana.", "",
+        "Primjeri novog `pice`:", "",
+        md_table(["lanac", "naziv", "prije", "poslije"], kids),
+    ])
+
+
+SECTIONS = {"1": section_tiers, "4": section_synonyms, "5": section_cvijet}
 
 
 def main() -> None:

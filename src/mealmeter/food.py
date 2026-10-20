@@ -66,7 +66,7 @@ ALCOHOL_BRANDS = (
     r"grey goose|smirnoff|absolut|beefeater|tanqueray|bacardi|havana club|captain morgan|stock\b|koktel"
 )
 # Nije alkoholno piće iako naziv sadrži alkoholnu riječ (na izvornom nazivu, malim slovima)
-NOT_ALCOHOL_REGEX = (r"bezalkohol|bez alkohola|alkoholfrei|alcohol free|\b0[.,]0 ?%|(?<!\d)(?<!\d[.,])0 ?%|\bocat|\baroma|"
+NOT_ALCOHOL_REGEX = (r"bezalkohol|bez alkohola|alkoholfrei|alcohol free|dje[cč]j|spu[zž]va bob|\b0[.,]0 ?%|(?<!\d)(?<!\d[.,])0 ?%|\bocat|\baroma|"
                      r"kuglic|\bumak|\bsok od")
 # Postotak alkohola u nazivu pića ("40% 0,7L", "4,5% 0,33l"); sokovi, nektari i mliječna mast ne
 ABV_REGEX = r"(?<![\d.,])(\d{1,2}(?:[.,]\d{1,2})?) ?% ?(?!m\.?m|mm|voc)"
@@ -129,7 +129,8 @@ def chain_group(category: str | None, name: str | None, cmap: dict[str, str] | N
     group = group or category_group(category)
     if group in FOOD_GROUPS and _PET_RX.search(norm_text(name) or ""):
         return "kucni_ljubimci"
-    if group == "pice" and is_alcohol(name, drink=True):
+    # dječja kategorija pića ("DJEČJI PJENUŠCI") nije alkohol ni kad naziv kaže samo "PJENUŠAC"
+    if group == "pice" and is_alcohol(name, drink=True) and not re.search(r"(^| )(?:decj|decij)", norm_text(category or "") or ""):
         return "alkohol"
     if group == "alkohol" and name and _NOT_ALCOHOL_RX.search(name.lower()):
         return "pice"
@@ -282,10 +283,12 @@ def build_food(con: duckdb.DuckDBPyConnection) -> dict:
 # is_food = true; BROAD samo za kategorije lanaca s poznatim neprehrambenim artiklima (category_map.yaml,
 # _chain_verify: Gavranović "Hrana", Boso "ZELENI PROGRAM", Studenac "HRANA", Plodine preko EAN-a).
 STRICT_NONFOOD_IN_FOOD = [
-    (r"igrac|sjeme\b|cvijet", "ostalo"),
+    # "cvijet" samo u širem popisu (Korak 2E): "CVIJET SOLI", "KULENOV CVIJET", čaj od cvijeta, cvjetača
+    (r"igrac|sjeme\b", "ostalo"),
     (r"svijec|baterij|salvet|ukrasn", "kucanstvo"),
 ]
 BROAD_NONFOOD_IN_FOOD = STRICT_NONFOOD_IN_FOOD + [
+    (r"cvijet", "ostalo"),
     (r"sampon|regenerator|gel za tus|tus gel|krema za (?:lice|ruke|tijelo|suncanje)|losion|dezodor", "kozmetika"),
     (r"toaletni papir|maramic|pelen|ulosc|tampon|cetkic|zubna pasta|britv|sapun", "higijena"),
     (r"hrana za (?:pse|macke)|za pse|za macke|psec|macj|pijesak za|granule za", "kucni_ljubimci"),
@@ -298,7 +301,8 @@ BROAD_NONFOOD_IN_FOOD = STRICT_NONFOOD_IN_FOOD + [
 # "BOMBONI + IGRAČKA", "KOŠARICE CVIJET" od čokolade, "KULENOV CVIJET NARESCI", "FLIPS S IGRAČKOM")
 _EDIBLE_GUARD = re.compile(r"(^| )(?:jestiv|secern|cokol|marcipan|fondan|bombon|lizalic|zvak|keks|sladoled|"
                            r"kruh|jogurt|dr oet|oetker|tort|kolac|posip\b|confileta|sir\b|narez|naresc|kulen|"
-                           r"igrackom|milka|flips|krafn|cips|smoki|salam|cvijet soli|soli\b)")
+                           r"igrackom|milka|flips|krafn|cips|smoki|salam|cvijet soli|soli\b|sol\b|caj\b|cajev|"
+                           r"brokul|cvjetac|cvijetac|kamilic|bazg|neven|lipa\b|lipov|ukrasni cvjetic)")
 _STRICT_RX = [(re.compile(r"(^| )(?:" + p + ")"), g) for p, g in STRICT_NONFOOD_IN_FOOD]
 _BROAD_RX = [(re.compile(r"(^| )(?:" + p + ")"), g) for p, g in BROAD_NONFOOD_IN_FOOD]
 
@@ -307,7 +311,10 @@ def nonfood_in_food(name: str | None, broad: bool = False, category: str | None 
                     pack_unit: str | None = None) -> str | None:
     """Neprehrambena skupina za proizvod iz kategorije hrane čiji naziv to otkriva, ili None."""
     text = norm_text(name) or ""
-    if _EDIBLE_GUARD.search(text) or seed_status(name, category, pack_unit) in ("food", "unsure"):
+    seed = seed_status(name, category, pack_unit)
+    if seed == "nonfood":  # vrećica sjemena ("SJEME GARDEN CVJETAČA") prije zaštite za jestivo
+        return "ostalo"
+    if _EDIBLE_GUARD.search(text) or seed in ("food", "unsure"):
         return None
     for rx, group in (_BROAD_RX if broad else _STRICT_RX):
         if rx.search(text):
