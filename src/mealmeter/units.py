@@ -19,6 +19,7 @@ class Units:
     measures: dict[str, float]  # norm_text(alias) -> ml
     names: dict[str, str]  # norm_text(alias) -> ključ mjere (zlica, salica...)
     densities: dict[str, float]  # namirnica -> g/ml
+    pieces: dict[str, float]  # namirnica -> g po komadu (luk, češanj češnjaka, vezica peršina)
 
 
 @lru_cache(maxsize=2)
@@ -30,7 +31,13 @@ def load_units(path: Path = UNITS_PATH) -> Units:
             measures[norm_text(alias)] = float(m["ml"])
             names[norm_text(alias)] = key
     densities = {k: float(v["g_per_ml"]) for k, v in (raw.get("densities") or {}).items()}
-    return Units(measures, names, densities)
+    pieces = {k: float(v["g"]) for k, v in (raw.get("pieces") or {}).items()}
+    return Units(measures, names, densities, pieces)
+
+
+def piece_weight(staple_key: str) -> float | None:
+    """Procijenjena masa jednog komada namirnice u g (data/units.yaml, pieces), ili None."""
+    return load_units().pieces.get(staple_key)
 
 
 def is_measure(unit: str | None) -> bool:

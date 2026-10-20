@@ -10,6 +10,7 @@ import duckdb
 import yaml
 
 from mealmeter.normalize import norm_text
+from mealmeter.units import piece_weight
 
 STAPLES_PATH = Path(__file__).with_name("staples.yaml")
 # loose_produce: nazivi staklenki/konzervi koji prolaze pravilo ">= 500 g" ("KRASTAVCI 6-9 cm 1580g ...
@@ -58,6 +59,9 @@ class Staple:
     # oblik namirnice preko drugih namirnica: {"konzerva": "rajcica_konzerva", ...}
     form_staples: dict[str, str] = field(default_factory=dict, hash=False, compare=False)
     ambiguous_form: bool = False
+    # proizvod bez gramature koji se ne prodaje na vagu dobiva procijenjenu težinu komada iz
+    # data/units.yaml (vezica peršina 50 g), uz unit_confidence=low i pack_source=assumed
+    assume_piece: bool = False
     # oblik=suho bez oznake u nazivu: {"pack_g": (400, 1000), "unit": (...), "words": (...)}
     dry_rule: dict = field(default_factory=dict, hash=False, compare=False)
     # uzorci: proizvod ispada samo ako nema gramature (prazna soljenka), drop_reason 'bez_gramature'
@@ -226,6 +230,7 @@ def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> d
             form_staples=d.get("form_staples") or {},
             ambiguous_form=bool(d.get("ambiguous_form", False)),
             require_pack=tuple(_fold(p) for p in d.get("require_pack", [])),
+            assume_piece=bool(d.get("assume_piece", False)),
             dry_rule={k: tuple(_fold(str(x)) if k != "pack_g" else float(x) for x in v)
                       for k, v in (d.get("dry_rule") or {}).items()},
             substitutes={a: tuple(str(v) for v in vals) for a, vals in (d.get("substitutes") or {}).items()},
@@ -439,12 +444,12 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
             """, [st.key, _word_start(st.require_pack)])
 
     rows = con.execute("""
-        SELECT s.chain, s.product_id, s.staple, p.name, p.pack_amount, p.pack_unit, p.unit
+        SELECT s.chain, s.product_id, s.staple, p.name, p.pack_amount, p.pack_unit, p.unit, p.unit_hint
         FROM clean.product_staples s JOIN clean.products p USING (chain, product_id)
         WHERE NOT s.excluded AND s.drop_reason IS NULL
     """).fetchall()
     attr_rows, unit_rows = [], []
-    for chain, pid, key, name, amount, pack_unit, unit in rows:
+    for chain, pid, key, name, amount, pack_unit, unit, hint in rows:
         st = staples[key]
         detail = extract_attributes_detail(st, name)
         if st.ambiguous_form and detail.get("oblik", (None, "default"))[1] == "default":
@@ -456,6 +461,9 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
         assumed = None
         if st.assumed_pack_regex and amount is None and re.search(st.assumed_pack_regex, norm_text(name) or ""):
             assumed = st.assumed_pack_g
+        elif st.assume_piece and amount is None and hint != "kg":
+            # komad bez težine koji se ne prodaje na vagu (vezica peršina): procjena iz data/units.yaml
+            assumed = piece_weight(st.key)
         if n is not None or assumed is not None:
             unit_rows.append((chain, pid, key, n, assumed))
 

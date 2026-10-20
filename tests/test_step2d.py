@@ -256,3 +256,32 @@ def test_sachet_ranges_values():
     assert S["kvasac"].plausible_per_pack == (0.10, 1.50)
     assert S["prasak_za_pecivo"].plausible_per_pack == (0.10, 0.60)
     assert S["vanilin_secer"].plausible_per_pack == (0.10, 1.80)
+
+
+# --- 8. peršin -------------------------------------------------------------------------
+
+def test_persin_default_leaf():
+    from mealmeter.basket import resolve_name
+    from mealmeter.staples import extract_attributes
+
+    st = S["persin"]
+    assert st.default_attributes == {"dio": "list"} and st.assume_piece
+    assert extract_attributes(st, "PERŠIN")["dio"] == "list"
+    assert extract_attributes(st, "PERŠIN KORJEN AGROVIR")["dio"] == "korijen"
+    assert resolve_name("peršin korijen") == (st, {"dio": "korijen"})
+    assert resolve_name("peršin") == (st, {})
+
+
+def test_persin_bunch_assumed(tmp_path):
+    from mealmeter.build import build_clean, load_raw
+    from tests.conftest import FIXTURE
+
+    c = duckdb.connect(str(tmp_path / "p.duckdb"))
+    load_raw(c, FIXTURE, "2026-10-19")
+    c.execute("""INSERT INTO products (chain, product_id, barcode, name, category, unit) VALUES
+                 ('konzum', 'P1', 'konzum:P1', 'PERŠIN LIST', 'HRANA', 'KOM'),
+                 ('konzum', 'P2', 'konzum:P2', 'PERŠIN LIST', 'HRANA', 'KG')""")
+    build_clean(c)
+    got = dict(c.execute("""SELECT product_id, assumed_g FROM clean.product_staples
+                            WHERE staple = 'persin' AND product_id IN ('P1', 'P2')""").fetchall())
+    assert got == {"P1": 50, "P2": None}  # na vagu (kg) bez procjene

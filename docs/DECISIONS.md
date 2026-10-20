@@ -500,3 +500,7 @@ Izvještaji: [STEP2D_REVIEW.md](STEP2D_REVIEW.md) (`scripts/step2d_review.py`) i
     - Granice po vrećici (vlasnik): kvasac 0,10–1,50, prašak 0,10–0,60, vanilin šećer 0,10–1,80 €. Vrijede
       i za višestruka pakiranja (cijena / broj vrećica), u oba smjera.
     - Rinfuza od 500 g sada je jedno „pakiranje“ i obično je izvan granica (samo rezerva u košarici).
+61. **Peršin:** zadano `dio=list`, a naziv bez oznake dijela je list. Korijen ulazi samo kad recept kaže
+    „peršin korijen“. Novo polje `assume_piece`: proizvod bez gramature koji se ne prodaje na vagu dobiva
+    procijenjenu masu komada iz `data/units.yaml` (`pieces.persin`: vezica 50 g, procjena), uz
+    `unit_confidence=low` i `pack_source=assumed`. Recept „1 vezica“ = 50 g.

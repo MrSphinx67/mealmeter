@@ -38,6 +38,8 @@
 #                   dobiva pretpostavljenu masu, uz unit_confidence=low i pack_source=assumed
 #   inferred_attributes  atribut zaključen iz naziva linije (LAGANO JUTRO -> laktoza=bez), u izlazu
 #                   označen kao "inferred"
+#   assume_piece    proizvod bez gramature koji se ne prodaje na vagu dobiva masu komada iz data/units.yaml
+#                   (pieces), npr. vezica peršina 50 g, uz unit_confidence=low i pack_source=assumed
 #   piece_g         masa jednog komada u g, za recepte u komadima ("2 luka"; češnjak: jedan češanj)
 #   ambiguous_form  oblik (atribut oblik: konzerva/suho/smrznuto/svjeze) bitno mijenja proizvod; košarica
 #                   bez zadanog oblika bira najjeftiniji i upozorava
@@ -775,10 +777,15 @@ persin:
   # (nemaju cijenu po kg, a "1 vezica" u receptu nema pretpostavljenu masu)
   unit: kg
   pantry: true
+  # zadano list; korijen samo kad ga recept traži ("peršin korijen"); naziv bez oznake je list
+  default_attributes: {dio: list}
+  # vezica bez težine: procjena 50 g (data/units.yaml, pieces.persin), unit_confidence=low
+  assume_piece: true
   attributes:
     dio:
-      korijen: '\bkorijen|\bberlinsk'
+      korijen: '\bkorijen|\bkorjen|\bberlinsk'
       list: '\blist|\blisnat'
+      _default: list
   loose_produce: true
 
 gljive:

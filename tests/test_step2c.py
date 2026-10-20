@@ -145,13 +145,13 @@ def test_basket_milk_returns_vrsta_and_mast(con):
 # --- 8. peršin i svježe bilje ----------------------------------------------------------
 
 def test_persin_kg_pantry():
-    from mealmeter.basket import IngredientError, to_base
+    from mealmeter.basket import to_base
 
     st = S["persin"]
     assert st.unit == "kg" and st.pantry and st.compare_unit == "kg"
     assert to_base(20, "g", st)[:2] == (20, "g")
-    with pytest.raises(IngredientError):  # vezica bez mase se ne pretvara u grame
-        to_base(1, "vezica", st)
+    # Korak 2D: vezica = 50 g (procjena iz data/units.yaml)
+    assert to_base(1, "vezica", st)[:2] == (50, "g")
 
 
 # --- 9. pretvorba mjera ------------------------------------------------------------

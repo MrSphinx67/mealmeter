@@ -104,12 +104,14 @@ def to_base(amount: float, unit: str, staple: Staple) -> tuple[float, str, list[
         out = qty / density if target == "ml" else qty * density
         warnings.append(f"{qty:g} {base} ≈ {out:g} {target} (procjena, {density:g} g/ml)")
         return out, target, warnings
-    if base == "kom" and target in ("g", "ml") and staple.piece_g:
-        warnings.append(f"{qty:g} kom ≈ {qty * staple.piece_g:g} g (komad {staple.piece_g:g} g)")
-        return qty * staple.piece_g, "g" if target == "g" else "ml", warnings
-    if target == "kom" and base == "g" and staple.piece_g:
-        warnings.append(f"{qty:g} g ≈ {qty / staple.piece_g:g} kom (komad {staple.piece_g:g} g)")
-        return qty / staple.piece_g, "kom", warnings
+    # masa komada: data/units.yaml (pieces, procjena), inače piece_g iz staples.yaml
+    piece = units.piece_weight(staple.key) or staple.piece_g
+    if base == "kom" and target in ("g", "ml") and piece:
+        warnings.append(f"{qty:g} kom ≈ {qty * piece:g} g (komad {piece:g} g, procjena)")
+        return qty * piece, "g" if target == "g" else "ml", warnings
+    if target == "kom" and base == "g" and piece:
+        warnings.append(f"{qty:g} g ≈ {qty / piece:g} kom (komad {piece:g} g, procjena)")
+        return qty / piece, "kom", warnings
     if target == "vrecica" and base in ("g", "kom"):
         if base == "kom":
             return qty, "vrecica", warnings
