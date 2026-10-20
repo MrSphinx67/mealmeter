@@ -92,14 +92,18 @@ class Staple:
         return {"pack": "vrecica", "count": "kom"}.get(self.compare_by, self.unit)
 
     def units_in_pack(
-        self, name: str, pack_amount: float | None, pack_unit: str | None, attrs: dict[str, str]
+        self, name: str, pack_amount: float | None, pack_unit: str | None, attrs: dict[str, str],
+        wholesale: bool = False,
     ) -> float | None:
         """Broj jedinica usporedbe u pakiranju kad to nije kg/l: vrećice od sachet_g grama
-        (compare_by: pack) ili komadi iz naziva po count_regex, npr. "10/1", "10 KOM" (count)."""
+        (compare_by: pack) ili komadi iz naziva po count_regex, npr. "10/1", "10 KOM" (count).
+        Kod veleprodaje (wholesale) "10/1" je broj kutija, pa vrijedi samo "10 KOM" (zadnja grupa regexa)."""
         if self.compare_by == "count":
-            if self.count_regex and (m := re.search(self.count_regex, attr_text(name))):
-                return float(next(g for g in m.groups() if g))
-            return pack_amount if pack_unit == "kom" else None
+            for m in re.finditer(self.count_regex or r"(?!)", attr_text(name)):
+                groups = m.groups()[-1:] if wholesale else m.groups()
+                if any(groups):
+                    return float(next(g for g in groups if g))
+            return pack_amount if pack_unit == "kom" and not wholesale else None
         if self.compare_by != "pack" or not pack_amount or pack_unit != "g":
             return None
         size = self.sachet_g
@@ -348,7 +352,7 @@ def extract_attributes(staple: Staple, name: str) -> dict[str, str]:
 
 def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | None = None) -> dict:
     """clean.product_staples (proizvod <-> namirnica, s oznakom isključenja) i clean.product_attrs."""
-    from mealmeter.build import _temp_table  # izbjegava kružni import
+    from mealmeter.build import WHOLESALE_CHAINS, _temp_table  # izbjegava kružni import
 
     staples = staples or load_staples()
     # excluded: pogađa must_not_match -> cijela grupa (EAN) ispada iz namirnice.
@@ -431,7 +435,7 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
                 detail["oblik"] = (form, "heuristic")
         attrs = {a: v for a, (v, _) in detail.items()}
         attr_rows += [(chain, pid, key, a, v, how) for a, (v, how) in detail.items()]
-        n = st.units_in_pack(name, amount, pack_unit, attrs)
+        n = st.units_in_pack(name, amount, pack_unit, attrs, wholesale=chain in WHOLESALE_CHAINS)
         assumed = None
         if st.assumed_pack_regex and amount is None and re.search(st.assumed_pack_regex, norm_text(name) or ""):
             assumed = st.assumed_pack_g

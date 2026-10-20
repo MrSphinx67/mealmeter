@@ -197,11 +197,12 @@ def choose_product(rows: list[dict], need: float, need_unit: str, by_weight_unit
 
 # --- plan_basket -------------------------------------------------------------------
 
-def _rows_for(con, staple: Staple, attributes: dict, city: str) -> list[dict]:
+def _rows_for(con, staple: Staple, attributes: dict, city: str, wholesale: bool = False) -> list[dict]:
     # Samo provjerena hrana bez alkohola; proizvod nepoznate skupine (food_group 'unknown', npr.
     # Plodine) samo za svježe voće i povrće, gdje naziv prolazi pravilo prve ili druge riječi.
     food_sql = _food_filter(unverified="staple" if staple.loose_produce else "no")
-    sql, params, _ = _candidates(staple, [], attributes, city, include_clearance=True, food_sql=food_sql)
+    sql, params, _ = _candidates(staple, [], attributes, city, include_clearance=True, food_sql=food_sql,
+                                 include_wholesale=wholesale)
     cur = con.execute(sql + " SELECT * FROM x", params)
     cols = [d[0] for d in cur.description]
     return [dict(zip(cols, r)) for r in cur.fetchall()]
@@ -260,7 +261,7 @@ def _num(v):
     return float(v) if v is not None else None
 
 
-def _prepare(con, need: Need, city: str) -> dict[tuple, list[dict]]:
+def _prepare(con, need: Need, city: str, wholesale: bool = False) -> dict[tuple, list[dict]]:
     """Kandidati po trgovini (chain, store_id) za jedan sastojak (uz odabrani oblik)."""
     attrs = dict(need.attributes)
     if need.form and "oblik" in need.staple.attributes:
@@ -268,14 +269,14 @@ def _prepare(con, need: Need, city: str) -> dict[tuple, list[dict]]:
     for a, v in need.staple.defaults().items():
         attrs.setdefault(a, v)
     by_store: dict[tuple, list[dict]] = {}
-    for r in _rows_for(con, need.staple, attrs, city):
+    for r in _rows_for(con, need.staple, attrs, city, wholesale):
         for k in ("price_eff", "price_per_unit", "pack_amount", "drained_amount", "n_units", "assumed_g"):
             r[k] = _num(r.get(k))
         by_store.setdefault((r["chain"], r["store_id"]), []).append(r)
     return by_store
 
 
-def _resolve_form(con, need: Need, city: str) -> list[str]:
+def _resolve_form(con, need: Need, city: str, wholesale: bool = False) -> list[str]:
     """Dvosmislena namirnica bez oblika: izaberi najjeftiniji oblik (po jedinici) i vrati upozorenje."""
     st = need.staple
     if st.form_staples:  # oblik je druga namirnica (rajčica)
@@ -299,7 +300,7 @@ def _resolve_form(con, need: Need, city: str) -> list[str]:
         except IngredientError:
             continue
         unit_costs = []
-        for rows in _prepare(con, probe, city).values():
+        for rows in _prepare(con, probe, city, wholesale).values():
             pick = choose_product(rows, probe.amount, probe.unit, _by_weight_unit(fst), fst.loose_produce)
             if pick and not pick["fallback"]:
                 unit_costs.append(pick["cost_used"])
@@ -335,12 +336,14 @@ def city_suggestions(con, city: str, n: int = 5) -> list[str]:
 
 
 def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
-                con: duckdb.DuckDBPyConnection | None = None, max_stores: int | None = None) -> dict:
+                con: duckdb.DuckDBPyConnection | None = None, max_stores: int | None = None,
+                include_wholesale: bool = False) -> dict:
     """Cijena recepta po trgovini u gradu (+ nacionalne cijene) i najbolja trgovina.
 
     ingredients: [{"name": "brašno", "amount": 500, "unit": "g", "form": None, "attributes": {...}}]
     Vraća ingredients (povezani sastojci s pretpostavkama), unmatched, stores (svaka trgovina:
     stavke, total, broj povezanih sastojaka), best_store, warnings, date i date_hr.
+    Veleprodaja (Metro, store_type 'cash_and_carry') je uključena samo uz include_wholesale=True.
     """
     if mode != "single_store":
         raise ValueError("podržan je samo mode='single_store'")
@@ -365,7 +368,7 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
                     raise IngredientError(f"nepoznat atribut {a}={v} za '{staple.name}'")
             amount, unit, warns = to_base(*_input_amount(item), staple)
             need = Need(item, staple, amount, unit, attrs, form=item.get("form"), warnings=warns)
-            need.warnings += _resolve_form(con, need, city)
+            need.warnings += _resolve_form(con, need, city, include_wholesale)
             if need.staple is not staple:  # oblik je druga namirnica: količina u njezinoj jedinici
                 need.amount, need.unit, more = to_base(*_input_amount(item), need.staple)
                 need.warnings += more
@@ -391,7 +394,7 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
         attrs_of, attrs_of_ean = _product_attrs(con, need.staple)
         prefs = {a: v for a, v in need.staple.default_preference.items() if a not in need.attributes}
         group_values = _group_values(con, need.staple, prefs)
-        for key, rows in _prepare(con, need, city).items():
+        for key, rows in _prepare(con, need, city, include_wholesale).items():
             pick = _choose_preferred(rows, need, prefs, group_values)
             if pick is None:
                 continue

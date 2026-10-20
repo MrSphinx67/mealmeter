@@ -488,3 +488,8 @@ Izvještaji: [STEP2D_REVIEW.md](STEP2D_REVIEW.md) (`scripts/step2d_review.py`) i
       („KAPULA ŽUTA (CRV.LUK)“).
     - „bijeli luk“ / „luk bijeli“ je češnjak i isključen je iz luka.
     - Rukavac 4/1 i dalje dobiva pretpostavljenih 500 g uz `unit_confidence=low`.
+59. **Jaja i veleprodaja.**
+    - Granice po uzgoju (`plausible_by`): bio 0,30–1,00 €/kom, ostali 0,15–0,55 €/kom (vlasnik).
+    - **Metro** je `clean.stores.store_type = 'cash_and_carry'` i isključen je iz `find_products`, `get_prices` i
+      `plan_basket`, osim uz `include_wholesale=True` (CLI `--include-wholesale`).
+    - Kod Metroa se „10/1“ i „30/1“ ne tumače kao broj jaja (to su kartoni), a „30 KOM“ da.

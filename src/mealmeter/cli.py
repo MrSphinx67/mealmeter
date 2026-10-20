@@ -38,7 +38,7 @@ def _table(rows: list[list[str]], headers: list[str]) -> str:
 
 def _food_kwargs(args) -> dict:
     return {"include_nonfood": args.include_nonfood, "include_alcohol": args.include_alcohol,
-            "include_unverified": args.include_unverified}
+            "include_unverified": args.include_unverified, "include_wholesale": args.include_wholesale}
 
 
 def _add_food_args(parser) -> None:
@@ -46,6 +46,7 @@ def _add_food_args(parser) -> None:
     parser.add_argument("--include-alcohol", action="store_true", help="i alkoholna pića")
     parser.add_argument("--include-unverified", action="store_true",
                         help="i proizvodi nepoznate skupine (oznaka (?) u nazivu)")
+    parser.add_argument("--include-wholesale", action="store_true", help="i veleprodaja (Metro)")
 
 
 def cmd_find(args) -> None:

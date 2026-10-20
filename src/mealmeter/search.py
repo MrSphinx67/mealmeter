@@ -83,7 +83,7 @@ def _food_filter(include_nonfood: bool = False, include_alcohol: bool = False, u
 
 def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | None,
                 include_clearance: bool, food_sql: str | None = None,
-                include_ambiguous: bool = False) -> tuple[str, list, str]:
+                include_ambiguous: bool = False, include_wholesale: bool = False) -> tuple[str, list, str]:
     """SQL (CTE-ovi g, hit, x) za kandidate: jedan redak po (trgovina, proizvod).
 
     x sadrži sve proizvode iz grupa koje odgovaraju upitu/namirnici, s cijenom po jedinici u
@@ -193,6 +193,7 @@ def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | 
           JOIN clean.chains ch USING (chain)
           {rules_join}
           WHERE {city_sql} AND {drop_sql} AND {clearance_sql} AND {food_sql}
+            AND {"TRUE" if include_wholesale else "s.store_type <> 'cash_and_carry'"}
         )"""
     return sql, hit_params + name_hit_params + coverage_params + city_params, cov_col
 
@@ -209,6 +210,7 @@ def find_products(
     include_alcohol: bool = False,
     include_unverified: bool = False,
     include_ambiguous: bool = False,
+    include_wholesale: bool = False,
 ) -> list[dict]:
     """Pronađi proizvode po nazivu ili po osnovnoj namirnici (staples.yaml).
 
@@ -217,7 +219,8 @@ def find_products(
     (food_group 'unknown', npr. Plodine bez EAN-a u drugim lancima); grupa sastavljena samo od
     takvih nosi `food_unverified = true`. Za namirnicu se zadano vraćaju samo grupe sa statusom
     'member' (clean.staple_groups: većina lanaca ima naziv namirnice); `include_ambiguous` dodaje
-    dvosmislene grupe ("KUPUS KIS MASL ULJE" kod maslinovog ulja).
+    dvosmislene grupe ("KUPUS KIS MASL ULJE" kod maslinovog ulja). Veleprodaja (Metro,
+    store_type 'cash_and_carry') zadano nije uključena (`include_wholesale`).
 
     - Slobodan upit: proizvod odgovara ako normalizirani naziv sadrži sve riječi upita. Ako je
       upit točno sinonim namirnice ("mlijeko", "brašno"), automatski se koristi namirnica.
@@ -265,7 +268,7 @@ def find_products(
     con = con or connect()
     food_sql = _food_filter(include_nonfood, include_alcohol, "yes" if include_unverified else "no")
     cand_sql, cand_params, cov_col = _candidates(staple, tokens, attributes, city, include_clearance, food_sql,
-                                                 include_ambiguous)
+                                                 include_ambiguous, include_wholesale)
     best = "x.unit_confidence = pick.conf AND x.per_unit = pick.per_unit AND NOT x.price_suspect"
     sql = f"""
         {cand_sql},
@@ -411,6 +414,7 @@ def _attach_attributes(con: duckdb.DuckDBPyConnection, staple, rows: list[dict])
 def get_prices(
     identifier: str, city: str | None = None, limit: int = 50, con: duckdb.DuckDBPyConnection | None = None,
     include_nonfood: bool = False, include_alcohol: bool = False, include_unverified: bool = False,
+    include_wholesale: bool = False,
 ) -> list[dict]:
     """Cijene po trgovini za EAN, `lanac:product_id` ili id klase (npr. "jaja:m"), od najjeftinije.
 
@@ -459,6 +463,7 @@ def get_prices(
         JOIN clean.chains ch USING (chain)
         WHERE {prod_sql} AND {city_sql}
           AND {_food_filter(include_nonfood, include_alcohol, "yes" if include_unverified else "no")}
+          AND {"TRUE" if include_wholesale else "s.store_type <> 'cash_and_carry'"}
         ORDER BY c.price_eff, p.chain, s.city, s.address
         LIMIT ?
         """,

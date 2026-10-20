@@ -184,3 +184,38 @@ def test_onion_default_and_garlic():
 def test_onion_rukavac_assumed_500g():
     st = S["luk"]
     assert st.assumed_pack_g == 500 and st.assumed_pack_regex
+
+
+# --- 6. jaja i veleprodaja ------------------------------------------------------------------
+
+def test_egg_ranges_by_uzgoj():
+    assert S["jaja"].plausible_by == {"uzgoj": {"bio": (0.30, 1.00), "_other": (0.15, 0.55)}}
+    assert S["jaja"].plausible_per_unit is None
+
+
+def test_wholesale_store_type(con):
+    assert con.execute("SELECT DISTINCT store_type FROM clean.stores WHERE chain = 'metro'").fetchall() == [
+        ("cash_and_carry",)]
+    assert con.execute("SELECT count(*) FROM clean.stores WHERE store_type = 'retail'").fetchone()[0] > 0
+
+
+def test_wholesale_egg_cartons_not_counted(con):
+    # "10/1 ARO JAJA" kod Metroa je deset kutija, a ne deset jaja
+    assert S["jaja"].units_in_pack("10/1 ARO JAJA A KL M", None, None, {}, wholesale=True) is None
+    assert S["jaja"].units_in_pack("10/1 ARO JAJA A KL M", None, None, {}) == 10
+    assert S["jaja"].units_in_pack("JAJA 30 KOM", None, None, {}, wholesale=True) == 30
+    n = con.execute("SELECT n_units FROM clean.product_staples WHERE chain = 'metro' AND staple = 'jaja'").fetchall()
+    assert n and all(v is None for (v,) in n)
+
+
+def test_wholesale_excluded_by_default(con):
+    from mealmeter.basket import plan_basket
+    from mealmeter.search import get_prices
+
+    assert not any("metro" in r["chains"] for r in find_products("aro jaja", city="Osijek", con=con))
+    assert any("metro" in r["chains"] for r in find_products("aro jaja", city="Osijek", con=con,
+                                                            include_wholesale=True))
+    assert get_prices("metro:226729", con=con) == []
+    assert get_prices("metro:226729", con=con, include_wholesale=True)
+    res = plan_basket([{"name": "jaja", "amount": 2, "unit": "kom"}], "Osijek", con=con)
+    assert not any(s["chain"] == "metro" for s in res["stores"])

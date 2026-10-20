@@ -74,6 +74,7 @@ vrijednost se uspješno parsirala.
 | city_norm | `norm_text(city)`: mala slova, bez dijakritika |
 | city_canonical | grad nakon aliasa (Sesvete → Zagreb, Kaštel Stari → Kaštela) |
 | city_key | `norm_text(city_canonical)`, ključ za pretragu |
+| store_type | `cash_and_carry` (veleprodaja: Metro, `build.WHOLESALE_CHAINS`) ili `retail`; veleprodaja je izvan zadanog izbora (`include_wholesale`) |
 
 **`clean.city_alias`** `(alias_norm, city)`: 19 aliasa, izvor je `CITY_ALIASES` u `normalize.py`.
 

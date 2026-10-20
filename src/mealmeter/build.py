@@ -31,6 +31,9 @@ CITY_FIXES = {
 # Lanci čiji podaci nisu pouzdani: ostaju u bazi, ali se ne koriste za preporuke (plan_basket).
 # Razlozi se računaju pri svakom buildu (chain_quality_report) i zapisuju u clean.chains.
 SUSPECT_CHAINS = {"lorenco"}
+# Veleprodaja (cash & carry): clean.stores.store_type = 'cash_and_carry'. Prodaje kartone i ugostiteljska
+# pakiranja ("10/1 JAJA" je deset kutija), pa je izvan zadanog izbora i košarice (include_wholesale).
+WHOLESALE_CHAINS = {"metro"}
 
 NATIONAL_NOTE = "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu."
 
@@ -102,7 +105,8 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
         "chain": "VARCHAR", "store_id": "VARCHAR", "city": "VARCHAR", "city_norm": "VARCHAR",
         "city_canonical": "VARCHAR", "city_key": "VARCHAR",
     }, store_rows())
-    con.execute("""
+    wholesale = ", ".join(f"'{c}'" for c in sorted(WHOLESALE_CHAINS))
+    con.execute(f"""
         CREATE OR REPLACE TABLE clean.stores AS
         SELECT r.chain, r.store_id, r.type,
                CASE WHEN r.chain = 'spar'  -- "Optujska 171 87001 Spar" -> "Optujska 171"
@@ -110,7 +114,8 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
                     ELSE r.address END AS address,
                d.city, r.zipcode,
                CASE WHEN r.store_id = 'all' THEN 'national' ELSE 'local' END AS scope,
-               d.city_norm, d.city_canonical, d.city_key
+               d.city_norm, d.city_canonical, d.city_key,
+               CASE WHEN r.chain IN ({wholesale}) THEN 'cash_and_carry' ELSE 'retail' END AS store_type
         FROM stores r JOIN store_derived d USING (chain, store_id)
     """)
 

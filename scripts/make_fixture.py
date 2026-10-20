@@ -29,6 +29,7 @@ PICK = {
     "spar": (["87089"], ["18058", "48759", "306692"]),  # adresa sa sufiksom "87089 Spar"; pureće mljeveno, GreenVie parmezan
     "roto": (["D22"], ["04030203", "15598"]),  # cijena 0.00
     "dm": (["all"], ["1000105"]),  # nacionalna cijena
+    "metro": (["S14"], ["226729", "226279"]),  # veleprodaja (Osijek): "10/1" i "30/1" jaja su kartoni
     "plodine": (["053"], ["021793",  # "NAPITAK SOJINO MLIJEKO" (Osijek), bez kategorije
                           "040151", "100101", "613881", "689540"]),  # brašno (EAN), banana, čips, hrana za pse
 }
