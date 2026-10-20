@@ -435,3 +435,9 @@ Izvještaji za pregled su u [MORNING_REVIEW.md](MORNING_REVIEW.md) (`scripts/mor
     - **Sve su procjene** (`estimate: true`) i čekaju pregled. Ostale namirnice računaju se s 1 g/ml, uz upozorenje.
     - `plan_basket` koristi `units.convert` umjesto ugrađenih žlica (prije: gustoća 1 za sve), pa je
       1 žlica šećera sada 12,75 g, a ne 15 g. Gustoća vrijedi i za g ↔ ml (npr. 103 g mlijeka = 100 ml).
+51. **Kvasac, prašak za pecivo, vanilin šećer: granice po vrećici.**
+    - Novo polje `plausible_per_pack` (€ po vrećici, `range_source = 'pack'`) zamjenjuje automatske granice.
+    - Prijedlog iz podataka je [p5, 1,25 × p95] cijene pojedinačnih vrećica, zaokruženo na 0,05 €:
+      kvasac 0,30–1,25, prašak 0,10–0,40, vanilin šećer 0,10–0,85.
+    - `price_suspect`: cijena po vrećici iznad gornje granice, ili pojedinačna vrećica (≤ 1,5 vrećice u
+      pakiranju) ispod donje. Rinfuza i višestruka pakiranja nisu kažnjeni zbog niže cijene po vrećici.

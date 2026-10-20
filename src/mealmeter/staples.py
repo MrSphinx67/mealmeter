@@ -29,6 +29,8 @@ class Staple:
     attributes: dict[str, dict[str, str]] = field(default_factory=dict, hash=False, compare=False)
     loose_produce: bool = False
     plausible_per_unit: tuple[float, float] | None = None
+    # realna cijena jedne vrećice (compare_by: pack); zamjenjuje automatske granice, vidi STAPLE_SUSPECT_SQL
+    plausible_per_pack: tuple[float, float] | None = None
     min_pack: float | None = None
     max_pack: float | None = None
     default_exclude_variants: tuple[tuple[str, str], ...] = ()
@@ -165,6 +167,7 @@ def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> d
             attributes=attrs,
             loose_produce=bool(d.get("loose_produce", False)),
             plausible_per_unit=tuple(d["plausible_per_unit"]) if d.get("plausible_per_unit") else None,
+            plausible_per_pack=tuple(d["plausible_per_pack"]) if d.get("plausible_per_pack") else None,
             min_pack=d.get("min_pack"),
             max_pack=d.get("max_pack"),
             default_exclude_variants=tuple(tuple(v.split("=", 1)) for v in d.get("default_exclude_variants", [])),
@@ -205,6 +208,8 @@ def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> d
         for attr, value in st.default_exclude_variants:
             if value not in attrs.get(attr, {}):
                 raise ValueError(f"{key}: default_exclude_variants {attr}={value} nije definiran atribut")
+        if st.plausible_per_pack and (st.compare_by != "pack" or st.plausible_per_unit):
+            raise ValueError(f"{key}: plausible_per_pack vrijedi samo uz compare_by: pack i bez plausible_per_unit")
         if st.compare_by not in ("unit", "pack", "count") or (st.compare_by == "pack" and not st.sachet_g):
             raise ValueError(f"{key}: compare_by mora biti unit, pack (uz sachet_g) ili count")
         # Svi regexi se moraju dati kompilirati (Python re je nadskup RE2 za ove uzorke)
@@ -327,7 +332,8 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
     """)
     con.executemany("INSERT INTO clean.staple_rules VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [
         (st.key, st.name, st.unit, st.compare_by, st.compare_unit,
-         *(st.plausible_per_unit or (None, None)), "manual" if st.plausible_per_unit else None,
+         *(st.plausible_per_unit or st.plausible_per_pack or (None, None)),
+         "manual" if st.plausible_per_unit else "pack" if st.plausible_per_pack else None,
          st.min_pack, st.max_pack, st.pantry, st.loose_produce)
         for st in staples.values()
     ])
@@ -415,6 +421,17 @@ STAPLE_PPU_SQL = """CASE
     WHEN ps.assumed_g > 0 THEN round(c.price_eff / ps.assumed_g * 1000, 2)
     WHEN c.per_unit = r.unit THEN c.price_per_unit END"""
 AUTO_RANGE = (0.25, 4.0)  # automatske granice: 0.25x do 4x medijana namirnice
+# Je li cijena po jedinici `ppu` izvan granica (r = clean.staple_rules). Granice po vrećici
+# (range_source 'pack', plausible_per_pack): skupo je sve iznad gornje granice, a jeftino samo
+# pojedinačna vrećica (n_units <= 1,5) ispod donje, jer su rinfuza i višestruka pakiranja stvarno
+# jeftinija po vrećici. Inače: izvan [ppu_min, ppu_max].
+SINGLE_PACK_UNITS = 1.5
+
+
+def staple_suspect_sql(ppu: str, n_units: str) -> str:
+    return f"""(CASE WHEN r.range_source = 'pack'
+                     THEN ({ppu}) > r.ppu_max OR (coalesce({n_units}, 0) <= {SINGLE_PACK_UNITS} AND ({ppu}) < r.ppu_min)
+                     ELSE NOT (({ppu}) BETWEEN r.ppu_min AND r.ppu_max) END)"""
 
 
 def set_auto_ranges(con: duckdb.DuckDBPyConnection) -> int:
@@ -440,9 +457,10 @@ def staple_price_suspects(con: duckdb.DuckDBPyConnection) -> list[tuple]:
     """Po namirnici: (namirnica, izvor granica, broj cijena izvan granica, broj usporedivih cijena)."""
     return con.execute(f"""
         SELECT staple, any_value(range_source),
-               count(*) FILTER (WHERE ppu NOT BETWEEN ppu_min AND ppu_max), count(*)
+               count(*) FILTER (WHERE suspect), count(*)
         FROM (
-          SELECT ps.staple, r.range_source, r.ppu_min, r.ppu_max, {STAPLE_PPU_SQL} AS ppu
+          SELECT ps.staple, r.range_source, {STAPLE_PPU_SQL} AS ppu,
+                 {staple_suspect_sql(STAPLE_PPU_SQL, "ps.n_units")} AS suspect
           FROM clean.product_staples ps JOIN clean.staple_rules r USING (staple)
           JOIN clean.prices c USING (chain, product_id)
           WHERE NOT ps.excluded AND ps.drop_reason IS NULL AND r.ppu_min IS NOT NULL

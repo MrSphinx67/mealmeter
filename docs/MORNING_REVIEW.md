@@ -14,9 +14,9 @@ Sve grupe s „jeli“ ili „je li“ u nazivu. To je Gavrilovićeva linija **J
 | trgovina-krk:jeli pileca prsa 2600 gr | JELI PILEĆA PRSA 2600 gr | trgovina-krk | 4,23 | 4,23 | 4,38 | 11 |
 | branka:salama prsa pileca jeli gavrilovic | SALAMA PRSA PILEĆA JELI GAVRILOVIĆ | branka | 9,49 | 9,74 | 9,99 | 2 |
 | 3858892724316 | JELI PILEĆA PRSA 2600G,GAVRILOVIĆ; PILEĆA PRSA JELI GAV RILOVIĆ; PILEĆA PRSA JELI GAVRILOVIĆ; PRSA PILEĆA JELI 2600 g; PRSA PILEĆA JELI kg; Pileća prsa Jeli | konzum, ktc, ribola, spar, studenac, trgocentar | 3,84 | 10,29 | 11,69 | 205 |
-| tommy:pileca prsa jeli gavrilovic | PILEĆA PRSA JELI GAVRILOVIĆ | tommy | 9,99 | 10,49 | 10,99 | 81 |
-| gavranovic:gav jeli pileca prsa delikates | GAV.JELI PILEĆA PRSA DELIKATES | gavranovic | 10,49 | 10,49 | 10,49 | 44 |
 | ntl:prsa pileca jeli kg gavrilovic | PRSA PILEĆA JELI kg GAVRILOVIĆ | ntl | 10,49 | 10,49 | 10,49 | 2 |
+| gavranovic:gav jeli pileca prsa delikates | GAV.JELI PILEĆA PRSA DELIKATES | gavranovic | 10,49 | 10,49 | 10,49 | 44 |
+| tommy:pileca prsa jeli gavrilovic | PILEĆA PRSA JELI GAVRILOVIĆ | tommy | 9,99 | 10,49 | 10,99 | 81 |
 | 3858892722572 | ŠUNKA JELI PIL. PRSA; ŠUNKA PILEĆA PRSA JELI | djelo_vodice, studenac | 10,69 | 11,04 | 11,39 | 2 |
 | 3858892724392 | GAV.JELI PILEĆA PRSA 350g; Gavrilović Jeli Pileća prsa 350 g; JELI PILECA PRSA 350 G GAVRILOVIC; PILEĆA PRSA 350 g JE LI GAVRILOVIĆ; PILEĆA PRSA 350G JELI; PILEĆA PRSA 350g JELI GAVRILOVIĆ; PILEĆA PRSA JELI 350 g; PRSA PILEĆA JELI 350 g; PRSA PILEĆA JELI 350g | djelo_vodice, gavranovic, kaufland, konzum, ktc, plodine, ribola, spar, studenac | 8,11 | 11,11 | 13,40 | 310 |
 
@@ -29,18 +29,18 @@ Napomena: štruca od 2,6 kg ima 2,30–4,38 €/kg, pa vjerojatno nosi cijenu po
 | konzum | PRSA PILEĆA K PLUS BEZ KOŽE | 4,69 | 4,69 | 184 |
 | konzum | PILEĆI FILE OD PRSA VAKUUM | 2,99 | 4,99 | 95 |
 | tommy | PILEĆI FILE BRAZILSKI SMRZNUTI | 4,25 | 4,99 | 83 |
-| eurospin | DOMAĆI PIL. FILE OD PRSA OBIT. PAK. | 4,99 | 4,99 | 43 |
 | eurospin | DOMAĆI PIL. FILE OD PRSA OBIT.RFZ | 4,99 | 4,99 | 43 |
+| eurospin | DOMAĆI PIL. FILE OD PRSA OBIT. PAK. | 4,99 | 4,99 | 43 |
 | stanic | PILEĆI FILE SMRZNUTI | 2,75 | 2,75 | 29 |
 | roto | PILEĆI FILE SVJEŽI sniženje (12) | 2,50 | 2,50 | 9 |
-| metro | CCA5KG MC PILEĆI FILE MAP | 4,99 | 4,99 | 7 |
 | metro | 2,5KG UKR. PILEĆI FILE SMRZ | 31,50 | 31,50 | 7 |
+| metro | CCA5KG MC PILEĆI FILE MAP | 4,99 | 4,99 | 7 |
 | studenac | PILECI FILE SMRZ.STANIC | 3,92 | 3,98 | 5 |
 | trgovina-krk | PILEĆI FILE ZA GASTRO 1 kg | 1,95 | 4,08 | 4 |
 | konzum | PILEĆI FILE SOLJENI 6X2 BRAZIL | 3,28 | 4,11 | 4 |
-| branka | PRSA PILEĆA SVJEŽA | 4,79 | 4,99 | 2 |
-| studenac | GASTRO PILEĆI FILE PEČENI | 209,90 | 209,90 | 2 |
 | studenac | PILEĆI FILE BRAZIL 2KG LEDO | 4,91 | 4,91 | 2 |
+| branka | PRSA PILEĆA BEZ KOŽE | 4,79 | 4,79 | 2 |
+| branka | -PRSA PILEĆA SVJEŽA | 4,79 | 4,79 | 2 |
 
 ## 5. Luk: nazivi s bojom (ČEKA POTVRDU, mapiranje nije mijenjano)
 
@@ -221,25 +221,25 @@ Proizvodi izvan zadanog izbora (`find_products`/`get_prices` bez `include_*`), p
 | lanac | naziv | kategorija lanca | skupina | izvor |
 |---|---|---|---|---|
 | branka | CVJETIĆI UKRASNI | HRANA | hrana | chain |
-| ktc | BOMBONI 4g +IGRAČKA PONY | HRANA | hrana | chain |
+| plodine | WHISKEY JAMESON 0,7 L + 2 CASE |  | alkohol | ean_inherited |
 | studenac | IGRAČKA HUGI WUGI BLOW BUBBLE 12/1 | HRANA | hrana | chain |
 | boso | CVIJE ORHID.POSUD.CIKL.47 cm | ZELENI PROGRAM | hrana | chain |
-| ktc | ROLADA VANILIJA 300g DEKOR DOMA | HRANA | hrana | chain |
-| lorenco | MAČJI JEZICI PRALINE OD ML.I BJ.ČOK |  | hrana | ean_inherited |
+| ribola | ABC 100G SPUŽVA BOB | HRANA | hrana | chain |
+| roto | WHISKEY JACK DANIELS HONEY 0,70 + 2 ČAŠE (6)\* | ŽESTOKO | alkohol | chain |
 | gavranovic | TANJURIĆI STAKLO 15X15cm HO-rasprodaja | Hrana | hrana | chain |
 | branka | SALVETE DAISY MI BOŽIĆNA ZVIJEZDA 20/1 | HRANA | hrana | chain |
 | vrutak | \*TEMPRANILLO CASA SOLAR 0.75L COSECHEROS ZOZP SUHO 2025 -6/1- | VINO INOZEMNO | alkohol | chain |
-| plodine | CROISSANT COK. 300 G 6/1 CASALINI |  | hrana | ean_inherited |
-| ribola | GORDONS PINK 0,7L+COPA ČAŠA | PIĆE | pice | chain |
+| ktc | NUTELLA 200g ČAŠA | HRANA | hrana | chain |
+| ktc | MUFFINS CLASIC 250g U POSUDI | HRANA | hrana | chain |
 | gavranovic | VREĆICA UKRASNA 26X32X12 cm-rasprodaja | Hrana | hrana | chain |
-| plodine | KAVA 400 G MLJEVENA FOLIJA ANAMARIJA |  | hrana | ean_inherited |
+| konzum | ČAJ CVIJET BAZGE EKO 40g DARVITALIS | HRANA | hrana | chain |
 | gavranovic | TETA VIOLETA OMEKŠIVAČ 900ml LAGOON | Hrana | hrana | chain |
+| plodine | UKRAS DRAZESNA SRCA 7 G DR OETKER |  | hrana | ean_inherited |
 | trgovina-krk | JIM BEAM 0,7L + 1 ČAŠE | Piće | alkohol | chain |
 | gavranovic | ČESTITKA-rasprodaja | Hrana | hrana | chain |
 | boso | WHISK JACK 0,7 l DANIELS+2 ČAŠE | VINO I JAP | alkohol | chain |
-| ntl | IGRAČKA FINGER SLUG VELIKI | Ostalo | hrana | ean_inherited |
-| konzum | DRAŽEI JAJA RUM KOKOS 175 g CASALI | HRANA | hrana | chain |
-| plodine | NOODLES CURRY 65 G FINI MINI CASA |  | hrana | ean_inherited |
+| spar | Kruh craft Karla u kalup.400 g | Hrana | hrana | chain |
+| plodine | UKRASNE VRECICE KARO BIJELO SIVA |  | hrana | ean_inherited |
 
 ## 1. Jaja
 
@@ -312,16 +312,16 @@ Izvor atributa za 10 grupa riže (`find_products(ingredient="riza")`):
 
 | id | naziv | atributi | izvor (how, naziv) |
 |---|---|---|---|
-| 8001860100017 | Riso Scotti riža originario okr.zrno 1kg | vrsta=originario | vrsta: name („RIŽA SCOTTI ORIGINARIO 1/1 KK“) |
+| 8001860100017 | Riso Scotti riža originario okr.zrno 1kg | vrsta=originario | vrsta: name („RIŽA ORIGINARIO 1 kg SCOTTI“) |
 | 3838700540291 | RIŽA ZA DOMAĆA JELA ZLATO POLJE PODRAVKA 1 kg (12) | vrsta=originario | vrsta: name („RIŽA ZL.POLJE 1 kg (OKRUGLO ZRNO)“) |
 | 3838700540369 | RIŽA ZLATO POLJE BLAZINICA PODRAVKA 800 g (9) |  |  |
-| 8001860201011 | Riso Scotti riža arborio dugo zrno 1kg | vrsta=arborio | vrsta: name („RIŽA ARBORIO 1 kg“) |
-| 8001860190520 | Riso Scotti riža oro dugog zrna 1kg | vrsta=parboiled | vrsta: name („RIŽA 1 kg ORO PARBOILED SCOTTI“) |
+| 8001860201011 | Riso Scotti riža arborio dugo zrno 1kg | vrsta=arborio | vrsta: name („RIŽA ARBORIO 1 kg SCOTTI“) |
+| 8001860190520 | Riso Scotti riža oro dugog zrna 1kg | vrsta=parboiled | vrsta: name („RIŽA SCOTTI ORO 1 kg PARBOILED“) |
 | 3838700540314 | RIŽA BIJELA 800 g VREĆICA ZLATO POLJE | vrsta=dugo_zrno | vrsta: name („Zlato polje riža dugo zrno pvc 800 g“) |
 | 3838700540482 | RIŽA ZL POLJE ST ANDREA 500G KUT (18) |  |  |
-| 5410673007490 | RIZA PARABOILED DUGO ZRNO VRECICA 500 G BENS ORIGINAL | vrsta=dugo_zrno | vrsta: name („RIŽA BENS ORIG. 500 g DUGO ZRNO“) |
+| 5410673007490 | RIZA PARABOILED DUGO ZRNO VRECICA 500 G BENS ORIGINAL | vrsta=dugo_zrno | vrsta: name („RIŽA DUGO ZRNO 500 g 4 VREĆICE BEN S“) |
 | 3838700540406 | RIŽA ZL POLJE ST ANDREA 1KG KUT VAK (12) |  |  |
-| 3838700540604 | RIŽA ARBORIO VAKUMIRANA 1000 g PODRA | vrsta=arborio | vrsta: name („RIŽA ARBORIO 1 kg“) |
+| 3838700540604 | RIŽA ARBORIO VAKUMIRANA 1000 g PODRA | vrsta=arborio | vrsta: name („RIZA ARBORIO 1 KG VP ZLATO POLJE“) |
 
 ## 3. Kakao
 
@@ -413,13 +413,13 @@ Primjer: `plan_basket` 0,5 l mlijeka u Osijeku (prvih 8 trgovina):
 | lanac | adresa | proizvod | vrsta | mast | € | zamjena |
 |---|---|---|---|---|---|---|
 | lidl | Svetog Leopolda Bogdana Mandića 33 A | Križevačka mljekara Trajno mlijeko | trajno | 2.8 | 0,52 |  |
-| lidl | Zeleno Polje 8 A | Križevačka mljekara Trajno mlijeko | trajno | 2.8 | 0,52 |  |
 | lidl | Ulica J. J. Strossmayera 350 | Križevačka mljekara Trajno mlijeko | trajno | 2.8 | 0,52 |  |
-| eurospin | Ulica Josipa Jurja Strossmayera 343A | MLIJEKO TRAJNO 2,8% m.m.1l | trajno | 2.8 | 0,62 |  |
+| lidl | Zeleno Polje 8 A | Križevačka mljekara Trajno mlijeko | trajno | 2.8 | 0,52 |  |
 | eurospin | Ulica 3 gardijske brigade „Kune“ 30 | MLIJEKO TRAJNO 2,8% m.m.1l | trajno | 2.8 | 0,62 |  |
+| eurospin | Ulica Josipa Jurja Strossmayera 343A | MLIJEKO TRAJNO 2,8% m.m.1l | trajno | 2.8 | 0,62 |  |
+| ntl | TVRDAVICA 47 | MLIJEKO TRAJNO 2,8 % m. m. 1L TOJETO | trajno | 2.8 | 0,65 |  |
 | ntl | Zeleno polje 9b, Osijek | MLIJEKO TRAJNO 2,8 % m. m. 1L TOJETO | trajno | 2.8 | 0,65 |  |
-| ntl | Dobra ulica 2, Brijest, Osijek | MLIJEKO TRAJNO 2,8 % m. m. 1L TOJETO | trajno | 2.8 | 0,65 |  |
-| ntl | LOSINJSKA 43 | MLIJEKO TRAJNO 2,8 % m. m. 1L TOJETO | trajno | 2.8 | 0,65 |  |
+| ntl | Cvrsnicka 64 | MLIJEKO TRAJNO 2,8 % m. m. 1L TOJETO | trajno | 2.8 | 0,65 |  |
 
 ## 8. Peršin i svježe bilje
 
@@ -454,3 +454,33 @@ Peršin: `unit: kg`, `pantry: true` (u ukupno ulazi utrošeni dio). Proizvodi be
 | mlijeko | 1,03 | 15,0 ml | 5,0 ml | 250,0 ml | da |
 | maslac | 0,95 | 14,2 g | 4,8 g | 237,5 g | da |
 | riza | 0,85 | 12,8 g | 4,2 g | 212,5 g | da |
+
+## 10. Kvasac, prašak za pecivo, vanilin šećer: granice po vrećici
+
+Automatske granice (0,25x–4x medijana) su ugašene; cijena se uspoređuje po vrećici (`compare_by: pack`), a granice su `plausible_per_pack` (`clean.staple_rules.range_source = 'pack'`). Prijedlog iz podataka: 5. percentil do 1,25 × 95. percentila cijene **pojedinačnih vrećica**, zaokruženo na 0,05 €. `price_suspect` je cijena po vrećici iznad gornje granice, ili pojedinačna vrećica ispod donje; rinfuza i višestruka pakiranja smiju biti jeftinija po vrećici (prije je zato 18 % kvasca bilo odbačeno).
+
+| namirnica | pojedinačnih vrećica | p5 € | medijan € | p95 € | max € | granice € | odbačeno prije | odbačeno sada |
+|---|---|---|---|---|---|---|---|---|
+| kvasac | 185 | 0,30 | 0,61 | 0,99 | 24,49 | 0,30–1,25 | 2250 / 12364 (18,2 %) | 156 / 12364 (1,3 %) |
+| prasak_za_pecivo | 62 | 0,11 | 0,20 | 0,29 | 0,39 | 0,10–0,40 | 10 / 6024 (0,2 %) | 21 / 6024 (0,3 %) |
+| vanilin_secer | 143 | 0,12 | 0,24 | 0,65 | 1,69 | 0,10–0,85 | 333 / 9639 (3,5 %) | 176 / 9639 (1,8 %) |
+
+Najčešće cijene izvan granica:
+
+| namirnica | lanac | naziv | vrećica | cijena € | €/vrećica | trgovina |
+|---|---|---|---|---|---|---|
+| kvasac | kaufland | KLC.Suhi kvasac 7 g | 1,00 | 0,13 | 0,13 | 53 |
+| kvasac | ribola | KVASAC SUH.10g ALEVA | 1,43 | 0,36 | 0,25 | 32 |
+| kvasac | ktc | KVASAC SVJEŽI 50g(2\*25g) DUOS | 1,19 | 0,35 | 0,29 | 18 |
+| kvasac | ribola | KVASAC SUH.10g ALEVA | 1,43 | 0,37 | 0,26 | 13 |
+| kvasac | roto | KVASAC SVJEŽI 42g HARMER (24) | 1,00 | 0,24 | 0,24 | 9 |
+| prasak_za_pecivo | stridon | PRAŠAK ZA PECIVO 13 g BONITO (60) | 1,08 | 0,07 | 0,06 | 12 |
+| prasak_za_pecivo | metro | 1KG ARO PRAŠAK ZA PECIVO | 83,33 | 35,38 | 0,42 | 7 |
+| prasak_za_pecivo | metro | 12GX6 DOLCELA PRAŠAK ZA PECIVO | 6,00 | 32,40 | 5,40 | 2 |
+| vanilin_secer | gavranovic | KOTANYI BOURBON VANILIN ŠEĆER 10g | 1,25 | 1,19 | 0,95 | 121 |
+| vanilin_secer | eurospin | VANILIN AROMA (5VRE.)2G | 0,25 | 0,39 | 1,56 | 43 |
+| vanilin_secer | stridon | VANILIN ŠEĆER 10 g BONITO (55) | 1,25 | 0,07 | 0,06 | 4 |
+| vanilin_secer | stridon | DOLCELA VANILIN ŠEĆER 8 g 10kom PODRAVKA | 1,00 | 1,59 | 1,59 | 2 |
+| vanilin_secer | metro | 6X8G DOLCELA VANILIN ŠEĆER 5+1 | 6,00 | 24,30 | 4,05 | 2 |
+
+Napomena: donja granica kvasca (0,30 €) pogađa i vjerojatno stvarne cijene trgovačkih marki (Kaufland 0,13 €, Harmer 0,24 €). Ako su to stvarne cijene, donja granica bi trebala biti oko 0,10 €.

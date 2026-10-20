@@ -208,3 +208,24 @@ def test_to_base_grams_of_liquid_use_density():
 
     qty, unit, warnings = to_base(103, "g", S["mlijeko"])
     assert (round(qty, 3), unit) == (100.0, "ml") and "1.03 g/ml" in warnings[0]
+
+
+# --- 10. vrećice: granice po pakiranju ----------------------------------------------
+
+@pytest.mark.parametrize("key", ["kvasac", "prasak_za_pecivo", "vanilin_secer"])
+def test_sachet_staples_use_pack_ranges(key, con):
+    st = S[key]
+    assert st.compare_by == "pack" and st.plausible_per_pack and not st.plausible_per_unit
+    lo, hi, src = con.execute("SELECT ppu_min, ppu_max, range_source FROM clean.staple_rules WHERE staple = ?",
+                              [key]).fetchone()
+    assert src == "pack" and (lo, hi) == st.plausible_per_pack
+
+
+def test_pack_suspect_rule(con):
+    from mealmeter.staples import staple_suspect_sql
+
+    sql = staple_suspect_sql("ppu", "n")
+    rows = con.execute(f"""
+        SELECT ppu, n, {sql} FROM (SELECT 'pack' AS range_source, 0.30 AS ppu_min, 1.25 AS ppu_max) r,
+        (VALUES (0.10, 70.0), (0.10, 1.0), (0.60, 1.0), (19.5, 1.0), (2.0, 30.0)) v(ppu, n)""").fetchall()
+    assert [s for _, _, s in rows] == [False, True, False, True, True]

@@ -9,7 +9,7 @@ import duckdb
 
 from mealmeter.build import NATIONAL_NOTE
 from mealmeter.normalize import canonical_city, date_hr, norm_text, normalize_ean
-from mealmeter.staples import STAPLE_PPU_SQL, load_staples, resolve_ingredient
+from mealmeter.staples import STAPLE_PPU_SQL, load_staples, resolve_ingredient, staple_suspect_sql
 
 DEFAULT_DB = Path(os.environ.get("MEALMETER_DB", Path(__file__).resolve().parents[2] / "data" / "mealmeter.duckdb"))
 
@@ -151,7 +151,7 @@ def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | 
                              WHEN psu.assumed_g > 0 THEN 'assumed'
                              WHEN c.unit_confidence = 'low' THEN 'unit_price' ELSE p.pack_source END"""
         suspect_sql = f"""coalesce(({per_unit_sql}) = r.compare_unit
-                                   AND NOT (({ppu_sql}) BETWEEN r.ppu_min AND r.ppu_max), false)"""
+                                   AND {staple_suspect_sql(ppu_sql, "psu.n_units")}, false)"""
         n_units_sql, assumed_sql = "psu.n_units", "psu.assumed_g"
         clearance_sql = "TRUE" if include_clearance else "NOT p.clearance"
     else:

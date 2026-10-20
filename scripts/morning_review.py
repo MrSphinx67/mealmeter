@@ -13,7 +13,7 @@ import duckdb
 
 from mealmeter.food import food_report
 from mealmeter.search import find_products
-from mealmeter.staples import STAPLE_PPU_SQL, load_staples
+from mealmeter.staples import SINGLE_PACK_UNITS, STAPLE_PPU_SQL, load_staples, staple_price_suspects, staple_suspect_sql
 
 OUT = Path("docs/MORNING_REVIEW.md")
 
@@ -338,8 +338,45 @@ def section_units(con) -> str:
     ])
 
 
+# cijene izvan automatskih granica prije Koraka 2C.10 (build_clean.py, commit f1c5420): (odbačeno, od)
+SACHET_SUSPECTS_BEFORE = {"kvasac": (2250, 12364), "prasak_za_pecivo": (10, 6024), "vanilin_secer": (333, 9639)}
+
+
+def section_sachets(con) -> str:
+    suspects = {k: (bad, n) for k, _, bad, n in staple_price_suspects(con)}
+    rows, outliers = [], []
+    for key in ("kvasac", "prasak_za_pecivo", "vanilin_secer"):
+        base = _staple_prices(key)
+        single = f"SELECT DISTINCT chain, name, ppu FROM ({base}) WHERE n_units <= {SINGLE_PACK_UNITS}"
+        n, q, mx = con.execute(f"SELECT count(*), quantile_cont(ppu, [0.05, 0.5, 0.95]), max(ppu) FROM ({single})").fetchone()
+        lo, hi = con.execute("SELECT ppu_min, ppu_max FROM clean.staple_rules WHERE staple = ?", [key]).fetchone()
+        b_bad, b_n = SACHET_SUSPECTS_BEFORE[key]
+        a_bad, a_n = suspects.get(key, (0, 0))
+        rows.append((key, n, hr(q[0]), hr(q[1]), hr(q[2]), hr(mx), f"{hr(lo)}–{hr(hi)}",
+                     f"{b_bad} / {b_n} ({hr(100 * b_bad / b_n, 1)} %)",
+                     f"{a_bad} / {a_n} ({hr(100 * a_bad / a_n, 1)} %)" if a_n else "-"))
+        outliers += con.execute(f"""
+            SELECT '{key}', b.chain, b.name, b.n_units, b.price_eff, b.ppu, count(*) FROM ({base}) b,
+                   (SELECT * FROM clean.staple_rules WHERE staple = '{key}') r
+            WHERE {staple_suspect_sql('b.ppu', 'b.n_units')} GROUP BY ALL ORDER BY count(*) DESC LIMIT 5""").fetchall()
+    return "\n".join([
+        "## 10. Kvasac, prašak za pecivo, vanilin šećer: granice po vrećici", "",
+        "Automatske granice (0,25x–4x medijana) su ugašene; cijena se uspoređuje po vrećici (`compare_by: pack`), "
+        "a granice su `plausible_per_pack` (`clean.staple_rules.range_source = 'pack'`). Prijedlog iz podataka: "
+        "5. percentil do 1,25 × 95. percentila cijene **pojedinačnih vrećica**, zaokruženo na 0,05 €. "
+        "`price_suspect` je cijena po vrećici iznad gornje granice, ili pojedinačna vrećica ispod donje; "
+        "rinfuza i višestruka pakiranja smiju biti jeftinija po vrećici (prije je zato 18 % kvasca bilo odbačeno).", "",
+        md_table(["namirnica", "pojedinačnih vrećica", "p5 €", "medijan €", "p95 €", "max €", "granice €",
+                  "odbačeno prije", "odbačeno sada"], rows), "",
+        "Najčešće cijene izvan granica:", "",
+        md_table(["namirnica", "lanac", "naziv", "vrećica", "cijena €", "€/vrećica", "trgovina"], outliers), "",
+        "Napomena: donja granica kvasca (0,30 €) pogađa i vjerojatno stvarne cijene trgovačkih marki "
+        "(Kaufland 0,13 €, Harmer 0,24 €). Ako su to stvarne cijene, donja granica bi trebala biti oko 0,10 €.",
+    ])
+
+
 SECTIONS = [section_chicken, section_onion, section_food, section_eggs, section_variants, section_kakao,
-            section_salt, section_milk, section_parsley, section_units]
+            section_salt, section_milk, section_parsley, section_units, section_sachets]
 
 
 def main() -> None:
