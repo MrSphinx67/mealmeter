@@ -845,7 +845,10 @@ tjestenina:
   min_pack: 250
   attributes:
     oblik:
-      spageti: '\bspaget|\bspaghett'
+      # bucatini i linguine prije špageta ("SPAGHETTI BUCATINI" je bucatini); spageti uključuje spagetine
+      bucatini: '\bbucatin'
+      linguine: '\blinguin'
+      spageti: '\bspaget|\bspaghett|\bspagetin'
       penne: '\bpenne'
       fusilli: '\bfusill|\bsvrdl'
       makaroni: '\bmakaron'

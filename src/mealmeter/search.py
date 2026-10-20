@@ -81,9 +81,27 @@ def _food_filter(include_nonfood: bool = False, include_alcohol: bool = False, u
     return sql
 
 
+def _required_attrs_sql(staple, required: dict | None) -> str:
+    """SQL (alias p): proizvod sam ima tražene vrijednosti atributa iz naziva; zadana vrijednost
+    (how = 'default', npr. oblik=nepoznato) nikad ne prolazi. Vrijednosti su provjerene pa idu kao literali."""
+    if not (staple and required):
+        return "TRUE"
+    parts = []
+    for attr, value in required.items():
+        accepted = staple.accepted_values(attr, value)
+        if attr not in staple.attributes or any(v not in staple.attributes[attr] for v in accepted):
+            raise ValueError(f"nepoznat atribut {attr}={value} za '{staple.key}'")
+        values = ", ".join("'" + v.replace("'", "''") + "'" for v in accepted)
+        parts.append(f"""EXISTS (SELECT 1 FROM clean.product_attrs ra WHERE ra.chain = p.chain
+                     AND ra.product_id = p.product_id AND ra.staple = '{staple.key}' AND ra.attr = '{attr}'
+                     AND ra.value IN ({values}) AND ra.how <> 'default')""")
+    return " AND ".join(parts)
+
+
 def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | None,
                 include_clearance: bool, food_sql: str | None = None,
-                include_ambiguous: bool = False, include_wholesale: bool = False) -> tuple[str, list, str]:
+                include_ambiguous: bool = False, include_wholesale: bool = False,
+                required: dict | None = None) -> tuple[str, list, str]:
     """SQL (CTE-ovi g, hit, x) za kandidate: jedan redak po (trgovina, proizvod).
 
     x sadrži sve proizvode iz grupa koje odgovaraju upitu/namirnici, s cijenom po jedinici u
@@ -93,9 +111,12 @@ def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | 
     Grupe (bkey: EAN, inače lanac + naziv) biraju se po clean.staple_groups (status 'member'; uz
     include_ambiguous i 'ambiguous') i atributima grupe (clean.staple_group_attrs). Kod namirnice s
     group_by (jaja) izlazni ključ gkey je klasa, a izbor je i dalje po EAN grupi.
+    `required`: izričito traženi atributi ("špageti" -> oblik=spageti). Proizvod ih mora imati u svom
+    nazivu (product_attrs.how nije 'default'), inače ispada, i kad ih grupa (isti EAN) ima.
     Vraća (sql, parametri, stupac relevantnosti za razinu grupe).
     """
     food_sql = food_sql or _food_filter()
+    required_sql = _required_attrs_sql(staple, required)
     city_sql, city_params = _city_filter(city)
     name_sql = " AND ".join("p.name_norm LIKE ?" for _ in tokens) or "TRUE"
     likes = [f"%{t}%" for t in tokens]
@@ -194,7 +215,7 @@ def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | 
           JOIN clean.stores s USING (chain, store_id)
           JOIN clean.chains ch USING (chain)
           {rules_join}
-          WHERE {city_sql} AND {drop_sql} AND {clearance_sql} AND {food_sql}
+          WHERE {city_sql} AND {drop_sql} AND {clearance_sql} AND {food_sql} AND {required_sql}
             AND {"TRUE" if include_wholesale else "s.store_type <> 'cash_and_carry'"}
         )"""
     return sql, hit_params + name_hit_params + coverage_params + city_params, cov_col
@@ -253,6 +274,7 @@ def find_products(
         staple = resolve_ingredient(query)
         if staple:
             query = None  # upit je samo naziv namirnice
+    required = dict(attributes or {})  # izričito traženi atributi: proizvod ih mora imati u nazivu
     if staple and staple.defaults():
         # zadani filtar namirnice (mlijeko: vrsta=trajno; mljeveno meso: miješano, juneće ili svinjsko)
         # osim ako je atribut zadan
@@ -270,7 +292,7 @@ def find_products(
     con = con or connect()
     food_sql = _food_filter(include_nonfood, include_alcohol, "yes" if include_unverified else "no")
     cand_sql, cand_params, cov_col = _candidates(staple, tokens, attributes, city, include_clearance, food_sql,
-                                                 include_ambiguous, include_wholesale)
+                                                 include_ambiguous, include_wholesale, required)
     best = "x.unit_confidence = pick.conf AND x.per_unit = pick.per_unit AND NOT x.price_suspect"
     sql = f"""
         {cand_sql},

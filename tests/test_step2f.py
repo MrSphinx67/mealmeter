@@ -40,3 +40,55 @@ def test_multi_name_ean_flagged():
         "SELECT chain, product_id, ean_global, ean_note FROM clean.products").fetchall()}
     assert got[("a", "0")] == (False, "multi_name") and got[("b", "x")] == (True, None)
     assert got[("a", "y")] == (True, None) and got[("c", "z")] == (False, "repeated_digit")
+
+
+# --- 2. obavezni atribut ------------------------------------------------------------------------
+
+def test_spageti_excludes_bucatini(con):
+    from mealmeter.basket import plan_basket
+
+    res = find_products(ingredient="tjestenina", attributes={"oblik": "spageti"}, con=con, limit=50)
+    names = [r["name"] for r in res]
+    assert not any("BUCATINI" in n for n in names)
+    rows = plan_basket([{"name": "špageti", "amount": 400, "unit": "g"}], "Osijek", con=con)
+    assert all("BUCATINI" not in it["name"] for s in rows["stores"] for it in s["items"])
+
+
+@pytest.mark.parametrize("name,shape", [
+    ("TJESTENINA BUCATINI 500 G RISCOSSA", "bucatini"), ("LINGUINE 500 g BARILLA", "linguine"),
+    ("SPAGHETTI N.5 500g", "spageti"), ("SPAGETINI 500 g", "spageti"), ("TAGLIATELLE 250 g", "tagliatelle"),
+])
+def test_pasta_shapes(name, shape):
+    from mealmeter.staples import extract_attributes
+
+    assert extract_attributes(S["tjestenina"], name)["oblik"] == shape
+
+
+def test_required_attr_default_never_passes():
+    from mealmeter.search import _required_attrs_sql
+
+    sql = _required_attrs_sql(S["grah"], {"oblik": "suho"})
+    assert "how <> 'default'" in sql and "'suho'" in sql
+
+
+def test_product_without_required_attr_dropped(tmp_path):
+    """Grupa (isti EAN) je "špageti" po nazivu drugog lanca, ali proizvod bez oblika u svom nazivu ispada."""
+    from mealmeter.build import build_clean, load_raw
+    from mealmeter.search import _candidates
+    from tests.conftest import FIXTURE
+
+    c = duckdb.connect(str(tmp_path / "r.duckdb"))
+    load_raw(c, FIXTURE, "2026-10-19")
+    c.execute("""INSERT INTO products (chain, product_id, barcode, name, category, unit) VALUES
+                 ('konzum', 'T1', '8011780000960', 'TJESTENINA RISCOSSA 500 G', 'HRANA', 'KOM'),
+                 ('spar', 'T2', '8011780000960', 'TJESTENINA ŠPAGETI RISCOSSA 500 G', 'Hrana', 'KOM')""")
+    c.execute("""INSERT INTO prices (chain, store_id, product_id, price, date) VALUES
+                 ('konzum', '0907', 'T1', 1.09, DATE '2026-10-19'), ('spar', '87089', 'T2', 1.19, DATE '2026-10-19')""")
+    build_clean(c)
+    st = S["tjestenina"]
+    names = {}
+    for req in (None, {"oblik": "spageti"}):
+        sql, params, _ = _candidates(st, [], {"oblik": "spageti"}, None, False, required=req)
+        names[bool(req)] = {n for (n,) in c.execute(sql + " SELECT DISTINCT name FROM x", params).fetchall()}
+    assert "TJESTENINA RISCOSSA 500 G" in names[False]  # bez pravila ulazi preko grupe
+    assert names[True] >= {"TJESTENINA ŠPAGETI RISCOSSA 500 G"} and "TJESTENINA RISCOSSA 500 G" not in names[True]

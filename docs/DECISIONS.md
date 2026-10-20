@@ -671,3 +671,11 @@ Sažetak: [REVIEW_2F.md](REVIEW_2F.md) (`scripts/review_2f.py`).
     
     Provjera je prije nasljeđivanja gramature i skupine preko EAN-a. Na 20.10.: Eurospin 9999999999994 (83
     proizvoda) i jedan Plodinin proizvod s ponavljajućom znamenkom; pravilo „≥ 5 naziva“ ne pogađa ništa drugo.
+82. **Obavezni atribut** (`search._required_attrs_sql`, parametar `required` u `_candidates`).
+    - Izričito traženi atribut, iz naziva sastojka („špageti“ → oblik=spageti, „glatko brašno“ → tip=glatko),
+      iz `attributes` ili iz `form`, proizvod mora imati u svom nazivu (`how` ≠ `default`). Inače ispada, i kad
+      ga grupa (isti EAN) ima po nazivu drugog lanca.
+    - Zadani atributi (`default_attributes`, `default_preference`) se ne traže od proizvoda.
+    - Novi oblici tjestenine: bucatini i linguine (provjeravaju se prije špageta), a špageti uključuju
+      spaghetti i spagetini. „TJESTENINA BUCATINI 500 G RISCOSSA“ (isti EAN kao „ŠPAGETI N6“ u trgovini Krk)
+      više nije špageti.
