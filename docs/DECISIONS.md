@@ -702,3 +702,11 @@ Sažetak: [REVIEW_2F.md](REVIEW_2F.md) (`scripts/review_2f.py`).
       „CCA 4 KG“.
     - Usput: maslinovo ulje isključuje taralli i focacciu („TARALLI DJEVIČANSKO MASL.ULJE 500g“ bio je izbor
       u košarici).
+86. **Provjera jedinice za gramaturu iz stupca `unit`** (`staples.flag_unit_suspects`,
+    `product_staples.unit_suspect`, `drop_reason = 'unit_suspect'`).
+    - Proizvod s `pack_source = 'unit'` čiji je medijan cijene po jedinici izvan 0,6x–1,6x medijana namirnice
+      ispada iz zadanog izbora.
+    - **Upozorenje:** na 20.10. to izbacuje 267 Lidlovih proizvoda, među njima i ispravne jeftine („Trajno
+      mlijeko 2,8% 1l“ 0,52 €/l, „Viro Kristalni šećer 1kg“). Granica 0,6x pogađa jeftine trgovačke marke, a
+      greške jedinice su obično faktor 10 ili više. Prijedlog: 0,3x–3x (`UNIT_SUSPECT_RATIO`). Tablica je u
+      REVIEW_2F.md.

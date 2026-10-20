@@ -176,3 +176,23 @@ def test_fresh_meat_by_weight_primary():
     counter = _w("vaga", 6.0)  # bez pakiranja i bez "cca": vaga u mesnici
     pick = choose_product([counter, _row("pak", 4.50, "strong", grams=500)], 500, "g", "kg", loose=True)
     assert pick["product_id"] == "vaga" and not pick["by_weight_fallback"]  # 3,00 € < 4,50 €
+
+
+# --- 6. provjera jedinice (pack_source = unit) ---------------------------------------------------------
+
+def test_unit_suspect(tmp_path):
+    from mealmeter.build import build_clean, load_raw
+    from tests.conftest import FIXTURE
+
+    c = duckdb.connect(str(tmp_path / "u.duckdb"))
+    load_raw(c, FIXTURE, "2026-10-19")
+    c.execute("""INSERT INTO products (chain, product_id, barcode, name, category, unit) VALUES
+                 ('lidl', 'L1', 'lidl:L1', 'Brašno pšenično glatko', 'Hrana', '1kg'),
+                 ('lidl', 'L2', 'lidl:L2', 'Brašno pšenično oštro', 'Hrana', '500g')""")  # 2,80 €/kg: krivi unit
+    c.execute("""INSERT INTO prices (chain, store_id, product_id, price, date) VALUES
+                 ('lidl', '105', 'L1', 0.69, DATE '2026-10-19'), ('lidl', '105', 'L2', 1.40, DATE '2026-10-19')""")
+    build_clean(c)
+    got = dict(c.execute("""SELECT product_id, unit_suspect FROM clean.product_staples
+                            WHERE staple = 'brasno' AND product_id IN ('L1', 'L2')""").fetchall())
+    assert got == {"L1": False, "L2": True}
+    assert c.execute("SELECT drop_reason FROM clean.product_staples WHERE product_id = 'L2'").fetchone()[0] == "unit_suspect"

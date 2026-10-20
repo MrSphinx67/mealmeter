@@ -551,6 +551,7 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
         WHERE p.chain = ps.chain AND p.product_id = ps.product_id AND r.staple = ps.staple
           AND ps.drop_reason IS NULL AND NOT ps.excluded AND NOT {unit_compatible_sql()}
     """)
+    flag_unit_suspects(con)
     auto_ranges = set_auto_ranges(con)  # granice prije grupa: slabi član traži cijenu u granicama
     groups = build_staple_groups(con)
     return {
@@ -698,6 +699,31 @@ def staple_suspect_sql(ppu: str, n_units: str, ps: str | None = None) -> str:
     hi = f"coalesce({ps}.ppu_max, r.ppu_max)" if ps else "r.ppu_max"
     # range_source 'pack' (vrećice): ppu je cijena po vrećici, i za višestruka pakiranja
     return f"""(NOT (({ppu}) BETWEEN {lo} AND {hi}))"""
+
+
+UNIT_SUSPECT_RATIO = (0.6, 1.6)  # cijena po jedinici iz stupca unit naspram medijana namirnice
+
+
+def flag_unit_suspects(con: duckdb.DuckDBPyConnection) -> int:
+    """Proizvod čija gramatura dolazi iz stupca `unit` (pack_source 'unit', uglavnom Lidl), a medijan
+    cijene po jedinici mu je izvan 0,6x-1,6x medijana namirnice: product_staples.unit_suspect = true
+    i drop_reason 'unit_suspect' (izvan zadanog izbora). Vraća broj takvih proizvoda."""
+    lo, hi = UNIT_SUSPECT_RATIO
+    con.execute("ALTER TABLE clean.product_staples ADD COLUMN unit_suspect BOOLEAN DEFAULT false")
+    con.execute(f"""
+        CREATE OR REPLACE TEMP TABLE unit_ppu AS
+        SELECT ps.staple, ps.chain, ps.product_id, p.pack_source, median({STAPLE_PPU_SQL}) AS ppu
+        FROM clean.product_staples ps JOIN clean.staple_rules r USING (staple)
+        JOIN clean.prices c USING (chain, product_id) JOIN clean.products p USING (chain, product_id)
+        WHERE NOT ps.excluded AND ps.drop_reason IS NULL GROUP BY ALL
+    """)
+    con.execute(f"""
+        UPDATE clean.product_staples ps SET unit_suspect = true, drop_reason = 'unit_suspect'
+        FROM unit_ppu u, (SELECT staple, median(ppu) AS med FROM unit_ppu GROUP BY staple) m
+        WHERE u.staple = ps.staple AND u.chain = ps.chain AND u.product_id = ps.product_id AND m.staple = u.staple
+          AND u.pack_source = 'unit' AND m.med > 0 AND (u.ppu / m.med > {hi} OR u.ppu / m.med < {lo})
+    """)
+    return con.execute("SELECT count(*) FROM clean.product_staples WHERE unit_suspect").fetchone()[0]
 
 
 def set_auto_ranges(con: duckdb.DuckDBPyConnection) -> int:
