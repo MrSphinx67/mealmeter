@@ -44,15 +44,30 @@ def is_measure(unit: str | None) -> bool:
     return norm_text(unit or "") in load_units().measures
 
 
+# komad u receptu: masa iz pieces (luk, češanj češnjaka, vezica peršina...)
+PIECE_UNITS = {"kom", "komad", "komada", "komadi", "kos", "glavica", "glavice", "cesanj", "cesnja", "cesnjeva",
+               "rezanj", "rezanja", "vezica", "vezice"}
+
+
+def is_piece(unit: str | None) -> bool:
+    return norm_text(unit or "") in PIECE_UNITS
+
+
 def convert(amount: float, unit: str, staple) -> tuple[float, str, list[str]]:
-    """Količina u kuhinjskoj mjeri -> (količina, "g" | "ml", upozorenja) za namirnicu `staple`
-    (Staple ili ključ). Namirnica u kg dobiva grame preko gustoće (g/ml; bez gustoće 1 g/ml),
-    a namirnica u l mililitre. Namirnica u komadima (jaja) ne može se mjeriti žlicom: ValueError."""
+    """Količina u kuhinjskoj mjeri ili komadima -> (količina, "g" | "ml", upozorenja) za namirnicu
+    `staple` (Staple ili ključ). Mjera: namirnica u kg dobiva grame preko gustoće (g/ml; bez gustoće
+    1 g/ml), a namirnica u l mililitre. Komad ("kom", "glavica", "češanj", "vezica"): grami iz pieces;
+    namirnica bez mase komada daje ValueError, kao i žlica za namirnicu u komadima (jaja)."""
     units = load_units()
     key = norm_text(unit or "")
+    staple_key = getattr(staple, "key", staple)
+    if key in PIECE_UNITS:
+        g = units.pieces.get(staple_key)
+        if g is None:
+            raise ValueError(f"nema procijenjene mase komada za '{staple_key}' (data/units.yaml, pieces)")
+        return amount * g, "g", [f"{amount:g} {unit} ≈ {amount * g:g} g (procjena, komad {g:g} g)"]
     if key not in units.measures:
         raise ValueError(f"nepoznata mjera '{unit}'; poznate: {', '.join(sorted(set(units.names.values())))}")
-    staple_key = getattr(staple, "key", staple)
     staple_unit = getattr(staple, "unit", "kg")
     ml = amount * units.measures[key]
     label = f"{amount:g} {unit} ≈ {ml:g} ml"

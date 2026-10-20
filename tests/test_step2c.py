@@ -165,7 +165,7 @@ def test_persin_kg_pantry():
     (2, "dcl", "ulje", (200, "ml")),
     (1, "prstohvat", "sol", (0.6, "g")),
     (2, "žlice", "maslac", (28.5, "g")),
-    (1, "žlica", "med", (15, "g")),  # bez gustoće: 1 g/ml
+    (1, "žlica", "kecap", (15, "g")),  # bez gustoće: 1 g/ml
 ])
 def test_convert(amount, unit, staple, expected):
     from mealmeter.units import convert
@@ -190,7 +190,7 @@ def test_units_all_estimates():
 
     raw = yaml.safe_load(UNITS_PATH.read_text(encoding="utf-8"))
     assert all(m["estimate"] for m in raw["measures"].values())
-    assert set(raw["densities"]) == {"brasno", "secer", "sol", "ulje", "mlijeko", "maslac", "riza"}
+    assert {"brasno", "secer", "sol", "ulje", "mlijeko", "maslac", "riza"} <= set(raw["densities"])
     assert all(d["estimate"] for d in raw["densities"].values())
 
 

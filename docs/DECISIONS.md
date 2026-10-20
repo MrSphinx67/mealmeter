@@ -504,3 +504,10 @@ Izvještaji: [STEP2D_REVIEW.md](STEP2D_REVIEW.md) (`scripts/step2d_review.py`) i
     „peršin korijen“. Novo polje `assume_piece`: proizvod bez gramature koji se ne prodaje na vagu dobiva
     procijenjenu masu komada iz `data/units.yaml` (`pieces.persin`: vezica 50 g, procjena), uz
     `unit_confidence=low` i `pack_source=assumed`. Recept „1 vezica“ = 50 g.
+62. **Mjere i težine komada (prijedlog, sve procjene).**
+    - Nove gustoće u `data/units.yaml`: kakao, med, prašak za pecivo, griz, krušne mrvice, mljevena paprika,
+      papar, ocat, Vegeta (`dodatak_jelima`), zobene pahuljice i sjeckani peršin.
+    - Nova sekcija `pieces`: luk 150, češanj 5, mrkva 100, krumpir 200, rajčica 120, paprika 150, tikvica 250,
+      jabuka 180, limun 120, naranča 200, banana 150 g. Uz njih krastavac, kupus, zelena salata, jaje i vezica peršina.
+    - `piece_g` je maknut iz `staples.yaml`; mase komada su samo u `units.yaml`.
+    - `units.convert()` prima i komade („kom“, „glavica“, „češanj“, „vezica“).

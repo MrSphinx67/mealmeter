@@ -34,7 +34,7 @@ measures:
     aliases: [čaša, čaše, čašu]
     estimate: true
 
-densities:  # g/ml
+densities:  # g/ml; u komentaru: 1 žlica (15 ml) / 1 žličica (5 ml) / 1 šalica (250 ml)
   brasno: {g_per_ml: 0.55, estimate: true}   # glatko, neprosijano, zahvaćeno žlicom
   secer: {g_per_ml: 0.85, estimate: true}    # kristal
   sol: {g_per_ml: 1.2, estimate: true}       # sitna kuhinjska
@@ -42,6 +42,33 @@ densities:  # g/ml
   mlijeko: {g_per_ml: 1.03, estimate: true}
   maslac: {g_per_ml: 0.95, estimate: true}   # omekšan, utisnut u mjeru
   riza: {g_per_ml: 0.85, estimate: true}     # sirova, dugo zrno
+  # Korak 2D, prijedlog za pregled
+  kakao: {g_per_ml: 0.45, estimate: true}             # žlica ≈ 7 g
+  med: {g_per_ml: 1.40, estimate: true}               # žlica ≈ 21 g
+  prasak_za_pecivo: {g_per_ml: 0.80, estimate: true}  # žličica ≈ 4 g (vrećica 12 g ≈ 3 žličice)
+  griz: {g_per_ml: 0.65, estimate: true}              # žlica ≈ 10 g, šalica ≈ 160 g
+  krusne_mrvice: {g_per_ml: 0.45, estimate: true}     # žlica ≈ 7 g
+  mljevena_paprika: {g_per_ml: 0.45, estimate: true}  # žličica ≈ 2 g
+  papar: {g_per_ml: 0.50, estimate: true}             # mljeveni; žličica ≈ 2,5 g
+  ocat: {g_per_ml: 1.01, estimate: true}              # ocat je u l, gustoća služi samo za g -> ml
+  dodatak_jelima: {g_per_ml: 0.90, estimate: true}    # Vegeta; žličica ≈ 4,5 g
+  zobene_pahuljice: {g_per_ml: 0.36, estimate: true}  # šalica ≈ 90 g
+  persin: {g_per_ml: 0.25, estimate: true}            # sjeckani list; žlica ≈ 4 g
 
-pieces:  # g po komadu
+pieces:  # g po komadu (srednje veliki, neočišćen, kakav se kupuje)
   persin: {g: 50, piece: vezica, estimate: true}  # vezica peršina bez težine
+  luk: {g: 150, estimate: true}
+  cesnjak: {g: 5, piece: češanj, estimate: true}  # jedan češanj, ne glavica
+  mrkva: {g: 100, estimate: true}
+  krumpir: {g: 200, estimate: true}
+  rajcica: {g: 120, estimate: true}
+  paprika: {g: 150, estimate: true}
+  tikvica: {g: 250, estimate: true}
+  jabuka: {g: 180, estimate: true}
+  limun: {g: 120, estimate: true}
+  naranca: {g: 200, estimate: true}
+  banana: {g: 150, estimate: true}  # s korom
+  krastavac: {g: 300, estimate: true}
+  kupus: {g: 1500, piece: glavica, estimate: true}
+  zelena_salata: {g: 400, piece: glavica, estimate: true}
+  jaja: {g: 60, estimate: true}  # jaje M

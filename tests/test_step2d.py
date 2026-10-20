@@ -285,3 +285,45 @@ def test_persin_bunch_assumed(tmp_path):
     got = dict(c.execute("""SELECT product_id, assumed_g FROM clean.product_staples
                             WHERE staple = 'persin' AND product_id IN ('P1', 'P2')""").fetchall())
     assert got == {"P1": 50, "P2": None}  # na vagu (kg) bez procjene
+
+
+# --- 9. mjere i težine komada ----------------------------------------------------------------
+
+@pytest.mark.parametrize("amount,unit,staple,expected", [
+    (1, "žlica", "kakao", 6.75), (1, "žlica", "med", 21.0), (1, "žličica", "prasak_za_pecivo", 4.0),
+    (1, "šalica", "griz", 162.5), (1, "šalica", "zobene_pahuljice", 90.0), (1, "žlica", "krusne_mrvice", 6.75),
+    (1, "žličica", "mljevena_paprika", 2.25), (1, "žličica", "papar", 2.5), (1, "žličica", "dodatak_jelima", 4.5),
+    (1, "žlica", "persin", 3.75),
+    (2, "kom", "luk", 300), (3, "češnja", "cesnjak", 15), (1, "kom", "mrkva", 100), (1, "kom", "krumpir", 200),
+    (1, "kom", "rajcica", 120), (1, "kom", "paprika", 150), (1, "kom", "tikvica", 250), (1, "kom", "jabuka", 180),
+    (1, "kom", "limun", 120), (1, "kom", "naranca", 200), (1, "kom", "banana", 150), (1, "vezica", "persin", 50),
+])
+def test_convert_measures_and_pieces(amount, unit, staple, expected):
+    from mealmeter.units import convert
+
+    qty, base, warnings = convert(amount, unit, S[staple])
+    assert base == "g" and qty == pytest.approx(expected) and "procjena" in warnings[0]
+
+
+def test_convert_vinegar_spoon_is_ml():
+    from mealmeter.units import convert
+
+    assert convert(1, "žlica", S["ocat"])[:2] == (15, "ml")
+
+
+def test_convert_piece_unknown():
+    from mealmeter.units import convert
+
+    with pytest.raises(ValueError):
+        convert(1, "kom", S["brasno"])
+
+
+def test_all_units_estimates():
+    import yaml
+
+    from mealmeter.units import UNITS_PATH
+
+    raw = yaml.safe_load(UNITS_PATH.read_text(encoding="utf-8"))
+    for section in ("measures", "densities", "pieces"):
+        assert all(v["estimate"] for v in raw[section].values()), section
+    assert not any(st.piece_g for st in S.values())  # mase komada su samo u units.yaml
