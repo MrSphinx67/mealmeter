@@ -139,3 +139,15 @@ def test_basket_milk_returns_vrsta_and_mast(con):
     assert ing["accepted_values"] == {"mast": ["2.8", "3.2", "3.5", "3.8"]}
     item = res["best_store"]["items"][0]
     assert item["attributes"]["vrsta"] == "trajno" and item["attributes"]["mast"] in ("2.8", "3.2", "3.5", "3.8")
+
+
+# --- 8. peršin i svježe bilje ----------------------------------------------------------
+
+def test_persin_kg_pantry():
+    from mealmeter.basket import IngredientError, to_base
+
+    st = S["persin"]
+    assert st.unit == "kg" and st.pantry and st.compare_unit == "kg"
+    assert to_base(20, "g", st)[:2] == (20, "g")
+    with pytest.raises(IngredientError):  # vezica bez mase se ne pretvara u grame
+        to_base(1, "vezica", st)

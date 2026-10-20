@@ -426,3 +426,6 @@ Izvještaji za pregled su u [MORNING_REVIEW.md](MORNING_REVIEW.md) (`scripts/mor
       odabranog proizvoda (vrsta, mast). Zamjena (npr. „mast=3.2 umjesto 2.8“) ide u `notes`.
     - Prepoznaje se i „TR“ (trajno) i „SV.“ (svježe).
     - Isključeni su acidofilno, kiselo („KIS.“), protein, „ČOKOL.“ i palačinke.
+49. **Peršin:** `unit: kg` (bio je `kom`) i `pantry: true`. Vezice i komadi bez gramature nemaju cijenu po kg i
+    ne pretvaraju se. „vezica“ je poznata jedinica recepta, ali bez `piece_g` daje `unmatched`. Drugog
+    svježeg bilja u rječniku nema.

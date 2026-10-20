@@ -288,8 +288,31 @@ def section_milk(con) -> str:
     ])
 
 
+def section_parsley(con) -> str:
+    from mealmeter.basket import plan_basket
+
+    rows = con.execute(f"""
+        SELECT CASE WHEN ppu IS NULL THEN 'bez cijene po kg (vezica/komad)' ELSE 'cijena po kg' END,
+               count(DISTINCT chain || product_id), min(ppu), median(ppu), max(ppu), min(name)
+        FROM ({_staple_prices('persin')}) GROUP BY 1 ORDER BY 1""").fetchall()
+    res = plan_basket([{"name": "peršin", "amount": 20, "unit": "g"}], "Zagreb", con=con)
+    best = res["best_store"]
+    it = best["items"][0] if best else None
+    example = (f"`plan_basket` 20 g peršina u Zagrebu: {best['chain']}, „{it['name']}“, pakiranje "
+               f"{hr(it['cost_pack'])} €, utrošeno (u ukupno) {hr(it['cost_used'])} €." if it else "")
+    return "\n".join([
+        "## 8. Peršin i svježe bilje", "",
+        "Peršin: `unit: kg`, `pantry: true` (u ukupno ulazi utrošeni dio). Proizvodi bez gramature i bez "
+        "cijene po kg (vezice, komadi) se ne pretvaraju: nemaju cijenu po kg, pa ne ulaze u usporedbu ni u "
+        "košaricu, a jedinica „vezica“ u receptu daje grešku (nema pretpostavljene mase). Drugog svježeg "
+        "bilja u rječniku još nema (bosiljak, kopar i vlasac su samo isključenja kod drugih namirnica).", "",
+        md_table(["proizvodi", "broj", "min €/kg", "medijan €/kg", "max €/kg", "primjer"], rows), "",
+        example,
+    ])
+
+
 SECTIONS = [section_chicken, section_onion, section_food, section_eggs, section_variants, section_kakao,
-            section_salt, section_milk]
+            section_salt, section_milk, section_parsley]
 
 
 def main() -> None:

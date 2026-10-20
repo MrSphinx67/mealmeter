@@ -745,7 +745,10 @@ persin:
   must_match: [persin]
   must_not_match: [sir\b, meki, hren, origano, zac\b, susen, zacin, kotanyi, safram, sjeme, maestro,
                    ulje, maslac, krumpir]
-  unit: kom
+  # svježe bilje: cijena po kg, u košarici se računa utrošeni dio; vezice bez težine se ne pretvaraju
+  # (nemaju cijenu po kg, a "1 vezica" u receptu nema pretpostavljenu masu)
+  unit: kg
+  pantry: true
   attributes:
     dio:
       korijen: '\bkorijen|\bberlinsk'

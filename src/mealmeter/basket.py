@@ -18,6 +18,8 @@ _UNIT_ALIASES = {
     "ml": ("ml", 1), "cl": ("ml", 10), "dl": ("ml", 100), "l": ("ml", 1000), "lit": ("ml", 1000), "litra": ("ml", 1000),
     "kom": ("kom", 1), "komad": ("kom", 1), "komada": ("kom", 1), "kos": ("kom", 1), "glavica": ("kom", 1),
     "rezanj": ("kom", 1), "rezanja": ("kom", 1), "cesanj": ("kom", 1), "cesnja": ("kom", 1),
+    # vezica (svježe bilje) je komad bez mase: pretvara se samo uz piece_g, a peršin ga namjerno nema
+    "vezica": ("kom", 1), "vezice": ("kom", 1),
     "vrecica": ("vrecica", 1), "vrecice": ("vrecica", 1), "paket": ("vrecica", 1), "paketic": ("vrecica", 1),
     "zlica": ("spoon", 15), "zlice": ("spoon", 15), "jusna zlica": ("spoon", 15),
     "zlicica": ("spoon", 5), "zlicice": ("spoon", 5), "cajna zlicica": ("spoon", 5),
