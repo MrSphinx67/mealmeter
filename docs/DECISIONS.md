@@ -544,3 +544,11 @@ Izvještaji: [STEP2D_REVIEW.md](STEP2D_REVIEW.md) (`scripts/step2d_review.py`) i
       trgovine manje (−272 tis. cijena), Metro 6 manje. Ukupno 27 lanaca, 1.452 trgovine, 474.121 proizvod,
       16,94 mil. redaka cijena (−371.547). Provjera je prošla (pad < 20 %), uz upozorenja; zapis je u
       `docs/data/update_2026-10-20.txt`. Baza je sada na 20.10., a 19.10. je u `clean.price_history`.
+67. **docs/REVIEW_FOR_CHAT.md** (`scripts/review_for_chat.py`, najviše 150 redaka, provjerava se pri izradi):
+    - košarice za palačinke i bolonjez u Osijeku, po stavkama;
+    - mjere, gustoće i težine komada iz `units.yaml`;
+    - pokrivenost (točka 11);
+    - rezultat ažuriranja na 2026-10-20.
+
+    Generirano nad arhivom 2026-10-20. STEP2D_REVIEW.md je generiran nad 19.10., prije ažuriranja; usporedbe
+    prije/poslije u njemu odnose se na taj dan.

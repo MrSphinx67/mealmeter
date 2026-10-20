@@ -29,7 +29,7 @@ def basket_lines(con, recipe: str) -> list[str]:
     data = json.loads(Path(f"data/recipes/{recipe}.json").read_text(encoding="utf-8"))
     res = plan_basket(data["ingredients"], "Osijek", con=con)
     best = res["best_store"]
-    rows = [(it["ingredient"], it["name"][:38], f"{it['n_packs']} x {hr(it['pack_qty'], 0)}" if it["n_packs"] else "na vagu",
+    rows = [(it["ingredient"], it["name"][:38], f"{it['n_packs']} x {hr(it['pack_qty'], 0)} {it['need_unit']}" if it["n_packs"] else "na vagu",
              hr(it["cost_pack"]), hr(it["cost_used"]), f"{it['unit_confidence']}/{it['pack_source']}")
             for it in best["items"]]
     extra = [f"nije povezano: {u['name']} ({u['reason']})" for u in res["unmatched"]]
@@ -45,17 +45,18 @@ def units_lines() -> list[str]:
     raw = yaml.safe_load(UNITS_PATH.read_text(encoding="utf-8"))
     measures = ", ".join(f"{k} {hr(m['ml'], 1).rstrip('0').rstrip(',')} ml" for k, m in raw["measures"].items())
 
-    def pairs(items):
+    def columns(items, k=3):
+        """Parovi (naziv, vrijednost) u k stupaca po retku, da tablica bude kratka."""
         items = list(items)
-        half = (len(items) + 1) // 2
-        left, right = items[:half], items[half:] + [("", "")] * (2 * half - len(items))
-        return [(*a, *b) for a, b in zip(left, right)]
+        n = -(-len(items) // k)
+        cols = [items[i * n:(i + 1) * n] + [("", "")] * (n - len(items[i * n:(i + 1) * n])) for i in range(k)]
+        return [tuple(x for col in cols for x in col[r]) for r in range(n)]
 
-    dens = pairs((k, hr(v["g_per_ml"])) for k, v in raw["densities"].items())
-    pieces = pairs((k + (f" ({v['piece']})" if v.get("piece") else ""), f"{v['g']:g}") for k, v in raw["pieces"].items())
+    dens = columns((k, hr(v["g_per_ml"])) for k, v in raw["densities"].items())
+    pieces = columns((k + (f" ({v['piece']})" if v.get("piece") else ""), f"{v['g']:g}") for k, v in raw["pieces"].items())
     return ["## Mjere i težine komada (data/units.yaml, sve procjene)", "", f"Mjere: {measures}.", "",
-            md_table(["namirnica", "g/ml", "namirnica", "g/ml"], dens), "",
-            md_table(["komad", "g", "komad", "g"], pieces), ""]
+            md_table(["namirnica", "g/ml"] * 3, dens), "",
+            md_table(["komad", "g"] * 3, pieces), ""]
 
 
 def coverage_lines(con) -> list[str]:
@@ -76,11 +77,11 @@ def update_lines() -> list[str]:
     if not files:
         return ["## Dnevno ažuriranje (točka 13)", "", "(nema zapisa)"]
     text = files[-1].read_text(encoding="utf-8").splitlines()
-    keep = [ln for ln in text if ln.strip().startswith(("datum", "lanaca", "trgovina", "proizvoda", "redaka", "čistih",
-                                                         "povijest", "!", "UKUPNO"))]
+    keep = [ln for ln in text if ln.strip().startswith(("datum:", "lanaca:", "trgovina:", "proizvoda:", "redaka cijena:",
+                                                         "!", "UKUPNO"))]
     return ["## Dnevno ažuriranje (točka 13)", "",
             f"`scripts/update.py` uzima najnoviju arhivu iz /v0/list; zapis: `{files[-1]}`.", "", "```",
-            *[ln.rstrip() for ln in keep], "```", ""]
+            *[ln.rstrip() for ln in keep], "```"]
 
 
 def main() -> None:
@@ -88,8 +89,8 @@ def main() -> None:
     con = duckdb.connect(db_path, read_only=True)
     date = con.execute("SELECT max(date) FROM clean.prices").fetchone()[0]
     lines = [f"# Pregled za razgovor: Korak 2D (arhiva {date.isoformat()})", "",
-             "Generira `scripts/review_for_chat.py`; detalji su u STEP2D_REVIEW.md i DECISIONS.md.", "",
-             "## Košarice u Osijeku (najbolja trgovina)", ""]
+             "## Košarice u Osijeku (najbolja trgovina; generira `scripts/review_for_chat.py`, detalji u "
+             "STEP2D_REVIEW.md)", ""]
     for recipe in RECIPES:
         lines += basket_lines(con, recipe)
     lines += units_lines() + coverage_lines(con) + update_lines()
