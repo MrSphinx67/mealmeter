@@ -414,3 +414,6 @@ Izvještaji za pregled su u [MORNING_REVIEW.md](MORNING_REVIEW.md) (`scripts/mor
 45. **Pileća prsa:** `plausible_per_unit: [5, 20]` €/kg (vlasnik). Grupe s „jeli“/„je li“ (Gavrilović Jeli,
     delikatesna prsa) su **privremeno isključene** dok vlasnik ne potvrdi (MORNING_REVIEW.md, točka 4).
 46. **Luk:** samo izvještaj (MORNING_REVIEW.md, točka 5), mapiranje boja nije mijenjano do potvrde vlasnika.
+47. **Sol:** `soljenk` je maknut iz `must_not_match`. Novo polje `require_pack` (`clean.product_staples.drop_reason =
+    'bez_gramature'`): proizvod koji pogađa uzorak ispada samo ako nema gramature. „SOL MORSKA SITNA 250G
+    SOLJENKA“ je sol.

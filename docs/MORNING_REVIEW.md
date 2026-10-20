@@ -29,8 +29,8 @@ Napomena: štruca od 2,6 kg ima 2,30–4,38 €/kg, pa vjerojatno nosi cijenu po
 | konzum | PRSA PILEĆA K PLUS BEZ KOŽE | 4,69 | 4,69 | 184 |
 | konzum | PILEĆI FILE OD PRSA VAKUUM | 2,99 | 4,99 | 95 |
 | tommy | PILEĆI FILE BRAZILSKI SMRZNUTI | 4,25 | 4,99 | 83 |
-| eurospin | DOMAĆI PIL. FILE OD PRSA OBIT.RFZ | 4,99 | 4,99 | 43 |
 | eurospin | DOMAĆI PIL. FILE OD PRSA OBIT. PAK. | 4,99 | 4,99 | 43 |
+| eurospin | DOMAĆI PIL. FILE OD PRSA OBIT.RFZ | 4,99 | 4,99 | 43 |
 | stanic | PILEĆI FILE SMRZNUTI | 2,75 | 2,75 | 29 |
 | roto | PILEĆI FILE SVJEŽI sniženje (12) | 2,50 | 2,50 | 9 |
 | metro | 2,5KG UKR. PILEĆI FILE SMRZ | 31,50 | 31,50 | 7 |
@@ -38,9 +38,9 @@ Napomena: štruca od 2,6 kg ima 2,30–4,38 €/kg, pa vjerojatno nosi cijenu po
 | studenac | PILECI FILE SMRZ.STANIC | 3,92 | 3,98 | 5 |
 | trgovina-krk | PILEĆI FILE ZA GASTRO 1 kg | 1,95 | 4,08 | 4 |
 | konzum | PILEĆI FILE SOLJENI 6X2 BRAZIL | 3,28 | 4,11 | 4 |
-| studenac | GASTRO PILEĆI FILE PEČENI | 209,90 | 209,90 | 2 |
 | branka | PRSA PILEĆA SVJEŽA | 4,79 | 4,99 | 2 |
-| studenac | PILEĆI FILE BRAZIL 2KG LEDO | 4,91 | 4,91 | 2 |
+| branka | -PRSA PILEĆA SVJEŽA | 4,79 | 4,79 | 2 |
+| studenac | GASTRO PILEĆI FILE PEČENI | 209,90 | 209,90 | 2 |
 
 ## 5. Luk: nazivi s bojom (ČEKA POTVRDU, mapiranje nije mijenjano)
 
@@ -220,26 +220,26 @@ Proizvodi izvan zadanog izbora (`find_products`/`get_prices` bez `include_*`), p
 
 | lanac | naziv | kategorija lanca | skupina | izvor |
 |---|---|---|---|---|
-| gavranovic | SLADOLED KING DESIRE 450ml ČAŠA LEDO | Hrana | hrana | chain |
 | ribola | DUKAT ČOK.MLI 0,2l ČAŠA | HRANA | hrana | chain |
-| ktc | BOMBONI 4g +IGRAČKA PONY | HRANA | hrana | chain |
+| gavranovic | KRPA KUH.40X60cm 100%PAMUK HT-8902 | Hrana | hrana | chain |
+| boso | POSUD DALAS ARANŽ. MALA | ZELENI PROGRAM | hrana | chain |
 | studenac | IGRAČKA HUGI WUGI BLOW BUBBLE 12/1 | HRANA | hrana | chain |
+| gavranovic | VREĆICA UKRASNA 26x32x12cm TOČKICE ROZA/BIJELA -rasprodaja | Hrana | hrana | chain |
 | plodine | SVIJECE ZA TORTU UKRASNE 12/1 52506 |  | hrana | ean_inherited |
-| ktc | ROLADA VANILIJA 300g DEKOR DOMA | HRANA | hrana | chain |
-| gavranovic | SVIJEĆA ROĐENDANSKA 10kom-rasprodaja | Hrana | hrana | chain |
-| lorenco | MAČJI JEZICI PRALINE OD ML.I BJ.ČOK |  | hrana | ean_inherited |
+| branka | DEKOR ROZA KRISTALIĆI 10g | HRANA | hrana | chain |
+| djelo_vodice | SENF ČAŠA 250ML | SENF ČAŠICA | hrana | chain |
+| gavranovic | NOŽ 3/1 23360/335-rasprodaja | Hrana | hrana | chain |
 | spar | Kruh craft Karla u kalup.400 g | Hrana | hrana | chain |
 | ribola | PLAZMA ČAŠA 450ml LEDO | HRANA | hrana | chain |
 | vrutak | \*TEMPRANILLO CASA SOLAR 0.75L COSECHEROS ZOZP SUHO 2025 -6/1- | VINO INOZEMNO | alkohol | chain |
-| boso | SJEME GARDEN KRAST.DUGI ZELENI | ZELENI PROGRAM | hrana | chain |
-| branka | ČAJ LIPA CVIJET 50g | HRANA | hrana | chain |
-| jadranka_trgovina | LIKER PELINKOVAC 0,7L VERSUS + 2 ČAŠE PROMO | PIĆE | alkohol | chain |
-| boso | SJEME GARDEN PRKOS FIORI DOPPI | ZELENI PROGRAM | hrana | chain |
-| gavranovic | VREĆICA UKRASNA ZA BOCU 12x36x9cm BIJELA/SIVA - rasprodaja | Hrana | hrana | chain |
-| gavranovic | BATERIJE PHILIPS 6F22 9V 1/1-rasprodaja | Hrana | hrana | chain |
+| ktc | NUTELLA 200g ČAŠA | HRANA | hrana | chain |
+| ktc | MUFFINS CLASIC 250g U POSUDI | HRANA | hrana | chain |
+| konzum | ČAJ CVIJET BAZGE EKO 40g DARVITALIS | HRANA | hrana | chain |
+| plodine | UKRAS DRAZESNA SRCA 7 G DR OETKER |  | hrana | ean_inherited |
 | trgovina-krk | JIM BEAM 0,7L + 1 ČAŠE | Piće | alkohol | chain |
-| gavranovic | SCABIOSA CVIJET - rasprodaja | Hrana | hrana | chain |
 | plodine | PALOMA SALVETE STYLE 33X33/20 RUZA |  | hrana | ean_inherited |
+| gavranovic | TANJURIĆI STAKLO 15X15cm HO-rasprodaja | Hrana | hrana | chain |
+| boso | SJEME GARDEN MJEŠ.CVIJEĆA LUN.ST | ZELENI PROGRAM | hrana | chain |
 
 ## 1. Jaja
 
@@ -255,8 +255,8 @@ Nazivi u `jaja:m` s krajnjim cijenama po jajetu (≥ 1,00 ili ≤ 0,16 €; 1,30
 | metro | 15/1 MC JAJA PODNI UZGOJ M | 15,00 | 45,36 | 3,02 | 7 |
 | metro | 30/1 ARO JAJA A KL M | 30,00 | 39,00 | 1,30 | 7 |
 | studenac | SVJEŽA JAJA 10/1, RAZRED M | 10,00 | 1,59 | 0,16 | 1 |
-| lidl | PERFA Jaja podni uzgoj razred M | 15,00 | 2,25 | 0,15 | 116 |
 | lidl | Žito Jaja razred M | 18,00 | 2,75 | 0,15 | 116 |
+| lidl | PERFA Jaja podni uzgoj razred M | 15,00 | 2,25 | 0,15 | 116 |
 | lidl | Kones Bi Jaja, razred M | 10,00 | 1,45 | 0,14 | 116 |
 | stridon | SVJEŽA JAJA A KLASE RAZRED M 10/1 PERFA | 10,00 | 0,16 | 0,02 | 1 |
 | jadranka_trgovina | JAJA SVJEŽA 30/1 KLASA A, RAZRED M | 30,00 | 0,26 | 0,01 | 1 |
@@ -320,7 +320,7 @@ Izvor atributa za 10 grupa riže (`find_products(ingredient="riza")`):
 | 3838700540314 | RIŽA BIJELA 800 g VREĆICA ZLATO POLJE | vrsta=dugo_zrno | vrsta: name („Zlato polje riža dugo zrno pvc 800 g“) |
 | 3838700540482 | RIŽA ZL POLJE ST ANDREA 500G KUT (18) |  |  |
 | 5410673007490 | RIZA PARABOILED DUGO ZRNO VRECICA 500 G BENS ORIGINAL | vrsta=dugo_zrno | vrsta: name („RIŽA BENS DUGO ZRNO 500 g“) |
-| 3838700540406 | RIŽA ZLATNO POLJE SANT ANDREA VAKUUM 1KG |  |  |
+| 3838700540406 | RIŽA ZL POLJE ST ANDREA 1KG KUT VAK (12) |  |  |
 | 3838700540604 | RIŽA ARBORIO VAKUMIRANA 1000 g PODRA | vrsta=arborio | vrsta: name („RIŽA ZLATO POLJE ARBORIO VP 1 kg“) |
 
 ## 3. Kakao
@@ -343,3 +343,34 @@ Top 10:
 | 3850102945085 | KAKAO PRAH 100 g KRAŠ (21) | 100 g | 2 | 14,90–24,30 |
 | 9100000963976 | KAKAO PRAH S-BUDGET 250 g | 250 g | 1 | 19,92–19,92 |
 | 4002309015217 | KAKAO SUCHARD BENSDORP 125 g | 125 g | 1 | 35,92–35,92 |
+
+## 6. Sol i soljenka
+
+`soljenk` više nije u `must_not_match`. Novo polje `require_pack: [soljenk]`: soljenka ispada iz soli samo ako nema gramature (`drop_reason = 'bez_gramature'`, prazna posuda).
+
+Test „SOL MORSKA SITNA 250G SOLJENKA“: u soli (vrutak: sol); testovi `test_sol_soljenka_*`.
+
+Svi proizvodi soli sa „soljenk“ (20):
+
+| lanac | naziv | g | status |
+|---|---|---|---|
+| jadranka_trgovina | SOL SITNA MORSKA 250g PAG91 SOLJENKA | 250,00 | sol |
+| konzum | SOL MORSKA SITNA SOLJENKA 250g SOLANA NIN | 250,00 | sol |
+| konzum | SOL SOLJENKA 250g PVC SOLANA PAG | 250,00 | sol |
+| konzum | SOL SOLJENKA 450g PVC SOLANA PAG | 450,00 | sol |
+| ktc | SOL MORSKA 250G,SOLJENKA | 250,00 | sol |
+| lorenco | SOL MORSKA KUHINJ.250G-SOLJENKA | 250,00 | sol |
+| plodine | SOL 250 G SITNA SOLJENKA PAG 91 | 250,00 | sol |
+| plodine | SOL 500 G SITNA SOLJENKA TEGLICA PAG 91 | 500,00 | sol |
+| plodine | SOL LIGHT 250 G SOLJENKA PVC SOLANA PAG | 250,00 | sol |
+| plodine | SOL SITNA SOLJENKA 250 G | 250,00 | sol |
+| plodine | SOL SITNA SOLJENKA 450 G SOLANA PAG | 450,00 | sol |
+| plodine | SOL SOLJENKA SITNA 250 G PLODINE | 250,00 | sol |
+| roto | SOL SOLJENKA 250g PVC SOLANA PAG (12) | 250,00 | sol |
+| stridon | SOL MORSKA SOLJENKA 250 gr (12) | 250,00 | sol |
+| tommy | SOL SITNA SOLJENKA 250 g PAG | 250,00 | sol |
+| tommy | SOL SITNA SOLJENKA 450 g | 450,00 | sol |
+| trgovina-krk | SOL 250 g SOLJENKE PAG | 250,00 | sol |
+| trgovina-krk | SOL 250 g SOLJENKE PAG 91 | 250,00 | sol |
+| vrutak | SOL KAMENA 250G SOLJENKA -15/1- TUZLA | 250,00 | sol |
+| vrutak | SOL MORSKA SITNA 250G SOLJENKA -12/1- PAG | 250,00 | sol |

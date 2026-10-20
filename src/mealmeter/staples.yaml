@@ -25,6 +25,8 @@
 #   default_attributes  zadani filtar ako atribut nije zadan (mljeveno meso: vrsta=mijesano)
 #   disabled        namirnica postoji, ali nije u v1 (ne gradi se i ne može se tražiti)
 #   attributes._default  vrijednost atributa kad nijedan uzorak ne pogodi
+#   require_pack    uzorci (name_norm, početak riječi): proizvod koji ih pogađa ispada samo ako nema gramature
+#                   (prazna soljenka), drop_reason = 'bez_gramature'
 #   packaged        {pattern, default_g}: pakirana roba na vagu bez gramature u nazivu (luk RUKAVAC 4/1)
 #                   dobiva pretpostavljenu masu, uz unit_confidence=low i pack_source=assumed
 #   inferred_attributes  atribut zaključen iz naziva linije (LAGANO JUTRO -> laktoza=bez), u izlazu
@@ -181,7 +183,9 @@ sol:
   must_match: [sol\b]
   must_not_match: [junec, telec, but\b, odresc, pivo, alc, nitrit, ambre, sprej, spf, sun\b, mlijeko,
                    elephant, flat\b, chilli, chili, papar, set\b, mlinac, posuda, bocic, doza, finish,
-                   somat, perilic, ocat, ulje, kupanje, naocal, suncan, med\b, soljenk]
+                   somat, perilic, ocat, ulje, kupanje, naocal, suncan, med\b]
+  # soljenka sa sadržajem ("SOL MORSKA SITNA 250G SOLJENKA") je sol; prazna soljenka nema gramaturu
+  require_pack: [soljenk]
   unit: kg
   default_exclude_variants: [vrsta=himalajska, vrsta=smanjeni_natrij]
   pantry: true

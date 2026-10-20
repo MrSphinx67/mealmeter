@@ -239,7 +239,26 @@ def section_onion(con) -> str:
     ])
 
 
-SECTIONS = [section_chicken, section_onion, section_food, section_eggs, section_variants, section_kakao]
+def section_salt(con) -> str:
+    rows = con.execute("""
+        SELECT p.chain, p.name, p.pack_amount, coalesce(ps.drop_reason, 'sol') FROM clean.product_staples ps
+        JOIN clean.products p USING (chain, product_id)
+        WHERE ps.staple = 'sol' AND NOT ps.excluded AND regexp_matches(p.name_norm, '(^| )soljenk')
+        ORDER BY 4, p.chain, p.name""").fetchall()
+    target = [r for r in rows if r[1].upper().startswith("SOL MORSKA SITNA 250G SOLJENKA")]
+    return "\n".join([
+        "## 6. Sol i soljenka", "",
+        "`soljenk` više nije u `must_not_match`. Novo polje `require_pack: [soljenk]`: soljenka ispada iz soli "
+        "samo ako nema gramature (`drop_reason = 'bez_gramature'`, prazna posuda).", "",
+        f"Test „SOL MORSKA SITNA 250G SOLJENKA“: {'u soli' if target and target[0][3] == 'sol' else 'NIJE u soli'} "
+        f"({', '.join(f'{r[0]}: {r[3]}' for r in target)}); testovi `test_sol_soljenka_*`.", "",
+        f"Svi proizvodi soli sa „soljenk“ ({len(rows)}):", "",
+        md_table(["lanac", "naziv", "g", "status"], rows),
+    ])
+
+
+SECTIONS = [section_chicken, section_onion, section_food, section_eggs, section_variants, section_kakao,
+            section_salt]
 
 
 def main() -> None:

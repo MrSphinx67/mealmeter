@@ -76,3 +76,28 @@ def test_chicken_jeli_temporarily_excluded(name):
 def test_chicken_range():
     assert S["pileca_prsa"].plausible_per_unit == (5, 20)
     assert name_match(S["pileca_prsa"], "PILEĆI FILE 500 g") == "match"
+
+
+# --- 6. sol ----------------------------------------------------------------------
+
+def test_sol_soljenka_is_salt():
+    assert name_match(S["sol"], "SOL MORSKA SITNA 250G SOLJENKA") == "match"
+    assert S["sol"].require_pack == ("soljenk",)
+
+
+def test_sol_soljenka_without_pack_dropped(tmp_path):
+    """Soljenka bez gramature (prazna posuda) ispada iz soli, a ona s gramaturom ostaje."""
+    import duckdb
+
+    from mealmeter.build import build_clean, load_raw
+    from tests.conftest import FIXTURE
+
+    c = duckdb.connect(str(tmp_path / "sol.duckdb"))
+    load_raw(c, FIXTURE, "2026-10-19")
+    c.execute("""INSERT INTO products (chain, product_id, barcode, name, category, unit) VALUES
+                 ('konzum', 'T1', 'konzum:T1', 'SOL MORSKA SITNA 250G SOLJENKA', 'HRANA', 'KOM'),
+                 ('konzum', 'T2', 'konzum:T2', 'SOL SOLJENKA STAKLENA S POKLOPCEM', 'HRANA', 'KOM')""")
+    build_clean(c)
+    got = dict(c.execute("""SELECT product_id, coalesce(drop_reason, 'ok') FROM clean.product_staples
+                            WHERE staple = 'sol' AND product_id IN ('T1', 'T2')""").fetchall())
+    assert got == {"T1": "ok", "T2": "bez_gramature"}

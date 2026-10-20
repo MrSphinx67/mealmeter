@@ -53,6 +53,8 @@ class Staple:
     # oblik namirnice preko drugih namirnica: {"konzerva": "rajcica_konzerva", ...}
     form_staples: dict[str, str] = field(default_factory=dict, hash=False, compare=False)
     ambiguous_form: bool = False
+    # uzorci: proizvod ispada samo ako nema gramature (prazna soljenka), drop_reason 'bez_gramature'
+    require_pack: tuple[str, ...] = ()
 
     @property
     def require_regex(self) -> str | None:
@@ -174,6 +176,7 @@ def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> d
             piece_g=d.get("piece_g"),
             form_staples=d.get("form_staples") or {},
             ambiguous_form=bool(d.get("ambiguous_form", False)),
+            require_pack=tuple(_fold(p) for p in d.get("require_pack", [])),
         )
         if st.ambiguous_form and "oblik" not in attrs:
             raise ValueError(f"{key}: ambiguous_form traži atribut oblik")
@@ -325,6 +328,17 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
           AND r.compare_by <> 'count'
           AND (p.pack_amount < r.min_pack OR p.pack_amount > r.max_pack)
     """)
+
+    # require_pack: npr. soljenka je sol samo kad ima gramaturu
+    for st in staples.values():
+        if st.require_pack:
+            con.execute("""
+                UPDATE clean.product_staples ps SET drop_reason = 'bez_gramature'
+                FROM clean.products p
+                WHERE p.chain = ps.chain AND p.product_id = ps.product_id AND ps.staple = ?
+                  AND ps.drop_reason IS NULL AND NOT ps.excluded AND p.pack_amount IS NULL
+                  AND regexp_matches(p.name_norm, ?)
+            """, [st.key, _word_start(st.require_pack)])
 
     rows = con.execute("""
         SELECT s.chain, s.product_id, s.staple, p.name, p.pack_amount, p.pack_unit
