@@ -350,3 +350,41 @@ Ako se pokaže da je Lorenco stvarni nacionalni web-shop, ovu odluku vrijedi pre
     - Rinfuza (RFS/RFZ) kod mahunarki znači suho na vagu, a ne svježe.
 40. **Recepti** su u `data/recipes/test_*.json` (palačinke, grah, bolonjez), u gitu kroz iznimku u
     `.gitignore`. CLI: `python -m mealmeter.cli basket data/recipes/test_grah.json --city Osijek`.
+
+## Korak 2C: filtar hrane i ispravci rječnika (2026-10-20)
+
+Izvještaji za pregled su u [MORNING_REVIEW.md](MORNING_REVIEW.md) (`scripts/morning_review.py`).
+
+41. **Filtar hrane** (`src/mealmeter/food.py`, stupci `clean.products.food_group`, `is_food`, `category_source`).
+    - Skupine: hrana, pice, alkohol, kozmetika, higijena, kucanstvo, djeca, kucni_ljubimci, ostalo,
+      te `unknown` kad se ne zna. `is_food` je `true` za hrana/pice/alkohol, `false` za ostale, a
+      **`NULL` za `unknown`** (umjesto teksta 'unknown', da SQL ostane trovrijednosni).
+    - **`data/category_map.yaml`** (1.334 normalizirane kategorije, u gitu kroz iznimku u `.gitignore`)
+      izrađen je pravilima iz `normalize._CATEGORY_RULES` (`scripts/make_category_map.py`) i može se
+      ručno ispravljati. Kategorije izvan mape idu kroz ista pravila.
+    - Stare skupine `sunce` → kozmetika, `igracke` → ostalo, `ljubimci` → `kucni_ljubimci`;
+      „NEPREHRANA“ (Tommy) → ostalo; „PAKIRANA HRANA I PIĆE“ → pice.
+    - **„Ostalo“ je `unknown`, a ne neprehrambeno**: kod NTL-a, trgovine Krk, Gavranovića i Žabca
+      (28.559 proizvoda) miješa svrdla i ručnike s gastro hranom („MIJEŠANO MLJEVENO MESO ZA GASTRO 1 kg“).
+    - Alkohol: kategorije vina, piva i žestica, te u kategorijama pića naziv (vino, pivo, rakija, marke
+      piva i žestica, postotak alkohola 3,5–80 % osim sokova, nektara i mliječne masti).
+      „0,0 %“/„bezalkoholno“ je `pice`.
+    - **Hrana za ljubimce u kategoriji hrane** („HRANA ZA PSE …“ u Hrana) je `kucni_ljubimci` (moja
+      dopuna nakon uzorka; „Felix“ nije na popisu jer je i marka kečapa i kiselih krastavaca).
+    - Nasljeđivanje: proizvod bez korisne kategorije dobiva skupinu istog globalnog EAN-a iz lanaca s
+      kategorijom ako ju ima **više od 50 % glasova** (jedan glas po proizvodu u lancu); inače `unknown`.
+    - Riječi (samo kad ni kategorija ni EAN ne pomažu): popis iz zahtjeva, uz tri ispravka:
+      `pse` samo kao cijela riječ i ne iza „bras“ (prefiks bi pogodio „PŠENIČNO“), `sjeme` samo kao
+      cijela riječ („KRUH SA SJEMENKAMA“). Dodano: čaše i pribor za piće (`casa`, `depozit`,
+      `otvarac`…, osim jogurta „u čaši“) i opće alkoholne riječi (vino, pivo, rakija…), jer bi inače
+      „ČAŠA ZA PIVO“ i vino iz Plodina ostali `unknown`.
+    - **Zadano:** `find_products` i `get_prices` vraćaju samo `is_food = true` bez alkohola; parametri
+      `include_nonfood`, `include_alcohol`, `include_unverified` (CLI `--include-*`). Grupa samo od
+      `unknown` proizvoda nosi `food_unverified = true`.
+    - **`plan_basket`:** `unknown` samo za `loose_produce` i samo proizvod koji je sam prošao pravilo
+      namirnice (riječ je prva ili druga u nazivu); stavka nosi `food_unverified`, ali bez kazne u
+      poretku trgovina. Alkohol i neprehrambeno nikad (`drop_reason = 'kategorija:<skupina>'`).
+    - **Dječja hrana** (dm „bebe & djeca“, „DJEČJA HRANA“) ostaje u skupini `djeca`, dakle izvan zadanog
+      izbora, kao i u Koraku 2A2.
+    - Brojke (arhiva 2026-10-19): Plodine 29,8 % naslijeđeno preko EAN-a, 49.890 ostaje `unknown`
+      (velik dio su neprehrambeni artikli kojih nema u drugim lancima); Lorenco 71,4 %, 4.735 `unknown`.

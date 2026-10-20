@@ -8,7 +8,7 @@ import duckdb
 
 from mealmeter.build import NATIONAL_NOTE
 from mealmeter.normalize import date_hr, norm_text
-from mealmeter.search import _candidates, connect, resolve_city
+from mealmeter.search import _candidates, _food_filter, connect, resolve_city
 from mealmeter.staples import Staple, load_staples, resolve_ingredient
 
 # jedinica u receptu -> (osnovna jedinica, faktor); "spoon" = približno (gustoća 1)
@@ -188,7 +188,10 @@ def choose_product(rows: list[dict], need: float, need_unit: str, by_weight_unit
 # --- plan_basket -------------------------------------------------------------------
 
 def _rows_for(con, staple: Staple, attributes: dict, city: str) -> list[dict]:
-    sql, params, _ = _candidates(staple, [], attributes, city, include_clearance=True)
+    # Samo provjerena hrana bez alkohola; proizvod nepoznate skupine (food_group 'unknown', npr.
+    # Plodine) samo za svježe voće i povrće, gdje naziv prolazi pravilo prve ili druge riječi.
+    food_sql = _food_filter(unverified="staple" if staple.loose_produce else "no")
+    sql, params, _ = _candidates(staple, [], attributes, city, include_clearance=True, food_sql=food_sql)
     cur = con.execute(sql + " SELECT * FROM x", params)
     cols = [d[0] for d in cur.description]
     return [dict(zip(cols, r)) for r in cur.fetchall()]
@@ -339,7 +342,7 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
                 "pantry": need.staple.pantry, "price_per_unit": pick["price_per_unit"], "per_unit": pick["per_unit"],
                 "unit_confidence": pick["unit_confidence"], "pack_source": pick["pack_source"],
                 "is_special": pick["is_special"], "flags": pick["flags"], "notes": pick["notes"],
-                "fallback": pick["fallback"],
+                "fallback": pick["fallback"], "food_unverified": pick["is_food"] is None,
             }
 
     n_needs = len(needs)

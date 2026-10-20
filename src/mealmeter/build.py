@@ -7,12 +7,12 @@ from pathlib import Path
 
 import duckdb
 
+from mealmeter.food import build_food
 from mealmeter.staples import build_staples
 from mealmeter.normalize import (
     CITY_ALIASES,
     analyze_pack,
     canonical_city,
-    category_group,
     is_clearance,
     norm_text,
     normalize_ean,
@@ -116,8 +116,8 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
 
     # --- proizvodi ---
     def product_rows():
-        q = "SELECT chain, product_id, barcode, name, unit, quantity, category FROM products"
-        for chain, pid, barcode, name, unit, quantity, category in con.execute(q).fetchall():
+        q = "SELECT chain, product_id, barcode, name, unit, quantity FROM products"
+        for chain, pid, barcode, name, unit, quantity in con.execute(q).fetchall():
             ean, valid, glob = normalize_ean(barcode)
             pack, drained, variable, confidence = analyze_pack(name)
             source = "name"
@@ -126,20 +126,20 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
                 source, confidence = "unit", "high"
             amount, pack_unit = pack or (None, None)
             yield (chain, pid, ean, valid, glob, norm_text(name), amount, pack_unit,
-                   source if pack else None, unit_hint(unit, quantity), category_group(category),
+                   source if pack else None, unit_hint(unit, quantity),
                    drained, variable, is_clearance(name), confidence)
 
     _temp_table(con, "product_derived", {
         "chain": "VARCHAR", "product_id": "VARCHAR", "ean_norm": "VARCHAR", "ean_valid": "BOOLEAN",
         "ean_global": "BOOLEAN", "name_norm": "VARCHAR", "pack_amount": "DOUBLE", "pack_unit": "VARCHAR",
-        "pack_source": "VARCHAR", "unit_hint": "VARCHAR", "category_group": "VARCHAR",
+        "pack_source": "VARCHAR", "unit_hint": "VARCHAR",
         "drained_amount": "DOUBLE", "variable_weight": "BOOLEAN", "clearance": "BOOLEAN",
         "pack_confidence": "VARCHAR",
     }, product_rows())
     con.execute("""
         CREATE OR REPLACE TABLE clean.products AS
         SELECT r.chain, r.product_id, r.barcode, d.ean_norm, d.ean_valid, d.ean_global,
-               r.name, d.name_norm, r.brand, r.category, d.category_group, r.unit, r.quantity,
+               r.name, d.name_norm, r.brand, r.category, r.unit, r.quantity,
                d.pack_amount, d.pack_unit, d.pack_source, d.unit_hint,
                d.drained_amount, d.variable_weight, d.clearance, d.pack_confidence
         FROM products r JOIN product_derived d USING (chain, product_id)
@@ -158,6 +158,8 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
         ) e
         WHERE p.ean_norm = e.ean_norm AND p.ean_global AND p.pack_unit IS NULL AND NOT p.variable_weight
     """)
+    # food_group, is_food, category_source (kategorija lanca -> EAN -> riječi), vidi food.py
+    food_stats = build_food(con)
 
     # --- cijene ---
     # 0.00 je u ovim podacima uvijek "prazno" (cijena 0 € ne postoji), pa sve cijene 0 -> NULL.
@@ -207,7 +209,7 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
         FROM clean.stores s GROUP BY s.chain
     """)
 
-    stats = {}
+    stats = {"food": food_stats}
     stats["quality"] = chain_quality_report(con)
     stats["staples"] = build_staples(con)
     stats["dedup"] = con.execute("""

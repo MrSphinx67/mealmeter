@@ -93,7 +93,9 @@ vrijednost se uspješno parsirala.
 | drained_amount | **ocijeđena masa** konzerve u g, bez tekućine („OC. MASA 280 g“, „185/140g“, „NETO 800G“); košarica je koristi za konzerve |
 | variable_weight | „CCA“ ili raspon težine („1-1,5KG“): nema pakiranja, cijena po kg je od lanca |
 | clearance | naziv sadrži „SNIŽEN…“ (rasprodaja) |
-| category_group | normalizirana kategorija lanca (hrana, pice, kozmetika, higijena, kucanstvo, djeca, sunce, igracke, ljubimci, ostalo) |
+| food_group | skupina (`food.py`): hrana, pice, alkohol, kozmetika, higijena, kucanstvo, djeca, kucni_ljubimci, ostalo ili `unknown` |
+| is_food | `true` (hrana, pice, alkohol), `false` (ostale skupine), NULL (`unknown`) |
+| category_source | `chain` (kategorija lanca, `data/category_map.yaml`), `ean_inherited` (većinska skupina istog globalnog EAN-a), `words` (popis riječi), `none` |
 | unit_hint | `kg`/`l`: na što se (vjerojatno) odnosi lančev `unit_price` (iz `quantity`/`unit`) |
 
 **`clean.prices`** (16.401.076 redaka; iz 17.316.247 uklonjeno 907.165 duplikata i 8.006 redaka bez cijene)
@@ -134,6 +136,8 @@ ili `default`.
 
 ## Funkcije pretrage (`src/mealmeter/search.py`)
 
+- Filtar hrane: obje funkcije zadano vraćaju samo `is_food = true` bez alkohola; `include_nonfood`,
+  `include_alcohol` i `include_unverified` to proširuju, a izlaz nosi `food_group` i `food_unverified`.
 - `find_products(query=None, city=None, limit=10, ingredient=None, attributes=None)`: grupe proizvoda
   (po EAN-u ili po lancu i nazivu) s poljima `id, ean, name, brand, pack, n_chains, n_stores, chains,
   price_min/max, price_per_unit_min/max, per_unit, unit_confidence, pack_source, suspect_chains,

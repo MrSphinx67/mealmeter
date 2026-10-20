@@ -135,7 +135,8 @@ def test_plan_basket_osijek(con):
 
 def test_plan_basket_avoids_clearance(con):
     res = plan_basket([{"name": "banana", "amount": 300, "unit": "g"}], "Osijek", con=con)
-    item = res["best_store"]["items"][0]
+    ntl = next(s for s in res["stores"] if s["chain"] == "ntl")  # Plodine (fixture) ima jeftiniju bananu
+    item = ntl["items"][0]
     assert item["product_id"] == "245063"  # "BANANA", a ne "BANANA SNIŽENJE"
     assert item["n_packs"] is None and item["unit_confidence"] == "low" and item["pack_source"] == "unit_price"
 
@@ -144,7 +145,8 @@ def test_plan_basket_brasno_smallest_pack(con):
     res = plan_basket([{"name": "brašno glatko", "amount": 500, "unit": "g"}], "Osijek", con=con)
     qty = {s["chain"]: s["items"][0]["pack_qty"] for s in res["stores"]}
     # 1 kg je najmanje pakiranje koje pokriva 500 g; Lidl u fixtureu ima samo 3 kg i 4x1 kg
-    assert qty == {"konzum": 1000, "ntl": 1000, "spar": 1000, "roto": 1000, "eurospin": 1000, "lidl": 3000}
+    assert qty == {"konzum": 1000, "ntl": 1000, "spar": 1000, "roto": 1000, "eurospin": 1000, "lidl": 3000,
+                   "plodine": 1000}  # Plodine: skupina hrana naslijeđena preko EAN-a
 
 
 def test_unknown_city_suggestions(con):

@@ -36,11 +36,24 @@ def _table(rows: list[list[str]], headers: list[str]) -> str:
     return "\n".join([line(headers), line(["-" * w for w in widths]), *map(line, rows)])
 
 
+def _food_kwargs(args) -> dict:
+    return {"include_nonfood": args.include_nonfood, "include_alcohol": args.include_alcohol,
+            "include_unverified": args.include_unverified}
+
+
+def _add_food_args(parser) -> None:
+    parser.add_argument("--include-nonfood", action="store_true", help="i neprehrambeni proizvodi")
+    parser.add_argument("--include-alcohol", action="store_true", help="i alkoholna pića")
+    parser.add_argument("--include-unverified", action="store_true",
+                        help="i proizvodi nepoznate skupine (oznaka (?) u nazivu)")
+
+
 def cmd_find(args) -> None:
     attrs = dict(a.split("=", 1) for a in args.attr) if args.attr else None
     try:
         res = search.find_products(
-            args.query, city=args.city, limit=args.limit, ingredient=args.ingredient, attributes=attrs
+            args.query, city=args.city, limit=args.limit, ingredient=args.ingredient, attributes=attrs,
+            **_food_kwargs(args),
         )
     except ValueError as e:
         sys.exit(str(e))
@@ -55,7 +68,7 @@ def cmd_find(args) -> None:
     rows = [
         [
             r["id"],
-            r["name"][:48],
+            r["name"][:48] + (" (?)" if r.get("food_unverified") else ""),
             (r["brand"] or "")[:18],
             r["pack"] or "",
             _fmt_range(r["price_min"], r["price_max"]),
@@ -81,7 +94,7 @@ def cmd_find(args) -> None:
 
 def cmd_prices(args) -> None:
     try:
-        res = search.get_prices(args.identifier, city=args.city, limit=args.limit)
+        res = search.get_prices(args.identifier, city=args.city, limit=args.limit, **_food_kwargs(args))
     except ValueError as e:
         sys.exit(str(e))
     if args.json:
@@ -171,6 +184,7 @@ def main(argv: list[str] | None = None) -> None:
     f.add_argument("--city")
     f.add_argument("--limit", type=int, default=10)
     f.add_argument("--json", action="store_true")
+    _add_food_args(f)
     f.set_defaults(func=cmd_find)
 
     p = sub.add_parser("prices", help="cijene po trgovini za EAN ili lanac:product_id")
@@ -178,6 +192,7 @@ def main(argv: list[str] | None = None) -> None:
     p.add_argument("--city")
     p.add_argument("--limit", type=int, default=50)
     p.add_argument("--json", action="store_true")
+    _add_food_args(p)
     p.set_defaults(func=cmd_prices)
 
     b = sub.add_parser("basket", help="cijena recepta po trgovini (recept.json)")

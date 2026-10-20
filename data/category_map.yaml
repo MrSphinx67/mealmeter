@@ -1,0 +1,1360 @@
+# Kategorija lanca (norm_text: mala slova, bez dijakritika i interpunkcije) -> food_group.
+# Skupine: hrana, pice, alkohol, kozmetika, higijena, kucanstvo, djeca, kucni_ljubimci, ostalo, unknown.
+# 'unknown' znači da kategorija ništa ne govori (npr. "Ostalo" miješa svrdla i gastro hranu):
+# takvi proizvodi nasljeđuju skupinu preko EAN-a ili popisa riječi (vidi src/mealmeter/food.py).
+# Prijedlog je izrađen pravilima (scripts/make_category_map.py); ispravci se upisuju ovdje.
+# Komentar uz redak: broj proizvoda i lanci.
+
+# --- hrana (778 kategorija, 162648 proizvoda)
+"hrana": hrana  # 134600, branka,bure,dukat,eurospin,gavranovic,jadranka_trgovina,kaufland,konzum,ktc,lidl,metro,ntl,ribola,spar,stanic,stridon,studenac,trgocentar,trgovina-krk
+"svjezi odeli": hrana  # 3065, tommy
+"hladeno i smrznuto": hrana  # 2790, tommy
+"prehrana": hrana  # 1520, dm
+"keksi grickalice i slatkisi": hrana  # 934, zabac
+"slatki i slani program": hrana  # 785, roto
+"slatki program": hrana  # 677, boso
+"priprema jela": hrana  # 669, boso
+"zacini i dodaci jelima": hrana  # 656, vrutak
+"namirnice za pripremu jela": hrana  # 618, roto
+"mlijecni proizvodi": hrana  # 514, boso,vrutak
+"konzervirano": hrana  # 501, boso,roto
+"cokolade deserti": hrana  # 470, vrutak
+"smrznuti program": hrana  # 437, roto
+"keksi napolitanke vafli": hrana  # 422, vrutak
+"osnovne namirnice": hrana  # 375, roto
+"grickalice": hrana  # 318, vrutak
+"smrznuto": hrana  # 295, boso
+"mlijeko i mlijecni proizvodi": hrana  # 287, roto,zabac
+"slani program": hrana  # 228, boso
+"sirevi": hrana  # 223, vrutak
+"meso": hrana  # 223, vrutak
+"bomboni": hrana  # 221, vrutak
+"delikatese mesne": hrana  # 217, roto
+"corn flakes musli kase protein bar": hrana  # 201, vrutak
+"dorucak": hrana  # 199, boso,roto
+"zeleni program": hrana  # 198, boso
+"riza zitarice prerad od zit": hrana  # 192, vrutak
+"tjestenina": hrana  # 188, vrutak
+"mesni proizvodi": hrana  # 182, boso
+"mesni i morski proizvodi": hrana  # 182, zabac
+"gastro prehrana": hrana  # 174, djelo_vodice
+"proizvodi za kolace": hrana  # 166, vrutak
+"kompoti suseno voce": hrana  # 165, vrutak
+"smrznuto meso povrce riba": hrana  # 157, vrutak
+"konzervirana roba i juhe": hrana  # 155, zabac
+"smrznute slastice peciva kruh": hrana  # 154, vrutak
+"povrce": hrana  # 151, boso,djelo_vodice,vrutak
+"mesna jela u konzervi pastete": hrana  # 150, vrutak
+"voce": hrana  # 144, boso
+"povrce konzerve kutije vrecice": hrana  # 140, vrutak
+"proteini": hrana  # 137, vrutak
+"kiseline": hrana  # 130, vrutak
+"umaci i namazi": hrana  # 129, zabac
+"smrznuta hrana": hrana  # 124, zabac
+"delikatese sir": hrana  # 120, roto
+"ribe u konzervi plodovi mora": hrana  # 116, vrutak
+"zitarice tjestenina i prilozi": hrana  # 114, zabac
+"zdrava hrana": hrana  # 112, boso,roto
+"ulje ocat": hrana  # 105, vrutak
+"svjeze meso": hrana  # 100, boso,roto,vrutak
+"pekarsrvo": hrana  # 95, vrutak
+"bombonjere": hrana  # 92, djelo_vodice,vrutak
+"narezani suhomesnati proizvodi": hrana  # 91, vrutak
+"pekarski proizvodi": hrana  # 89, boso
+"juhe kocke za juhu": hrana  # 88, vrutak
+"cips ostalo": hrana  # 83, djelo_vodice
+"zvake": hrana  # 82, djelo_vodice
+"toploteka": hrana  # 81, vrutak
+"voce i povrce pdv 5 povrce": hrana  # 78, roto
+"trajna mlijeka": hrana  # 77, vrutak
+"meso svjeze pdv 5": hrana  # 77, roto
+"tuna": hrana  # 73, djelo_vodice
+"prigodni bozicni program": hrana  # 71, djelo_vodice
+"fermentirani proizvodi": hrana  # 69, vrutak
+"bomboni tvrdi mali": hrana  # 67, djelo_vodice
+"svjeze voce": hrana  # 66, vrutak
+"marmelade dzemovi pekmezi": hrana  # 64, vrutak
+"bomboni gumeni": hrana  # 61, djelo_vodice
+"zvakace gume": hrana  # 61, vrutak
+"slasticarski proizvodi": hrana  # 57, boso
+"zacini i pecenje": hrana  # 55, zabac
+"krekeri": hrana  # 55, djelo_vodice
+"mesnica i ribarnica": hrana  # 54, boso
+"zacini vrecica": hrana  # 54, djelo_vodice
+"kruh i pekarski proizvodi": hrana  # 54, roto,zabac
+"keks ostali": hrana  # 52, djelo_vodice
+"sojine kokos i riza preradevin": hrana  # 52, vrutak
+"voce i povrce pdv 5 voce": hrana  # 50, roto
+"lizalice": hrana  # 47, vrutak
+"ostalo suho voce": hrana  # 46, djelo_vodice
+"tjestenina ostalo": hrana  # 45, djelo_vodice
+"secer sol zasladivac": hrana  # 44, vrutak
+"grickalice snack": hrana  # 44, djelo_vodice
+"prigodni uskrsni program": hrana  # 42, djelo_vodice
+"kikiriki": hrana  # 41, djelo_vodice
+"dodatak jelu": hrana  # 39, djelo_vodice
+"cips slani": hrana  # 39, djelo_vodice
+"cokoladni impuls": hrana  # 39, vrutak
+"musli": hrana  # 38, djelo_vodice
+"pahuljice cokoladne": hrana  # 38, djelo_vodice
+"specijaliteti i svjeza tjestenina": hrana  # 38, roto
+"kolac ostalo": hrana  # 36, djelo_vodice
+"praline": hrana  # 36, djelo_vodice
+"pakirano piletina": hrana  # 35, djelo_vodice
+"sirup": hrana  # 34, djelo_vodice
+"voce i povrce pdv 5 suho voceipovrce": hrana  # 33, roto
+"vafli cokolada": hrana  # 33, djelo_vodice
+"vafli punjeni": hrana  # 33, djelo_vodice
+"med": hrana  # 32, djelo_vodice,roto
+"tvrdi sir komad": hrana  # 31, djelo_vodice
+"kroasan ostali": hrana  # 31, djelo_vodice
+"papar": hrana  # 31, djelo_vodice
+"smrznuti pp peciva": hrana  # 31, djelo_vodice
+"tjestenina instant": hrana  # 31, djelo_vodice
+"sitni vafl": hrana  # 31, djelo_vodice
+"sezona prehrana": hrana  # 29, boso
+"med preradevine meda": hrana  # 29, vrutak
+"cajno pecivo punjeno": hrana  # 28, djelo_vodice
+"flips veliki": hrana  # 28, djelo_vodice
+"mlijecni deserti": hrana  # 27, djelo_vodice,vrutak
+"cokolade ostale mala": hrana  # 27, djelo_vodice
+"pasirana rajcica": hrana  # 27, djelo_vodice
+"priprema kolaca": hrana  # 27, zabac
+"puding": hrana  # 26, djelo_vodice
+"sladoled stapic": hrana  # 26, djelo_vodice
+"gastro program": hrana  # 26, roto
+"cokoladni bar": hrana  # 26, djelo_vodice
+"cajno pecivo preliveno": hrana  # 25, djelo_vodice
+"sardina": hrana  # 25, djelo_vodice
+"cips paprika": hrana  # 25, djelo_vodice
+"tost": hrana  # 24, djelo_vodice
+"zacini staklo": hrana  # 24, djelo_vodice
+"stapici slani": hrana  # 24, djelo_vodice
+"cokolade ostale": hrana  # 24, djelo_vodice
+"brasno": hrana  # 24, vrutak
+"puding za pripremu": hrana  # 23, djelo_vodice
+"ostala gotova jela": hrana  # 23, djelo_vodice
+"zobene pahuljice": hrana  # 23, djelo_vodice
+"panettone": hrana  # 23, djelo_vodice
+"sunka narezano": hrana  # 23, djelo_vodice
+"ostalo narezane salame": hrana  # 23, djelo_vodice
+"zitna plocica": hrana  # 22, djelo_vodice
+"narezani sirevi": hrana  # 22, vrutak
+"dzem ostalo": hrana  # 22, djelo_vodice
+"keksi i kolaci": hrana  # 21, djelo_vodice
+"vrhnja": hrana  # 21, vrutak
+"cokolada punjena mala": hrana  # 21, djelo_vodice
+"sitni ferrero snack": hrana  # 20, djelo_vodice
+"ajvar veliki": hrana  # 20, djelo_vodice
+"sirupi": hrana  # 20, vrutak
+"cokolada mlijecna mala": hrana  # 20, djelo_vodice
+"gastro juhe": hrana  # 20, djelo_vodice
+"rolada": hrana  # 19, djelo_vodice
+"gotova jela od tijesta": hrana  # 19, djelo_vodice
+"ostali sir narezano": hrana  # 19, djelo_vodice
+"gastro dzem": hrana  # 19, djelo_vodice
+"zm panirana piletina": hrana  # 19, djelo_vodice
+"voce i povrce suho voceipovrce pdv 5": hrana  # 19, roto
+"krem juhe": hrana  # 18, djelo_vodice
+"prsut": hrana  # 18, djelo_vodice
+"cokoladica sitna": hrana  # 18, djelo_vodice
+"mlijecni cokoladni deserti": hrana  # 18, djelo_vodice
+"svjezi sir": hrana  # 18, djelo_vodice
+"zobena kasa": hrana  # 18, djelo_vodice
+"ostali umaci": hrana  # 18, djelo_vodice
+"vafli ostali": hrana  # 18, djelo_vodice
+"dodaci za kolace aroma": hrana  # 18, djelo_vodice
+"spageti": hrana  # 18, djelo_vodice
+"keks sa zitaricama": hrana  # 18, djelo_vodice
+"sitni keks": hrana  # 17, djelo_vodice
+"zacini gastro": hrana  # 17, djelo_vodice
+"riza originario": hrana  # 17, djelo_vodice
+"parizer komad": hrana  # 17, djelo_vodice
+"pastete ostale": hrana  # 17, djelo_vodice
+"namazi": hrana  # 17, vrutak
+"pasteta kokosja": hrana  # 17, djelo_vodice
+"kroasan kakao": hrana  # 17, djelo_vodice
+"grcki jogurt": hrana  # 17, djelo_vodice
+"umak od rajcice": hrana  # 16, djelo_vodice
+"bomboni vocni": hrana  # 16, djelo_vodice
+"penne rigate": hrana  # 16, djelo_vodice
+"pasteta jetrena": hrana  # 16, djelo_vodice
+"pasteta tuna": hrana  # 16, djelo_vodice
+"krastavci veliki": hrana  # 16, djelo_vodice
+"kokice": hrana  # 16, djelo_vodice
+"medenjaci": hrana  # 16, djelo_vodice
+"bomboni karamela mali": hrana  # 16, djelo_vodice
+"med cvjetni": hrana  # 16, djelo_vodice
+"panceta narezano": hrana  # 16, djelo_vodice
+"povrtne juhe": hrana  # 15, djelo_vodice
+"kruh psenicni mijesani": hrana  # 15, djelo_vodice
+"sladoled obiteljski 2l": hrana  # 15, djelo_vodice
+"pasteta cajna": hrana  # 15, djelo_vodice
+"pecivo": hrana  # 15, djelo_vodice
+"cokolada ljesnjak badem mala": hrana  # 15, djelo_vodice
+"namaz jednobojni": hrana  # 15, djelo_vodice
+"delikatesa": hrana  # 14, boso
+"cokolade za kuhanje": hrana  # 14, vrutak
+"panirana riba": hrana  # 14, djelo_vodice
+"cajno pecivo cokolada": hrana  # 14, djelo_vodice
+"snack": hrana  # 14, djelo_vodice
+"proteini mlijeko": hrana  # 14, djelo_vodice
+"sladoled multipak stapic": hrana  # 14, djelo_vodice
+"pereci": hrana  # 14, djelo_vodice
+"sirni namaz": hrana  # 14, djelo_vodice
+"vanilin secer": hrana  # 14, djelo_vodice
+"parmezan": hrana  # 14, djelo_vodice
+"deserti": hrana  # 14, vrutak
+"flips mali": hrana  # 14, djelo_vodice
+"brusketi": hrana  # 14, djelo_vodice
+"polutvrdi sir": hrana  # 14, djelo_vodice
+"lizalica ostalo": hrana  # 14, djelo_vodice
+"cokolada keks": hrana  # 13, djelo_vodice
+"dzem marelica": hrana  # 13, djelo_vodice
+"mix za pecenje": hrana  # 13, djelo_vodice
+"umaci": hrana  # 13, djelo_vodice
+"cokolada keks mala": hrana  # 13, djelo_vodice
+"corn flakes": hrana  # 13, djelo_vodice
+"jogurt vocni casa": hrana  # 13, djelo_vodice
+"ostali ukrasi za kolace": hrana  # 13, djelo_vodice
+"dvopek klasik": hrana  # 13, djelo_vodice
+"skampi": hrana  # 13, djelo_vodice
+"palenta": hrana  # 13, djelo_vodice
+"cokolada mlijecna": hrana  # 13, djelo_vodice
+"ajvar mali": hrana  # 12, djelo_vodice
+"koncentrat rajcice": hrana  # 12, djelo_vodice
+"cokolada ljesnjak badem": hrana  # 12, djelo_vodice
+"ostale salame": hrana  # 12, djelo_vodice
+"kokosja juha": hrana  # 12, djelo_vodice
+"sitni biskvit": hrana  # 12, djelo_vodice
+"vafli ljesnjak": hrana  # 12, djelo_vodice
+"bomboni tvrdi": hrana  # 12, djelo_vodice
+"orah": hrana  # 12, djelo_vodice
+"jaffa naranca": hrana  # 12, djelo_vodice
+"pakirano mljeveno meso": hrana  # 12, djelo_vodice
+"zdravi kruh": hrana  # 12, djelo_vodice
+"petit beurre": hrana  # 12, djelo_vodice
+"kikiriki suho": hrana  # 12, djelo_vodice
+"sladoled obiteljski 1l": hrana  # 12, djelo_vodice
+"biskvit": hrana  # 12, djelo_vodice
+"med bagrem": hrana  # 12, djelo_vodice
+"kruh bijeli": hrana  # 12, djelo_vodice
+"med ostalo": hrana  # 12, djelo_vodice
+"zm ostalo povrce": hrana  # 12, djelo_vodice
+"skusa": hrana  # 11, djelo_vodice
+"rezanci": hrana  # 11, djelo_vodice
+"brasno ostalo": hrana  # 11, djelo_vodice
+"goveda juha": hrana  # 11, djelo_vodice
+"cokolada riza": hrana  # 11, djelo_vodice
+"maslinovo ulje": hrana  # 11, djelo_vodice
+"peciva i kolaci": hrana  # 11, djelo_vodice
+"svjeze voce i povrce": hrana  # 11, roto
+"lazanje": hrana  # 11, djelo_vodice
+"salata tuna": hrana  # 11, djelo_vodice
+"krumpir ostali": hrana  # 11, djelo_vodice
+"stapici punjenji": hrana  # 11, djelo_vodice
+"gastro ostalo povrce": hrana  # 11, djelo_vodice
+"keks integralni": hrana  # 11, djelo_vodice
+"paprika file velika": hrana  # 11, djelo_vodice
+"mjesavina za kolace": hrana  # 11, djelo_vodice
+"parizer": hrana  # 11, djelo_vodice
+"paprika mljevena": hrana  # 10, djelo_vodice
+"kranjska kobasica": hrana  # 10, djelo_vodice
+"feferoni veliki": hrana  # 10, djelo_vodice
+"kefir": hrana  # 10, djelo_vodice
+"brasno 5 1": hrana  # 10, djelo_vodice
+"riza paraboiled": hrana  # 10, djelo_vodice
+"sunka": hrana  # 10, djelo_vodice
+"bomboni pjenasti": hrana  # 10, djelo_vodice
+"sladoled gastro": hrana  # 10, djelo_vodice
+"desertne kreme": hrana  # 10, djelo_vodice
+"hrenovke 200g": hrana  # 10, djelo_vodice
+"vafli vocni": hrana  # 10, djelo_vodice
+"pelat": hrana  # 10, djelo_vodice
+"lisnato cvjetasto mahunasto": hrana  # 10, djelo_vodice
+"dvopek ostali": hrana  # 10, djelo_vodice
+"fusilli": hrana  # 10, djelo_vodice
+"gastro majoneza": hrana  # 10, djelo_vodice
+"sladoled kornet": hrana  # 10, djelo_vodice
+"kruh": hrana  # 10, djelo_vodice
+"ostali praskasti proizvodi": hrana  # 10, djelo_vodice
+"mesni narezak": hrana  # 10, djelo_vodice
+"bomboni cokoladni": hrana  # 9, djelo_vodice
+"lignja": hrana  # 9, djelo_vodice
+"vafli preliveni": hrana  # 9, djelo_vodice
+"smrznuti pp kruh": hrana  # 9, djelo_vodice
+"kvasac suhi": hrana  # 9, djelo_vodice
+"kiselo vrhnje 12": hrana  # 9, djelo_vodice
+"gastro smrznuti pekarski proizvodi": hrana  # 9, djelo_vodice
+"sendvic keks": hrana  # 9, djelo_vodice
+"zm lignja": hrana  # 9, djelo_vodice
+"bomboni karamela veliki": hrana  # 9, djelo_vodice
+"pakirano puretina": hrana  # 9, djelo_vodice
+"keks digestive": hrana  # 9, djelo_vodice
+"jaffa ostalo": hrana  # 9, djelo_vodice
+"umak pesto": hrana  # 9, djelo_vodice
+"gastro cikla": hrana  # 9, djelo_vodice
+"vinski ocat": hrana  # 9, djelo_vodice
+"mlijeko bez laktoze": hrana  # 8, djelo_vodice
+"ketchup mali": hrana  # 8, djelo_vodice
+"narezak": hrana  # 8, djelo_vodice
+"slatki preljev": hrana  # 8, djelo_vodice
+"dzem sipak": hrana  # 8, djelo_vodice
+"alkoholni ocat": hrana  # 8, djelo_vodice
+"krusne mrvice": hrana  # 8, djelo_vodice
+"origano": hrana  # 8, djelo_vodice
+"bomboni zele": hrana  # 8, djelo_vodice
+"ostale kobasice": hrana  # 8, djelo_vodice
+"tortilje": hrana  # 8, djelo_vodice
+"svjeza mlijeka": hrana  # 8, vrutak
+"masline zelene velike": hrana  # 8, djelo_vodice
+"cokolada riza mala": hrana  # 8, djelo_vodice
+"kiselis ostalo mali": hrana  # 8, djelo_vodice
+"budola": hrana  # 8, djelo_vodice
+"jogurt pet veliki": hrana  # 8, djelo_vodice
+"draze vocni": hrana  # 8, djelo_vodice
+"pecivo malo": hrana  # 8, djelo_vodice
+"proteini boca": hrana  # 8, djelo_vodice
+"namazi biljni": hrana  # 8, djelo_vodice
+"gastro namazi": hrana  # 8, djelo_vodice
+"sol sitna": hrana  # 8, djelo_vodice
+"brasno glatko": hrana  # 8, djelo_vodice
+"ribice i gric": hrana  # 8, djelo_vodice
+"mlijecni namaz": hrana  # 8, djelo_vodice
+"jaja m": hrana  # 8, djelo_vodice
+"jaja l": hrana  # 8, djelo_vodice
+"cajno pecivo s maslacem": hrana  # 8, djelo_vodice
+"mlijeko 2 8": hrana  # 8, djelo_vodice
+"cokoladno mlijeko 200ml": hrana  # 8, djelo_vodice
+"keks bez secera": hrana  # 8, djelo_vodice
+"sladoled obiteljski 500ml": hrana  # 8, djelo_vodice
+"dzem mijesano voce": hrana  # 7, djelo_vodice
+"dzem sljiva": hrana  # 7, djelo_vodice
+"prasak za pecivo": hrana  # 7, djelo_vodice
+"tortele": hrana  # 7, djelo_vodice
+"skittles": hrana  # 7, djelo_vodice
+"zm grasak": hrana  # 7, djelo_vodice
+"cokolada punjena": hrana  # 7, djelo_vodice
+"tortelini 250g": hrana  # 7, djelo_vodice
+"kravlji sir": hrana  # 7, djelo_vodice
+"ferrero": hrana  # 7, vrutak
+"jaja": hrana  # 7, vrutak
+"slag za kolace": hrana  # 7, djelo_vodice
+"pommes frites": hrana  # 7, djelo_vodice
+"sampinjoni mali": hrana  # 7, djelo_vodice
+"cokolada za kuhanje 200g": hrana  # 7, djelo_vodice
+"senf staklo": hrana  # 7, djelo_vodice
+"cokoladno mlijeko 500ml": hrana  # 7, djelo_vodice
+"muffin": hrana  # 7, djelo_vodice
+"vocni pirevi": hrana  # 7, djelo_vodice
+"kompot ananas kolut": hrana  # 7, djelo_vodice
+"voce i povrce": hrana  # 7, zabac
+"sir trokutici": hrana  # 7, djelo_vodice
+"cikla velika": hrana  # 7, djelo_vodice
+"vrhnje za slag 500ml": hrana  # 7, djelo_vodice
+"zacini mlinac": hrana  # 7, djelo_vodice
+"keks mijesani": hrana  # 7, djelo_vodice
+"kukuruz veliki": hrana  # 7, djelo_vodice
+"zm filet ribe": hrana  # 7, djelo_vodice
+"ostale hrenovke": hrana  # 7, djelo_vodice
+"zm piletina": hrana  # 7, djelo_vodice
+"kapula luk": hrana  # 7, djelo_vodice
+"senf tuba": hrana  # 7, djelo_vodice
+"jogurt pet mali": hrana  # 7, djelo_vodice
+"sladoled ostali": hrana  # 7, djelo_vodice
+"bomboni tvrdi veliki": hrana  # 7, djelo_vodice
+"mentosi": hrana  # 7, djelo_vodice
+"kompot breskva": hrana  # 6, djelo_vodice
+"secer smedi": hrana  # 6, djelo_vodice
+"bomboni punjeni veliki": hrana  # 6, djelo_vodice
+"zm njoke 500g": hrana  # 6, djelo_vodice
+"tic tac": hrana  # 6, djelo_vodice
+"cokolada tamna": hrana  # 6, djelo_vodice
+"umak bolognese": hrana  # 6, djelo_vodice
+"kokice suho": hrana  # 6, djelo_vodice
+"panceta komad": hrana  # 6, djelo_vodice
+"pasteta u ovitku": hrana  # 6, djelo_vodice
+"gastro pelat": hrana  # 6, djelo_vodice
+"masline zelene male": hrana  # 6, djelo_vodice
+"namazi jednobojni": hrana  # 6, djelo_vodice
+"ketchup": hrana  # 6, djelo_vodice
+"ostalo cokoladno sitno": hrana  # 6, djelo_vodice
+"feta sir": hrana  # 6, djelo_vodice
+"sol krupna": hrana  # 6, djelo_vodice
+"aceto balsamico": hrana  # 6, djelo_vodice
+"namazi mali": hrana  # 6, djelo_vodice
+"jogurt tekuci casa": hrana  # 6, djelo_vodice
+"sirni namaz okus": hrana  # 6, djelo_vodice
+"drops": hrana  # 6, djelo_vodice
+"brasno ostro": hrana  # 6, djelo_vodice
+"proteini casa": hrana  # 6, djelo_vodice
+"zimska narezano": hrana  # 6, djelo_vodice
+"jabucni ocat": hrana  # 6, djelo_vodice
+"kokosja kocka": hrana  # 6, djelo_vodice
+"bananice": hrana  # 6, djelo_vodice
+"kruh specijalni": hrana  # 6, djelo_vodice
+"jaja svjeza": hrana  # 6, roto
+"fant": hrana  # 6, djelo_vodice
+"vrhnje za kuhanje 500ml": hrana  # 6, djelo_vodice
+"griz": hrana  # 6, djelo_vodice
+"borovnica": hrana  # 6, djelo_vodice
+"fidelini": hrana  # 6, djelo_vodice
+"cokoladno jaje": hrana  # 6, djelo_vodice
+"lizalica vocna": hrana  # 6, djelo_vodice
+"ostali sir": hrana  # 6, djelo_vodice
+"panirana piletina svjeza": hrana  # 6, djelo_vodice
+"grah gotovo jelo": hrana  # 6, djelo_vodice
+"mlijeko 3 8": hrana  # 6, djelo_vodice
+"mozzarela": hrana  # 6, djelo_vodice
+"zimska": hrana  # 6, djelo_vodice
+"kulen narezano": hrana  # 6, djelo_vodice
+"kiselo vrhnje 20": hrana  # 6, djelo_vodice
+"rakovi": hrana  # 6, djelo_vodice
+"pez": hrana  # 5, djelo_vodice
+"gastro ajvar": hrana  # 5, djelo_vodice
+"namaz dvobojni": hrana  # 5, djelo_vodice
+"kompot ananas kocka": hrana  # 5, djelo_vodice
+"secer kocka": hrana  # 5, djelo_vodice
+"toast sir": hrana  # 5, djelo_vodice
+"kuglof": hrana  # 5, djelo_vodice
+"suho meso vak": hrana  # 5, djelo_vodice
+"puzici": hrana  # 5, djelo_vodice
+"gastro grah": hrana  # 5, djelo_vodice
+"tartar": hrana  # 5, djelo_vodice
+"badem": hrana  # 5, djelo_vodice
+"sladoled multipak kornet": hrana  # 5, djelo_vodice
+"plodasto povrce": hrana  # 5, djelo_vodice
+"gastro umaci": hrana  # 5, djelo_vodice
+"grasak mali": hrana  # 5, djelo_vodice
+"kakao prah": hrana  # 5, djelo_vodice
+"subioti": hrana  # 5, djelo_vodice
+"grah suhi": hrana  # 5, djelo_vodice
+"svjeza tjestenina": hrana  # 5, djelo_vodice
+"strudla ostalo": hrana  # 5, djelo_vodice
+"goveda kocka": hrana  # 5, djelo_vodice
+"senf casica": hrana  # 5, djelo_vodice
+"grah smedi veliki": hrana  # 5, djelo_vodice
+"listovi za pite i savijace": hrana  # 5, djelo_vodice
+"trajna": hrana  # 5, djelo_vodice
+"gauda": hrana  # 5, djelo_vodice
+"tjestenina bez glutena": hrana  # 5, djelo_vodice
+"kompot ostali": hrana  # 5, djelo_vodice
+"maslaci": hrana  # 5, vrutak
+"secer veliki": hrana  # 5, djelo_vodice
+"suncokretovo ulje": hrana  # 5, djelo_vodice
+"margarin 250g za kolace": hrana  # 5, djelo_vodice
+"sjeckana rajcica": hrana  # 5, djelo_vodice
+"pasteta riblja": hrana  # 5, djelo_vodice
+"stapici sezam": hrana  # 5, djelo_vodice
+"zm hobotnica": hrana  # 5, djelo_vodice
+"marinirani incuni": hrana  # 5, djelo_vodice
+"umjetni zasladivaci": hrana  # 5, djelo_vodice
+"kukuruz mali": hrana  # 5, djelo_vodice
+"bobicasto voce": hrana  # 5, djelo_vodice
+"bakalar": hrana  # 5, djelo_vodice
+"bombonijera punjena": hrana  # 4, djelo_vodice
+"preljev za torte": hrana  # 4, djelo_vodice
+"gulas": hrana  # 4, djelo_vodice
+"vrhnje za kuhanje 200ml": hrana  # 4, djelo_vodice
+"bomboni ostali": hrana  # 4, djelo_vodice
+"mramorni kolac": hrana  # 4, djelo_vodice
+"mahuna": hrana  # 4, djelo_vodice
+"maslac mali": hrana  # 4, djelo_vodice
+"pistacio": hrana  # 4, djelo_vodice
+"piskote": hrana  # 4, djelo_vodice
+"kiseli kupus rezani": hrana  # 4, djelo_vodice
+"svjeze riba pdv 5": hrana  # 4, roto
+"tjestenina u boji": hrana  # 4, djelo_vodice
+"mlijeko 2 8 promo": hrana  # 4, djelo_vodice
+"cokolada noisete": hrana  # 4, djelo_vodice
+"kroasan vanilija": hrana  # 4, djelo_vodice
+"zm kozice": hrana  # 4, djelo_vodice
+"margarin 250g": hrana  # 4, djelo_vodice
+"sitni bomboni": hrana  # 4, djelo_vodice
+"zm oslic": hrana  # 4, djelo_vodice
+"slag u spreju": hrana  # 4, djelo_vodice
+"cajno pecivo vocno": hrana  # 4, djelo_vodice
+"tvrdi sir narezani": hrana  # 4, djelo_vodice
+"gastro riza": hrana  # 4, djelo_vodice
+"mijesana salata velika": hrana  # 4, djelo_vodice
+"bomboni punjeni mali": hrana  # 4, djelo_vodice
+"cokolada u prahu": hrana  # 4, djelo_vodice
+"majoneza staklo": hrana  # 4, djelo_vodice
+"pakirano svinjetina": hrana  # 4, djelo_vodice
+"majoneza vrecica": hrana  # 4, djelo_vodice
+"slane srdele": hrana  # 4, djelo_vodice
+"bajadera": hrana  # 4, djelo_vodice
+"majoneza doypack": hrana  # 4, djelo_vodice
+"bomboni bez secera": hrana  # 4, djelo_vodice
+"munchmallow": hrana  # 4, djelo_vodice
+"brusnica": hrana  # 4, djelo_vodice
+"namazi jednobojni do 400g": hrana  # 4, djelo_vodice
+"suha sunka": hrana  # 4, djelo_vodice
+"kruh kukuruzni": hrana  # 4, djelo_vodice
+"mlijeko 2 8 do 0 5l": hrana  # 4, djelo_vodice
+"secer u prahu": hrana  # 4, djelo_vodice
+"pomfrit 1kg": hrana  # 4, djelo_vodice
+"kiselo povrce": hrana  # 4, djelo_vodice
+"hamburger komad": hrana  # 4, djelo_vodice
+"ostali crveni sirupi staklo": hrana  # 4, djelo_vodice
+"pecivo veliko": hrana  # 4, djelo_vodice
+"ulja i masti": hrana  # 4, roto
+"masline crne velike": hrana  # 4, djelo_vodice
+"fitness pahuljice": hrana  # 4, djelo_vodice
+"gastro dresing doze": hrana  # 4, djelo_vodice
+"hrenovke 100g": hrana  # 4, djelo_vodice
+"ketchup veliki": hrana  # 4, djelo_vodice
+"majoneza tuba": hrana  # 4, djelo_vodice
+"proteini puding": hrana  # 4, djelo_vodice
+"ostalo povrce": hrana  # 4, djelo_vodice
+"filet ribe": hrana  # 4, djelo_vodice
+"draze cokoladni": hrana  # 4, djelo_vodice
+"kulen komada": hrana  # 4, djelo_vodice
+"ragu": hrana  # 4, djelo_vodice
+"aceton": hrana  # 4, djelo_vodice
+"maslac 250g": hrana  # 4, djelo_vodice
+"gouda": hrana  # 4, djelo_vodice
+"ostali sirupi svijetli staklo": hrana  # 4, djelo_vodice
+"med kesten": hrana  # 4, djelo_vodice
+"kiseli kupus glava": hrana  # 4, djelo_vodice
+"gljive": hrana  # 4, djelo_vodice
+"svjeze mlijeko 3 2 1l": hrana  # 4, djelo_vodice
+"palmino ulje": hrana  # 4, djelo_vodice
+"vrhnje za slag 200ml": hrana  # 3, djelo_vodice
+"cajno pecivo vanilija": hrana  # 3, djelo_vodice
+"mileram": hrana  # 3, djelo_vodice
+"limunska kiselina": hrana  # 3, djelo_vodice
+"gastro duved": hrana  # 3, djelo_vodice
+"knedle": hrana  # 3, djelo_vodice
+"sitni tortica": hrana  # 3, djelo_vodice
+"lisnato tijesto": hrana  # 3, djelo_vodice
+"majoneza boca": hrana  # 3, djelo_vodice
+"pakirano junetina": hrana  # 3, djelo_vodice
+"suho meso rfz": hrana  # 3, djelo_vodice
+"kruh tamni": hrana  # 3, djelo_vodice
+"odrezak ribe": hrana  # 3, djelo_vodice
+"temeljci": hrana  # 3, djelo_vodice
+"kompot visnja": hrana  # 3, djelo_vodice
+"grozdice": hrana  # 3, djelo_vodice
+"soda bikarbona": hrana  # 3, djelo_vodice
+"med lipa": hrana  # 3, djelo_vodice
+"tjestenina za juhu ostalo": hrana  # 3, djelo_vodice
+"marinirana hobotnica horeca": hrana  # 3, djelo_vodice
+"mesne grickalice": hrana  # 3, djelo_vodice
+"jogurt vocni pet veliki": hrana  # 3, djelo_vodice
+"grah crveni mali": hrana  # 3, djelo_vodice
+"sampinjoni veliki": hrana  # 3, djelo_vodice
+"hren": hrana  # 3, djelo_vodice
+"sol 10 1": hrana  # 3, djelo_vodice
+"sunka za pizzu": hrana  # 3, djelo_vodice
+"zm skoljke": hrana  # 3, djelo_vodice
+"riza arborio": hrana  # 3, djelo_vodice
+"zimska komad": hrana  # 3, djelo_vodice
+"jecam": hrana  # 3, djelo_vodice
+"ostalo ulje": hrana  # 3, djelo_vodice
+"gastro koncentrat": hrana  # 3, djelo_vodice
+"cokolada noisete mala": hrana  # 3, djelo_vodice
+"feferoni mali": hrana  # 3, djelo_vodice
+"sljiva suha": hrana  # 3, djelo_vodice
+"panirana piletina": hrana  # 3, djelo_vodice
+"hamburger": hrana  # 3, djelo_vodice
+"agrumi": hrana  # 3, djelo_vodice
+"ugostiteljski secer": hrana  # 3, djelo_vodice
+"ostali crveni sirupi pet": hrana  # 3, djelo_vodice
+"dijabetski i dijetetski pr zdrava hrana": hrana  # 3, roto
+"hrenovke 1kg": hrana  # 3, djelo_vodice
+"ribana kasa": hrana  # 3, djelo_vodice
+"cokolada za kuhanje 300g": hrana  # 3, djelo_vodice
+"mlijeko 1": hrana  # 3, djelo_vodice
+"lizalica duda": hrana  # 3, djelo_vodice
+"marinirani incun horeca": hrana  # 3, djelo_vodice
+"papaja suho": hrana  # 3, djelo_vodice
+"snack od sira": hrana  # 3, djelo_vodice
+"mast": hrana  # 3, vrutak
+"chia": hrana  # 3, djelo_vodice
+"bombonijera ostala": hrana  # 3, djelo_vodice
+"slanutak": hrana  # 3, djelo_vodice
+"lizalica jumbo": hrana  # 3, djelo_vodice
+"ugostiteljski secer smedi": hrana  # 3, djelo_vodice
+"brasno veliko": hrana  # 3, djelo_vodice
+"gastro voce": hrana  # 3, djelo_vodice
+"bombon zele": hrana  # 3, vrutak
+"vrhnje za slag 1l": hrana  # 3, djelo_vodice
+"fileki": hrana  # 3, djelo_vodice
+"ukrasi za kolace mrvice": hrana  # 3, djelo_vodice
+"parizer narezano": hrana  # 3, djelo_vodice
+"cokolada bez secera": hrana  # 3, djelo_vodice
+"sunka narezak": hrana  # 3, djelo_vodice
+"jogurt cvrsti casa": hrana  # 3, djelo_vodice
+"meki sir": hrana  # 3, djelo_vodice
+"sunka komad": hrana  # 3, djelo_vodice
+"skoljke": hrana  # 3, djelo_vodice
+"egzoticno voce": hrana  # 3, djelo_vodice
+"suncokret": hrana  # 3, djelo_vodice
+"sladoled torte": hrana  # 3, djelo_vodice
+"mlinci": hrana  # 3, djelo_vodice
+"riza sain t andrea": hrana  # 3, djelo_vodice
+"sezam": hrana  # 2, djelo_vodice
+"cokolada za kuhanje 100g": hrana  # 2, djelo_vodice
+"sirup naranca pet": hrana  # 2, djelo_vodice
+"tortelini 500g": hrana  # 2, djelo_vodice
+"krastavci mali": hrana  # 2, djelo_vodice
+"kokos brasno": hrana  # 2, djelo_vodice
+"secer bijeli": hrana  # 2, djelo_vodice
+"cips": hrana  # 2, djelo_vodice
+"plemeniti sir": hrana  # 2, djelo_vodice
+"polutrajne salame ostale": hrana  # 2, djelo_vodice
+"hobotnica": hrana  # 2, djelo_vodice
+"pp kruh": hrana  # 2, djelo_vodice
+"gastro konzervirano": hrana  # 2, djelo_vodice
+"pomfrit mali": hrana  # 2, djelo_vodice
+"meksicki mix": hrana  # 2, djelo_vodice
+"soja desert": hrana  # 2, djelo_vodice
+"ementaler narezano": hrana  # 2, djelo_vodice
+"lizalica prah": hrana  # 2, djelo_vodice
+"zm visnja": hrana  # 2, djelo_vodice
+"majoneza mala": hrana  # 2, djelo_vodice
+"sirup naranca staklo": hrana  # 2, djelo_vodice
+"mesni narezak salama": hrana  # 2, djelo_vodice
+"sirup visnja pet": hrana  # 2, djelo_vodice
+"dodatak brasno": hrana  # 2, djelo_vodice
+"pastete cajne": hrana  # 2, djelo_vodice
+"mak": hrana  # 2, djelo_vodice
+"sladoled casica": hrana  # 2, djelo_vodice
+"marinirane kozice horeca": hrana  # 2, djelo_vodice
+"vrhnje za kuhanje 1l": hrana  # 2, djelo_vodice
+"mortadela": hrana  # 2, djelo_vodice
+"pp peciva": hrana  # 2, djelo_vodice
+"pogaca uskrsna": hrana  # 2, djelo_vodice
+"crnilo sipe horeca": hrana  # 2, djelo_vodice
+"zm srdela": hrana  # 2, djelo_vodice
+"gotove kreme i umaci": hrana  # 2, djelo_vodice
+"pucka kobasica": hrana  # 2, djelo_vodice
+"soja mlijeko": hrana  # 2, djelo_vodice
+"marelica": hrana  # 2, djelo_vodice
+"sirup limun staklo": hrana  # 2, djelo_vodice
+"mast velika": hrana  # 2, djelo_vodice
+"margarin 500g": hrana  # 2, djelo_vodice
+"bucino ulje": hrana  # 2, djelo_vodice
+"krafna": hrana  # 2, djelo_vodice
+"mortadela s maslinama": hrana  # 2, djelo_vodice
+"mlijeko 0 5": hrana  # 2, djelo_vodice
+"piletina": hrana  # 2, djelo_vodice
+"spinat": hrana  # 2, djelo_vodice
+"soja umak": hrana  # 2, djelo_vodice
+"svjeza riba kozice": hrana  # 2, djelo_vodice
+"ostali sirupi svijetli pet": hrana  # 2, djelo_vodice
+"tagliatelle": hrana  # 2, djelo_vodice
+"njoke 500g": hrana  # 2, djelo_vodice
+"grah smedi mali": hrana  # 2, djelo_vodice
+"bucune sjemenke": hrana  # 2, djelo_vodice
+"zm puretina": hrana  # 2, djelo_vodice
+"maslac 125g": hrana  # 2, djelo_vodice
+"sirup jabuka staklo": hrana  # 2, djelo_vodice
+"tarana": hrana  # 2, djelo_vodice
+"slova": hrana  # 2, djelo_vodice
+"tirolska komad": hrana  # 2, djelo_vodice
+"aroma": hrana  # 2, djelo_vodice
+"temeljac": hrana  # 2, djelo_vodice
+"grozde": hrana  # 2, djelo_vodice
+"grah bijeli veliki": hrana  # 2, djelo_vodice
+"mortadela narezano": hrana  # 2, djelo_vodice
+"tagliatelle u boji": hrana  # 2, djelo_vodice
+"cvarci": hrana  # 2, djelo_vodice
+"povrtna kocka": hrana  # 2, djelo_vodice
+"svjeze mlijeko 3 2 1 75l": hrana  # 2, djelo_vodice
+"jogurt vocni pet mali": hrana  # 2, djelo_vodice
+"zm svinjetina": hrana  # 2, djelo_vodice
+"orah mljeveni": hrana  # 2, djelo_vodice
+"njoke 1kg": hrana  # 2, djelo_vodice
+"gastro tjestenine": hrana  # 2, djelo_vodice
+"ovcji sir": hrana  # 2, djelo_vodice
+"tirolska": hrana  # 2, djelo_vodice
+"krumpir": hrana  # 2, djelo_vodice
+"kulen": hrana  # 2, djelo_vodice
+"svjeza pakirana riba": hrana  # 2, djelo_vodice
+"leca suho": hrana  # 2, djelo_vodice
+"voce i povrce suho voceipovrce pdv 25": hrana  # 2, roto
+"jogurt kantica": hrana  # 2, djelo_vodice
+"ljesnjak": hrana  # 2, djelo_vodice
+"sirup borovnica staklo": hrana  # 2, djelo_vodice
+"kompot marelica": hrana  # 2, djelo_vodice
+"acedofil": hrana  # 2, djelo_vodice
+"grasak": hrana  # 2, djelo_vodice
+"lignjun": hrana  # 2, djelo_vodice
+"pecenica narezana": hrana  # 2, djelo_vodice
+"zm ostalo voce": hrana  # 2, djelo_vodice
+"umaci ostalo": hrana  # 2, djelo_vodice
+"narezak pureci": hrana  # 1, djelo_vodice
+"suho grozdice": hrana  # 1, djelo_vodice
+"biljno ulje": hrana  # 1, djelo_vodice
+"kozje mlijeko 1l": hrana  # 1, djelo_vodice
+"svinjska crijeva": hrana  # 1, djelo_vodice
+"zm sipa": hrana  # 1, djelo_vodice
+"baza umak": hrana  # 1, djelo_vodice
+"zm bakalar": hrana  # 1, djelo_vodice
+"svjeza riba ostala riba": hrana  # 1, djelo_vodice
+"cokoladno mlijeko 1l": hrana  # 1, djelo_vodice
+"svjeza riba brancin": hrana  # 1, djelo_vodice
+"sladoled blok": hrana  # 1, djelo_vodice
+"kozje mlijeko 0 5l": hrana  # 1, djelo_vodice
+"paprika file gastro": hrana  # 1, djelo_vodice
+"ukrasi za kolace perle": hrana  # 1, djelo_vodice
+"blitva": hrana  # 1, djelo_vodice
+"grasak veliki": hrana  # 1, djelo_vodice
+"korneti za sladoled": hrana  # 1, djelo_vodice
+"zvjezdice": hrana  # 1, djelo_vodice
+"strudla smokva": hrana  # 1, djelo_vodice
+"leca": hrana  # 1, djelo_vodice
+"zm bodecnjak": hrana  # 1, djelo_vodice
+"gastro sumsko voce": hrana  # 1, djelo_vodice
+"drveni stapici 20 cm": hrana  # 1, djelo_vodice
+"riza saint andrea": hrana  # 1, djelo_vodice
+"ostala riba": hrana  # 1, djelo_vodice
+"sumsko voce": hrana  # 1, djelo_vodice
+"zm ostalo meso": hrana  # 1, djelo_vodice
+"margarin okusi": hrana  # 1, djelo_vodice
+"riza integralna": hrana  # 1, djelo_vodice
+"bio ulje": hrana  # 1, djelo_vodice
+"zm skampi": hrana  # 1, djelo_vodice
+"bob": hrana  # 1, djelo_vodice
+"kruh polubijeli": hrana  # 1, djelo_vodice
+"slanutak suho": hrana  # 1, djelo_vodice
+"hamburger narezani": hrana  # 1, djelo_vodice
+"umak od gljiva": hrana  # 1, djelo_vodice
+"med gastro": hrana  # 1, djelo_vodice
+"njoke 2 5kg": hrana  # 1, djelo_vodice
+"zm njoke 1kg": hrana  # 1, djelo_vodice
+"kvasac": hrana  # 1, djelo_vodice
+"kore za tortu i oblatne": hrana  # 1, djelo_vodice
+"dzem mali": hrana  # 1, djelo_vodice
+"sirup visnja staklo": hrana  # 1, djelo_vodice
+"lokum": hrana  # 1, djelo_vodice
+"banana suho": hrana  # 1, djelo_vodice
+"plodovi mora": hrana  # 1, djelo_vodice
+"francuska salata": hrana  # 1, djelo_vodice
+"marinirana hobotnica": hrana  # 1, djelo_vodice
+"jaja s": hrana  # 1, djelo_vodice
+"carska mjesavina": hrana  # 1, djelo_vodice
+"prsut komad": hrana  # 1, djelo_vodice
+"jecam suho": hrana  # 1, djelo_vodice
+"sir za pizzu": hrana  # 1, djelo_vodice
+"uht proizvodi": hrana  # 1, vrutak
+"sirup borovnica pet": hrana  # 1, djelo_vodice
+"sirup jabuka pet": hrana  # 1, djelo_vodice
+"kiselo mlijeko": hrana  # 1, djelo_vodice
+"zm plodovi mora": hrana  # 1, djelo_vodice
+"jabuka kruska": hrana  # 1, djelo_vodice
+"mozzarela 1kg": hrana  # 1, djelo_vodice
+"masline zelene gastro": hrana  # 1, djelo_vodice
+"bakalar 600 800": hrana  # 1, djelo_vodice
+"somboled": hrana  # 1, vrutak
+"strudla jabuka": hrana  # 1, djelo_vodice
+"lizalica cokoladna": hrana  # 1, djelo_vodice
+"kakao i vruca cokolada": hrana  # 1, djelo_vodice
+"grah crveni veliki": hrana  # 1, djelo_vodice
+"strudla visnja": hrana  # 1, djelo_vodice
+"grah bijeli mali": hrana  # 1, djelo_vodice
+"krastavci gastro": hrana  # 1, djelo_vodice
+"ementaler": hrana  # 1, djelo_vodice
+"led": hrana  # 1, djelo_vodice
+"masline crne gastro": hrana  # 1, djelo_vodice
+"sunka dimljena": hrana  # 1, djelo_vodice
+"polutrajno suhomesnato ostalo": hrana  # 1, djelo_vodice
+"kostunicavo voce": hrana  # 1, djelo_vodice
+"svjeze mlijeko 1 5 1l": hrana  # 1, djelo_vodice
+"namazi dvobojni": hrana  # 1, djelo_vodice
+"brokula": hrana  # 1, djelo_vodice
+"zm gotova jela": hrana  # 1, djelo_vodice
+"duvec veliki": hrana  # 1, djelo_vodice
+"suha sunka komad": hrana  # 1, djelo_vodice
+"kruh i pekarski proizvodi s porezom": hrana  # 1, roto
+"slag pjena": hrana  # 1, vrutak
+"sirup limun pet": hrana  # 1, djelo_vodice
+"gastro ocat": hrana  # 1, djelo_vodice
+"vrhnje za kavu": hrana  # 1, djelo_vodice
+"worcester": hrana  # 1, djelo_vodice
+"kozji sir": hrana  # 1, djelo_vodice
+"ketchup vrecica": hrana  # 1, djelo_vodice
+"mahune velike": hrana  # 1, djelo_vodice
+"visnja": hrana  # 1, djelo_vodice
+"korjenasto povrce": hrana  # 1, djelo_vodice
+"rostilj kobasice": hrana  # 1, djelo_vodice
+"kakao": hrana  # 1, djelo_vodice
+"ulje veliko pakiranje": hrana  # 1, djelo_vodice
+"svjeza riba orada": hrana  # 1, djelo_vodice
+"masline crne male": hrana  # 1, djelo_vodice
+
+# --- pice (146 kategorija, 46151 proizvoda)
+"pice": pice  # 23129, branka,bure,eurospin,gavranovic,jadranka_trgovina,kaufland,konzum,lidl,metro,ntl,ribola,stanic,studenac,trgocentar,trgovina-krk
+"pica": pice  # 9381, ktc,spar,stridon
+"pakirana hrana i pice": pice  # 8865, tommy
+"sokovi": pice  # 833, roto,vrutak
+"bezalkoholna pica": pice  # 368, zabac
+"sokovi sirupi i napitci": pice  # 289, boso
+"vode": pice  # 264, boso,roto
+"kava inst kava kavovine": pice  # 243, vrutak
+"cajevi": pice  # 205, roto,vrutak
+"kava caj kakao": pice  # 203, boso
+"gazirana pica": pice  # 201, boso,vrutak
+"kava instanti i kavovina": pice  # 153, roto
+"sok brick": pice  # 150, vrutak
+"energetski napitci": pice  # 108, vrutak
+"instant napitci": pice  # 96, djelo_vodice,zabac
+"ugostitelji sokovi": pice  # 67, djelo_vodice
+"sok mirni": pice  # 55, vrutak
+"mineralna voda": pice  # 55, vrutak
+"mirna pica 0 5l": pice  # 52, djelo_vodice
+"tonic": pice  # 51, vrutak
+"ledeni cajevi": pice  # 51, vrutak
+"vode s okusom": pice  # 43, vrutak
+"smjese za izradu napitaka": pice  # 40, vrutak
+"instant mjesavina za kavu": pice  # 39, djelo_vodice
+"ledeni caj 0 5l": pice  # 38, djelo_vodice
+"cokoladni napitci": pice  # 33, vrutak
+"negazirana voda": pice  # 32, vrutak
+"aromatizirana voda 0 5l": pice  # 30, djelo_vodice
+"kava instant": pice  # 29, djelo_vodice
+"mirna pica 1 5l": pice  # 28, djelo_vodice
+"ledeni caj 1 5l": pice  # 27, djelo_vodice
+"caj biljni ostalo": pice  # 26, djelo_vodice
+"mirna pica 0 33l": pice  # 25, djelo_vodice
+"vocni sok ostalo mali": pice  # 25, djelo_vodice
+"energetski napitci okus 0 25l": pice  # 25, djelo_vodice
+"vocni sok 100 1l": pice  # 24, djelo_vodice
+"energetski napitci okus 0 5l": pice  # 24, djelo_vodice
+"ledena kava": pice  # 22, djelo_vodice
+"kava mljevena": pice  # 22, djelo_vodice
+"kava horeca": pice  # 22, vrutak
+"ugostitelji gazirana pica": pice  # 21, djelo_vodice
+"tonic 1 5l": pice  # 20, djelo_vodice
+"vocni sok naranca 1l": pice  # 20, djelo_vodice
+"bio napitak": pice  # 19, djelo_vodice
+"cappuccino vrecica": pice  # 18, djelo_vodice
+"gazirana aromatizirana voda 0 5l": pice  # 18, djelo_vodice
+"vocni sok crveni 1l": pice  # 17, djelo_vodice
+"gazirana pica cola limenka": pice  # 17, djelo_vodice
+"gazirana voda 1 5l": pice  # 16, djelo_vodice
+"ostala gazirana pica 0 5l": pice  # 16, djelo_vodice
+"funkcionalni pet": pice  # 15, djelo_vodice
+"vocni sok ostalo 2l": pice  # 15, djelo_vodice
+"smoothie": pice  # 15, djelo_vodice
+"kava kapsule": pice  # 15, djelo_vodice
+"ugostitelji gazirana voda": pice  # 14, djelo_vodice
+"gazirana pica cola 0 5l": pice  # 14, djelo_vodice
+"vocni sok jabuka 1l": pice  # 14, djelo_vodice
+"cappuccino cokolada": pice  # 13, djelo_vodice
+"vocni sok multi 1l": pice  # 13, djelo_vodice
+"caj vocni ostalo": pice  # 13, djelo_vodice
+"vocni sok jabuka mali": pice  # 12, djelo_vodice
+"voda 0 5l": pice  # 11, djelo_vodice
+"voda 1 5l": pice  # 11, djelo_vodice
+"vocni sok kasasti 1l": pice  # 11, djelo_vodice
+"energetski napitci classic 0 25l": pice  # 11, djelo_vodice
+"gastro kava": pice  # 11, djelo_vodice
+"aromatizirana voda 1 5l": pice  # 11, djelo_vodice
+"vocni sok jabuka 2l": pice  # 10, djelo_vodice
+"gazirana pica cola 1 5l": pice  # 10, djelo_vodice
+"energetski napitci iznad 0 5l okus": pice  # 10, djelo_vodice
+"caj kamilica": pice  # 10, djelo_vodice
+"vocni sok naranca mali": pice  # 10, djelo_vodice
+"kava vakumirana": pice  # 9, djelo_vodice
+"vocni sok naranca 2l": pice  # 9, djelo_vodice
+"cappuccino klasik": pice  # 9, djelo_vodice
+"caj sipak": pice  # 9, djelo_vodice
+"mlijecni napitak": pice  # 9, djelo_vodice
+"gazirana pica cola 2l": pice  # 9, djelo_vodice
+"gazirana pica naranca 0 5l": pice  # 8, djelo_vodice
+"gazirana voda 0 5l": pice  # 8, djelo_vodice
+"gazirana aromatizirana voda 1 5l": pice  # 8, djelo_vodice
+"ostala gazirana pica 2l": pice  # 8, djelo_vodice
+"energetski napitci classic 0 5l": pice  # 8, djelo_vodice
+"cedevita go": pice  # 8, djelo_vodice
+"ledeni caj 0 25l": pice  # 8, djelo_vodice
+"gazirana pica cola 1l": pice  # 7, djelo_vodice
+"ugostitelji led caj": pice  # 7, djelo_vodice
+"gazirana pica naranca limenka": pice  # 7, djelo_vodice
+"instant napitak naranca 500g": pice  # 7, djelo_vodice
+"funkcionalno limenka": pice  # 7, djelo_vodice
+"tonic 0 5l": pice  # 7, djelo_vodice
+"ugostitelji tonic": pice  # 6, djelo_vodice
+"gazirana voda 1l": pice  # 6, djelo_vodice
+"gazirana pica naranca 2l": pice  # 6, djelo_vodice
+"ostala gazirana pica 1 5l": pice  # 6, djelo_vodice
+"caj menta": pice  # 6, djelo_vodice
+"gazirana pica naranca 1 5l": pice  # 5, djelo_vodice
+"funkcionalno boca": pice  # 5, djelo_vodice
+"voda 1l": pice  # 5, djelo_vodice
+"ostala gazirana pica limenka": pice  # 5, djelo_vodice
+"energetski napitci ostalo": pice  # 5, djelo_vodice
+"caj sumsko voce": pice  # 5, djelo_vodice
+"ugostitelji voda": pice  # 5, djelo_vodice
+"cappuccino ostali": pice  # 5, djelo_vodice
+"caj funkcionalni": pice  # 4, djelo_vodice
+"instant napitak limun 200g": pice  # 4, djelo_vodice
+"instant napitak naranca 200g": pice  # 4, djelo_vodice
+"vocni sok kasasti mali": pice  # 4, djelo_vodice
+"cappuccino vanilija": pice  # 4, djelo_vodice
+"aromatizirana voda 0 33l": pice  # 4, djelo_vodice
+"kakao napitak": pice  # 4, djelo_vodice
+"instant napitak limun 500g": pice  # 4, djelo_vodice
+"caj zeleni": pice  # 4, djelo_vodice
+"instant napitak naranca 1kg": pice  # 4, djelo_vodice
+"instant napitak ostalo 19g": pice  # 3, djelo_vodice
+"mirna pica 1l": pice  # 3, djelo_vodice
+"bezalkoholno 0 5l boca": pice  # 3, djelo_vodice
+"voda 5l": pice  # 3, djelo_vodice
+"funkcionalno pet": pice  # 3, djelo_vodice
+"vodica za usta": pice  # 3, djelo_vodice
+"funkcionalni casa": pice  # 3, djelo_vodice
+"kavovina": pice  # 3, djelo_vodice
+"caj brusnica": pice  # 3, djelo_vodice
+"voda 0 25l": pice  # 3, djelo_vodice
+"tonic limenka": pice  # 2, djelo_vodice
+"kakao napitak 330g": pice  # 2, djelo_vodice
+"dodaci za koktele": pice  # 2, djelo_vodice
+"instant napitak ostalo 1kg": pice  # 2, djelo_vodice
+"gazirana pica naranca 1l": pice  # 2, djelo_vodice
+"caj crni": pice  # 2, djelo_vodice
+"ostala gazirana pica 1l": pice  # 2, djelo_vodice
+"bio sok": pice  # 2, djelo_vodice
+"instant napitak limun 1kg": pice  # 2, djelo_vodice
+"instant napitak ostalo 200g": pice  # 2, djelo_vodice
+"cappuccino irish": pice  # 2, djelo_vodice
+"caj borovnica": pice  # 2, djelo_vodice
+"caj uvin": pice  # 2, djelo_vodice
+"mirna pica za ugostiteljstvo": pice  # 1, djelo_vodice
+"soja napitak": pice  # 1, djelo_vodice
+"kakao napitak 800g": pice  # 1, djelo_vodice
+"destilirana voda 1l": pice  # 1, djelo_vodice
+"kava bez kofeina": pice  # 1, djelo_vodice
+"kakao napitak 200g": pice  # 1, djelo_vodice
+"instant napitak ostalo 500g": pice  # 1, djelo_vodice
+"kakao napitak do 400g": pice  # 1, djelo_vodice
+"destilirana voda 5l": pice  # 1, djelo_vodice
+
+# --- alkohol (113 kategorija, 9547 proizvoda)
+"zestoko": alkohol  # 1611, roto
+"vino domace": alkohol  # 1371, vrutak
+"vino": alkohol  # 1268, roto
+"pivo": alkohol  # 1168, boso,roto,vrutak
+"zestoka alkoholna pica strana": alkohol  # 945, vrutak
+"vino inozemno": alkohol  # 804, vrutak
+"zestoka alkoholna pica domaca": alkohol  # 549, vrutak
+"vino i jap": alkohol  # 219, boso
+"pjenusci inozemni": alkohol  # 200, vrutak
+"pjenusci domaci": alkohol  # 147, vrutak
+"alkoholna pica": alkohol  # 115, zabac
+"vino bijelo ostalo 0 75l": alkohol  # 67, djelo_vodice
+"pivo limenka 0 5l": alkohol  # 54, djelo_vodice
+"vino crno ostalo 0 75l": alkohol  # 47, djelo_vodice
+"ostali likeri": alkohol  # 42, djelo_vodice
+"likeri": alkohol  # 37, djelo_vodice
+"pivo limenka pakiranja": alkohol  # 34, djelo_vodice
+"whiskey 0 7l": alkohol  # 32, djelo_vodice
+"cider": alkohol  # 29, vrutak
+"pjenusci": alkohol  # 28, djelo_vodice
+"gotovi kokteli": alkohol  # 28, djelo_vodice
+"gin 0 7l": alkohol  # 24, djelo_vodice
+"pivo boca 0 33l": alkohol  # 23, djelo_vodice
+"vino grasevina 0 75l": alkohol  # 21, djelo_vodice
+"pelinkovac": alkohol  # 21, djelo_vodice
+"likeri 0 1l": alkohol  # 20, djelo_vodice
+"vino grasevina 1l": alkohol  # 20, djelo_vodice
+"vino plavac 0 75l": alkohol  # 18, djelo_vodice
+"vodka 0 7l": alkohol  # 18, djelo_vodice
+"rum tamni 0 7l": alkohol  # 18, djelo_vodice
+"vino rose 0 75l": alkohol  # 18, djelo_vodice
+"vino posip 0 75l": alkohol  # 17, djelo_vodice
+"ostale rakije": alkohol  # 17, djelo_vodice
+"vino chardonnay 0 75l": alkohol  # 16, djelo_vodice
+"biljni likeri": alkohol  # 15, djelo_vodice
+"vino bijelo ostalo 1l": alkohol  # 14, djelo_vodice
+"specijalno pivo 0 5l": alkohol  # 14, djelo_vodice
+"prosek": alkohol  # 14, djelo_vodice
+"vodka 1l": alkohol  # 14, djelo_vodice
+"bib bijelo": alkohol  # 14, djelo_vodice
+"vino caber sav 0 75l": alkohol  # 13, djelo_vodice
+"core 0 5l boca": alkohol  # 13, djelo_vodice
+"rum bijeli 1l": alkohol  # 13, djelo_vodice
+"vino merlot 0 75l": alkohol  # 11, djelo_vodice
+"bib crno": alkohol  # 11, djelo_vodice
+"cider boca 0 33l": alkohol  # 11, djelo_vodice
+"liker visnja": alkohol  # 10, djelo_vodice
+"vino malvazija 0 75l": alkohol  # 10, djelo_vodice
+"vino vranac 1l": alkohol  # 10, djelo_vodice
+"vino malo bijelo": alkohol  # 9, djelo_vodice
+"pivo pet 2l": alkohol  # 9, djelo_vodice
+"radler 0 5l boca": alkohol  # 9, djelo_vodice
+"pivo radler limenka 0 5l": alkohol  # 9, djelo_vodice
+"rum bijeli 0 7l": alkohol  # 9, djelo_vodice
+"vino plavac 1l": alkohol  # 9, djelo_vodice
+"vino crno ostalo 1l": alkohol  # 9, djelo_vodice
+"gin 1l": alkohol  # 9, djelo_vodice
+"cider limenka 0 5l": alkohol  # 9, djelo_vodice
+"vodka 0 1l": alkohol  # 8, djelo_vodice
+"orahovac": alkohol  # 8, djelo_vodice
+"konjak 0 7l": alkohol  # 8, djelo_vodice
+"vino babic 0 75l": alkohol  # 8, djelo_vodice
+"whiskey 1l": alkohol  # 8, djelo_vodice
+"sljivovica": alkohol  # 8, djelo_vodice
+"premium 0 5 l boca": alkohol  # 8, djelo_vodice
+"rum tamni 1l": alkohol  # 7, djelo_vodice
+"pivo limenka 0 33l": alkohol  # 7, djelo_vodice
+"core 0 5l boca tamno": alkohol  # 7, djelo_vodice
+"konjak 1l": alkohol  # 7, djelo_vodice
+"vino bijelo 2l": alkohol  # 7, djelo_vodice
+"pivo bacva 30 1": alkohol  # 7, djelo_vodice
+"tequila 0 7l": alkohol  # 7, djelo_vodice
+"vino crno 2l": alkohol  # 7, djelo_vodice
+"pivo bacva 20 1": alkohol  # 7, djelo_vodice
+"cokoladni likeri": alkohol  # 6, djelo_vodice
+"rakije 0 1l": alkohol  # 6, djelo_vodice
+"pjenusci mali": alkohol  # 6, djelo_vodice
+"vino pinot 0 75l": alkohol  # 5, djelo_vodice
+"travarica": alkohol  # 5, djelo_vodice
+"specijalno pivo 0 33l": alkohol  # 5, djelo_vodice
+"vino rose 1l": alkohol  # 4, djelo_vodice
+"vino bijelo 3l": alkohol  # 4, djelo_vodice
+"premium whisky": alkohol  # 4, djelo_vodice
+"pivo boca 0 25l": alkohol  # 4, djelo_vodice
+"tequila 1l": alkohol  # 3, djelo_vodice
+"konjak 0 1l": alkohol  # 3, djelo_vodice
+"rum 0 1l": alkohol  # 3, djelo_vodice
+"pivo bacva 50 1": alkohol  # 3, djelo_vodice
+"desertna vina 0 75l": alkohol  # 3, djelo_vodice
+"vino merlot 1l": alkohol  # 3, djelo_vodice
+"vodka premium": alkohol  # 3, djelo_vodice
+"vino crno 3l": alkohol  # 3, djelo_vodice
+"gin premium": alkohol  # 3, djelo_vodice
+"vino malvazija 1l": alkohol  # 3, djelo_vodice
+"travarica 0 1l": alkohol  # 3, djelo_vodice
+"vino caber sav 1l": alkohol  # 3, djelo_vodice
+"kruskovac": alkohol  # 2, djelo_vodice
+"pivo bacva 5l": alkohol  # 2, djelo_vodice
+"vino poklon paketi": alkohol  # 2, djelo_vodice
+"pivo radler pet 2l": alkohol  # 2, djelo_vodice
+"whisky 0 1l": alkohol  # 2, djelo_vodice
+"cider limenka 0 33l": alkohol  # 2, djelo_vodice
+"komovica": alkohol  # 2, djelo_vodice
+"rum ostalo 1l": alkohol  # 2, djelo_vodice
+"premium pjenusci": alkohol  # 2, djelo_vodice
+"vino malo crno": alkohol  # 2, djelo_vodice
+"vino bijelo stolno 1l": alkohol  # 2, djelo_vodice
+"gin 0 1l": alkohol  # 2, djelo_vodice
+"jeger": alkohol  # 1, djelo_vodice
+"rum plocica": alkohol  # 1, djelo_vodice
+"whiskey veliko pakiranje": alkohol  # 1, djelo_vodice
+"pivo pet 1l": alkohol  # 1, djelo_vodice
+"vino vranac 0 75l": alkohol  # 1, djelo_vodice
+
+# --- kozmetika (50 kategorija, 39839 proizvoda)
+"kozmetika": kozmetika  # 26700, boso,branka,bure,eurospin,gavranovic,jadranka_trgovina,kaufland,konzum,ktc,lidl,metro,ntl,ribola,roto,spar,stanic,stridon,studenac,trgocentar,trgovina-krk
+"dekorativna kozmetika": kozmetika  # 5244, dm
+"tijelo": kozmetika  # 2837, dm
+"lice": kozmetika  # 1419, dm
+"kosa": kozmetika  # 1394, dm
+"mirisi": kozmetika  # 649, dm
+"njega tijela": kozmetika  # 535, vrutak
+"njega kose": kozmetika  # 166, vrutak
+"drogerija mita": kozmetika  # 127, zabac
+"drogerija": kozmetika  # 107, zabac
+"sampon 250 ml": kozmetika  # 61, djelo_vodice
+"kozm za brij miw": kozmetika  # 54, vrutak
+"ljepota i njega": kozmetika  # 47, roto
+"gel za tusiranje 250 ml": kozmetika  # 45, djelo_vodice
+"deo sprej men": kozmetika  # 32, djelo_vodice
+"regenerator 250 ml": kozmetika  # 31, djelo_vodice
+"gel za tusiranje men": kozmetika  # 29, djelo_vodice
+"deo sprej zenski": kozmetika  # 28, djelo_vodice
+"balzam poslije brijanja": kozmetika  # 24, djelo_vodice
+"kozmetika za suncanje": kozmetika  # 24, vrutak
+"mlijeko za tijelo": kozmetika  # 23, djelo_vodice
+"deo roll on zenski": kozmetika  # 22, djelo_vodice
+"labelo": kozmetika  # 22, djelo_vodice
+"gel za tusiranje 500 ml": kozmetika  # 20, djelo_vodice
+"lak za kosu": kozmetika  # 19, djelo_vodice
+"sampon 500 ml": kozmetika  # 16, djelo_vodice
+"deo roll on men": kozmetika  # 16, djelo_vodice
+"pjenaste kupke": kozmetika  # 15, djelo_vodice
+"losion poslije brijanja": kozmetika  # 14, djelo_vodice
+"krema od 75 200 ml": kozmetika  # 13, djelo_vodice
+"krema za ruke": kozmetika  # 10, djelo_vodice
+"sampon 1 l": kozmetika  # 10, djelo_vodice
+"losion za tijelo": kozmetika  # 10, djelo_vodice
+"gel za kosu": kozmetika  # 10, djelo_vodice
+"pjena za brijanje": kozmetika  # 8, djelo_vodice
+"univerzalna krema": kozmetika  # 8, djelo_vodice
+"gel za brijanje": kozmetika  # 7, djelo_vodice
+"njega noktiju": kozmetika  # 5, vrutak
+"sampon men": kozmetika  # 5, djelo_vodice
+"regenerator 500 ml": kozmetika  # 5, djelo_vodice
+"krema for men": kozmetika  # 4, djelo_vodice
+"pjena za kosu": kozmetika  # 4, djelo_vodice
+"krema do 75 ml": kozmetika  # 4, djelo_vodice
+"deo stick zenski": kozmetika  # 4, djelo_vodice
+"stvari za depilaciju": kozmetika  # 4, djelo_vodice
+"krema za brijanje": kozmetika  # 3, djelo_vodice
+"gel za tusiranje 1 l": kozmetika  # 2, djelo_vodice
+"gel za kosu men": kozmetika  # 1, djelo_vodice
+"pasta za ruke": kozmetika  # 1, djelo_vodice
+"njega lica": kozmetika  # 1, djelo_vodice
+
+# --- higijena (35 kategorija, 7418 proizvoda)
+"toaletne potrepstine": higijena  # 6147, branka,bure,eurospin,gavranovic,jadranka_trgovina,kaufland,konzum,ktc,lidl,metro,ntl,ribola,spar,stanic,stridon,studenac,trgocentar,trgovina-krk
+"usta zubi": higijena  # 537, dm
+"higijena": higijena  # 149, boso
+"njega usana i usne supljine": higijena  # 126, vrutak
+"tamponi ulosci": higijena  # 71, vrutak
+"zubna pasta": higijena  # 56, djelo_vodice
+"cetkica za zube": higijena  # 33, djelo_vodice
+"jednokratne britvice": higijena  # 27, djelo_vodice
+"ulosci normal": higijena  # 24, djelo_vodice
+"sapun tvrdi": higijena  # 23, djelo_vodice
+"ulosci maxi": higijena  # 21, djelo_vodice
+"toaletni papir troslojni": higijena  # 21, djelo_vodice
+"brijaci": higijena  # 17, djelo_vodice,vrutak
+"ulosci kutija": higijena  # 16, djelo_vodice
+"higijenski stapici za usi": higijena  # 16, djelo_vodice
+"sapun tekuci 250 ml": higijena  # 14, djelo_vodice
+"jednokratne britvice zenski": higijena  # 13, djelo_vodice
+"blazinice": higijena  # 13, djelo_vodice
+"papirnate maramice neutral": higijena  # 12, djelo_vodice
+"sapun tekuci 500 ml": higijena  # 11, djelo_vodice
+"tamponi": higijena  # 10, djelo_vodice
+"vlazne maramice i brisaci": higijena  # 9, djelo_vodice
+"higijenske vlazne maramice": higijena  # 9, djelo_vodice
+"sapun tekuci 1 l": higijena  # 9, djelo_vodice
+"njega zubi": higijena  # 8, djelo_vodice
+"toaletni papir dvoslojni": higijena  # 4, djelo_vodice
+"ulosci pamucni": higijena  # 4, djelo_vodice
+"papirnate maramice miris": higijena  # 4, djelo_vodice
+"toaletne maramice": higijena  # 3, djelo_vodice
+"sapun za robu": higijena  # 3, djelo_vodice
+"vlazne maramice za ciscenje kuhinje": higijena  # 3, djelo_vodice
+"zubni konac": higijena  # 2, djelo_vodice
+"vlazne maramice za ciscenje kupaonice": higijena  # 1, djelo_vodice
+"higijenske potrepstine": higijena  # 1, vrutak
+"maramice za robu": higijena  # 1, djelo_vodice
+
+# --- kucanstvo (129 kategorija, 70829 proizvoda)
+"proizvodi za kucanstvo": kucanstvo  # 42986, branka,eurospin,gavranovic,jadranka_trgovina,kaufland,konzum,ktc,lidl,metro,ntl,ribola,spar,stanic,stridon,studenac,trgocentar,trgovina-krk
+"sredstva za ciscenje": kucanstvo  # 14665, branka,bure,eurospin,gavranovic,jadranka_trgovina,kaufland,konzum,ktc,lidl,metro,ntl,ribola,spar,stanic,stridon,studenac,trgocentar,trgovina-krk,vrutak
+"kucne potrepstine": kucanstvo  # 7372, bure
+"posude i oprema za dom": kucanstvo  # 753, boso
+"pranje rublja i ciscenje": kucanstvo  # 732, dm
+"sredstva za pranje ciscenje i osvjezavanje": kucanstvo  # 590, boso
+"domacinstvo": kucanstvo  # 549, dm
+"kucanske potrepstine": kucanstvo  # 531, boso,roto
+"sred za ciscenje i odrzavanje": kucanstvo  # 243, roto
+"papirna pvc i ostala konfekcija": kucanstvo  # 211, roto
+"oprema za ugostiteljstvo": kucanstvo  # 179, roto
+"oprema za kucanstvo": kucanstvo  # 156, vrutak
+"omeksivaci i ostalo za rublje": kucanstvo  # 104, vrutak
+"detergenti za sude": kucanstvo  # 94, vrutak
+"omeksivaci 1l": kucanstvo  # 91, djelo_vodice
+"uradi sam auto namjestaj": kucanstvo  # 89, boso
+"ambalaza": kucanstvo  # 87, boso,stanic
+"gel za rublje kapsule": kucanstvo  # 68, vrutak
+"detergenti za rublje": kucanstvo  # 65, vrutak
+"zice spuzve krpe cetke wc": kucanstvo  # 64, vrutak
+"svijece": kucanstvo  # 59, boso
+"univerzalno sredstvo za ciscenje": kucanstvo  # 55, djelo_vodice
+"det za robu kapsule": kucanstvo  # 50, djelo_vodice
+"det za strojno pranje suda tablete": kucanstvo  # 43, djelo_vodice
+"miris za wc 1 1": kucanstvo  # 40, djelo_vodice
+"sistemi za mokro ciscenje podova": kucanstvo  # 37, djelo_vodice
+"omeksivaci 2l": kucanstvo  # 36, djelo_vodice
+"det za robu praskasti iznad 3 kg": kucanstvo  # 32, djelo_vodice
+"det za finu tkaninu tekuci iznad 2l": kucanstvo  # 30, djelo_vodice
+"det za robu praskasti 1 3 kg": kucanstvo  # 30, djelo_vodice
+"deterdzent za sude 0 5l": kucanstvo  # 29, djelo_vodice
+"deterdzent za sude 1 l": kucanstvo  # 27, djelo_vodice
+"det za robu tekuci do 2l": kucanstvo  # 25, djelo_vodice
+"rukavice": kucanstvo  # 24, vrutak
+"det za robu tekuci": kucanstvo  # 23, djelo_vodice
+"gumene rukavice l": kucanstvo  # 19, djelo_vodice
+"sredstva za ciscenje stakla": kucanstvo  # 18, djelo_vodice
+"sredstva za ciscenje poda": kucanstvo  # 18, djelo_vodice
+"spuzva za sude 1 1": kucanstvo  # 17, djelo_vodice
+"sredstva za ciscenje wc skoljke": kucanstvo  # 14, djelo_vodice
+"lopatica": kucanstvo  # 14, djelo_vodice
+"vrece za smece 35 l": kucanstvo  # 14, djelo_vodice
+"sredstva za ciscenje kupaonica u spreju": kucanstvo  # 14, djelo_vodice
+"det za robu tekuci iznad 2l": kucanstvo  # 14, djelo_vodice
+"alu folija gastro": kucanstvo  # 14, djelo_vodice
+"kuhinjski rucnici dvoslojni": kucanstvo  # 14, djelo_vodice
+"sobna metla": kucanstvo  # 13, djelo_vodice
+"spuzva za sude 2 1": kucanstvo  # 13, djelo_vodice
+"cetka za wc": kucanstvo  # 13, djelo_vodice
+"miris za wc 2 1": kucanstvo  # 12, djelo_vodice
+"omeksivaci 3l": kucanstvo  # 12, djelo_vodice
+"gumene rukavice m": kucanstvo  # 12, djelo_vodice
+"wc gel": kucanstvo  # 12, djelo_vodice
+"papir za pecenje": kucanstvo  # 11, djelo_vodice
+"odcepljivac odvoda": kucanstvo  # 11, djelo_vodice
+"visenamjenska krpa": kucanstvo  # 11, djelo_vodice
+"odstranjivac mrlja": kucanstvo  # 10, djelo_vodice
+"sredstva za ciscenje kuhinje u spreju": kucanstvo  # 10, djelo_vodice
+"deterdzent za sude 1 5 l": kucanstvo  # 10, djelo_vodice
+"stapici drveni cackalice i sl": kucanstvo  # 10, vrutak
+"lopatica metla": kucanstvo  # 10, djelo_vodice
+"det za finu tkaninu tekuci do 2l": kucanstvo  # 10, djelo_vodice
+"izbjeljivac": kucanstvo  # 9, djelo_vodice
+"sredstvo protiv kamenca": kucanstvo  # 9, djelo_vodice
+"miris za wc 3 1": kucanstvo  # 8, djelo_vodice
+"spuzva za sude 3 1": kucanstvo  # 8, djelo_vodice
+"det za strojno pranje suda sol": kucanstvo  # 8, djelo_vodice
+"spuzvasta krpa 3 1": kucanstvo  # 8, djelo_vodice
+"vrece za zamrzavanje 3 l": kucanstvo  # 8, djelo_vodice
+"celicna zica 1 1": kucanstvo  # 8, djelo_vodice
+"alu folija 20m": kucanstvo  # 8, djelo_vodice
+"prijanjajuca folija": kucanstvo  # 8, djelo_vodice
+"metle": kucanstvo  # 8, djelo_vodice
+"krpa": kucanstvo  # 8, djelo_vodice
+"odmascivac": kucanstvo  # 7, djelo_vodice
+"vrece za smece 120 l": kucanstvo  # 7, djelo_vodice
+"stap za metlu": kucanstvo  # 7, djelo_vodice
+"celicna zica 2 1": kucanstvo  # 7, djelo_vodice
+"tekuca sredstva za ciscenje kuhinja": kucanstvo  # 7, djelo_vodice
+"krpa za pod 1 1": kucanstvo  # 7, djelo_vodice
+"vrece za smece 150 l": kucanstvo  # 7, djelo_vodice
+"tekuca sredstva za kupaonicu": kucanstvo  # 6, djelo_vodice
+"sredstva za ciscenje drvenih povrsina": kucanstvo  # 6, djelo_vodice
+"alu folija 10m": kucanstvo  # 6, djelo_vodice
+"salvete boja": kucanstvo  # 6, djelo_vodice
+"cackalice 200 1": kucanstvo  # 6, djelo_vodice
+"vrece za smece 70 l": kucanstvo  # 6, djelo_vodice
+"sredstva za dezinfekciju ruku": kucanstvo  # 6, djelo_vodice
+"det za robu praskasti do 1 kg": kucanstvo  # 5, djelo_vodice
+"sredstva za ciscenje namjestaja": kucanstvo  # 5, djelo_vodice
+"cetka za ciscenje": kucanstvo  # 5, djelo_vodice
+"vrece za smece 50 l": kucanstvo  # 5, djelo_vodice
+"ciscenje lica": kucanstvo  # 5, djelo_vodice
+"spuzva za sude 10 1": kucanstvo  # 5, djelo_vodice
+"vrece za zamrzavanje 5 l": kucanstvo  # 5, djelo_vodice
+"sredstvo za odrzavanje perilica": kucanstvo  # 5, djelo_vodice
+"det za strojno pranje suda gel": kucanstvo  # 4, djelo_vodice
+"gumene rukavice s": kucanstvo  # 4, djelo_vodice
+"metla bez drske": kucanstvo  # 4, djelo_vodice
+"spuzva za sude 5 1": kucanstvo  # 4, djelo_vodice
+"ljepilo": kucanstvo  # 4, djelo_vodice
+"vrecice za led": kucanstvo  # 4, djelo_vodice
+"celicna zica 3 1": kucanstvo  # 4, djelo_vodice
+"vrece za smece 60 l": kucanstvo  # 4, djelo_vodice
+"salvete 30 30": kucanstvo  # 4, djelo_vodice
+"cetke gume metle i sl": kucanstvo  # 4, vrutak
+"cistaci za prasinu": kucanstvo  # 3, djelo_vodice
+"kuhinjski rucnici troslojni": kucanstvo  # 3, djelo_vodice
+"krpe za pod": kucanstvo  # 3, djelo_vodice
+"vrece za zamrzavanje 2 l": kucanstvo  # 3, djelo_vodice
+"dimljena lopatica": kucanstvo  # 2, djelo_vodice
+"spuzvasta krpa 5 1": kucanstvo  # 2, djelo_vodice
+"alu folija 30m": kucanstvo  # 2, djelo_vodice
+"patrone": kucanstvo  # 2, djelo_vodice
+"cetka za ciscene": kucanstvo  # 2, djelo_vodice
+"ostala sredstva za pranje robe": kucanstvo  # 2, djelo_vodice
+"sibice": kucanstvo  # 2, djelo_vodice
+"deterdzent za sude gastro": kucanstvo  # 2, djelo_vodice
+"vrece za zamrzavanje 1 l": kucanstvo  # 2, djelo_vodice
+"papir i papirna ambalaza": kucanstvo  # 2, boso
+"persil": kucanstvo  # 1, stridon
+"filter za kavu": kucanstvo  # 1, djelo_vodice
+"kompjutorska oprema": kucanstvo  # 1, vrutak
+"vrece za smece 240 l": kucanstvo  # 1, djelo_vodice
+"metla sirkova velika": kucanstvo  # 1, djelo_vodice
+"salvete 40 40": kucanstvo  # 1, djelo_vodice
+"krpa za pod 5 1": kucanstvo  # 1, djelo_vodice
+"krpica": kucanstvo  # 1, djelo_vodice
+"metla sirkova mala": kucanstvo  # 1, djelo_vodice
+
+# --- djeca (25 kategorija, 1856 proizvoda)
+"bebe deca": djeca  # 1410, dm
+"decja hrana": djeca  # 78, djelo_vodice,roto,vrutak,zabac
+"kozmetika za decu": djeca  # 72, vrutak
+"decje kasice": djeca  # 43, djelo_vodice
+"decija hrana": djeca  # 38, boso
+"baby vlazne maramice 25 100 kom": djeca  # 27, djelo_vodice
+"decija oprema": djeca  # 27, boso
+"decji svijet": djeca  # 24, roto
+"decja krema i losion": djeca  # 16, djelo_vodice
+"decji sampon": djeca  # 16, djelo_vodice
+"decji keksi": djeca  # 14, djelo_vodice
+"decji sokovi": djeca  # 12, djelo_vodice
+"decji pjenusci": djeca  # 11, djelo_vodice
+"pelene": djeca  # 10, vrutak
+"pelene 4": djeca  # 9, djelo_vodice
+"decja kozmetika": djeca  # 9, djelo_vodice
+"decje mlijeko": djeca  # 7, djelo_vodice
+"decja kupka": djeca  # 7, djelo_vodice
+"pelene 5": djeca  # 6, djelo_vodice
+"pelene 3": djeca  # 6, djelo_vodice
+"ostala decja hrana": djeca  # 4, djelo_vodice
+"baby vlazne maramice 5 25 kom": djeca  # 3, djelo_vodice
+"pelene 2": djeca  # 3, djelo_vodice
+"pelene 6": djeca  # 3, djelo_vodice
+"decji sapun": djeca  # 1, djelo_vodice
+
+# --- kucni_ljubimci (2 kategorija, 767 proizvoda)
+"kucni ljubimci": kucni_ljubimci  # 449, boso,dm,roto,zabac
+"hrana i ostalo za kuc ljubimce": kucni_ljubimci  # 318, vrutak
+
+# --- ostalo (38 kategorija, 12791 proizvoda)
+"neprehrana": ostalo  # 5223, tommy
+"dodaci uredenje pokloni": ostalo  # 3676, dm
+"zdravlje": ostalo  # 1407, dm
+"igracke": ostalo  # 638, boso
+"skolski i uredski pribor": ostalo  # 450, boso
+"tekstil i obuca": ostalo  # 232, boso
+"duhan bonovi takse markice": ostalo  # 210, boso
+"poklon i party program": ostalo  # 174, boso
+"cigarete i duhani": ostalo  # 131, roto
+"sezona neprehrana": ostalo  # 125, boso
+"duhanski proizvodi": ostalo  # 74, stanic
+"tisak i knjige": ostalo  # 71, boso
+"poklon pakiranje": ostalo  # 61, djelo_vodice
+"foto": ostalo  # 58, dm
+"tel kartice i prepaid bonovi": ostalo  # 31, roto
+"cvijece i sjemenje": ostalo  # 31, roto
+"flasteri vata": ostalo  # 26, vrutak
+"zarulja 60 w": ostalo  # 24, djelo_vodice
+"poklon pakiranje men": ostalo  # 17, djelo_vodice
+"upaljaci": ostalo  # 16, djelo_vodice
+"album": ostalo  # 13, djelo_vodice
+"zarulja 40 w": ostalo  # 13, djelo_vodice
+"elektricni i ostali ure aji": ostalo  # 12, boso
+"poklon pakiranja": ostalo  # 11, djelo_vodice
+"dodaci prehrani": ostalo  # 9, zabac
+"prezervativi": ostalo  # 7, vrutak
+"hanzaplast": ostalo  # 7, djelo_vodice
+"slicice": ostalo  # 7, djelo_vodice
+"vata": ostalo  # 6, djelo_vodice
+"kondomi": ostalo  # 5, djelo_vodice
+"sumace tablete magnezij": ostalo  # 5, djelo_vodice
+"sumece tablete vitamin c": ostalo  # 5, djelo_vodice
+"zarulja 12 w": ostalo  # 5, djelo_vodice
+"zarulja 100 w": ostalo  # 4, djelo_vodice
+"sumece tablete magnezij": ostalo  # 3, djelo_vodice
+"zarulja 25 w": ostalo  # 2, djelo_vodice
+"sumece tablete multivitamin": ostalo  # 1, djelo_vodice
+"gsm bonovi i start paketi": ostalo  # 1, vrutak
+
+# --- unknown (18 kategorija, 28707 proizvoda)
+"ostalo": unknown  # 28559, dm,gavranovic,ntl,roto,trgovina-krk,zabac
+"trgovacka roba": unknown  # 36, vrutak
+"izbaceni": unknown  # 24, vrutak
+"cajni kolutici": unknown  # 14, djelo_vodice
+"impuls": unknown  # 14, roto
+"cajna narezana": unknown  # 10, djelo_vodice
+"cajna komad": unknown  # 9, djelo_vodice
+"valentinovo": unknown  # 9, djelo_vodice
+"cajna": unknown  # 7, djelo_vodice
+"mix": unknown  # 4, djelo_vodice
+"mjesavine": unknown  # 4, djelo_vodice
+"bezgluteinski proizvodi": unknown  # 4, vrutak
+"usluge": unknown  # 4, dm
+"audio video informatika": unknown  # 3, boso
+"razno": unknown  # 3, zabac
+"mita bozicni asortiman": unknown  # 1, zabac
+"mix suho": unknown  # 1, djelo_vodice
+"uredaji": unknown  # 1, vrutak

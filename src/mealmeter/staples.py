@@ -15,8 +15,6 @@ STAPLES_PATH = Path(__file__).with_name("staples.yaml")
 # loose_produce: nazivi staklenki/konzervi koji prolaze pravilo ">= 500 g" ("KRASTAVCI 6-9 cm 1580g ...
 # ocijeđene mase", "KISELI ..."): kalibar u cm, ocijeđena masa, kiselo. Uzorak je na name_norm.
 LOOSE_REJECT_REGEX = r"\d+ \d+ cm|(^| )ocj|(^| )ocij|(^| )kis"
-# Skupine kategorija (normalize.category_group) čiji se proizvodi nikad ne vežu za namirnicu
-NONFOOD_GROUPS = ("kozmetika", "higijena", "kucanstvo", "djeca", "sunce", "igracke", "ljubimci")
 UNITS = ("kg", "l", "kom")
 
 
@@ -273,12 +271,12 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
 
     staples = staples or load_staples()
     # excluded: pogađa must_not_match -> cijela grupa (EAN) ispada iz namirnice.
-    # drop_reason: samo ovaj proizvod ispada (npr. neprehrambena kategorija lanca), grupa ostaje.
+    # drop_reason: samo ovaj proizvod ispada (neprehrambena skupina ili alkohol, food.py), grupa ostaje.
+    # Proizvodi s food_group='unknown' ostaju; pretraga i košarica ih filtriraju (is_food IS NULL).
     con.execute("""
         CREATE OR REPLACE TABLE clean.product_staples (
           chain VARCHAR, product_id VARCHAR, staple VARCHAR, excluded BOOLEAN, drop_reason VARCHAR)
     """)
-    nonfood = ", ".join(f"'{g}'" for g in NONFOOD_GROUPS)
     for st in staples.values():
         excl = "regexp_matches(name_norm, ?)" if st.exclude_regex else "false"
         params = ([st.exclude_regex] if st.exclude_regex else []) + [st.match_regex]
@@ -298,7 +296,7 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
         con.execute(
             f"""INSERT INTO clean.product_staples
                 SELECT chain, product_id, '{st.key}', {excl},
-                       CASE WHEN category_group IN ({nonfood}) THEN 'kategorija:' || category_group END
+                       CASE WHEN NOT is_food OR food_group = 'alkohol' THEN 'kategorija:' || food_group END
                 FROM clean.products WHERE regexp_matches(name_norm, ?) {loose}""",
             params,
         )

@@ -28,7 +28,8 @@ PICK = {
     "spar": (["87089"], ["18058"]),  # adresa sa sufiksom "87089 Spar"
     "roto": (["D22"], ["04030203", "15598"]),  # cijena 0.00
     "dm": (["all"], ["1000105"]),  # nacionalna cijena
-    "plodine": (["053"], ["021793"]),  # "NAPITAK SOJINO MLIJEKO" (Osijek)
+    "plodine": (["053"], ["021793",  # "NAPITAK SOJINO MLIJEKO" (Osijek), bez kategorije
+                          "040151", "100101", "613881", "689540"]),  # brašno (EAN), banana, čips, hrana za pse
 }
 
 for chain, (stores, products) in PICK.items():

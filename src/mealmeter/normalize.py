@@ -305,32 +305,80 @@ def canonical_city(city: str | None) -> str | None:
 
 # --- Kategorije ----------------------------------------------------------------
 
+# Skupine hrane (food_group): is_food je true za FOOD_GROUPS, false za NONFOOD_GROUPS, a
+# 'unknown' (is_food NULL) kad kategorija lanca ništa ne govori (nema je, ili je "Ostalo").
+FOOD_GROUPS = ("hrana", "pice", "alkohol")
+NONFOOD_GROUPS = ("kozmetika", "higijena", "kucanstvo", "djeca", "kucni_ljubimci", "ostalo")
+FOOD_GROUP_VALUES = FOOD_GROUPS + NONFOOD_GROUPS + ("unknown",)
+
 # (grupa, uzorci na početku riječi u norm_text(category)); prvo pravilo koje pogodi pobjeđuje.
 # Uzorci su u normaliziranom obliku: "dječja" -> "decja", "za djecu" -> "za decu".
+# "Ostalo" kod NTL-a, trgovine Krk, Gavranovića i Žabca miješa svrdla, ručnike i gastro hranu, pa su
+# takve kategorije (cijeli naziv) 'unknown'.
+_UNINFORMATIVE_CATEGORIES = {"ostalo", "razno", "mix", "mjesavine", "trgovacka roba", "izbaceni", "valentinovo",
+                             "impuls", "usluge", "mita bozicni asortiman"}
+# Pravila služe za izradu data/category_map.yaml (scripts/make_category_map.py) i kao rezerva za
+# kategorije kojih u mapi nema. Kategorija bez pogotka je 'unknown'.
 _CATEGORY_RULES = [
-    ("djeca", r"decj|decij|decu\b|deca\b|bebe|dojenc"),
-    ("ljubimci", r"ljubim|za pse|za macke"),
-    ("igracke", r"igrack"),
-    ("sunce", r"suncanj|zastita od sunca|spf"),
-    ("higijena", r"toaletn|higijen|tampon|ulosc|pelen|usta zubi|njega usana|zubn"),
-    ("kozmetika", r"kozmet|njega|sampon|tijelo|lice\b|kosa\b|mirisi|parfem|drogerij|dekorativ"),
-    ("kucanstvo", r"kucanstv|kucn|kucansk|domacinstv|sredstva za|sred za|cisc|ciisc|deterg|omeksiv|rublj|"
-                  r"posud|oprema|ambalaz|papirna|skolsk|uredsk|tekstil|obuc|uradi sam|svijec|neprehrana|"
-                  r"poklon|uredenje|foto\b|tisak|duhan|cigaret|zice|spuzve|krpe|gel za rublje"),
+    ("hrana", r"ocat\b"),  # "ALKOHOLNI OCAT", "VINSKI OCAT"
+    ("djeca", r"decj|decij|decu\b|deca\b|bebe|baby|dojenc|pelen"),
+    ("kucni_ljubimci", r"ljubim|za pse|za macke"),
+    ("alkohol", r"vino|vina\b|pivo|piva\b|zestok|pjenus|liker|whisk|gin\b|rum\b|rakij|pelinkovac|prosek|"
+                r"cider|konjak|tequila|vodk|sljivovic|orahovac|travaric|radler|bib bijelo|bib crno|"
+                r"alkoholn|gotovi koktel|aperitiv|brandy|core 0 5|premium 0 5|kruskovac|komovica|jeger"),
+    ("ostalo", r"duhan|cigaret|tel kartice|bonovi|zdravlje|dodaci prehrani|prezervativ|kondom|zarulj|upaljac|"
+               r"album|slicice|flaster|hanzaplast|vata\b|cvijece|sjemenj|elektricn|igrack|tekstil|obuc|"
+               r"skolsk|uredsk|poklon|party|neprehrana|sumece tablete|sumace tablete|foto\b|tisak"),
+    ("higijena", r"toaletn|higijen|tampon|ulosc|usta zubi|njega usana|zubn|cetkica za zube|britvic|brijac|"
+                 r"vlazne maramice|maramic|sapun|blazinice|njega zubi"),
+    ("kozmetika", r"kozm|njega|sampon|tijelo|lice\b|kosa\b|kosu\b|mirisi|parfem|drogerij|dekorativ|deo\b|"
+                  r"dezodor|gel za tus|gel za brij|gel za kosu|pjena za brij|losion|balzam|regenerator|labelo|"
+                  r"krema za ruke|krema od|krema do|krema for|krema za brij|univerzalna krema|pjenaste kupke|suncanj|"
+                  r"zastita od sunca|spf|depilac|pasta za ruke"),
+    ("kucanstvo", r"kucanstv|kucn|kucansk|domacinstv|sredstva za|sredstvo|sred za|cisc|ciisc|deterg|det za|"
+                  r"omeksiv|rublj|posud|oprema|ambalaz|papirna|svijec|uredenje|zice|celicna|spuzv|krpe|krpa|"
+                  r"metl|lopatica|rukavice|vrece|folij|papir za pecenje|kuhinjski rucnici|salvete|cackalice|"
+                  r"stapici drveni|odcepljivac|odstranjivac|odmascivac|izbjeljivac|kamenca|perilic|miris za wc|"
+                  r"wc\b|uradi sam|gel za rublje|deterdzent|vrecice za led|ljepilo|cistaci|sibice|patrone|persil|"
+                  r"krpica|filter za kavu"),
+    ("pice", r"pic|sok|vod|napitc|napitak|kava|kave\b|cappuccino|caj\b|cajev|ledeni caj|tonic|smoothie|cedevita|funkcionaln|"
+             r"instant mjesavina za kavu|bio napitak|bezalkohol|kavovina|energetski|dodaci za koktele"),
     ("hrana", r"hran|namirnic|meso|mesn|mlijec|mlijek|sir|povrc|voc|kruh|pekar|tjestenin|riza|zitaric|"
               r"zacin|konzerv|slatk|slan|grickal|keks|cokolad|bombon|smrz|svjez|delikat|riba|ulje|ocat|"
-              r"dorucak|kolac|kiselin|juhe|umaci|deserti|prehrana|program|tuna|odjel"),
-    ("pice", r"pic|sok|vod|vino|pivo|zestok|pjenus|napitc|kava|caj"),
+              r"dorucak|kolac|kiselin|juhe|juha|umac|umak|deserti|desert|prehrana|program|tuna|odjel|"
+              r"priprem|musli|kase\b|kasa\b|protein|suhomesn|cips|zvak|toploteka|ferment|marmelad|dzem|"
+              r"pekmez|slastic|kreker|lizalic|secer|sol\b|zasladiv|kikiriki|praline|pakirano|vafl|med\b|"
+              r"papar|kroasan|piletin|puretin|flips|pasiran|rajcic|sladoled|puding|sardin|tost|brasno|zoben|"
+              r"sunka|salam|gotova jela|gotovo jelo|zitna|vrhnj|spageti|prsut|pastet|parizer|namaz|panceta|"
+              r"medenjac|krastav|kokic|peciv|snack|vanilin|pereci|parmezan|brusket|skamp|palent|"
+              r"mix za pecenje|dvopek|corn flakes|biskvit|petit beurre|orah|koncentrat|jaffa|stapici|skus|"
+              r"rezanc|paprika|lazanj|krumpir|tortil|kvasac|kefir|kobasic|hrenovk|majonez|fusilli|feferon|"
+              r"lignj|ribic|origano|narezak|maslin|krusne|ketchup|kiseli|jogurt|jaja|grasak|zm\b|filet|"
+              r"tortel|skittles|senf|sampinj|prasak|pommes|muffin|mentos|kukuruz|kompot|kapula|luk\b|"
+              r"ferrero|cikla|njok|zimska|tic tac|rakovi|mozzar|kulen|kocka|griz|grah|fidelin|drops|"
+              r"borovnic|bananic|aceto|balsam|hobotnic|tartar|strudl|sezam|puzic|pez\b|masla|incun|"
+              r"listovi za pite|kuglof|kakao|gauda|ajvar|penne|rolada|panettone|sitni|fant\b|subioti|"
+              r"trajna|budola|mlinc|tijest|lisnat|gastro|jela\b|jelo\b|bakalar|badem|ulja|masti|mast\b|slag|ragu|"
+              r"preljev|pomfrit|pistaci|piskot|munchmallow|salata|margarin|mahun|gulas|gouda|gljiv|pahulj|"
+              r"brusnic|bezgluten|bajadera|temeljac|temeljci|suncokret|soda bikarbona|sljiva|skoljk|papaja|"
+              r"odrezak|mileram|knedl|jecam|hren|hamburger|grozd|fileki|chia|agrumi|tirolsk|tarana|"
+              r"tagliatelle|spinat|slova|pogac|pecenic|mortadel|meksicki|kozic|marelic|mak\b|ljesnjak|leca|"
+              r"krafn|ementaler|cvarc|crnilo|sjemenke|aroma|acedofil|zvjezdic|worcester|visnj|uht\b|crijeva|"
+              r"somboled|plodovi mora|lokum|kore za tortu|jabuka|duvec|carska|brokul|bob\b|blitva|banana|"
+              r"led\b|dodatak jelu|pelat|praskasti"),
 ]
 
 
-def category_group(category: str | None) -> str | None:
-    """Normalizirana skupina kategorije lanca: hrana, pice, kozmetika, higijena, kucanstvo, djeca,
-    sunce, igracke, ljubimci, ostalo; None ako lanac ne daje kategoriju."""
+def category_group(category: str | None) -> str:
+    """Skupina kategorije lanca prema pravilima (_CATEGORY_RULES): hrana, pice, alkohol, kozmetika,
+    higijena, kucanstvo, djeca, kucni_ljubimci, ostalo ili 'unknown' (nema kategorije ili ništa
+    ne pogađa). Build koristi data/category_map.yaml, a ova pravila samo za kategorije izvan mape."""
     if not category:
-        return None
+        return "unknown"
     text = norm_text(category)
+    if text in _UNINFORMATIVE_CATEGORIES:
+        return "unknown"
     for group, pattern in _CATEGORY_RULES:
         if re.search(r"(^| )(?:" + pattern + ")", text):
             return group
-    return "ostalo"
+    return "unknown"

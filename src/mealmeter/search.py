@@ -61,15 +61,37 @@ def _with_date(row: dict) -> dict:
     return row
 
 
+def _food_filter(include_nonfood: bool = False, include_alcohol: bool = False, unverified: str = "no") -> str:
+    """SQL uvjet nad clean.products (alias p) za filtar hrane (food.py).
+
+    Zadano samo is_food = true i bez alkohola. `unverified`: "no" (food_group 'unknown' ne ulazi),
+    "yes" (ulazi) ili "staple" (ulazi samo proizvod koji je sam povezan s namirnicom, psu; za
+    loose_produce u košarici, gdje naziv već prolazi strogo pravilo prve ili druge riječi).
+    """
+    allowed = ["p.is_food"]
+    if include_nonfood:
+        allowed.append("NOT p.is_food")
+    if unverified == "yes":
+        allowed.append("p.is_food IS NULL")
+    elif unverified == "staple":
+        allowed.append("(p.is_food IS NULL AND psu.staple IS NOT NULL AND NOT psu.excluded)")
+    sql = "(" + " OR ".join(f"coalesce({a}, false)" for a in allowed) + ")"
+    if not include_alcohol:
+        sql += " AND p.food_group <> 'alkohol'"
+    return sql
+
+
 def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | None,
-                include_clearance: bool) -> tuple[str, list, str]:
+                include_clearance: bool, food_sql: str | None = None) -> tuple[str, list, str]:
     """SQL (CTE-ovi g, hit, x) za kandidate: jedan redak po (trgovina, proizvod).
 
     x sadrži sve proizvode iz grupa koje odgovaraju upitu/namirnici, s cijenom po jedinici u
     jedinici usporedbe namirnice (STAPLE_PPU_SQL), pouzdanošću, izvorom gramature i zastavicama
     (price_suspect, clearance, pack_confidence, data_quality). Koriste ga find_products i plan_basket.
+    `food_sql` je uvjet filtra hrane (_food_filter; zadano samo provjerena hrana bez alkohola).
     Vraća (sql, parametri, stupac relevantnosti za razinu grupe).
     """
+    food_sql = food_sql or _food_filter()
     city_sql, city_params = _city_filter(city)
     name_sql = " AND ".join("p.name_norm LIKE ?" for _ in tokens) or "TRUE"
     likes = [f"%{t}%" for t in tokens]
@@ -159,14 +181,15 @@ def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | 
                  ({conf_sql}) AS unit_confidence, ({source_sql}) AS pack_source, ({suspect_sql}) AS price_suspect,
                  {n_units_sql} AS n_units, {assumed_sql} AS assumed_g,
                  c.price_per_kg_drained, p.variable_weight, p.clearance,
-                 c.is_special, c.date, s.scope, s.address, s.city, ch.data_quality
+                 c.is_special, c.date, s.scope, s.address, s.city, ch.data_quality,
+                 p.is_food, p.food_group, p.category_source
           FROM g p
           JOIN hit USING (gkey)
           JOIN clean.prices c USING (chain, product_id)
           JOIN clean.stores s USING (chain, store_id)
           JOIN clean.chains ch USING (chain)
           {rules_join}
-          WHERE {city_sql} AND {drop_sql} AND {clearance_sql}
+          WHERE {city_sql} AND {drop_sql} AND {clearance_sql} AND {food_sql}
         )"""
     return sql, hit_params + name_hit_params + coverage_params + city_params, cov_col
 
@@ -179,8 +202,16 @@ def find_products(
     ingredient: str | None = None,
     attributes: dict[str, str] | None = None,
     include_clearance: bool = False,
+    include_nonfood: bool = False,
+    include_alcohol: bool = False,
+    include_unverified: bool = False,
 ) -> list[dict]:
     """Pronađi proizvode po nazivu ili po osnovnoj namirnici (staples.yaml).
+
+    Zadano vraća samo hranu (is_food = true) bez alkohola. `include_nonfood` dodaje neprehrambene
+    proizvode, `include_alcohol` alkoholna pića, a `include_unverified` proizvode nepoznate skupine
+    (food_group 'unknown', npr. Plodine bez EAN-a u drugim lancima); grupa sastavljena samo od
+    takvih nosi `food_unverified = true`.
 
     - Slobodan upit: proizvod odgovara ako normalizirani naziv sadrži sve riječi upita. Ako je
       upit točno sinonim namirnice ("mlijeko", "brašno"), automatski se koristi namirnica.
@@ -224,7 +255,8 @@ def find_products(
     if not tokens and staple is None:
         return []
     con = con or connect()
-    cand_sql, cand_params, cov_col = _candidates(staple, tokens, attributes, city, include_clearance)
+    food_sql = _food_filter(include_nonfood, include_alcohol, "yes" if include_unverified else "no")
+    cand_sql, cand_params, cov_col = _candidates(staple, tokens, attributes, city, include_clearance, food_sql)
     best = "x.unit_confidence = pick.conf AND x.per_unit = pick.per_unit AND NOT x.price_suspect"
     sql = f"""
         {cand_sql},
@@ -273,6 +305,8 @@ def find_products(
           bool_or(x.variable_weight) AS any_variable_weight,
           bool_or(x.is_special) AS any_special,
           bool_or(x.scope = 'national') AS has_national,
+          mode(x.food_group) AS food_group,
+          bool_and(x.is_food IS NULL) AS food_unverified,
           max(x.date) AS date,
           bool_or(starts_with(x.name_norm, ?)) AS _starts,
           CASE WHEN any_value({cov_col}) >= 0.5 THEN 0 WHEN any_value({cov_col}) >= 0.25 THEN 1 ELSE 2 END AS _tier
@@ -360,9 +394,13 @@ def _attach_attributes(con: duckdb.DuckDBPyConnection, staple, rows: list[dict])
 
 
 def get_prices(
-    identifier: str, city: str | None = None, limit: int = 50, con: duckdb.DuckDBPyConnection | None = None
+    identifier: str, city: str | None = None, limit: int = 50, con: duckdb.DuckDBPyConnection | None = None,
+    include_nonfood: bool = False, include_alcohol: bool = False, include_unverified: bool = False,
 ) -> list[dict]:
-    """Cijene po trgovini za EAN, `lanac:product_id` ili id klase (npr. "jaja:m"), od najjeftinije."""
+    """Cijene po trgovini za EAN, `lanac:product_id` ili id klase (npr. "jaja:m"), od najjeftinije.
+
+    Filtar hrane kao u find_products: zadano samo is_food = true i bez alkohola; retci nepoznate
+    skupine (include_unverified=True) nose `food_unverified = true`."""
     ident = identifier.strip()
     staples = load_staples()
     prefix = ident.split(":", 1)[0].strip()
@@ -394,12 +432,14 @@ def get_prices(
                c.price_per_unit, c.per_unit, c.unit_confidence,
                CASE WHEN c.unit_confidence = 'low' THEN 'unit_price'
                     WHEN c.unit_confidence = 'high' THEN p.pack_source END AS pack_source,
-               ch.data_quality, c.price_per_kg_drained, p.drained_amount, p.variable_weight, p.clearance, c.date
+               ch.data_quality, c.price_per_kg_drained, p.drained_amount, p.variable_weight, p.clearance, c.date,
+               p.food_group, p.is_food IS NULL AS food_unverified
         FROM clean.products p
         JOIN clean.prices c USING (chain, product_id)
         JOIN clean.stores s USING (chain, store_id)
         JOIN clean.chains ch USING (chain)
         WHERE {prod_sql} AND {city_sql}
+          AND {_food_filter(include_nonfood, include_alcohol, "yes" if include_unverified else "no")}
         ORDER BY c.price_eff, p.chain, s.city, s.address
         LIMIT ?
         """,

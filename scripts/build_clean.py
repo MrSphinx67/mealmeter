@@ -58,6 +58,18 @@ for row in stats["quality"]:
     chain, dq, *vals = row
     print(f"{chain:<20}{dq:<10}" + "".join(f"{'' if v is None else v:>7}" for v in vals))
 
+food = stats["food"]
+print("\n=== Filtar hrane (food.py): proizvodi bez korisne kategorije lanca po lancu")
+print(f"{'lanac':<20}{'proizvoda':>10}{'bez kat.':>10}{'EAN':>8}{'% EAN':>7}{'riječi':>8}{'unknown':>9}{'sukob':>7}")
+for chain, n, n_no, n_ean, n_words, n_unk, n_conf in food["by_chain"]:
+    if n_no:
+        print(f"{chain:<20}{n:>10}{n_no:>10}{n_ean:>8}{100 * n_ean / n_no:>7.1f}{n_words:>8}{n_unk:>9}{n_conf:>7}")
+if food["unmapped_categories"]:
+    print("  kategorije izvan data/category_map.yaml (vrijede pravila):", food["unmapped_categories"][:20])
+print(f"{'skupina':<16}{'is_food':<9}{'izvor':<15}{'proizvoda':>10}")
+for group, is_food, source, n in food["by_group"]:
+    print(f"{group:<16}{str(is_food):<9}{source:<15}{n:>10}")
+
 st = dict(stats["staples"])
 suspects = st.pop("suspect_prices")
 print("\n=== Osnovne namirnice (staples.yaml):", {k: v for k, v in st.items() if k != "auto_ranges"})

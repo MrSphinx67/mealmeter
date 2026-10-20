@@ -61,13 +61,16 @@ def test_new_attributes(key, name, expected):
 # --- 2. neprehrambeni proizvodi ----------------------------------------------
 
 @pytest.mark.parametrize("category,group", [
-    ("HRANA", "hrana"), ("PAKIRANA HRANA I PIĆE", "hrana"), ("PIĆE", "pice"),
+    ("HRANA", "hrana"), ("PAKIRANA HRANA I PIĆE", "pice"), ("PIĆE", "pice"),
     ("KOZMETIKA", "kozmetika"), ("dekorativna kozmetika", "kozmetika"), ("tijelo", "kozmetika"),
     ("TOALETNE POTREPŠTINE", "higijena"), ("ZUBNA PASTA", "higijena"),
-    ("PROIZVODI ZA KUĆANSTVO", "kucanstvo"), ("SREDSTVA ZA ČIŠĆENJE", "kucanstvo"), ("NEPREHRANA", "kucanstvo"),
+    ("PROIZVODI ZA KUĆANSTVO", "kucanstvo"), ("SREDSTVA ZA ČIŠĆENJE", "kucanstvo"), ("NEPREHRANA", "ostalo"),
     ("bebe & djeca", "djeca"), ("DJEČJA HRANA", "djeca"), ("KOZMETIKA ZA DJECU", "djeca"),
-    ("KOZMETIKA ZA SUNČANJE", "sunce"), ("SUNCOKRETOVO ULJE", "hrana"),
-    ("IGRAČKE", "igracke"), ("kućni ljubimci", "ljubimci"), ("Ostalo", "ostalo"), (None, None),
+    ("KOZMETIKA ZA SUNČANJE", "kozmetika"), ("SUNCOKRETOVO ULJE", "hrana"),
+    ("IGRAČKE", "ostalo"), ("kućni ljubimci", "kucni_ljubimci"), ("Ostalo", "unknown"), (None, "unknown"),
+    ("VINO DOMAĆE", "alkohol"), ("ŽESTOKO", "alkohol"), ("BEZALKOHOLNA PIĆA", "pice"),
+    ("ALKOHOLNI OCAT", "hrana"), ("PRIPREMA JELA", "hrana"), ("cajno pecivo punjeno", "hrana"),
+    ("zdravlje", "ostalo"), ("trgovacka roba", "unknown"),
 ])
 def test_category_group(category, group):
     from mealmeter.normalize import category_group
@@ -265,7 +268,7 @@ def test_manual_and_auto_ranges(con):
     assert rules["brasno"] == "manual" and rules["mlijeko"] == "manual"
     # fixture: med i banana nemaju ručne granice -> 0.25x-4x medijana
     lo, hi, src = con.execute("SELECT ppu_min, ppu_max, range_source FROM clean.staple_rules WHERE staple = 'banana'").fetchone()
-    assert src == "auto" and hi == pytest.approx(16 * lo)
+    assert src == "auto" and hi == pytest.approx(16 * lo, rel=1e-3)  # granice su zaokružene na 4 decimale
 
 
 def test_default_exclude_variants(con, monkeypatch):

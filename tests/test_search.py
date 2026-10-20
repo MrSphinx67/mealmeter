@@ -75,7 +75,7 @@ def test_find_groups_by_ean(con):
     res = find_products("brašno glatko", con=con)
     top = res[0]
     assert top["id"] == PODRAVKA_1KG
-    assert top["n_chains"] == 4  # konzum, ntl, spar, roto
+    assert top["n_chains"] == 5  # konzum, ntl, spar, roto, plodine (bez kategorije, hrana preko EAN-a)
     assert top["pack"] == "1 kg"
     assert top["per_unit"] == "kg" and top["unit_confidence"] == "high"
     assert top["date"] == "2026-10-19" and top["date_hr"] == "19.10.2026."
@@ -104,7 +104,7 @@ def test_find_ignores_diacritics_and_case(con):
 def test_find_city_filter(con):
     res = find_products("brasno glatko", city="osijek", con=con)
     top = next(r for r in res if r["id"] == PODRAVKA_1KG)
-    assert top["n_chains"] == 4 and top["n_stores"] == 4  # po jedna trgovina u Osijeku
+    assert top["n_chains"] == 5 and top["n_stores"] == 5  # po jedna trgovina u Osijeku
     # Jastrebarsko nema konzum/ntl/spar/roto -> Podravka se ne pojavljuje
     assert all(r["id"] != PODRAVKA_1KG for r in find_products("brasno glatko", city="Jastrebarsko", con=con))
 
@@ -124,7 +124,9 @@ def test_find_matches_abbreviated_names_via_ean(con):
 
 
 def test_find_national_scope(con):
-    res = find_products("hipp", city="Osijek", con=con)
+    # HiPP je u dm-ovoj kategoriji "bebe & djeca" (food_group djeca), pa samo uz include_nonfood
+    assert find_products("hipp", city="Osijek", con=con) == []
+    res = find_products("hipp", city="Osijek", con=con, include_nonfood=True)
     assert len(res) == 1 and res[0]["chains"] == "dm" and "note" in res[0]
 
 
@@ -142,7 +144,7 @@ def test_find_empty_query(con):
 
 def test_get_prices_by_ean(con):
     res = get_prices(PODRAVKA_1KG, city="Osijek", con=con)
-    assert {r["chain"] for r in res} == {"konzum", "ntl", "spar", "roto"}
+    assert {r["chain"] for r in res} == {"konzum", "ntl", "spar", "roto", "plodine"}
     assert [r["price_eff"] for r in res] == sorted(r["price_eff"] for r in res)
     assert all(r["date_hr"] == "19.10.2026." and r["scope"] == "local" for r in res)
 
@@ -157,7 +159,8 @@ def test_get_prices_by_chain_id_and_special(con):
 
 
 def test_get_prices_national(con):
-    res = get_prices("dm:1000105", city="Osijek", con=con)
+    assert get_prices("dm:1000105", city="Osijek", con=con) == []  # djeca: neprehrambeno
+    res = get_prices("dm:1000105", city="Osijek", con=con, include_nonfood=True)
     assert len(res) == 1 and res[0]["scope"] == "national" and "note" in res[0]
 
 
