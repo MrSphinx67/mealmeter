@@ -642,3 +642,10 @@ Izvještaji: [STEP2E_REVIEW.md](STEP2E_REVIEW.md) (`scripts/step2e_review.py`) i
       kategorija → pripadnost → varijante → pakiranje → price_suspect → rasprodaja → konačno.
     - Najveći gubitak je u pripadnosti: većinom prerađeni proizvodi, ali i povrće na komad s globalnim EAN-om
       („KRASTAVAC SALATAR kom“), koje pravilo za svježe povrće odbija.
+78. **Eurospin i barkod 9999999999994** (samo izvještaj, točka 10).
+    - Eurospin isti „globalni“ EAN koristi za 83 različita proizvoda (biljke, voće, povrće), pa jedan naziv
+      („MRKVA 1kg“, „KRUMPIR 4kg“) uvodi cijelu grupu u namirnicu. Mrkve i krumpira je zato 63 i 60 (na 20.10.),
+      a stvarnih proizvoda 4 i 7.
+    - **Prijedlog (nije primijenjen, utječe i na košaricu):** EAN koji jedan lanac koristi za ≥ 5 različitih
+      `name_norm` tretirati kao neglobalan (ključ grupe lanac + `name_norm`). Na arhivi 20.10. to pogađa samo
+      9999999999994.

@@ -12,6 +12,7 @@ import duckdb
 sys.path.insert(0, str(Path(__file__).parent))
 from morning_review import md_table  # noqa: E402
 
+from mealmeter.search import _candidates  # noqa: E402
 from mealmeter.staples import BKEY_SQL, STAPLE_PPU_SQL, load_staples, staple_suspect_sql  # noqa: E402
 
 OUT = Path("docs/STEP2E_REVIEW.md")
@@ -203,7 +204,38 @@ def section_funnel(con) -> str:
     return "\n".join(out)
 
 
-SECTIONS = {"1": section_tiers, "4": section_synonyms, "5": section_cvijet, "9": section_funnel}
+def section_eurospin(con) -> str:
+    out = ["## 10. Eurospin: zašto 62 mrkve i 59 krumpira", ""]
+    for key in ("mrkva", "krumpir"):
+        st = load_staples()[key]
+        sql, params, _ = _candidates(st, [], st.defaults() or None, None, False)
+        rows = con.execute(sql + """ SELECT x.bkey AS grp, x.chain || ':' || x.product_id AS pid, any_value(x.name) AS nm,
+                                            count(DISTINCT x.store_id) AS n
+                                     FROM x WHERE x.chain = 'eurospin' AND NOT x.price_suspect
+                                     GROUP BY x.bkey, x.chain, x.product_id
+                                     ORDER BY grp = '9999999999994', nm LIMIT 30""", params).fetchall()
+        n_all, n_ph = con.execute(sql + """ SELECT count(DISTINCT product_id),
+                                            count(DISTINCT product_id) FILTER (WHERE bkey = '9999999999994')
+                                            FROM x WHERE chain = 'eurospin' AND NOT price_suspect""", params).fetchone()
+        out += [f"### {key}: {n_all} proizvoda, od toga {n_ph} iz grupe 9999999999994", "",
+                md_table(["grupa (bkey)", "id", "naziv", "trgovina"], rows), ""]
+    ph = con.execute("""
+        SELECT ean_norm, chain, count(*) AS n, count(DISTINCT name_norm) AS names FROM clean.products
+        WHERE ean_global GROUP BY ALL HAVING count(DISTINCT name_norm) >= 5 ORDER BY names DESC LIMIT 10""").fetchall()
+    out += ["**Objašnjenje:** Eurospin za 83 različita proizvoda (biljke, naranče, jagode, mrkva, krumpir…) koristi "
+            "isti barkod **9999999999994**. Kontrolna znamenka je ispravna, pa je to „globalni“ EAN i svi ti "
+            "proizvodi čine jednu grupu. Jedan naziv u njoj („MRKVA 1kg“, „KRUMPIR 4kg“) čini grupu snažnim "
+            "članom mrkve ili krumpira, pa u izbor ulaze i begonije, jagode i naranče. Stvarnih Eurospinovih mrkvi "
+            "i krumpira je 4 odnosno 7.", "",
+            "**Prijedlog (nije primijenjen):** EAN koji jedan lanac koristi za barem 5 različitih `name_norm` "
+            "tretirati kao neglobalan, pa se grupira po lanac + `name_norm` (kao proizvodi bez EAN-a). EAN-ovi koji "
+            "bi to pogodili:", "",
+            md_table(["EAN", "lanac", "proizvoda", "različitih naziva"], ph)]
+    return "\n".join(out)
+
+
+SECTIONS = {"1": section_tiers, "4": section_synonyms, "5": section_cvijet, "9": section_funnel,
+            "10": section_eurospin}
 
 
 def main() -> None:
