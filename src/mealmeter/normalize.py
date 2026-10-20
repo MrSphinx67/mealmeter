@@ -115,6 +115,9 @@ _PAK = re.compile(r"(?<![\d.,])(\d{1,2})\s*-?\s*(?:pak|pack)\b", re.I)
 # zadnja opcija: "TUNA 2x80" bez jedinice (pretpostavljaju se grami)
 _MULTI_NOUNIT = re.compile(r"(?<![\d.,])([1-9]|1[0-2])\s*[x×*]\s*(\d{2,4})(?![\d.,])(?!\s*(?:cm|mm|m\b|x|[a-z]))", re.I)
 _SINGLE = re.compile(_PRE + _NUM + r"\s*" + _UNIT + r"\.?" + _POST, re.I)
+# jedinica slijepljena s idućom riječi: "250 gVOĆARNA", "250 gMADIG" (mala jedinica, pa veliko slovo);
+# bez razlike u veličini slova ("5 LIMUNA") ne vrijedi
+_SINGLE_GLUED = re.compile(_PRE + _NUM + r"\s*(kg|gr|g|ml|l)(?=[A-ZČĆŠŽĐ])")
 # gramatura do ove vrijednosti uz "4+1" / "3/1" / "6 PAK" je jedna vrećica, ako je i po komadu < 5 g
 _SACHET_MAX = 30
 
@@ -217,6 +220,8 @@ def analyze_pack(name: str | None) -> tuple[tuple[float, str] | None, float | No
         return (amount, unit), drained, False, confidence
     if m := _MULTI_NOUNIT.search(text):
         return (float(int(m.group(1)) * int(m.group(2))), "g"), drained, False, "low"
+    if (m := _SINGLE_GLUED.search(text)) and _num(m.group(1)) > 0:
+        return _to_base(m.group(1), m.group(2)), drained, False, "high"
     return None, drained, False, None
 
 

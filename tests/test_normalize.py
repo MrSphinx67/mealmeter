@@ -97,8 +97,8 @@ REAL_NAMES = [
     ("DEKA DJ. JEDNOBOJNA 110X140 CM WIM", None),
     ("LAGUNA MALVAZIJA 0,187 (20)", None),
     ("JAJA 10/1 L TOM CRO", None),  # L je veličina jaja, a "10/1" broj komada
-    # poznato ograničenje: jedinica zalijepljena za sljedeću riječ
-    ("ULTRA PENNE RIG.500gPAGANI", None),
+    # jedinica zalijepljena za sljedeću riječ (Korak 2D): mala jedinica pa veliko slovo
+    ("ULTRA PENNE RIG.500gPAGANI", (500, "g")),
 ]
 
 

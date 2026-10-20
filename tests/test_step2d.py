@@ -53,3 +53,49 @@ def test_group_attrs_prefer_name(con):
     rows = con.execute("""SELECT value, how FROM clean.staple_group_attrs
                           WHERE staple = 'mljeveno_meso' AND attr = 'vrsta' AND bkey = '3850339413043'""").fetchall()
     assert rows == [("purece", "name")]
+
+
+# --- 2. isključenja i gramatura ----------------------------------------------------------
+
+@pytest.mark.parametrize("key,name", [
+    ("maslinovo_ulje", "KUPUS KIS MASL ULJE ČEŠNJAK 250g"),
+    ("maslinovo_ulje", "PREMIUM SAL. KIS.KUPUS S EX.DJE. MASL. ULJEM I CES. 250G"),
+    ("parmezan", "RIBAN.PARMEZAN GREEN VIE 100 g"),
+    ("mozzarella", "MOZZARELLA VEGAN 200 g"),
+    ("tvrdi_sir", "SIR TVRDI BILJNI 200 g"),
+    ("maslac", "BILJNA ZAMJENA ZA MASLAC 250 g"),
+    ("grah", "GRAH S KOB.SMRZ."),
+    ("slanutak", "SIPA SA SLANUTKOM SMRZ."),
+    ("grasak", "GRAŠAK I SIPA 400 g"),
+    ("grah", "BRUDET GRAH 400 g"),
+    ("leca", "LEĆA ORZO 300 g"),
+])
+def test_point2_exclusions(key, name):
+    from mealmeter.staples import name_match
+
+    assert name_match(S[key], name) == "excluded"
+
+
+def test_felix_only_pet_food():
+    from mealmeter.staples import name_match
+
+    assert name_match(S["kecap"], "KETCHUP FELIX BLAGI 500g") == "match"
+    assert name_match(S["tuna"], "HRANA ZA MAČKE FELIX TUNA 85 g") == "excluded"
+
+
+def test_kupus_and_vegan_parmezan_not_in_default(con):
+    names = [r["name"] for r in find_products(ingredient="maslinovo_ulje", limit=100, con=con)]
+    assert not any("KUPUS" in n for n in names)
+    names = [r["name"] for r in find_products(ingredient="parmezan", limit=100, con=con, include_ambiguous=True)]
+    assert not any("BILJ" in n.upper() or "GREEN" in n.upper() for n in names)
+
+
+@pytest.mark.parametrize("name,pack", [
+    ("PERŠIN KOR LIS 250 gVOĆARNA STUDENAC", (250, "g")),
+    ("KIS.KUP. ČEŠNJ.250 gMADIG", (250, "g")),
+    ("5 LIMUNA", None),  # bez razlike u veličini slova jedinica se ne odvaja
+])
+def test_pack_glued_unit(name, pack):
+    from mealmeter.normalize import parse_pack
+
+    assert parse_pack(name) == pack

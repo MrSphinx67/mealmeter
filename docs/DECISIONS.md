@@ -466,3 +466,11 @@ Izvještaji: [STEP2D_REVIEW.md](STEP2D_REVIEW.md) (`scripts/step2d_review.py`) i
       proizvod grupe“. Zato pureće mljeveno meso (u jednom lancu bez vrste) više nije zadano miješano.
     - Cijena pravila: grupe sa skraćenim ili samo markom imenovanim nazivima ispadaju (najviše tjestenina,
       202 grupe). Vidi STEP2D_REVIEW.md.
+55. **Isključenja (Korak 2D.2).**
+    - maslinovo ulje: kupus, kis, salat (tuna i sardin već postoje).
+    - parmezan, mozzarella, maslac, tvrdi i svježi sir: biljn, vegan, greenvie/green vie, zamjen.
+    - grah, leća, slanutak, grašak: kob\b, sipa, brudet, orzo.
+    - `felix` je maknut iz `_defaults` (Felix je i kečap). Hrana za ljubimce isključuje se kroz macke, za pse,
+      psa\b i novi `hrana za`.
+    - Gramatura: jedinica zalijepljena za iduću riječ čita se kad je jedinica malim, a iduće slovo velikim slovom
+      („250 gVOĆARNA“, „500gPAGANI“). „5 LIMUNA“ i dalje nije 5 l.

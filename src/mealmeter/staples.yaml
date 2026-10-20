@@ -50,12 +50,13 @@
 
 _defaults:
   must_not_match:
-    # hrana za ljubimce
+    # hrana za ljubimce ("felix" nije ovdje: Felix je i marka kečapa i krastavaca; hrana za mačke
+    # Felix isključena je kroz "macke", "za pse", "hrana za")
+    - hrana za
     - macke
     - macak
     - za pse
     - psa\b
-    - felix
     - whiskas
     - friskies
     - pedigree
@@ -247,7 +248,8 @@ maslinovo_ulje:
   synonyms: [maslinovo ulje, maslinovo]
   must_match: [maslinovo ulje, ulje maslinovo, masl ulje, ulje masl, ekstra devicansko, extra devicansko,
                extra virgin]
-  must_not_match: [grissin, okus, tartuf, umak, kruh, pecivo, kreker, tuna, sardin, fileti, skus, inci, masline\b, rajcic, ocat, set\b, sapun, krema]
+  must_not_match: [grissin, okus, tartuf, umak, kruh, pecivo, kreker, tuna, sardin, fileti, skus, inci, masline\b, rajcic, ocat, set\b, sapun, krema,
+                   kupus, kis, salat]
   unit: l
   max_pack: 5000
   min_pack: 250
@@ -265,7 +267,8 @@ maslac:
   must_not_match: [povrc, mjesavin, focacc, pistacij, toast, tikva, salata, tost, bombon, candie,
                    zacinsk, bilj, peanut, snickers, kikiriki, kokic, keks, croissant, kroasan, shea,
                    kakao, namaz, mikrovaln, smokic, caj\b, pop\b, crunchy, bobi, buttons, slani stapic,
-                   biskvit, popcorn, tijest]
+                   biskvit, popcorn, tijest,
+                   biljn, vegan, greenvie, green vie, zamjen]
   unit: kg
   max_pack: 1000
   min_pack: 100
@@ -390,7 +393,8 @@ svjezi_sir:
   synonyms: [svježi sir, svjezi sir, kravlji sir]
   must_match: [svjezi sir, sir svjezi, svj sir, sir svj, zrnati sir, sirni namaz svjezi]
   must_not_match: [dukatino, voce, strukli, mascarpone, vrhnje, burek, strudl, pita, savijac, palacink,
-                   krem\b, sunka, luk\b, vlasac, paprik, bucin, sirni\b, snack]
+                   krem\b, sunka, luk\b, vlasac, paprik, bucin, sirni\b, snack,
+                   biljn, vegan, greenvie, green vie, zamjen]
   unit: kg
   max_pack: 1000
   min_pack: 150
@@ -404,7 +408,8 @@ tvrdi_sir:
   name: tvrdi sir (gauda, trapist, edamac)
   synonyms: [tvrdi sir, gauda, gouda, trapist, edamac, edamer, polutvrdi sir]
   must_match: [gauda, gouda, trapist, edamac, edamer, tvrdi sir, sir tvrdi, polutvrdi, polutv\b, tilzit]
-  must_not_match: [krem\b, topljen, namaz, cips, kreker, sunka, burek, pita]
+  must_not_match: [krem\b, topljen, namaz, cips, kreker, sunka, burek, pita,
+                   biljn, vegan, greenvie, green vie, zamjen]
   unit: kg
   max_pack: 1000
   min_pack: 100
@@ -423,7 +428,8 @@ mozzarella:
   name: mozzarella
   synonyms: [mozzarella, mocarela]
   must_match: [mozzarel, mozarel, mocarel]
-  must_not_match: [krem\b, mozzarellom, pizza, stapic, panir, salata, sendvic, tost]
+  must_not_match: [krem\b, mozzarellom, pizza, stapic, panir, salata, sendvic, tost,
+                   biljn, vegan, greenvie, green vie, zamjen]
   unit: kg
   max_pack: 1000
   min_pack: 100
@@ -437,7 +443,8 @@ parmezan:
   name: parmezan
   synonyms: [parmezan, parmigiano, grana padano]
   must_match: [parmezan, parmigian, grana padano]
-  must_not_match: [rizot, salama, ribez, cips, kreker, umak, pesto]
+  must_not_match: [rizot, salama, ribez, cips, kreker, umak, pesto,
+                   biljn, vegan, greenvie, green vie, zamjen]
   unit: kg
   max_pack: 1000
   min_pack: 50
@@ -1121,7 +1128,8 @@ grah:
   must_match: [grah\b, graha\b, grah zrn]
   must_not_match: [kobasic, slanin, zapecen, hamburger, varivo, variva, juha, salata, tuna, sjeme, mahun,
                    sarenac sjeme, carnex, gavrilovic, gotov, rebarc, kocka, posni grah sa, umak, chili,
-                   konzerv mesn, tortilj, burrito, mix\b, kukuruz]
+                   konzerv mesn, tortilj, burrito, mix\b, kukuruz,
+                   kob\b, sipa, brudet, orzo]
   unit: kg
   ambiguous_form: true
   # bez oznake u nazivu: suho ako je pakiranje 400-1000 g, nema oznake konzerve ni smrznutog, a unit je
@@ -1149,7 +1157,8 @@ leca:
   synonyms: [leća, leca, lece]
   must_match: [leca\b, lece\b, leca zelena, leca crvena]
   must_not_match: [visiomax, kontakt, dnevne, mjesecne, mjes\b, silik, hidr, otopin, cips, chips, snack,
-                   juha, salata, sir\b, kava\b, paprika]
+                   juha, salata, sir\b, kava\b, paprika,
+                   kob\b, sipa, brudet, orzo]
   unit: kg
   ambiguous_form: true
   # bez oznake u nazivu: suho ako je pakiranje 400-1000 g, nema oznake konzerve ni smrznutog, a unit je
@@ -1175,7 +1184,8 @@ slanutak:
   name: slanutak
   synonyms: [slanutak, leblebija, cicer]
   must_match: [slanut, leblebij, cicer]
-  must_not_match: [hummus, humus, namaz, brasno, chips, cips, snack, salata, krem\b, pasta, falafel]
+  must_not_match: [hummus, humus, namaz, brasno, chips, cips, snack, salata, krem\b, pasta, falafel,
+                   kob\b, sipa, brudet, orzo]
   unit: kg
   ambiguous_form: true
   # bez oznake u nazivu: suho ako je pakiranje 400-1000 g, nema oznake konzerve ni smrznutog, a unit je
@@ -1220,7 +1230,8 @@ grasak:
   synonyms: [grašak, grasak]
   must_match: [grasak, graska\b]
   must_not_match: [mrkv, juha, rizi bizi, salata, sjeme, chips, cips, snack, wasabi, protein, mix\b,
-                   povrce, kukuruz]
+                   povrce, kukuruz,
+                   kob\b, sipa, brudet, orzo]
   unit: kg
   ambiguous_form: true
   # bez oznake u nazivu: suho ako je pakiranje 400-1000 g, nema oznake konzerve ni smrznutog, a unit je
