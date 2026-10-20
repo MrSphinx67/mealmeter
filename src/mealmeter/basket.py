@@ -197,6 +197,15 @@ def _rows_for(con, staple: Staple, attributes: dict, city: str) -> list[dict]:
     return [dict(zip(cols, r)) for r in cur.fetchall()]
 
 
+def _product_attrs(con, staple: Staple) -> dict[tuple, dict]:
+    """Atributi proizvoda namirnice: (chain, product_id) -> {atribut: vrijednost}."""
+    out: dict[tuple, dict] = {}
+    for chain, pid, attr, value in con.execute(
+            "SELECT chain, product_id, attr, value FROM clean.product_attrs WHERE staple = ?", [staple.key]).fetchall():
+        out.setdefault((chain, pid), {})[attr] = value
+    return out
+
+
 def _num(v):
     return float(v) if v is not None else None
 
@@ -323,6 +332,7 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
             "warnings": need.warnings,
         })
         out["warnings"] += need.warnings
+        attrs_of = _product_attrs(con, need.staple)
         for key, rows in _prepare(con, need, city).items():
             pick = choose_product(rows, need.amount, need.unit, _by_weight_unit(need.staple), need.staple.loose_produce)
             if pick is None:
@@ -336,7 +346,8 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
             store["items"][idx] = {
                 "ingredient": need.input.get("name"), "staple": need.staple.key, "need": round(need.amount, 3),
                 "need_unit": need.unit, "product_id": pick["product_id"], "ean": pick["ean_norm"],
-                "name": pick["name"], "pack_qty": pick["qty"], "n_packs": pick["n_packs"],
+                "name": pick["name"], "attributes": attrs_of.get((pick["chain"], pick["product_id"]), {}),
+                "pack_qty": pick["qty"], "n_packs": pick["n_packs"],
                 "price_eff": pick["price_eff"], "cost_pack": pick["cost_pack"], "cost_used": pick["cost_used"],
                 "counted": pick["cost_used"] if need.staple.pantry else pick["cost_pack"],
                 "pantry": need.staple.pantry, "price_per_unit": pick["price_per_unit"], "per_unit": pick["per_unit"],

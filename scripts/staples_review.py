@@ -86,7 +86,7 @@ def section(st, top: int, n_excl: int, results: list[dict]) -> list[str]:
     if st.default_attributes:
         rules.append("zadano: **" + ", ".join(f"{a}={v}" for a, v in st.default_attributes.items()) + "**")
     if st.group_by:
-        rules.append(f"grupira po: **{st.group_by}**")
+        rules.append(f"grupira po: **{', '.join(st.group_by)}**")
     if st.pantry:
         rules.append("**pantry**")
     out = ["", f'<a id="{st.key}"></a>', f"## {st.name} (`{st.key}`)", "", " · ".join(rules), "",

@@ -39,23 +39,55 @@ Proizvodi izvan zadanog izbora (`find_products`/`get_prices` bez `include_*`), p
 
 | lanac | naziv | kategorija lanca | skupina | izvor |
 |---|---|---|---|---|
-| branka | CVJETIĆI UKRASNI | HRANA | hrana | chain |
+| gavranovic | SLADOLED KING DESIRE 450ml ČAŠA LEDO | Hrana | hrana | chain |
+| ribola | DUKAT ČOK.MLI 0,2l ČAŠA | HRANA | hrana | chain |
 | ktc | BOMBONI 4g +IGRAČKA PONY | HRANA | hrana | chain |
 | studenac | IGRAČKA HUGI WUGI BLOW BUBBLE 12/1 | HRANA | hrana | chain |
-| boso | CVIJE ORHID.POSUD.CIKL.47 cm | ZELENI PROGRAM | hrana | chain |
+| plodine | SVIJECE ZA TORTU UKRASNE 12/1 52506 |  | hrana | ean_inherited |
 | ktc | ROLADA VANILIJA 300g DEKOR DOMA | HRANA | hrana | chain |
+| gavranovic | SVIJEĆA ROĐENDANSKA 10kom-rasprodaja | Hrana | hrana | chain |
 | lorenco | MAČJI JEZICI PRALINE OD ML.I BJ.ČOK |  | hrana | ean_inherited |
-| gavranovic | TANJURIĆI STAKLO 15X15cm HO-rasprodaja | Hrana | hrana | chain |
-| branka | SALVETE DAISY MI BOŽIĆNA ZVIJEZDA 20/1 | HRANA | hrana | chain |
+| spar | Kruh craft Karla u kalup.400 g | Hrana | hrana | chain |
+| ribola | PLAZMA ČAŠA 450ml LEDO | HRANA | hrana | chain |
 | vrutak | *TEMPRANILLO CASA SOLAR 0.75L COSECHEROS ZOZP SUHO 2025 -6/1- | VINO INOZEMNO | alkohol | chain |
-| plodine | CROISSANT COK. 300 G 6/1 CASALINI |  | hrana | ean_inherited |
-| ribola | GORDONS PINK 0,7L+COPA ČAŠA | PIĆE | pice | chain |
-| gavranovic | VREĆICA UKRASNA 26X32X12 cm-rasprodaja | Hrana | hrana | chain |
-| plodine | KAVA 400 G MLJEVENA FOLIJA ANAMARIJA |  | hrana | ean_inherited |
-| gavranovic | TETA VIOLETA OMEKŠIVAČ 900ml LAGOON | Hrana | hrana | chain |
+| boso | SJEME GARDEN KRAST.DUGI ZELENI | ZELENI PROGRAM | hrana | chain |
+| branka | ČAJ LIPA CVIJET 50g | HRANA | hrana | chain |
+| jadranka_trgovina | LIKER PELINKOVAC 0,7L VERSUS + 2 ČAŠE PROMO | PIĆE | alkohol | chain |
+| boso | SJEME GARDEN PRKOS FIORI DOPPI | ZELENI PROGRAM | hrana | chain |
+| gavranovic | VREĆICA UKRASNA ZA BOCU 12x36x9cm BIJELA/SIVA - rasprodaja | Hrana | hrana | chain |
+| gavranovic | BATERIJE PHILIPS 6F22 9V 1/1-rasprodaja | Hrana | hrana | chain |
 | trgovina-krk | JIM BEAM 0,7L + 1 ČAŠE | Piće | alkohol | chain |
-| gavranovic | ČESTITKA-rasprodaja | Hrana | hrana | chain |
-| boso | WHISK JACK 0,7 l DANIELS+2 ČAŠE | VINO I JAP | alkohol | chain |
-| ntl | IGRAČKA FINGER SLUG VELIKI | Ostalo | hrana | ean_inherited |
-| konzum | DRAŽEI JAJA RUM KOKOS 175 g CASALI | HRANA | hrana | chain |
-| plodine | NOODLES CURRY 65 G FINI MINI CASA |  | hrana | ean_inherited |
+| gavranovic | SCABIOSA CVIJET - rasprodaja | Hrana | hrana | chain |
+| plodine | PALOMA SALVETE STYLE 33X33/20 RUZA |  | hrana | ean_inherited |
+
+## 1. Jaja
+
+Uzgoj iz naziva: BIO/EKO → bio (prvi, jer „EKO … SLOBODNI UZGOJ“ je ekološki), KAVEZNI → kavezni, PODNI → podni, SLOBODNI → slobodni, inače `nepoznato`. Grupe su `jaja:<veličina>:<uzgoj>` (`get_prices` prima i `jaja:m` za sve uzgoje), a `plan_basket` vraća `attributes` odabranog proizvoda (velicina, uzgoj).
+
+Nazivi u `jaja:m` s krajnjim cijenama po jajetu (≥ 1,00 ili ≤ 0,16 €; 1,30 € je Metroov karton, a 0,10 € je bila donja granica starog raspona):
+
+| lanac | naziv | komada | cijena € | €/kom | trgovina |
+|---|---|---|---|---|---|
+| metro | 10/1 PERFA JAJA M | 10,00 | 44,10 | 4,41 | 5 |
+| metro | 10/1 ARO JAJA A KL M | 10,00 | 44,04 | 4,40 | 7 |
+| metro | 10/1 ŽITO JAJA M | 10,00 | 44,04 | 4,40 | 5 |
+| metro | 15/1 MC JAJA PODNI UZGOJ M | 15,00 | 45,36 | 3,02 | 7 |
+| metro | 30/1 ARO JAJA A KL M | 30,00 | 39,00 | 1,30 | 7 |
+| studenac | SVJEŽA JAJA 10/1, RAZRED M | 10,00 | 1,59 | 0,16 | 1 |
+| lidl | Žito Jaja razred M | 18,00 | 2,75 | 0,15 | 116 |
+| lidl | PERFA Jaja podni uzgoj razred M | 15,00 | 2,25 | 0,15 | 116 |
+| lidl | Kones Bi Jaja, razred M | 10,00 | 1,45 | 0,14 | 116 |
+| stridon | SVJEŽA JAJA A KLASE RAZRED M 10/1 PERFA | 10,00 | 0,16 | 0,02 | 1 |
+| jadranka_trgovina | JAJA SVJEŽA 30/1 KLASA A, RAZRED M | 30,00 | 0,26 | 0,01 | 1 |
+
+Distribucija cijene po jajetu (provjerena hrana, 491 različitih parova proizvod × cijena): 5. percentil **0,19**, medijan 0,31, 95. percentil **0,47** €. **Primijenjeno: `plausible_per_unit: [0.19, 0.47]`** (prije [0.1, 1.5]). Bio i dio slobodnog uzgoja su iznad 0,47 €; ako ih želiš u zadanom izboru, gornja granica bi trebala biti oko 0,55 €.
+
+| uzgoj | proizvoda | p5 | medijan | p95 | izvan granica |
+|---|---|---|---|---|---|
+| nepoznato | 320 | 0,19 | 0,31 | 0,42 | 25 |
+| podni | 118 | 0,19 | 0,33 | 0,48 | 11 |
+| kavezni | 24 | 0,16 | 0,25 | 0,29 | 2 |
+| slobodni | 18 | 0,30 | 0,37 | 1,20 | 1 |
+| bio | 11 | 0,34 | 0,47 | 0,53 | 5 |
+
+Klase (veličina:uzgoj) i broj različitih proizvoda: `-:bio` 10, `-:kavezni` 3, `-:nepoznato` 40, `-:podni` 13, `-:slobodni` 3, `l:kavezni` 6, `l:nepoznato` 102, `l:podni` 41, `l:slobodni` 5, `m:bio` 1, `m:kavezni` 15, `m:nepoznato` 165, `m:podni` 56, `m:slobodni` 10, `s:nepoznato` 5, `s:podni` 2, `xl:nepoznato` 8, `xl:podni` 6

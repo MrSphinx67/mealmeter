@@ -20,7 +20,7 @@
 #                   (sachet_g_by: {atribut: {vrijednost: grama}} za iznimke, npr. svježi kvasac 42 g)
 #   pantry          začini i sl.: u košarici se računa samo utrošeni dio (cost_used)
 #   compare_by: count + count_regex  cijena po komadu iz broja u nazivu ("10/1", "10 KOM")
-#   group_by        atribut po kojem se grupira umjesto EAN-a (jaja: velicina)
+#   group_by        atribut ili popis atributa po kojima se grupira umjesto EAN-a (jaja: [velicina, uzgoj])
 #   require_any     dodatni uzorci: barem jedan mora pogoditi (npr. dio mesa: but, vrat...)
 #   default_attributes  zadani filtar ako atribut nije zadan (mljeveno meso: vrsta=mijesano)
 #   disabled        namirnica postoji, ali nije u v1 (ne gradi se i ne može se tražiti)
@@ -433,13 +433,15 @@ jaja:
                    barilla, tagliatell, milka, salvet, punjen, rezac, marodi, luneta, plava\b, ukras,
                    kalup, prah, ljesnjak, kokos\b, sorini, socado, jajima, pasta, majonez, tj\b, tjest,
                    fidelin, fuz, surl, keks, misura, polje\b, klara\b, bez\b, od svj, liker, puding,
-                   krem\b, sendvic, salata, pasteta, namaz, jaja s\b, sa jajima, s jajima]
+                   krem\b, sendvic, salata, pasteta, namaz, jaja s\b, sa jajima, s jajima,
+                   obuc, folij, termoskup, stolic, glazben, igr]
   unit: kom
   piece_g: 60
-  plausible_per_unit: [0.1, 1.5]
+  # 5.-95. percentil cijene po jajetu različitih proizvoda (arhiva 2026-10-19), prijedlog za pregled
+  plausible_per_unit: [0.19, 0.47]
   max_pack: 30
   min_pack: 4
-  group_by: velicina
+  group_by: [velicina, uzgoj]
   # broj komada: "10/1", "10 KOM" (ne "-18/1-", to je broj pakiranja u kartonu)
   count_regex: '(?<![\d-])(\d+)\s*/\s*1\b(?!\s*-)|(\d+)\s*kom'
   compare_by: count
@@ -451,9 +453,12 @@ jaja:
       # "s" je i prijedlog ("JAJE S IGRAČKOM"), pa samo uz razred/vel./kl. ili u zagradi
       s: '(?:razred|raz\.|vel\.?|velicina|kl\.?)\s*s\b|\(s\)|(?:^|\s)s\s+(?:razred|raz\b|kl\b)'
     uzgoj:
-      slobodni: '\bslobodn'
-      podni: '\bpodn'
+      # bio prvi: "EKO JAJA SLOBODNI UZGOJ" je ekološki uzgoj
       bio: '\bbio\b|\beko\b|\bekol'
+      kavezni: '\bkavez'
+      podni: '\bpodn'
+      slobodni: '\bslobodn'
+      _default: nepoznato
   loose_produce: false
 
 luk:

@@ -388,3 +388,13 @@ Izvještaji za pregled su u [MORNING_REVIEW.md](MORNING_REVIEW.md) (`scripts/mor
       izbora, kao i u Koraku 2A2.
     - Brojke (arhiva 2026-10-19): Plodine 29,8 % naslijeđeno preko EAN-a, 49.890 ostaje `unknown`
       (velik dio su neprehrambeni artikli kojih nema u drugim lancima); Lorenco 71,4 %, 4.735 `unknown`.
+42. **Jaja.**
+    - Isključeni su i obuća, folija, termoskupljajuće, stolica, glazbeno i igr*.
+    - Novi atribut `uzgoj`: bio (BIO/EKO, provjerava se prvi), kavezni, podni, slobodni, inače `nepoznato`.
+    - `group_by` je sada popis atributa (`[velicina, uzgoj]`), pa su klase `jaja:m:podni`.
+      `get_prices` prima i kraći id (`jaja:m` = svi uzgoji). Proizvod bez veličine ostaje u svojoj EAN grupi.
+    - `plan_basket` uz svaku stavku vraća `attributes` odabranog proizvoda (veličina i uzgoj; za mlijeko vrsta i mast).
+    - **`plausible_per_unit: [0.19, 0.47]`**: 5.–95. percentil cijene po jajetu za različite proizvode
+      (provjerena hrana), umjesto mog prijedloga [0.1, 1.5].
+      - Ispadaju Metroovi kartoni (1,30–4,41 €/kom, „10/1“ je broj kutija) i greške (0,01 €/kom).
+      - Ispada i 5 od 11 bio proizvoda (do 0,53 €); vidi MORNING_REVIEW.md.

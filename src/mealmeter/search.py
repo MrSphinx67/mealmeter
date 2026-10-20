@@ -344,14 +344,19 @@ def _gkey_sql(staple) -> tuple[str, str]:
     """SQL za ključ grupe (alias p) i potreban JOIN.
 
     Zadano: globalni EAN, inače lanac + normalizirani naziv. Namirnica s group_by (jaja) grupira
-    po vrijednosti atributa ("jaja:m"), jer se uspoređuje klasa, a ne pojedini EAN.
+    po vrijednostima atributa ("jaja:m:podni"), jer se uspoređuje klasa, a ne pojedini EAN. Bez
+    vrijednosti prvog atributa (veličine) proizvod ostaje u svojoj EAN grupi.
     """
     base = "CASE WHEN p.ean_global THEN p.ean_norm ELSE p.chain || ':' || p.name_norm END"
     if not (staple and staple.group_by):
         return base, ""
-    join = f"""LEFT JOIN clean.product_attrs gb ON gb.chain = p.chain AND gb.product_id = p.product_id
-               AND gb.staple = '{staple.key}' AND gb.attr = '{staple.group_by}'"""
-    return f"CASE WHEN gb.value IS NOT NULL THEN '{staple.key}:' || gb.value ELSE {base} END", join
+    joins, parts = [], []
+    for i, attr in enumerate(staple.group_by):
+        joins.append(f"""LEFT JOIN clean.product_attrs gb{i} ON gb{i}.chain = p.chain AND gb{i}.product_id = p.product_id
+               AND gb{i}.staple = '{staple.key}' AND gb{i}.attr = '{attr}'""")
+        parts.append(f"coalesce(gb{i}.value, 'nepoznato')")
+    key = " || ':' || ".join(parts)
+    return f"CASE WHEN gb0.value IS NOT NULL THEN '{staple.key}:' || {key} ELSE {base} END", "\n".join(joins)
 
 
 def _attach_attributes(con: duckdb.DuckDBPyConnection, staple, rows: list[dict]) -> None:
@@ -405,14 +410,18 @@ def get_prices(
     staples = load_staples()
     prefix = ident.split(":", 1)[0].strip()
     if ":" in ident and prefix in staples and staples[prefix].group_by:
-        # id klase iz find_products (npr. "jaja:m"): svi proizvodi namirnice s tom vrijednošću atributa
-        st, value = staples[prefix], ident.split(":", 1)[1].strip()
-        if value not in st.attributes[st.group_by]:
-            raise ValueError(f"'{identifier}': nepoznata klasa; moguće: {', '.join(st.attributes[st.group_by])}")
-        prod_sql = """EXISTS (SELECT 1 FROM clean.product_attrs pa JOIN clean.product_staples ps USING (chain, product_id, staple)
+        # id klase iz find_products ("jaja:m:podni", ili samo "jaja:m" za sve uzgoje): proizvodi
+        # namirnice sa zadanim vrijednostima atributa iz group_by, redom
+        st = staples[prefix]
+        values = [v.strip() for v in ident.split(":")[1:]]
+        if len(values) > len(st.group_by) or any(v not in st.attributes[a] for a, v in zip(st.group_by, values)):
+            options = "; ".join(f"{a}: {', '.join(st.attributes[a])}" for a in st.group_by)
+            raise ValueError(f"'{identifier}': nepoznata klasa; moguće ({':'.join(st.group_by)}): {options}")
+        prod_sql = " AND ".join(f"""EXISTS (SELECT 1 FROM clean.product_attrs pa JOIN clean.product_staples ps USING (chain, product_id, staple)
                               WHERE pa.chain = p.chain AND pa.product_id = p.product_id AND pa.staple = ?
                                 AND pa.attr = ? AND pa.value = ? AND NOT ps.excluded AND ps.drop_reason IS NULL)"""
-        prod_params = [st.key, st.group_by, value]
+                                for _ in values)
+        prod_params = [x for a, v in zip(st.group_by, values) for x in (st.key, a, v)]
     elif ":" in ident:
         chain, pid = ident.split(":", 1)
         prod_sql, prod_params = "p.chain = ? AND p.product_id = ?", [chain.strip(), pid.strip()]

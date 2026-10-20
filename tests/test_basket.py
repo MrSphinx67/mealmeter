@@ -187,7 +187,7 @@ def test_three_recipes_exist():
 # --- get_prices: id klase ----------------------------------------------------------
 
 def test_get_prices_class_id(con, monkeypatch):
-    by_type = dict(S, brasno=replace(S["brasno"], group_by="tip"))
+    by_type = dict(S, brasno=replace(S["brasno"], group_by=("tip",)))
     monkeypatch.setattr(search, "load_staples", lambda *a, **k: by_type)
     rows = search.get_prices("brasno:ostro", con=con)
     assert {r["product_id"] for r in rows} == {"04030162"}
@@ -197,3 +197,11 @@ def test_get_prices_class_id(con, monkeypatch):
 
 def test_get_prices_egg_class_runs(con):
     assert search.get_prices("jaja:m", con=con) == []  # fixture nema jaja, ali id klase je valjan
+
+
+def test_get_prices_two_level_class_id(con, monkeypatch):
+    two = dict(S, brasno=replace(S["brasno"], group_by=("tip", "vrsta")))
+    monkeypatch.setattr(search, "load_staples", lambda *a, **k: two)
+    assert search.get_prices("brasno:ostro", con=con)  # samo prvi atribut
+    with pytest.raises(ValueError):
+        search.get_prices("brasno:ostro:kokosovo", con=con)

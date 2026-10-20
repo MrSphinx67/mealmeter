@@ -37,7 +37,8 @@ class Staple:
     sachet_g_by: dict[str, dict[str, float]] = field(default_factory=dict, hash=False, compare=False)
     pantry: bool = False
     count_regex: str | None = None
-    group_by: str | None = None
+    # atributi po kojima se grupira umjesto EAN-a (jaja: velicina, uzgoj -> "jaja:m:podni")
+    group_by: tuple[str, ...] = ()
     require_any: tuple[str, ...] = ()
     attribute_defaults: dict[str, str] = field(default_factory=dict, hash=False, compare=False)
     disabled: bool = False
@@ -162,7 +163,7 @@ def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> d
             sachet_g_by=d.get("sachet_g_by") or {},
             pantry=bool(d.get("pantry", False)),
             count_regex=d.get("count_regex"),
-            group_by=d.get("group_by"),
+            group_by=tuple([d["group_by"]] if isinstance(d.get("group_by"), str) else d.get("group_by") or ()),
             require_any=tuple(_fold(p) for p in d.get("require_any", [])),
             attribute_defaults=defaults,
             disabled=bool(d.get("disabled", False)),
@@ -181,8 +182,9 @@ def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> d
                 raise ValueError(f"{key}: default_attributes {a}={v} nije definiran atribut")
         if st.disabled and not include_disabled:
             continue
-        if st.group_by and st.group_by not in attrs:
-            raise ValueError(f"{key}: group_by {st.group_by} nije definiran atribut")
+        for attr in st.group_by:
+            if attr not in attrs:
+                raise ValueError(f"{key}: group_by {attr} nije definiran atribut")
         if st.compare_by == "count" and not st.count_regex:
             raise ValueError(f"{key}: compare_by: count traži count_regex")
         for attr, value in st.default_exclude_variants:

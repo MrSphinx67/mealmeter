@@ -345,7 +345,7 @@ def test_egg_size_and_count(name, size, count):
 
 def test_eggs_compare_by_class():
     st = S["jaja"]
-    assert st.compare_by == "count" and st.compare_unit == "kom" and st.group_by == "velicina"
+    assert st.compare_by == "count" and st.compare_unit == "kom" and st.group_by == ("velicina", "uzgoj")
     assert name_match(st, "DESERT QUARK MAXI JAJE S IGRAČ 160g") == "excluded"
     assert name_match(st, "COKO.JAJE ROCHER 212,5 G FERRERO") == "excluded"
 
