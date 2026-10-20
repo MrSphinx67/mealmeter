@@ -153,12 +153,14 @@ def cmd_basket(args) -> None:
             _fmt_money(it["cost_pack"]),
             _fmt_money(it["cost_used"]) + (" *" if it["pantry"] else ""),
             f"{it['unit_confidence']}/{it['pack_source']}",
-            ", ".join(search_flag(f) for f in it["flags"]),
+            ", ".join(f"{k}={v}" for k, v in it["attributes"].items()),
+            ", ".join([search_flag(f) for f in it["flags"]] + [n for n in it["notes"] if "zamjenjivo" in n]),
         ]
         for it in best["items"]
     ]
     print()
-    print(_table(rows, ["sastojak", "proizvod", "pakiranja", "cijena €", "utrošeno €", "pouzdanost", "napomena"]))
+    print(_table(rows, ["sastojak", "proizvod", "pakiranja", "cijena €", "utrošeno €", "pouzdanost", "atributi",
+                        "napomena"]))
     print("  * pantry (začini i sl.): u ukupno ulazi samo utrošeni dio")
     print()
     rows = [[s["chain"], (s["address"] or "(sve poslovnice)")[:34], f"{s['n_matched']}/{s['n_ingredients']}",

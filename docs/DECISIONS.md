@@ -417,3 +417,12 @@ Izvještaji za pregled su u [MORNING_REVIEW.md](MORNING_REVIEW.md) (`scripts/mor
 47. **Sol:** `soljenk` je maknut iz `must_not_match`. Novo polje `require_pack` (`clean.product_staples.drop_reason =
     'bez_gramature'`): proizvod koji pogađa uzorak ispada samo ako nema gramature. „SOL MORSKA SITNA 250G
     SOLJENKA“ je sol.
+48. **Mlijeko.**
+    - Zadano je `vrsta=trajno, mast=2.8` (`default_attributes`, i u `find_products`).
+    - Novo polje `substitutes: {mast: [2.8, 3.2, 3.5, 3.8]}`: tražena ili zadana masnoća iz skupine prihvaća
+      svaku masnoću iz skupine. Svježe i trajno ostaju zasebne vrste.
+    - Mlijeko bez oznake vrste u nazivu ne ulazi u zadani izbor (nema pogađanja); vidi raspodjelu u MORNING_REVIEW.md.
+    - `plan_basket` po sastojku vraća `applied_attributes` i `accepted_values`, a po stavci `attributes`
+      odabranog proizvoda (vrsta, mast). Zamjena (npr. „mast=3.2 umjesto 2.8“) ide u `notes`.
+    - Prepoznaje se i „TR“ (trajno) i „SV.“ (svježe).
+    - Isključeni su acidofilno, kiselo („KIS.“), protein, „ČOKOL.“ i palačinke.

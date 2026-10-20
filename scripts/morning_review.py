@@ -257,8 +257,39 @@ def section_salt(con) -> str:
     ])
 
 
+def section_milk(con) -> str:
+    from mealmeter.basket import plan_basket
+
+    dist = con.execute("""
+        SELECT coalesce(v.value, '-'), coalesce(m.value, '-'), count(DISTINCT p.chain || p.product_id)
+        FROM clean.product_staples ps JOIN clean.products p USING (chain, product_id)
+        LEFT JOIN clean.product_attrs v ON v.chain = ps.chain AND v.product_id = ps.product_id
+             AND v.staple = 'mlijeko' AND v.attr = 'vrsta'
+        LEFT JOIN clean.product_attrs m ON m.chain = ps.chain AND m.product_id = ps.product_id
+             AND m.staple = 'mlijeko' AND m.attr = 'mast'
+        WHERE ps.staple = 'mlijeko' AND NOT ps.excluded AND ps.drop_reason IS NULL AND p.is_food
+        GROUP BY ALL ORDER BY 1, 2""").fetchall()
+    res = plan_basket([{"name": "mlijeko", "amount": 0.5, "unit": "l"}], "Osijek", con=con)
+    items = [(s["chain"], s["address"], s["items"][0]["name"], s["items"][0]["attributes"].get("vrsta"),
+              s["items"][0]["attributes"].get("mast"), s["items"][0]["cost_pack"],
+              "; ".join(n for n in s["items"][0]["notes"] if "zamjenjivo" in n))
+             for s in res["stores"][:8]]
+    return "\n".join([
+        "## 7. Mlijeko", "",
+        "Zadano `vrsta=trajno, mast=2.8` (`default_attributes`), a masnoća 2,8–3,8 % je zamjenjiva "
+        "(`substitutes: {mast: [2.8, 3.2, 3.5, 3.8]}`). Svježe i trajno su zasebne vrste (nisu zamjenjive). "
+        "`plan_basket` vraća `applied_attributes` i `accepted_values` po sastojku, te `attributes` (vrsta, mast) "
+        "odabranog proizvoda; zamjena ide u `notes`. Novo prepoznavanje: „TR“ = trajno, „SV.“ = svježe.", "",
+        "Isključeni krivi pogoci: palačinke s mlijekom, acidofilno, kiselo („KIS.“), protein, „ČOKOL.“.", "",
+        "Proizvodi po vrsti i masnoći (`-` = nije u nazivu; bez vrste ne ulaze u zadani izbor):", "",
+        md_table(["vrsta", "mast", "proizvoda"], dist), "",
+        "Primjer: `plan_basket` 0,5 l mlijeka u Osijeku (prvih 8 trgovina):", "",
+        md_table(["lanac", "adresa", "proizvod", "vrsta", "mast", "€", "zamjena"], items),
+    ])
+
+
 SECTIONS = [section_chicken, section_onion, section_food, section_eggs, section_variants, section_kakao,
-            section_salt]
+            section_salt, section_milk]
 
 
 def main() -> None:

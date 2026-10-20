@@ -101,3 +101,41 @@ def test_sol_soljenka_without_pack_dropped(tmp_path):
     got = dict(c.execute("""SELECT product_id, coalesce(drop_reason, 'ok') FROM clean.product_staples
                             WHERE staple = 'sol' AND product_id IN ('T1', 'T2')""").fetchall())
     assert got == {"T1": "ok", "T2": "bez_gramature"}
+
+
+# --- 7. mlijeko ------------------------------------------------------------------
+
+def test_milk_substitutes():
+    st = S["mlijeko"]
+    assert st.default_attributes == {"vrsta": "trajno", "mast": "2.8"}
+    assert st.accepted_values("mast", "2.8") == ("2.8", "3.2", "3.5", "3.8")
+    assert st.accepted_values("mast", "3.8")[0] == "3.8"
+    assert st.accepted_values("mast", "1.5") == ("1.5",)
+    assert st.accepted_values("vrsta", "trajno") == ("trajno",)  # svježe i trajno nisu zamjenjivi
+
+
+@pytest.mark.parametrize("name,vrsta", [
+    ("MLIJEKO TR LAG JUTRO 1.5% 1L DUKAT", "trajno"),
+    ("MLIJEKO SV.3,2% Z BREG.1,75 L", "svjeze"),
+    ("MLIJEKO 3,2%MM 1L SVJEŽE DUKAT", "svjeze"),
+])
+def test_milk_vrsta(name, vrsta):
+    assert extract_attributes(S["mlijeko"], name)["vrsta"] == vrsta
+
+
+@pytest.mark.parametrize("name", ["PALAČINKE SA JAJIMA I MLIJEKOM", "ACIDOFILNO MLIJEKO 3,2% 1KG BOCA PET VINDIJA",
+                                  "MLIJEKO KIS. ČVRSTO 3,2% 900 g", "MLIJEKO PROTEIN 0,4% 1L DUKAT",
+                                  "MLIJEKO ČOKOL. TE Z BREG.0,5 L"])
+def test_milk_wrong_hits(name):
+    assert name_match(S["mlijeko"], name) == "excluded"
+
+
+def test_basket_milk_returns_vrsta_and_mast(con):
+    from mealmeter.basket import plan_basket
+
+    res = plan_basket([{"name": "mlijeko", "amount": 0.5, "unit": "l"}], "Osijek", con=con)
+    ing = res["ingredients"][0]
+    assert ing["applied_attributes"] == {"vrsta": "trajno", "mast": "2.8"}
+    assert ing["accepted_values"] == {"mast": ["2.8", "3.2", "3.5", "3.8"]}
+    item = res["best_store"]["items"][0]
+    assert item["attributes"]["vrsta"] == "trajno" and item["attributes"]["mast"] in ("2.8", "3.2", "3.5", "3.8")

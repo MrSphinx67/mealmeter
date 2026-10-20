@@ -197,12 +197,31 @@ def _rows_for(con, staple: Staple, attributes: dict, city: str) -> list[dict]:
     return [dict(zip(cols, r)) for r in cur.fetchall()]
 
 
-def _product_attrs(con, staple: Staple) -> dict[tuple, dict]:
-    """Atributi proizvoda namirnice: (chain, product_id) -> {atribut: vrijednost}."""
-    out: dict[tuple, dict] = {}
-    for chain, pid, attr, value in con.execute(
-            "SELECT chain, product_id, attr, value FROM clean.product_attrs WHERE staple = ?", [staple.key]).fetchall():
-        out.setdefault((chain, pid), {})[attr] = value
+def _product_attrs(con, staple: Staple) -> tuple[dict[tuple, dict], dict[str, dict]]:
+    """Atributi proizvoda namirnice: ((chain, product_id) -> {atribut: (vrijednost, how)},
+    globalni EAN -> {atribut: najčešća vrijednost iz naziva})."""
+    by_product: dict[tuple, dict] = {}
+    for chain, pid, attr, value, how in con.execute(
+            "SELECT chain, product_id, attr, value, how FROM clean.product_attrs WHERE staple = ?", [staple.key]).fetchall():
+        by_product.setdefault((chain, pid), {})[attr] = (value, how)
+    by_ean: dict[str, dict] = {}
+    for ean, attr, value in con.execute("""
+            SELECT p.ean_norm, a.attr, mode(a.value) FROM clean.product_attrs a JOIN clean.products p USING (chain, product_id)
+            WHERE a.staple = ? AND p.ean_global AND a.how = 'name' GROUP BY ALL""", [staple.key]).fetchall():
+        by_ean.setdefault(ean, {})[attr] = value
+    return by_product, by_ean
+
+
+def chosen_attributes(pick: dict, by_product: dict, by_ean: dict) -> dict:
+    """Atributi odabranog proizvoda: iz njegova naziva, a kad ih naziv nema (ili je vrijednost samo
+    zadana, how='default'), iz drugih naziva istog EAN-a ("Trajno mlijeko" bez masnoće kod Lidla)."""
+    own = by_product.get((pick["chain"], pick["product_id"]), {})
+    group = by_ean.get(pick["ean_norm"], {}) if pick.get("ean_global") else {}
+    out = {a: v for a, (v, how) in own.items() if how != "default"}
+    for a, v in group.items():
+        out.setdefault(a, v)
+    for a, (v, _) in own.items():
+        out.setdefault(a, v)
     return out
 
 
@@ -328,11 +347,16 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
         out["ingredients"].append({
             "name": need.input.get("name"), "staple": need.staple.key, "amount": round(need.amount, 3),
             "unit": need.unit, "attributes": need.attributes, "form": need.form,
+            # traženi atributi uz zadane (mlijeko: vrsta=trajno, mast=2.8) i prihvaćene zamjene
+            "applied_attributes": {**need.staple.default_attributes, **need.attributes},
+            "accepted_values": {a: list(need.staple.accepted_values(a, v)) for a, v in
+                                {**need.staple.default_attributes, **need.attributes}.items()
+                                if len(need.staple.accepted_values(a, v)) > 1},
             "assumed_form": need.form if need.assumed_form else None, "pantry": need.staple.pantry,
             "warnings": need.warnings,
         })
         out["warnings"] += need.warnings
-        attrs_of = _product_attrs(con, need.staple)
+        attrs_of, attrs_of_ean = _product_attrs(con, need.staple)
         for key, rows in _prepare(con, need, city).items():
             pick = choose_product(rows, need.amount, need.unit, _by_weight_unit(need.staple), need.staple.loose_produce)
             if pick is None:
@@ -343,16 +367,20 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
                 "city": first["city"], "scope": first["scope"], "data_quality": first["data_quality"],
                 "items": {}, "date": first["date"],
             })
+            chosen = chosen_attributes(pick, attrs_of, attrs_of_ean)
+            wanted = {**need.staple.default_attributes, **need.attributes}
+            subst = [f"{a}={chosen[a]} umjesto {v} (zamjenjivo)" for a, v in wanted.items()
+                     if chosen.get(a) not in (None, v) and chosen[a] in need.staple.accepted_values(a, v)]
             store["items"][idx] = {
                 "ingredient": need.input.get("name"), "staple": need.staple.key, "need": round(need.amount, 3),
                 "need_unit": need.unit, "product_id": pick["product_id"], "ean": pick["ean_norm"],
-                "name": pick["name"], "attributes": attrs_of.get((pick["chain"], pick["product_id"]), {}),
+                "name": pick["name"], "attributes": chosen,
                 "pack_qty": pick["qty"], "n_packs": pick["n_packs"],
                 "price_eff": pick["price_eff"], "cost_pack": pick["cost_pack"], "cost_used": pick["cost_used"],
                 "counted": pick["cost_used"] if need.staple.pantry else pick["cost_pack"],
                 "pantry": need.staple.pantry, "price_per_unit": pick["price_per_unit"], "per_unit": pick["per_unit"],
                 "unit_confidence": pick["unit_confidence"], "pack_source": pick["pack_source"],
-                "is_special": pick["is_special"], "flags": pick["flags"], "notes": pick["notes"],
+                "is_special": pick["is_special"], "flags": pick["flags"], "notes": pick["notes"] + subst,
                 "fallback": pick["fallback"], "food_unverified": pick["is_food"] is None,
             }
 

@@ -55,6 +55,14 @@ class Staple:
     ambiguous_form: bool = False
     # uzorci: proizvod ispada samo ako nema gramature (prazna soljenka), drop_reason 'bez_gramature'
     require_pack: tuple[str, ...] = ()
+    # zamjenjive vrijednosti atributa: {"mast": ("2.8", "3.2", "3.5", "3.8")}; traženi ili zadani
+    # 2.8 prihvaća bilo koju vrijednost iz iste skupine (vidi accepted_values)
+    substitutes: dict[str, tuple[str, ...]] = field(default_factory=dict, hash=False, compare=False)
+
+    def accepted_values(self, attr: str, value: str) -> tuple[str, ...]:
+        """Vrijednosti atributa koje vrijede kao `value` (s njom na prvom mjestu)."""
+        group = self.substitutes.get(attr, ())
+        return (value, *[v for v in group if v != value]) if value in group else (value,)
 
     @property
     def require_regex(self) -> str | None:
@@ -177,7 +185,11 @@ def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> d
             form_staples=d.get("form_staples") or {},
             ambiguous_form=bool(d.get("ambiguous_form", False)),
             require_pack=tuple(_fold(p) for p in d.get("require_pack", [])),
+            substitutes={a: tuple(str(v) for v in vals) for a, vals in (d.get("substitutes") or {}).items()},
         )
+        for a, vals in st.substitutes.items():
+            if any(v not in attrs.get(a, {}) for v in vals):
+                raise ValueError(f"{key}: substitutes {a}={vals} sadrži nedefiniranu vrijednost")
         if st.ambiguous_form and "oblik" not in attrs:
             raise ValueError(f"{key}: ambiguous_form traži atribut oblik")
         for a, v in st.default_attributes.items():

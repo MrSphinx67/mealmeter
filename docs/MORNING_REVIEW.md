@@ -29,18 +29,18 @@ Napomena: štruca od 2,6 kg ima 2,30–4,38 €/kg, pa vjerojatno nosi cijenu po
 | konzum | PRSA PILEĆA K PLUS BEZ KOŽE | 4,69 | 4,69 | 184 |
 | konzum | PILEĆI FILE OD PRSA VAKUUM | 2,99 | 4,99 | 95 |
 | tommy | PILEĆI FILE BRAZILSKI SMRZNUTI | 4,25 | 4,99 | 83 |
-| eurospin | DOMAĆI PIL. FILE OD PRSA OBIT. PAK. | 4,99 | 4,99 | 43 |
 | eurospin | DOMAĆI PIL. FILE OD PRSA OBIT.RFZ | 4,99 | 4,99 | 43 |
+| eurospin | DOMAĆI PIL. FILE OD PRSA OBIT. PAK. | 4,99 | 4,99 | 43 |
 | stanic | PILEĆI FILE SMRZNUTI | 2,75 | 2,75 | 29 |
 | roto | PILEĆI FILE SVJEŽI sniženje (12) | 2,50 | 2,50 | 9 |
-| metro | 2,5KG UKR. PILEĆI FILE SMRZ | 31,50 | 31,50 | 7 |
 | metro | CCA5KG MC PILEĆI FILE MAP | 4,99 | 4,99 | 7 |
+| metro | 2,5KG UKR. PILEĆI FILE SMRZ | 31,50 | 31,50 | 7 |
 | studenac | PILECI FILE SMRZ.STANIC | 3,92 | 3,98 | 5 |
-| trgovina-krk | PILEĆI FILE ZA GASTRO 1 kg | 1,95 | 4,08 | 4 |
 | konzum | PILEĆI FILE SOLJENI 6X2 BRAZIL | 3,28 | 4,11 | 4 |
+| trgovina-krk | PILEĆI FILE ZA GASTRO 1 kg | 1,95 | 4,08 | 4 |
+| branka | PRSA PILEĆA BEZ KOŽE | 4,79 | 4,79 | 2 |
 | branka | PRSA PILEĆA SVJEŽA | 4,79 | 4,99 | 2 |
 | branka | -PRSA PILEĆA SVJEŽA | 4,79 | 4,79 | 2 |
-| studenac | GASTRO PILEĆI FILE PEČENI | 209,90 | 209,90 | 2 |
 
 ## 5. Luk: nazivi s bojom (ČEKA POTVRDU, mapiranje nije mijenjano)
 
@@ -220,26 +220,26 @@ Proizvodi izvan zadanog izbora (`find_products`/`get_prices` bez `include_*`), p
 
 | lanac | naziv | kategorija lanca | skupina | izvor |
 |---|---|---|---|---|
+| gavranovic | SLADOLED KING DESIRE 450ml ČAŠA LEDO | Hrana | hrana | chain |
 | ribola | DUKAT ČOK.MLI 0,2l ČAŠA | HRANA | hrana | chain |
-| gavranovic | KRPA KUH.40X60cm 100%PAMUK HT-8902 | Hrana | hrana | chain |
-| boso | POSUD DALAS ARANŽ. MALA | ZELENI PROGRAM | hrana | chain |
+| ktc | BOMBONI 4g +IGRAČKA PONY | HRANA | hrana | chain |
 | studenac | IGRAČKA HUGI WUGI BLOW BUBBLE 12/1 | HRANA | hrana | chain |
-| gavranovic | VREĆICA UKRASNA 26x32x12cm TOČKICE ROZA/BIJELA -rasprodaja | Hrana | hrana | chain |
 | plodine | SVIJECE ZA TORTU UKRASNE 12/1 52506 |  | hrana | ean_inherited |
-| branka | DEKOR ROZA KRISTALIĆI 10g | HRANA | hrana | chain |
-| djelo_vodice | SENF ČAŠA 250ML | SENF ČAŠICA | hrana | chain |
-| gavranovic | NOŽ 3/1 23360/335-rasprodaja | Hrana | hrana | chain |
+| ktc | ROLADA VANILIJA 300g DEKOR DOMA | HRANA | hrana | chain |
+| gavranovic | SVIJEĆA ROĐENDANSKA 10kom-rasprodaja | Hrana | hrana | chain |
+| lorenco | MAČJI JEZICI PRALINE OD ML.I BJ.ČOK |  | hrana | ean_inherited |
 | spar | Kruh craft Karla u kalup.400 g | Hrana | hrana | chain |
 | ribola | PLAZMA ČAŠA 450ml LEDO | HRANA | hrana | chain |
 | vrutak | \*TEMPRANILLO CASA SOLAR 0.75L COSECHEROS ZOZP SUHO 2025 -6/1- | VINO INOZEMNO | alkohol | chain |
-| ktc | NUTELLA 200g ČAŠA | HRANA | hrana | chain |
-| ktc | MUFFINS CLASIC 250g U POSUDI | HRANA | hrana | chain |
-| konzum | ČAJ CVIJET BAZGE EKO 40g DARVITALIS | HRANA | hrana | chain |
-| plodine | UKRAS DRAZESNA SRCA 7 G DR OETKER |  | hrana | ean_inherited |
+| boso | SJEME GARDEN KRAST.DUGI ZELENI | ZELENI PROGRAM | hrana | chain |
+| branka | ČAJ LIPA CVIJET 50g | HRANA | hrana | chain |
+| jadranka_trgovina | LIKER PELINKOVAC 0,7L VERSUS + 2 ČAŠE PROMO | PIĆE | alkohol | chain |
+| boso | SJEME GARDEN PRKOS FIORI DOPPI | ZELENI PROGRAM | hrana | chain |
+| gavranovic | VREĆICA UKRASNA ZA BOCU 12x36x9cm BIJELA/SIVA - rasprodaja | Hrana | hrana | chain |
+| gavranovic | BATERIJE PHILIPS 6F22 9V 1/1-rasprodaja | Hrana | hrana | chain |
 | trgovina-krk | JIM BEAM 0,7L + 1 ČAŠE | Piće | alkohol | chain |
+| gavranovic | SCABIOSA CVIJET - rasprodaja | Hrana | hrana | chain |
 | plodine | PALOMA SALVETE STYLE 33X33/20 RUZA |  | hrana | ean_inherited |
-| gavranovic | TANJURIĆI STAKLO 15X15cm HO-rasprodaja | Hrana | hrana | chain |
-| boso | SJEME GARDEN MJEŠ.CVIJEĆA LUN.ST | ZELENI PROGRAM | hrana | chain |
 
 ## 1. Jaja
 
@@ -255,8 +255,8 @@ Nazivi u `jaja:m` s krajnjim cijenama po jajetu (≥ 1,00 ili ≤ 0,16 €; 1,30
 | metro | 15/1 MC JAJA PODNI UZGOJ M | 15,00 | 45,36 | 3,02 | 7 |
 | metro | 30/1 ARO JAJA A KL M | 30,00 | 39,00 | 1,30 | 7 |
 | studenac | SVJEŽA JAJA 10/1, RAZRED M | 10,00 | 1,59 | 0,16 | 1 |
-| lidl | Žito Jaja razred M | 18,00 | 2,75 | 0,15 | 116 |
 | lidl | PERFA Jaja podni uzgoj razred M | 15,00 | 2,25 | 0,15 | 116 |
+| lidl | Žito Jaja razred M | 18,00 | 2,75 | 0,15 | 116 |
 | lidl | Kones Bi Jaja, razred M | 10,00 | 1,45 | 0,14 | 116 |
 | stridon | SVJEŽA JAJA A KLASE RAZRED M 10/1 PERFA | 10,00 | 0,16 | 0,02 | 1 |
 | jadranka_trgovina | JAJA SVJEŽA 30/1 KLASA A, RAZRED M | 30,00 | 0,26 | 0,01 | 1 |
@@ -312,16 +312,16 @@ Izvor atributa za 10 grupa riže (`find_products(ingredient="riza")`):
 
 | id | naziv | atributi | izvor (how, naziv) |
 |---|---|---|---|
-| 8001860100017 | Riso Scotti riža originario okr.zrno 1kg | vrsta=originario | vrsta: name („RIŽA SCOTTI NIKAS ORIGINARIO 1 kg“) |
+| 8001860100017 | RIŽA SCOTTI 1KG ORIGINARIO U-1054 -10/1- | vrsta=originario | vrsta: name („RIŽA ORIGINARIO 1 kg SCOTTI“) |
 | 3838700540291 | RIŽA ZA DOMAĆA JELA ZLATO POLJE PODRAVKA 1 kg (12) | vrsta=originario | vrsta: name („RIŽA ZL.POLJE 1 kg (OKRUGLO ZRNO)“) |
 | 3838700540369 | RIŽA ZLATO POLJE BLAZINICA PODRAVKA 800 g (9) |  |  |
-| 8001860201011 | Riso Scotti riža arborio dugo zrno 1kg | vrsta=arborio | vrsta: name („RIŽA ARBORIO 1 kg RISO SCOT“) |
-| 8001860190520 | Riso Scotti riža oro dugog zrna 1kg | vrsta=parboiled | vrsta: name („RIŽA ORO PARBOILED 1 kg SCO“) |
+| 8001860201011 | Riso Scotti riža arborio dugo zrno 1kg | vrsta=arborio | vrsta: name („RIŽA ARBORIO 1 kg SCOTTI“) |
+| 8001860190520 | Riso Scotti riža oro dugog zrna 1kg | vrsta=parboiled | vrsta: name („RIŽA SCOTTI ORO 1 kg PARBOILED“) |
 | 3838700540314 | RIŽA BIJELA 800 g VREĆICA ZLATO POLJE | vrsta=dugo_zrno | vrsta: name („Zlato polje riža dugo zrno pvc 800 g“) |
 | 3838700540482 | RIŽA ZL POLJE ST ANDREA 500G KUT (18) |  |  |
-| 5410673007490 | RIZA PARABOILED DUGO ZRNO VRECICA 500 G BENS ORIGINAL | vrsta=dugo_zrno | vrsta: name („RIŽA BENS DUGO ZRNO 500 g“) |
+| 5410673007490 | RIZA PARABOILED DUGO ZRNO VRECICA 500 G BENS ORIGINAL | vrsta=dugo_zrno | vrsta: name („RIŽA DUGO ZRNO 500 g 4 VREĆICE BEN S“) |
 | 3838700540406 | RIŽA ZL POLJE ST ANDREA 1KG KUT VAK (12) |  |  |
-| 3838700540604 | RIŽA ARBORIO VAKUMIRANA 1000 g PODRA | vrsta=arborio | vrsta: name („RIŽA ZLATO POLJE ARBORIO VP 1 kg“) |
+| 3838700540604 | RIŽA ARBORIO VAKUMIRANA 1000 g PODRA | vrsta=arborio | vrsta: name („RIZA ARBORIO 1 KG VP ZLATO POLJE“) |
 
 ## 3. Kakao
 
@@ -374,3 +374,49 @@ Svi proizvodi soli sa „soljenk“ (20):
 | trgovina-krk | SOL 250 g SOLJENKE PAG 91 | 250,00 | sol |
 | vrutak | SOL KAMENA 250G SOLJENKA -15/1- TUZLA | 250,00 | sol |
 | vrutak | SOL MORSKA SITNA 250G SOLJENKA -12/1- PAG | 250,00 | sol |
+
+## 7. Mlijeko
+
+Zadano `vrsta=trajno, mast=2.8` (`default_attributes`), a masnoća 2,8–3,8 % je zamjenjiva (`substitutes: {mast: [2.8, 3.2, 3.5, 3.8]}`). Svježe i trajno su zasebne vrste (nisu zamjenjive). `plan_basket` vraća `applied_attributes` i `accepted_values` po sastojku, te `attributes` (vrsta, mast) odabranog proizvoda; zamjena ide u `notes`. Novo prepoznavanje: „TR“ = trajno, „SV.“ = svježe.
+
+Isključeni krivi pogoci: palačinke s mlijekom, acidofilno, kiselo („KIS.“), protein, „ČOKOL.“.
+
+Proizvodi po vrsti i masnoći (`-` = nije u nazivu; bez vrste ne ulaze u zadani izbor):
+
+| vrsta | mast | proizvoda |
+|---|---|---|
+| - | - | 78 |
+| - | 0 | 15 |
+| - | 0.5 | 7 |
+| - | 0.9 | 8 |
+| - | 1.5 | 45 |
+| - | 2.8 | 78 |
+| - | 3.2 | 8 |
+| - | 3.5 | 24 |
+| - | 3.8 | 36 |
+| svjeze | - | 15 |
+| svjeze | 1.5 | 30 |
+| svjeze | 3.2 | 127 |
+| svjeze | 3.5 | 1 |
+| svjeze | 3.8 | 1 |
+| trajno | - | 42 |
+| trajno | 0 | 3 |
+| trajno | 0.5 | 10 |
+| trajno | 0.9 | 24 |
+| trajno | 1.5 | 39 |
+| trajno | 2.8 | 200 |
+| trajno | 3.5 | 27 |
+| trajno | 3.8 | 53 |
+
+Primjer: `plan_basket` 0,5 l mlijeka u Osijeku (prvih 8 trgovina):
+
+| lanac | adresa | proizvod | vrsta | mast | € | zamjena |
+|---|---|---|---|---|---|---|
+| lidl | Svetog Leopolda Bogdana Mandića 33 A | Križevačka mljekara Trajno mlijeko | trajno | 2.8 | 0,52 |  |
+| lidl | Zeleno Polje 8 A | Križevačka mljekara Trajno mlijeko | trajno | 2.8 | 0,52 |  |
+| lidl | Ulica J. J. Strossmayera 350 | Križevačka mljekara Trajno mlijeko | trajno | 2.8 | 0,52 |  |
+| eurospin | Ulica Josipa Jurja Strossmayera 343A | MLIJEKO TRAJNO 2,8% m.m.1l | trajno | 2.8 | 0,62 |  |
+| eurospin | Ulica 3 gardijske brigade „Kune“ 30 | MLIJEKO TRAJNO 2,8% m.m.1l | trajno | 2.8 | 0,62 |  |
+| ntl | LOSINJSKA 43 | MLIJEKO TRAJNO 2,8 % m. m. 1L TOJETO | trajno | 2.8 | 0,65 |  |
+| ntl | Dobra ulica 2, Brijest, Osijek | MLIJEKO TRAJNO 2,8 % m. m. 1L TOJETO | trajno | 2.8 | 0,65 |  |
+| ntl | Ruzina 8, Osijek | MLIJEKO TRAJNO 2,8 % m. m. 1L TOJETO | trajno | 2.8 | 0,65 |  |

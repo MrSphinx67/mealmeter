@@ -108,10 +108,12 @@ def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | 
             GROUP BY g.gkey HAVING bool_or(NOT ps.excluded) AND NOT bool_or(ps.excluded)""")
         hit_params.append(staple.key)
         for attr, value in (attributes or {}).items():
-            hit_parts.append("""
+            # zamjenjive vrijednosti (mlijeko: mast 2.8 = 3.2 = 3.5 = 3.8)
+            accepted = staple.accepted_values(attr, value)
+            hit_parts.append(f"""
                 SELECT DISTINCT g.gkey FROM g JOIN clean.product_attrs pa USING (chain, product_id)
-                WHERE pa.staple = ? AND pa.attr = ? AND pa.value = ?""")
-            hit_params += [staple.key, attr, value]
+                WHERE pa.staple = ? AND pa.attr = ? AND pa.value IN ({", ".join("?" for _ in accepted)})""")
+            hit_params += [staple.key, attr, *accepted]
     hit_sql = " INTERSECT ".join(f"({h})" for h in hit_parts)
     if staple:
         # zadano isključene varijante (bez glutena, integralno...) osim ako je atribut tražen

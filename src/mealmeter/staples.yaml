@@ -23,6 +23,7 @@
 #   group_by        atribut ili popis atributa po kojima se grupira umjesto EAN-a (jaja: [velicina, uzgoj])
 #   require_any     dodatni uzorci: barem jedan mora pogoditi (npr. dio mesa: but, vrat...)
 #   default_attributes  zadani filtar ako atribut nije zadan (mljeveno meso: vrsta=mijesano)
+#   substitutes     {atribut: [vrijednosti]}: zamjenjive vrijednosti (mlijeko: mast 2.8 = 3.2 = 3.5 = 3.8)
 #   disabled        namirnica postoji, ali nije u v1 (ne gradi se i ne može se tražiti)
 #   attributes._default  vrijednost atributa kad nijedan uzorak ne pogodi
 #   require_pack    uzorci (name_norm, početak riječi): proizvod koji ih pogađa ispada samo ako nema gramature
@@ -289,9 +290,12 @@ mlijeko:
                    kras\b, bijela cokolada, prahu, zamjen, zamj\b, nan\b, junior, kiselo, jogurt,
                    sir\b, sladoled, puding, kroasan, croissant, bombon, cokoladic, med\b, sun\b,
                    suncanje, disney, dorina, ciste, cisti, pjena za, ukrasn, proteinsk, kefir, kondenz,
-                   lgg\b, aktiv]
+                   lgg\b, aktiv, acidofil, acedofil, kis\b, palacink, protein, cokol]
   unit: l
   default_exclude_variants: [laktoza=bez]
+  # zadano trajno 2,8 %; masnoća 2,8-3,8 % je zamjenjiva (svježe i trajno su zasebne vrste)
+  default_attributes: {vrsta: trajno, mast: "2.8"}
+  substitutes: {mast: ["2.8", "3.2", "3.5", "3.8"]}
   max_pack: 2000
   min_pack: 500
   plausible_per_unit: [0.5, 4]
@@ -306,8 +310,8 @@ mlijeko:
       "3.5": '\b3\.5\s*(%|mm)'
       "3.8": '\b3\.8\s*(%|mm)'
     vrsta:
-      trajno: '\btrajn|\buht\b'
-      svjeze: '\bsvjez|\bsvj\.'
+      trajno: '\btrajn|\buht\b|\btr\b'
+      svjeze: '\bsvjez|\bsvj\.|\bsv\.'
     laktoza:
       bez: 'bez laktoze|\blf\b|laktoze free'
   # Dukatova linija LAGANO JUTRO je mlijeko bez laktoze; naziv to rijetko izričito kaže
