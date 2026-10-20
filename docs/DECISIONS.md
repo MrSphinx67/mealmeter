@@ -407,3 +407,7 @@ Izvještaji za pregled su u [MORNING_REVIEW.md](MORNING_REVIEW.md) (`scripts/mor
     - Rajčica: cherry (i koktel, cocktail, mini), datterino (i „daterino“), harmony i campari su izvan zadanog.
     - Riža: „oro“ ne daje `parboiled`; parboiled dolazi samo iz riječi u nazivu (sada i „PARABOILED“).
       Grupa Scotti Oro (8001860190520) je parboiled jer tako glasi naziv u 10 lanaca.
+44. **Kakao: pozitivno podudaranje.** `must_match` je sada `^kakao\b`, „kakao prah“, „prah kakao“, „kakao u
+    prahu“, „kakao u pr.“ i „kakao za kolač…“. Uz isključenja iz zahtjeva dodao sam desert, kolač, rolice,
+    šnite, biskvit, krafne, tablu (čokolada), instant/vending napitke, Dolce Gusto, „XXL“ i Lumpi.
+    Lidl naziva takve proizvode „Kakao …“. Broj grupa: 173 prije, vidi MORNING_REVIEW.md za poslije.

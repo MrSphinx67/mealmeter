@@ -123,7 +123,8 @@ def test_category_group(category, group):
     ("svjezi_sir", "ŠTRUKLI SA SVJ SIR SLATKI 600g SMRZ"),
 ])
 def test_point2_exclusions(key, name):
-    assert name_match(S[key], name) == "excluded"
+    # kakao od Koraka 2C ima pozitivno podudaranje, pa takvi nazivi nisu ni kandidati (None)
+    assert name_match(S[key], name) in (("excluded", None) if key == "kakao" else ("excluded",))
 
 
 @pytest.mark.parametrize("key,name", [

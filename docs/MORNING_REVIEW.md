@@ -39,26 +39,26 @@ Proizvodi izvan zadanog izbora (`find_products`/`get_prices` bez `include_*`), p
 
 | lanac | naziv | kategorija lanca | skupina | izvor |
 |---|---|---|---|---|
-| ktc | JACK DANIEL S 0,7L + 1 ČAŠA | PIĆA | alkohol | chain |
+| ribola | DUKAT ČOK.MLI 0,2l ČAŠA | HRANA | hrana | chain |
 | gavranovic | KRPA KUH.40X60cm 100%PAMUK HT-8902 | Hrana | hrana | chain |
 | boso | POSUD DALAS ARANŽ. MALA | ZELENI PROGRAM | hrana | chain |
 | studenac | IGRAČKA HUGI WUGI BLOW BUBBLE 12/1 | HRANA | hrana | chain |
 | gavranovic | VREĆICA UKRASNA 26x32x12cm TOČKICE ROZA/BIJELA -rasprodaja | Hrana | hrana | chain |
-| konzum | MEDENJACI DEKORAT SET 480 G LAMBERTZ | HRANA | hrana | chain |
+| plodine | SVIJECE ZA TORTU UKRASNE 12/1 52506 |  | hrana | ean_inherited |
 | branka | DEKOR ROZA KRISTALIĆI 10g | HRANA | hrana | chain |
 | djelo_vodice | SENF ČAŠA 250ML | SENF ČAŠICA | hrana | chain |
 | gavranovic | NOŽ 3/1 23360/335-rasprodaja | Hrana | hrana | chain |
-| ntl | IGRAČKA FINGER SLUG VELIKI | Ostalo | hrana | ean_inherited |
-| ktc | ČOK BOMONI 80g SA GLAZB. IGRAČKOM | HRANA | hrana | chain |
+| spar | Kruh craft Karla u kalup.400 g | Hrana | hrana | chain |
+| ribola | PLAZMA ČAŠA 450ml LEDO | HRANA | hrana | chain |
 | vrutak | \*TEMPRANILLO CASA SOLAR 0.75L COSECHEROS ZOZP SUHO 2025 -6/1- | VINO INOZEMNO | alkohol | chain |
-| plodine | CROISSANT COK. 300 G 6/1 CASALINI |  | hrana | ean_inherited |
-| ribola | GORDONS PINK 0,7L+COPA ČAŠA | PIĆE | pice | chain |
-| plodine | KAVA 400 G MLJEVENA FOLIJA ANAMARIJA |  | hrana | ean_inherited |
+| ktc | NUTELLA 200g ČAŠA | HRANA | hrana | chain |
+| ktc | MUFFINS CLASIC 250g U POSUDI | HRANA | hrana | chain |
+| konzum | ČAJ CVIJET BAZGE EKO 40g DARVITALIS | HRANA | hrana | chain |
+| plodine | UKRAS DRAZESNA SRCA 7 G DR OETKER |  | hrana | ean_inherited |
 | trgovina-krk | JIM BEAM 0,7L + 1 ČAŠE | Piće | alkohol | chain |
-| konzum | KRUH KALUP 600g MARYMAT | HRANA | hrana | chain |
+| plodine | PALOMA SALVETE STYLE 33X33/20 RUZA |  | hrana | ean_inherited |
 | gavranovic | TANJURIĆI STAKLO 15X15cm HO-rasprodaja | Hrana | hrana | chain |
 | boso | SJEME GARDEN MJEŠ.CVIJEĆA LUN.ST | ZELENI PROGRAM | hrana | chain |
-| gavranovic | TANJUR DOLOMITE | Hrana | hrana | chain |
 
 ## 1. Jaja
 
@@ -74,8 +74,8 @@ Nazivi u `jaja:m` s krajnjim cijenama po jajetu (≥ 1,00 ili ≤ 0,16 €; 1,30
 | metro | 15/1 MC JAJA PODNI UZGOJ M | 15,00 | 45,36 | 3,02 | 7 |
 | metro | 30/1 ARO JAJA A KL M | 30,00 | 39,00 | 1,30 | 7 |
 | studenac | SVJEŽA JAJA 10/1, RAZRED M | 10,00 | 1,59 | 0,16 | 1 |
-| lidl | PERFA Jaja podni uzgoj razred M | 15,00 | 2,25 | 0,15 | 116 |
 | lidl | Žito Jaja razred M | 18,00 | 2,75 | 0,15 | 116 |
+| lidl | PERFA Jaja podni uzgoj razred M | 15,00 | 2,25 | 0,15 | 116 |
 | lidl | Kones Bi Jaja, razred M | 10,00 | 1,45 | 0,14 | 116 |
 | stridon | SVJEŽA JAJA A KLASE RAZRED M 10/1 PERFA | 10,00 | 0,16 | 0,02 | 1 |
 | jadranka_trgovina | JAJA SVJEŽA 30/1 KLASA A, RAZRED M | 30,00 | 0,26 | 0,01 | 1 |
@@ -141,3 +141,24 @@ Izvor atributa za 10 grupa riže (`find_products(ingredient="riza")`):
 | 5410673007490 | RIZA PARABOILED DUGO ZRNO VRECICA 500 G BENS ORIGINAL | vrsta=dugo_zrno | vrsta: name („RIŽA BENS DUGO ZRNO 500 g“) |
 | 3838700540406 | RIŽA ZL POLJE ST ANDREA 1KG KUT VAK (12) |  |  |
 | 3838700540604 | RIŽA ARBORIO VAKUMIRANA 1000 g PODRA | vrsta=arborio | vrsta: name („RIŽA ZLATO POLJE ARBORIO VP 1 kg“) |
+
+## 3. Kakao
+
+Pozitivno podudaranje: naziv počinje s „kakao“ ili sadrži „kakao prah“, „prah kakao“, „kakao u prahu“ (i „kakao u pr.“), „kakao za kolače“. Isključeno: tortela, tortin, muffin, krema, benquick, napitak, choco box, te (moja dopuna) desert, kolač, rolice, šnite, biskvit, krafne, tabla (čokolada), instant i vending napitci, Dolce Gusto, „XXL“ i Lumpi (instant napitak).
+
+Grupa prije: **173**, poslije: **31**.
+
+Top 10:
+
+| id | naziv | pakiranje | lanaca | €/kg |
+|---|---|---|---|---|
+| 3858881044012 | KAKAO PRAH KANDIT 100G -12/1- SMANJENE MASTI 16-18% | 100 g | 21 | 16,60–30,80 |
+| 3850102110292 | KAKAO PRAH 100G (21), KRAŠ (PAL-90) | 100 g | 20 | 17,90–30,90 |
+| 5997381346917 | KAKAO DR OETKER ZA KOLAČE 70G-16/1- | 70 g | 14 | 19,00–38,71 |
+| 3858881773608 | KAKAO U PRAHU ANAMARIJA 100 g | 100 g | 9 | 9,30–30,50 |
+| 3858891566221 | ULTRA KAKAO U PRAHU 100G ,ANAMARIJA | 100 g | 5 | 8,30–23,90 |
+| 3850334055149 | KAKAO PRAH SWEET CHEF 250G (12) | 250 g | 2 | 17,32–21,16 |
+| 3858890134360 | EKO KAKAO U PR.200 g EKOZONA | 200 g | 2 | 26,25–38,45 |
+| 3850102945085 | KAKAO PRAH 100 g KRAŠ (21) | 100 g | 2 | 14,90–24,30 |
+| 9100000963976 | KAKAO PRAH S-BUDGET 250 g | 250 g | 1 | 19,92–19,92 |
+| 4002309015217 | KAKAO SUCHARD BENSDORP 125 g | 125 g | 1 | 35,92–35,92 |

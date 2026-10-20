@@ -147,7 +147,27 @@ def section_variants(con) -> str:
     ])
 
 
-SECTIONS = [section_food, section_eggs, section_variants]
+# broj grupa kakaa prije promjene pravila (find_products(ingredient="kakao"), commit fcbd8be)
+KAKAO_GROUPS_BEFORE = 173
+
+
+def section_kakao(con) -> str:
+    res = find_products(ingredient="kakao", limit=10000, con=con)
+    top = [(r["id"], r["name"], r["pack"], r["n_chains"],
+            f"{hr(r['price_per_unit_min'])}–{hr(r['price_per_unit_max'])}" if r["price_per_unit_min"] else "")
+           for r in res[:10]]
+    return "\n".join([
+        "## 3. Kakao", "",
+        "Pozitivno podudaranje: naziv počinje s „kakao“ ili sadrži „kakao prah“, „prah kakao“, „kakao u prahu“ "
+        "(i „kakao u pr.“), „kakao za kolače“. Isključeno: tortela, tortin, muffin, krema, benquick, napitak, "
+        "choco box, te (moja dopuna) desert, kolač, rolice, šnite, biskvit, krafne, tabla (čokolada), instant i vending napitci, Dolce Gusto, „XXL“ i Lumpi (instant napitak).", "",
+        f"Grupa prije: **{KAKAO_GROUPS_BEFORE}**, poslije: **{len(res)}**.", "",
+        "Top 10:", "",
+        md_table(["id", "naziv", "pakiranje", "lanaca", "€/kg"], top),
+    ])
+
+
+SECTIONS = [section_food, section_eggs, section_variants, section_kakao]
 
 
 def main() -> None:

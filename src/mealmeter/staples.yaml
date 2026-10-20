@@ -918,11 +918,15 @@ vanilin_secer:
 kakao:
   name: kakao (prah)
   synonyms: [kakao, kakao prah]
-  must_match: [kakao\b]
-  must_not_match: [muffin, tortin, krema, vaselin, kesten, kava, donut, rolada, dekor, torta, vafel,
+  # pozitivno podudaranje: kakao je prva riječ naziva ili piše "kakao prah/u prahu/za kolače"
+  # (inače "TORTELA KAKAO", "PRALINE KAKAO", "KRAFNA ... KAKAO" ulaze kao kakao)
+  must_match: ['^kakao\b', kakao prah, prah kakao, kakao u prahu, kakao u pr\b, kakao za kolac]
+  must_not_match: [muffin, tortin, tortel, krema, vaselin, kesten, kava, donut, rolada, dekor, torta, vafel,
                    napolit, mrvice, napitak, instant, mlijek, maslac, keks, cokolad, krem\b, namaz,
                    puding, sladoled, kocke, kuglic, pahuljic, zitaric, kroasan, croissant, bombon, zrn,
-                   nesquik, benco, nescafe, bar\b, ploc]
+                   nesquik, benco, benquick, choco box, nescafe, bar\b, ploc,
+                   desert, kolac\b, rolic, snite, biskvit, krafn, tabla, inst\b, vending, hot mix, dolce gusto,
+                   kit kat, xxl, lumpi]
   unit: kg
   max_pack: 1000
   min_pack: 50
