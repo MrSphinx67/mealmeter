@@ -141,7 +141,9 @@ def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | 
                       AND d.product_id = p.product_id AND d.staple = '{staple.key}' AND d.drop_reason IS NOT NULL)"""
         rules_join = f"""LEFT JOIN clean.product_staples psu ON psu.chain = p.chain
                            AND psu.product_id = p.product_id AND psu.staple = '{staple.key}'
-                         CROSS JOIN (SELECT * FROM clean.staple_rules WHERE staple = '{staple.key}') r"""
+                         CROSS JOIN (SELECT * FROM clean.staple_rules WHERE staple = '{staple.key}') r
+                         LEFT JOIN clean.staple_groups sg ON sg.staple = '{staple.key}' AND sg.bkey = p.bkey"""
+        quality_sql = "sg.match_quality"
         ppu_sql = STAPLE_PPU_SQL.replace("ps.", "psu.")
         per_unit_sql = """CASE WHEN r.compare_by IN ('pack', 'count') THEN CASE WHEN psu.n_units > 0 THEN r.compare_unit END
                                WHEN psu.assumed_g > 0 THEN r.unit ELSE c.per_unit END"""
@@ -164,7 +166,7 @@ def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | 
                  )) ELSE 0 END"""
         coverage_params = likes
         cov_col = "cov.cov_max"
-        drop_sql, rules_join = "TRUE", ""
+        drop_sql, rules_join, quality_sql = "TRUE", "", "NULL::VARCHAR"
         ppu_sql, per_unit_sql, conf_sql = "c.price_per_unit", "c.per_unit", "c.unit_confidence"
         source_sql = "CASE WHEN c.unit_confidence = 'low' THEN 'unit_price' ELSE p.pack_source END"
         suspect_sql, n_units_sql, assumed_sql, clearance_sql = "false", "NULL::DOUBLE", "NULL::DOUBLE", "TRUE"
@@ -185,7 +187,7 @@ def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | 
                  {n_units_sql} AS n_units, {assumed_sql} AS assumed_g,
                  c.price_per_kg_drained, p.variable_weight, p.clearance,
                  c.is_special, c.date, s.scope, s.address, s.city, ch.data_quality,
-                 p.is_food, p.food_group, p.category_source, p.bkey
+                 p.is_food, p.food_group, p.category_source, p.bkey, {quality_sql} AS match_quality
           FROM g p
           JOIN hit USING (bkey)
           JOIN clean.prices c USING (chain, product_id)
@@ -318,13 +320,15 @@ def find_products(
           bool_or(x.is_special) AS any_special,
           bool_or(x.scope = 'national') AS has_national,
           mode(x.food_group) AS food_group,
+          -- pripadnost namirnici (clean.staple_groups): strong / weak (rangira se ispod snažnih)
+          any_value(x.match_quality) AS match_quality,
           bool_and(x.is_food IS NULL) AS food_unverified,
           max(x.date) AS date,
           bool_or(starts_with(x.name_norm, ?)) AS _starts,
           CASE WHEN any_value({cov_col}) >= 0.5 THEN 0 WHEN any_value({cov_col}) >= 0.25 THEN 1 ELSE 2 END AS _tier
         FROM x LEFT JOIN pick USING (gkey) JOIN cov USING (gkey)
         GROUP BY x.gkey, pick.per_unit, pick.conf
-        ORDER BY _tier, _starts DESC, n_chains DESC, n_stores DESC, price_per_unit_min NULLS LAST, name
+        ORDER BY coalesce(any_value(x.match_quality) = 'weak', false), _tier, _starts DESC, n_chains DESC, n_stores DESC, price_per_unit_min NULLS LAST, name
         LIMIT ?
     """
     params = cand_params + [staple.compare_unit if staple else None, tokens[0] if tokens else "", limit]

@@ -516,6 +516,7 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
               AND ps.drop_reason IS NULL AND NOT ps.excluded AND ps.n_units IS NOT NULL
               AND (ps.n_units < r.min_pack OR ps.n_units > r.max_pack)
         """)
+    auto_ranges = set_auto_ranges(con)  # granice prije grupa: slabi član traži cijenu u granicama
     groups = build_staple_groups(con)
     return {
         "staples": len(staples),
@@ -525,28 +526,38 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
         "excluded": con.execute("SELECT count(*) FROM clean.product_staples WHERE excluded").fetchone()[0],
         "dropped": con.execute("SELECT count(*) FROM clean.product_staples WHERE drop_reason IS NOT NULL").fetchone()[0],
         "attrs": con.execute("SELECT count(*) FROM clean.product_attrs").fetchone()[0],
-        "auto_ranges": set_auto_ranges(con),
+        "auto_ranges": auto_ranges,
         "suspect_prices": staple_price_suspects(con),
     }
 
 
 # Ključ grupe proizvoda (alias p = clean.products): globalni EAN, inače lanac + normalizirani naziv
 BKEY_SQL = "CASE WHEN p.ean_global THEN p.ean_norm ELSE p.chain || ':' || p.name_norm END"
-# Pripadnost grupe namirnici: udio lanaca čiji naziv prolazi pravila (> MEMBER_SHARE) i najveći udio
-# lanaca jednog isključenog naziva (< EXCLUDED_SHARE)
-MEMBER_SHARE, EXCLUDED_SHARE = 0.5, 0.25
+# Pripadnost grupe namirnici (Korak 2E): snažni član m > 50 % i x < 10 %; slabi x = 0 i m >= 25 % (uz
+# provjeru jedinice, pakiranja i cijene); m i x su udjeli lanaca, vidi build_staple_groups
+STRONG_SHARE, STRONG_MAX_EXCLUDED, WEAK_SHARE = 0.5, 0.10, 0.25
 HOW_RANK_SQL = "CASE how WHEN 'name' THEN 0 WHEN 'inferred' THEN 1 WHEN 'heuristic' THEN 2 ELSE 3 END"
+
+
+def unit_compatible_sql(staple_unit: str, pack_unit: str, compare_by: str = "'unit'") -> str:
+    """SQL: je li jedinica pakiranja spojiva s jedinicom namirnice (kom -> kom, kg -> g, l -> ml).
+    Nepoznata jedinica pakiranja ne isključuje; vrećice (compare_by pack) primaju sve."""
+    return f"""({pack_unit} IS NULL OR {compare_by} = 'pack'
+               OR ({staple_unit} = 'kom' AND {pack_unit} = 'kom') OR ({staple_unit} = 'kg' AND {pack_unit} = 'g')
+               OR ({staple_unit} = 'l' AND {pack_unit} = 'ml'))"""
 
 
 def build_staple_groups(con: duckdb.DuckDBPyConnection) -> list[tuple]:
     """clean.staple_groups i clean.staple_group_attrs: pripadnost grupe (EAN) namirnici i atributi grupe.
 
-    Grupa pripada namirnici (status 'member') ako naziv prolazi pravila (must_match, bez must_not_match)
-    u više od 50 % lanaca grupe, a nijedan isključeni naziv nema udio >= 25 % lanaca; inače je
-    'ambiguous' (izvan zadanog izbora), a 'excluded' ako nijedan naziv ne prolazi. Proizvod izbačen samo za sebe (drop_reason) računa se kao
-    pogodak naziva (izbačen zbog pakiranja), osim neprehrambenog (drop_reason 'kategorija:*'), a
-    n_usable je broj lanaca s proizvodom koji ostaje u izboru. Vrijednost atributa grupe: najprije iz naziva (how name > inferred > heuristic >
-    default), zatim po broju lanaca, pa abecedno. Vraća (namirnica, članova, dvosmislenih, isključenih).
+    Po grupi: m = udio lanaca čiji naziv prolazi must_match bez must_not_match, x = udio lanaca čiji
+    naziv pogađa must_not_match (neprehrambeni član po kategoriji nije ni m ni x).
+    - 'member' / match_quality 'strong': m > 50 % i x < 10 %;
+    - 'member' / 'weak': x = 0, m >= 25 %, jedinica spojiva, barem jedan proizvod u min/max pakiranja
+      (izvan raspona su već izbačeni) i medijan cijene po jedinici u granicama (ako je poznat);
+    - inače 'ambiguous' ako je m > 0, a 'excluded' ako je m = 0.
+    Vrijednost atributa grupe: najprije iz naziva (how name > inferred > heuristic > default), zatim
+    po broju lanaca, pa abecedno. Vraća (namirnica, snažnih, slabih, dvosmislenih, isključenih).
     """
     con.execute(f"""CREATE OR REPLACE TEMP TABLE product_bkeys AS
                      SELECT p.chain, p.product_id, p.name_norm, {BKEY_SQL} AS bkey FROM clean.products p""")
@@ -557,25 +568,45 @@ def build_staple_groups(con: duckdb.DuckDBPyConnection) -> list[tuple]:
     con.execute(f"""
         CREATE OR REPLACE TABLE clean.staple_groups AS
         WITH m AS (  -- svi proizvodi grupa koje namirnica dotiče
-          SELECT b.staple, b.bkey, p.chain, p.name_norm,
-                 -- neprehrambeni član ("MLIJEKO ZA DJECU" u kozmetici) nije pogodak naziva
-                 ps.excluded OR coalesce(starts_with(ps.drop_reason, 'kategorija:'), false) AS excluded,
-                 ps.drop_reason IS NULL AND NOT ps.excluded AS usable
+          SELECT b.staple, b.bkey, p.chain, p.product_id,
+                 coalesce(NOT ps.excluded AND NOT coalesce(starts_with(ps.drop_reason, 'kategorija:'), false), false) AS hit,
+                 coalesce(ps.excluded, false) AS miss,
+                 coalesce(ps.drop_reason IS NULL AND NOT ps.excluded, false) AS usable
           FROM staple_bkeys b JOIN product_bkeys p USING (bkey)
           LEFT JOIN clean.product_staples ps ON ps.chain = p.chain AND ps.product_id = p.product_id
                AND ps.staple = b.staple
         ),
         n AS (SELECT staple, bkey, count(DISTINCT chain) AS n_chains,
-                     count(DISTINCT chain) FILTER (WHERE excluded = false) AS n_match,
+                     count(DISTINCT chain) FILTER (WHERE hit) AS n_match,
+                     count(DISTINCT chain) FILTER (WHERE miss) AS n_miss,
                      count(DISTINCT chain) FILTER (WHERE usable) AS n_usable FROM m GROUP BY ALL),
-        e AS (SELECT staple, bkey, max(n_ex) AS n_ex_max FROM (
-                SELECT staple, bkey, name_norm, count(DISTINCT chain) AS n_ex FROM m WHERE excluded GROUP BY ALL)
-              GROUP BY ALL)
-        SELECT n.staple, n.bkey, n.n_chains, n.n_usable, n.n_match / n.n_chains AS share_match,
-               coalesce(e.n_ex_max, 0) / n.n_chains AS share_excluded,
-               CASE WHEN n.n_match / n.n_chains > {MEMBER_SHARE} AND coalesce(e.n_ex_max, 0) / n.n_chains < {EXCLUDED_SHARE}
-                    THEN 'member' WHEN n.n_match = 0 THEN 'excluded' ELSE 'ambiguous' END AS status
-        FROM n LEFT JOIN e USING (staple, bkey)
+        u AS (  -- jedinica i cijena po jedinici iskoristivih proizvoda (za slabe članove)
+          SELECT m.staple, m.bkey,
+                 bool_and({unit_compatible_sql("r.unit", "p.pack_unit", "r.compare_by")}) AS unit_ok
+          FROM m JOIN clean.products p USING (chain, product_id) JOIN clean.staple_rules r USING (staple)
+          WHERE m.usable GROUP BY ALL
+        ),
+        pr AS (
+          SELECT m.staple, m.bkey, median({STAPLE_PPU_SQL}) AS ppu_med, any_value(r.ppu_min) AS lo, any_value(r.ppu_max) AS hi
+          FROM m JOIN clean.product_staples ps USING (staple, chain, product_id)
+          JOIN clean.staple_rules r USING (staple) JOIN clean.prices c USING (chain, product_id)
+          WHERE m.usable GROUP BY ALL
+        ),
+        g AS (
+          SELECT n.*, n.n_match / n.n_chains AS share_match, n.n_miss / n.n_chains AS share_excluded,
+                 coalesce(u.unit_ok, true) AS unit_ok,
+                 coalesce(pr.ppu_med IS NULL OR pr.lo IS NULL OR pr.ppu_med BETWEEN pr.lo AND pr.hi, true) AS price_ok
+          FROM n LEFT JOIN u USING (staple, bkey) LEFT JOIN pr USING (staple, bkey)
+        )
+        SELECT staple, bkey, n_chains, n_usable, share_match, share_excluded, unit_ok, price_ok,
+               CASE WHEN share_match > {STRONG_SHARE} AND share_excluded < {STRONG_MAX_EXCLUDED} THEN 'strong'
+                    WHEN share_excluded = 0 AND share_match >= {WEAK_SHARE} AND unit_ok AND price_ok
+                         AND n_usable > 0 THEN 'weak' END AS match_quality,
+               CASE WHEN share_match > {STRONG_SHARE} AND share_excluded < {STRONG_MAX_EXCLUDED} THEN 'member'
+                    WHEN share_excluded = 0 AND share_match >= {WEAK_SHARE} AND unit_ok AND price_ok
+                         AND n_usable > 0 THEN 'member'
+                    WHEN n_match > 0 THEN 'ambiguous' ELSE 'excluded' END AS status
+        FROM g
     """)
     con.execute(f"""
         CREATE OR REPLACE TABLE clean.staple_group_attrs AS
@@ -587,8 +618,8 @@ def build_staple_groups(con: duckdb.DuckDBPyConnection) -> list[tuple]:
         ) QUALIFY row_number() OVER (PARTITION BY staple, bkey, attr ORDER BY rnk, n DESC, value) = 1
     """)
     return con.execute("""
-        SELECT staple, count(*) FILTER (WHERE status = 'member'), count(*) FILTER (WHERE status = 'ambiguous'),
-               count(*) FILTER (WHERE status = 'excluded')
+        SELECT staple, count(*) FILTER (WHERE match_quality = 'strong'), count(*) FILTER (WHERE match_quality = 'weak'),
+               count(*) FILTER (WHERE status = 'ambiguous'), count(*) FILTER (WHERE status = 'excluded')
         FROM clean.staple_groups GROUP BY staple ORDER BY staple""").fetchall()
 
 

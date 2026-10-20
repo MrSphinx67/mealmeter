@@ -28,6 +28,7 @@ FLAG_TEXT = {
     "price_suspect": "cijena izvan granica",
     "pack_confidence_low": "nesigurna gramatura (višestruko pakiranje)",
     "chain_suspect": "lanac sa sumnjivim podacima",
+    "weak_match": "slaba pripadnost namirnici (manjina lanaca ima naziv namirnice)",
 }
 
 
@@ -162,6 +163,8 @@ def flags_of(row: dict) -> list[str]:
         out.append("pack_confidence_low")
     if row.get("data_quality") == "suspect":
         out.append("chain_suspect")
+    if row.get("match_quality") == "weak":
+        out.append("weak_match")
     return out
 
 

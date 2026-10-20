@@ -11,34 +11,47 @@ S = load_staples()
 
 # --- 1. pripadnost grupe (EAN) namirnici ------------------------------------------------
 
-def _mini_groups(rows):
+def _mini_groups(rows, pack_unit=None):
     """build_staple_groups nad malom bazom: rows = [(chain, ean, name_norm, excluded | None)]."""
     c = duckdb.connect()
     c.execute("CREATE SCHEMA clean")
     c.execute("""CREATE TABLE clean.products (chain VARCHAR, product_id VARCHAR, ean_norm VARCHAR,
-                 ean_global BOOLEAN, name_norm VARCHAR)""")
+                 ean_global BOOLEAN, name_norm VARCHAR, pack_unit VARCHAR)""")
     c.execute("""CREATE TABLE clean.product_staples (chain VARCHAR, product_id VARCHAR, staple VARCHAR,
-                 excluded BOOLEAN, drop_reason VARCHAR)""")
+                 excluded BOOLEAN, drop_reason VARCHAR, n_units DOUBLE, assumed_g DOUBLE)""")
     c.execute("""CREATE TABLE clean.product_attrs (chain VARCHAR, product_id VARCHAR, staple VARCHAR,
                  attr VARCHAR, value VARCHAR, how VARCHAR)""")
+    c.execute("""CREATE TABLE clean.staple_rules AS SELECT 'x' AS staple, 'kg' AS unit, 'unit' AS compare_by,
+                 NULL::DOUBLE AS ppu_min, NULL::DOUBLE AS ppu_max""")
+    c.execute("""CREATE TABLE clean.prices (chain VARCHAR, product_id VARCHAR, price_eff DOUBLE, per_unit VARCHAR,
+                 price_per_unit DOUBLE)""")
     for i, (chain, ean, name, excluded) in enumerate(rows):
-        c.execute("INSERT INTO clean.products VALUES (?, ?, ?, true, ?)", [chain, str(i), ean, name])
+        c.execute("INSERT INTO clean.products VALUES (?, ?, ?, true, ?, ?)", [chain, str(i), ean, name, pack_unit])
         if excluded is not None:
-            c.execute("INSERT INTO clean.product_staples VALUES (?, ?, 'x', ?, NULL)", [chain, str(i), excluded])
+            c.execute("INSERT INTO clean.product_staples VALUES (?, ?, 'x', ?, NULL, NULL, NULL)", [chain, str(i), excluded])
     build_staple_groups(c)
-    return dict(c.execute("SELECT bkey, status FROM clean.staple_groups").fetchall())
+    return {b: (st, q) for b, st, q in c.execute("SELECT bkey, status, match_quality FROM clean.staple_groups").fetchall()}
 
 
-def test_group_majority_rule():
-    got = _mini_groups([
-        ("a", "1", "masl ulje", False), ("b", "1", "masl ulje", False), ("c", "1", "brand", None),  # 2/3
-        ("a", "2", "masl ulje", False), ("b", "2", "brand", None), ("c", "2", "brand", None),  # 1/3
-        ("a", "3", "x", False), ("b", "3", "x", False), ("c", "3", "x", False), ("d", "3", "y", True),  # 25 % isklj.
-        ("a", "4", "x", False), ("b", "4", "x", False), ("c", "4", "x", False), ("d", "4", "x", False),
-        ("e", "4", "y", True),  # 20 % isključenog naziva: dopušteno
-        ("a", "5", "y", True), ("b", "5", "brand", None),  # nijedan naziv ne prolazi
-    ])
-    assert got == {"1": "member", "2": "ambiguous", "3": "ambiguous", "4": "member", "5": "excluded"}
+def test_group_tiers():
+    # Korak 2E: snažni m > 50 % i x < 10 %; slabi x = 0 i m >= 25 %; inače ambiguous (m > 0) ili excluded
+    rows = [("a", "1", "masl ulje", False), ("b", "1", "masl ulje", False), ("c", "1", "brand", None),  # 2/3
+            ("a", "2", "masl ulje", False), ("b", "2", "brand", None), ("c", "2", "brand", None),  # 1/3, x = 0
+            ("a", "3", "x", False), ("b", "3", "x", False), ("c", "3", "x", False), ("d", "3", "y", True),  # x 25 %
+            ("a", "5", "y", True), ("b", "5", "brand", None),  # m = 0
+            ("a", "6", "x", False), ("b", "6", "b", None), ("c", "6", "b", None), ("d", "6", "b", None),  # 25 %
+            ("a", "7", "x", False), *[(ch, "7", "b", None) for ch in "bcde"]]  # 20 %
+    rows += [(ch, "4", "x", False) for ch in "abcdefghij"] + [("z", "4", "y", True)]  # x = 1/11 < 10 %
+    got = _mini_groups(rows)
+    assert got == {"1": ("member", "strong"), "2": ("member", "weak"), "3": ("ambiguous", None),
+                   "4": ("member", "strong"), "5": ("excluded", None), "6": ("member", "weak"),
+                   "7": ("ambiguous", None)}
+
+
+def test_weak_needs_compatible_unit():
+    rows = [("a", "1", "x", False), ("b", "1", "b", None), ("c", "1", "b", None)]
+    assert _mini_groups(rows, pack_unit="ml")["1"] == ("ambiguous", None)  # kg namirnica, pakiranje u ml
+    assert _mini_groups(rows, pack_unit="g")["1"] == ("member", "weak")
 
 
 def test_turkey_mince_not_default_mince(con):
@@ -396,3 +409,19 @@ def test_drained_mass_means_can():
     from mealmeter.staples import form_heuristic
 
     assert form_heuristic(S["grah"], "GRAH CRVENI 400/240 g E BUONO", "KOM", 400, "g", 240) == "konzerva"
+
+
+def _groups_for(staple_key: str, names: list[str], pack_unit="g"):
+    """Grupa od jednog EAN-a s nazivom po lancu; podudaranje prema stvarnim pravilima namirnice."""
+    from mealmeter.staples import name_match
+
+    rows = []
+    for i, name in enumerate(names):
+        hit = name_match(S[staple_key], name)
+        rows.append((f"lanac{i}", "1", name, None if hit is None else hit == "excluded"))
+    return _mini_groups(rows, pack_unit=pack_unit)["1"]
+
+
+def test_cavatappi_weak_member():
+    # samo jedan od dva naziva sadrži "tjestenina": m = 50 %, x = 0 -> slabi član
+    assert _groups_for("tjestenina", ["TJ.CAVATAPPI 63 500 g", "TJESTENINA CAVATAPPI 63 500G"]) == ("member", "weak")

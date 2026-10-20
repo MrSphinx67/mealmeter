@@ -552,3 +552,19 @@ Izvještaji: [STEP2D_REVIEW.md](STEP2D_REVIEW.md) (`scripts/step2d_review.py`) i
 
     Generirano nad arhivom 2026-10-20. STEP2D_REVIEW.md je generiran nad 19.10., prije ažuriranja; usporedbe
     prije/poslije u njemu odnose se na taj dan.
+
+## Korak 2E (2026-10-20)
+
+Izvještaji: [STEP2E_REVIEW.md](STEP2E_REVIEW.md) (`scripts/step2e_review.py`) i [REVIEW_2E.md](REVIEW_2E.md).
+
+68. **Pripadnost grupe: tri razine** (zamjenjuje odluku 54; `clean.staple_groups.match_quality`).
+    - m = udio lanaca čiji naziv prolazi `must_match` bez `must_not_match`; x = udio lanaca čiji naziv pogađa
+      `must_not_match`. Neprehrambeni član po kategoriji ne ulazi ni u m ni u x.
+    - Snažni član: m > 50 % i x < 10 %.
+    - Slabi član (`weak`): x = 0, m ≥ 25 %, jedinica spojiva (`unit_compatible_sql`), barem jedan proizvod
+      unutar min/max pakiranja i medijan cijene po jedinici u granicama. U zadanom je izboru, ali ispod snažnih
+      (`find_products`: `match_quality`; `plan_basket`: zastavica `weak_match`, dakle rezerva).
+    - Inače `ambiguous` (m > 0) ili `excluded` (m = 0).
+    - Granice cijena (`set_auto_ranges`) računaju se prije grupa, jer ih slabi član treba.
+    - Arhiva 2026-10-20: 15.819 snažnih, 546 slabih, 1.020 dvosmislenih grupa. Promjene naspram 2D su u
+      `docs/data/groups_changes_2e1.csv`.
