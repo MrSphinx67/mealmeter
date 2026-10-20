@@ -534,3 +534,13 @@ Izvještaji: [STEP2D_REVIEW.md](STEP2D_REVIEW.md) (`scripts/step2d_review.py`) i
     - Rajčica (`form_staples`) i dalje bira najjeftiniji oblik uz upozorenje.
     - Moja dopuna: poznata ocijeđena masa („GRAH CRVENI 400/240 g“) znači `oblik=konzerva` (`form_heuristic`).
       Na arhivi 2026-10-19 to je bilo 52 proizvoda s `nepoznato`.
+66. **Dnevno ažuriranje.**
+    - Najnovija arhiva i dalje dolazi iz `/v0/list` (najveći datum).
+    - Nova tablica `clean.archive_info` pamti učitanu verziju (`updated`, `size`), pa je ponovljeno pokretanje
+      prazno, a ponovno objavljena arhiva se učitava.
+    - Raspored: dva pokretanja dnevno (15:30 i 23:30).
+    - Ispis uključuje razlike po lancu (`compare_stats`).
+    - **Arhiva 2026-10-20 (objavljena u 14:26) je nepotpuna:** nema Stanića (31 trgovina), Gavranović ima 24
+      trgovine manje (−272 tis. cijena), Metro 6 manje. Ukupno 27 lanaca, 1.452 trgovine, 474.121 proizvod,
+      16,94 mil. redaka cijena (−371.547). Provjera je prošla (pad < 20 %), uz upozorenja; zapis je u
+      `docs/data/update_2026-10-20.txt`. Baza je sada na 20.10., a 19.10. je u `clean.price_history`.

@@ -26,8 +26,11 @@ KEEP_DAYS = 30
 MAX_DROP = 0.20
 
 SCHEDULE = """\
-# cron (svaki dan u 23:30; arhiva se objavljuje oko 22 h):
-30 23 * * *  cd {root} && {uv} run python scripts/update.py >> data/update.log 2>&1
+# Dva pokretanja dnevno (15:30 i 23:30). Najnovija arhiva uzima se iz /v0/list, a ne po satu: 20.10. je
+# objavljena već u 14:26, a ponekad se kasnije ponovno objavi. Pokretanje je idempotentno: ista arhiva
+# (datum + "updated" iz popisa) se ne učitava ponovno, a ponovno objavljena se učitava.
+# cron:
+30 15,23 * * *  cd {root} && {uv} run python scripts/update.py >> data/update.log 2>&1
 
 # ili systemd (korisnički timer), ~/.config/systemd/user/mealmeter-update.service:
 [Unit]
@@ -43,6 +46,7 @@ ExecStart={uv} run python scripts/update.py
 Description=Mealmeter: dnevno ažuriranje cijena
 
 [Timer]
+OnCalendar=*-*-* 15:30
 OnCalendar=*-*-* 23:30
 Persistent=true
 
@@ -159,6 +163,34 @@ def validate(new: list[tuple], old: list[tuple], max_drop: float = MAX_DROP) -> 
 
 # --- izgradnja i zamjena ---------------------------------------------------------------
 
+def compare_stats(new: list[tuple], old: list[tuple]) -> list[tuple]:
+    """Razlike po lancu: (lanac, trgovina, Δ, proizvoda, Δ, cijena, Δ) i zadnji redak UKUPNO;
+    lanac koji nedostaje u novoj arhivi ima nule."""
+    new_by, old_by = {r[0]: r for r in new}, {r[0]: r for r in old}
+    rows = []
+    for chain in sorted(set(new_by) | set(old_by)):
+        n, o = new_by.get(chain, (chain, 0, 0, 0)), old_by.get(chain, (chain, 0, 0, 0))
+        rows.append((chain, n[1], n[1] - o[1], n[2], n[2] - o[2], n[3], n[3] - o[3]))
+    tot = [sum(r[i] for r in rows) for i in range(1, 7)]
+    rows.append((f"UKUPNO ({len(new_by)} lanaca, {len(new_by) - len(old_by):+d})", *tot))
+    return rows
+
+
+def _loaded_version(db_path: Path) -> dict | None:
+    """{date, updated, size} zadnje učitane arhive (clean.archive_info), ili None."""
+    if not db_path.exists():
+        return None
+    con = duckdb.connect(str(db_path), read_only=True)
+    try:
+        if not con.execute("SELECT count(*) FROM duckdb_tables() WHERE schema_name = 'clean' "
+                           "AND table_name = 'archive_info'").fetchone()[0]:
+            return None
+        row = con.execute("SELECT date, updated, size FROM clean.archive_info ORDER BY loaded_at DESC LIMIT 1").fetchone()
+        return {"date": row[0].isoformat(), "updated": row[1], "size": row[2]} if row else None
+    finally:
+        con.close()
+
+
 def _previous(db_path: Path) -> tuple[str | None, list[tuple]]:
     """(datum, statistika) zadnje učitane arhive u postojećoj bazi."""
     if not db_path.exists():
@@ -182,7 +214,7 @@ def _previous(db_path: Path) -> tuple[str | None, list[tuple]]:
 
 
 def build_database(root: Path, date: str, db_path: Path, keep_days: int = KEEP_DAYS,
-                   max_drop: float = MAX_DROP) -> dict:
+                   max_drop: float = MAX_DROP, info: dict | None = None) -> dict:
     """Izgradi novu bazu u privremenu datoteku, provjeri je, prenese povijest cijena i atomarno
     zamijeni `db_path`. Pri bilo kojoj grešci stara baza ostaje netaknuta."""
     prev_date, prev_stats = _previous(db_path)
@@ -220,6 +252,11 @@ def build_database(root: Path, date: str, db_path: Path, keep_days: int = KEEP_D
             con.execute("DETACH old")
         con.executemany("INSERT INTO clean.archive_stats VALUES (?, ?, ?, ?, ?)",
                         [(date, *r) for r in stats])
+        # koja je verzija arhive učitana ("updated" i veličina iz /v0/list), za idempotentno pokretanje
+        con.execute("""CREATE TABLE clean.archive_info (date DATE, updated VARCHAR, size BIGINT, url VARCHAR,
+                       loaded_at TIMESTAMP)""")
+        con.execute("INSERT INTO clean.archive_info VALUES (?, ?, ?, ?, now())",
+                    [date, (info or {}).get("updated"), (info or {}).get("size"), (info or {}).get("url")])
         con.execute("""INSERT INTO clean.price_history
                        SELECT date, chain, store_id, product_id, price, special_price, price_eff,
                               price_per_unit, per_unit FROM clean.prices""")
@@ -228,6 +265,7 @@ def build_database(root: Path, date: str, db_path: Path, keep_days: int = KEEP_D
             "chains": len(stats), "stores": sum(r[1] for r in stats), "products": sum(r[2] for r in stats),
             "price_rows": sum(r[3] for r in stats),
             "price_rows_previous": sum(r[3] for r in prev_stats) if prev_stats else None,
+            "diff": compare_stats(stats, prev_stats) if prev_stats and prev_date != date else [],
             "clean_prices": con.execute("SELECT count(*) FROM clean.prices").fetchone()[0],
             "history_days": [d.isoformat() for (d,) in con.execute(
                 "SELECT DISTINCT date FROM clean.price_history ORDER BY date").fetchall()],
@@ -276,9 +314,17 @@ def run(argv: list[str] | None = None) -> int:
             info = latest_archive(args.list_url, args.date)
         date = info["date"]
         prev_date, _ = _previous(db_path)
-        if prev_date == date and not args.force:
+        loaded = _loaded_version(db_path)
+        republished = (loaded and loaded["date"] == date and info.get("updated")
+                       and loaded["updated"] and loaded["updated"] != info["updated"])
+        if prev_date and date < prev_date and not args.force:
+            log(f"najnovija arhiva {date} je starija od učitane {prev_date}; ništa za napraviti")
+            return 0
+        if prev_date == date and not republished and not args.force:
             log(f"arhiva {date} je već učitana; ništa za napraviti (--force za ponovno učitavanje)")
             return 0
+        if republished:
+            log(f"arhiva {date} je ponovno objavljena ({loaded['updated']} -> {info['updated']}); učitavam")
         if not args.archive:
             zip_path = data_dir / f"{date}.zip"
             if zip_path.exists() and info.get("size") and zip_path.stat().st_size == info["size"]:
@@ -288,7 +334,7 @@ def run(argv: list[str] | None = None) -> int:
                 download(info["url"], zip_path, info.get("size"))
         root = extract(zip_path, data_dir / date)
         log(f"gradim bazu za {date} (prethodna: {prev_date or '-'})")
-        summary = build_database(root, date, db_path, args.keep_days, args.max_drop)
+        summary = build_database(root, date, db_path, args.keep_days, args.max_drop, info)
     except ValidationError as e:
         log(f"PROVJERA NIJE PROŠLA: {e}; baza nije promijenjena")
         return 2
@@ -307,6 +353,11 @@ def run(argv: list[str] | None = None) -> int:
     print(f"  povijest:        {len(summary['history_days'])} dana ({summary['history_days'][0]} .. {summary['history_days'][-1]})")
     for w in summary["warnings"]:
         print(f"  ! {w}")
+    if summary["diff"]:
+        print(f"\n  razlike naspram {summary['previous_date']} (sirove tablice):")
+        print(f"  {'lanac':<28}{'trgovina':>9}{'Δ':>6}{'proizvoda':>11}{'Δ':>8}{'cijena':>11}{'Δ':>9}")
+        for chain, st, dst, pr, dpr, pc, dpc in summary["diff"]:
+            print(f"  {chain:<28}{st:>9}{dst:>+6}{pr:>11}{dpr:>+8}{pc:>11}{dpc:>+9}")
     return 0
 
 

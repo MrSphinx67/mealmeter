@@ -1,0 +1,45 @@
+[20:32:06] preuzimam https://api.cijene.dev/v0/archive/2026-10-20.zip
+[20:34:58] gradim bazu za 2026-10-20 (prethodna: 2026-10-19)
+[20:36:31] gotovo za 266 s: data/mealmeter.duckdb
+  datum:           2026-10-20
+  lanaca:          27
+  trgovina:        1452
+  proizvoda:       474121
+  redaka cijena:   16944700 (-371547 naspram 2026-10-19)
+  čistih cijena:   16027295
+  povijest:        2 dana (2026-10-19 .. 2026-10-20)
+  ! nedostaje lanac stanic
+  ! gavranovic: redaka cijena 1125955 -> 854124
+  ! metro: redaka cijena 73590 -> 12954
+
+  razlike naspram 2026-10-19 (sirove tablice):
+  lanac                        trgovina     Δ  proizvoda       Δ     cijena        Δ
+  boso                               14    +0       9271     +14      73863     +247
+  branka                              2    +0      14500     +38      24530      +54
+  bure                                3    +0      14500      +2      26789       +4
+  djelo_vodice                        1    +0      10748     -20      19349      -40
+  dm                                  1    +0      21788     +76      21788      +76
+  dukat                               6    +0        408      +0       4719       +0
+  eurospin                           44    +1       3966     -12     235045    +4849
+  gavranovic                        101   -24      14567    -577     854124  -271831
+  jadranka_trgovina                   1    +0      12419    +183      12419     +183
+  kaufland                           53    +0      19354      -1     737098     -612
+  konzum                            188    +0      22252     -52    1817662    +1521
+  ktc                                34    +0      15675      +2     280744     +612
+  lidl                              116    +0       6922      +0    1635732     +733
+  lorenco                             1    +0      17443      +0      19740       +0
+  metro                               1    -6      12954    -441      12954   -60636
+  ntl                               343    +0      18323      +8    1565397    +2408
+  plodine                           155    +0      76515     +20    6124402     -627
+  ribola                             61    +0      16981      +3     535244      +70
+  roto                                9    +0       9201      +0      82949       +0
+  spar                              144    +0      23404      +8    1307763    +1402
+  stanic                              0   -31          0   -2601          0   -49877
+  stridon                            41    +0      31598      +2     146929      +15
+  studenac                           20    +0      19792      +3     169250      +59
+  tommy                              87    +0      19944      +1     991244      +32
+  trgocentar                          6    +0      10284      +1      42902      +14
+  trgovina-krk                       14    +0      33797      +2     155137      +24
+  vrutak                              4    +0      14248      +2      40393      -95
+  zabac                               2    +0       3267     -66       6534     -132
+  UKUPNO (27 lanaca, -1)           1452   -60     474121   -3405   16944700  -371547

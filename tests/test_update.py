@@ -83,7 +83,7 @@ def test_broken_archive_is_error(env, tmp_path):
 def test_print_schedule(capsys):
     assert run(["--print-schedule"]) == 0
     out = capsys.readouterr().out
-    assert "scripts/update.py" in out and "OnCalendar" in out and "30 23 * * *" in out
+    assert "scripts/update.py" in out and "OnCalendar=*-*-* 15:30" in out and "30 15,23 * * *" in out
 
 
 def test_validate():
@@ -109,3 +109,32 @@ def test_latest_archive_from_list(tmp_path):
     assert latest_archive(f.as_uri(), date="2026-10-18")["size"] == 1
     with pytest.raises(RuntimeError):
         latest_archive(f.as_uri(), date="2026-01-01")
+
+
+def test_compare_stats():
+    from mealmeter.update import compare_stats
+
+    rows = compare_stats([("konzum", 2, 10, 100), ("spar", 1, 5, 50)], [("konzum", 1, 8, 90), ("lidl", 1, 4, 40)])
+    assert rows[0] == ("konzum", 2, 1, 10, 2, 100, 10)
+    assert rows[1] == ("lidl", 0, -1, 0, -4, 0, -40) and rows[2] == ("spar", 1, 1, 5, 5, 50, 50)
+    assert rows[-1][1:] == (3, 1, 15, 3, 150, 20) and rows[-1][0].startswith("UKUPNO (2 lanaca")
+
+
+def test_republished_archive_reloads(env, tmp_path, monkeypatch):
+    """Ista arhiva (datum + updated) se ne učitava ponovno; ponovno objavljena (novi updated) da."""
+    import mealmeter.update as upd
+
+    db, base = env["db"], env["base"]
+    listing = {"archives": [{"date": "2026-10-20", "url": env["full"].as_uri(), "size": env["full"].stat().st_size,
+                             "updated": "2026-10-20T14:26:59+02:00"}]}
+    lst = tmp_path / "list.json"
+    lst.write_text(json.dumps(listing))
+    args = base + ["--list-url", lst.as_uri()]
+    assert run(args) == 0
+    assert q(db, "SELECT updated FROM clean.archive_info") == [("2026-10-20T14:26:59+02:00",)]
+    mtime = db.stat().st_mtime
+    assert run(args) == 0 and db.stat().st_mtime == mtime  # 23:30, ista verzija: ništa
+    listing["archives"][0]["updated"] = "2026-10-20T21:59:00+02:00"
+    lst.write_text(json.dumps(listing))
+    assert run(args) == 0 and db.stat().st_mtime != mtime
+    assert q(db, "SELECT updated FROM clean.archive_info") == [("2026-10-20T21:59:00+02:00",)]

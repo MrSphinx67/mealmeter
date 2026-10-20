@@ -263,4 +263,9 @@ Ostaje:
   `clean.price_history (date, chain, store_id, product_id, price, special_price, price_eff,
   price_per_unit, per_unit)`, za zadnjih 30 dana (`--keep-days`).
 - Izlazni kodovi: 0 uspjeh ili već učitano, 1 greška, 2 provjera nije prošla.
-- `uv run python scripts/update.py --print-schedule` ispisuje cron i systemd timer; ništa se ne instalira.
+- `clean.archive_info (date, updated, size, url, loaded_at)`: učitana verzija arhive. Isti datum s istim
+  `updated` se ne učitava ponovno, a ponovno objavljena arhiva (novi `updated`) se učitava. Zato su dva
+  dnevna pokretanja (15:30 i 23:30, `--print-schedule`) sigurna.
+- Ispis nakon učitavanja uključuje razlike po lancu (trgovine, proizvodi, cijene) naspram prethodne arhive.
+- `uv run python scripts/update.py --print-schedule` ispisuje cron (`30 15,23 * * *`) i systemd timer s dva
+  `OnCalendar`; ništa se ne instalira.
