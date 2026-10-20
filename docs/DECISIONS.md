@@ -656,3 +656,6 @@ Izvještaji: [STEP2E_REVIEW.md](STEP2E_REVIEW.md) (`scripts/step2e_review.py`) i
       uz točnost na odloženom skupu 99,3 % (769 proizvoda).
     - 1.681 Plodina izlazi iz `unknown` (hrana 1.524, kućanstvo 119, pića 33, alkohol 5), među njima i svježe
       povrće („LUK ZUTI“, „ROTKVA CRNA“). Ono sada ulazi i u `find_products`.
+80. **Izvještaji Koraka 2E:** `docs/STEP2E_REVIEW.md` (`scripts/step2e_review.py`, detalji po točkama) i
+    `docs/REVIEW_2E.md` (`scripts/review_2e.py`, najviše 150 redaka). Oba su generirana nad arhivom 2026-10-20
+    s carry-forwardom.

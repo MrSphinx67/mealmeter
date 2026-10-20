@@ -1,8 +1,3 @@
 # Korak 2E: stanje
 
-| točka | stanje |
-|---|---|
-| 1-10 | gotovo |
-| 11 | gotovo |
-
-Sljedeće: docs/REVIEW_2E.md.
+Sve točke (1-11) i docs/REVIEW_2E.md su gotovi. Sljedeći korak čeka upute (recepti nisu započeti).
