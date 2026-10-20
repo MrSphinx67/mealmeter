@@ -152,3 +152,35 @@ def test_chicken_rules(con):
     lo, hi, src = con.execute("SELECT ppu_min, ppu_max, range_source FROM clean.staple_rules WHERE staple = 'pileca_prsa'").fetchone()
     assert (lo, hi, src) == (2, 20, "manual")  # najširi raspon; po proizvodu vrijedi raspon stanja
 
+# --- 5. luk ----------------------------------------------------------------------------
+
+@pytest.mark.parametrize("name,vrsta", [
+    ("LUK SREBRENAC (10)", "srebrenac"),
+    ("LUK LJUBIČ./BIJELI ZA GASTRO 1 kg", "ljubicasti"),
+    ("KAPULA ŽUTA (CRV.LUK)", "zuti"),
+    ("LUK CRVENI", "crveni"),
+    ("LUK CRVENI SLATKI 50-70", "slatki"),
+    ("LUK BORETTANE 250 g", "borettan"),
+    ("KAPULA", "obicni"),
+    ("LUK MLADI VEZICA", "mladi"),
+])
+def test_onion_vrsta(name, vrsta):
+    from mealmeter.staples import extract_attributes
+
+    assert extract_attributes(S["luk"], name)["vrsta"] == vrsta
+
+
+def test_onion_default_and_garlic():
+    from mealmeter.staples import name_match
+
+    st = S["luk"]
+    excluded = {v for a, v in st.default_exclude_variants if a == "vrsta"}
+    assert {"srebrenac", "ljubicasti", "mladi", "slatki", "borettan", "perlice"} <= excluded
+    assert not {"crveni", "zuti", "obicni"} & excluded
+    assert name_match(st, "LUK BIJELI RFS") == "excluded"  # češnjak
+    assert name_match(st, "LUK LJUBIČ./BIJELI ZA GASTRO 1 kg") == "match"
+
+
+def test_onion_rukavac_assumed_500g():
+    st = S["luk"]
+    assert st.assumed_pack_g == 500 and st.assumed_pack_regex

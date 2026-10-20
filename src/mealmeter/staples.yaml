@@ -502,18 +502,27 @@ luk:
                    vrhnje, sir\b, med\b, senf, kikiriki, przeni, granul, pasta, pecivo, bruschett,
                    karameliz, majonez, rings, zacin, tuba, umak, salat, prsten, masline, sendvic,
                    krem\b, namaz, svinjsk, poriluk, vlasac, kapulic, srdel, sardin, baguett, stapic,
-                   naljev, octu, ocat, kis\b, kisel, srebrn, srebni, marinir, pohan, kolut, fileti]
+                   naljev, octu, ocat, kis\b, kisel, marinir, pohan, kolut, fileti,
+                   bijeli luk, luk bijel]  # bijeli luk je češnjak
   unit: kg
   piece_g: 150
-  default_exclude_variants: [vrsta=mladi, vrsta=ljutika]
+  # obični luk = crveni, žuti, kapula ili bez oznake sorte; ostale sorte samo na zahtjev
+  default_exclude_variants: [vrsta=mladi, vrsta=ljutika, vrsta=borettan, vrsta=perlice, vrsta=srebrenac,
+                             vrsta=ljubicasti, vrsta=slatki]
   packaged: {pattern: rukavac, default_g: 500}
   attributes:
     vrsta:
+      # sorte prvo: "LUK CRVENI SLATKI" je slatki, "KAPULA ŽUTA (CRV.LUK)" žuti
       mladi: '\bmlad'
-      ljutika: '\bchalot|\bechalion|\bljutik|\bborettan|\bguarnicion|\bshallot'
-      crveni: '\bcrven|\bljubicast'
-      zuti: '\bzut|\bsrebren'
-      bijeli: '\bbijel'
+      ljutika: '\bchalot|\bechalion|\bljutik|\bshallot|\bguarnicion'
+      borettan: '\bborettan'
+      perlice: '\bperlic'
+      srebrenac: '\bsrebren\w*'
+      ljubicasti: '\bljubic\w*'  # i kratica "LJUBIČ."
+      slatki: '\bslatk'
+      zuti: '\bzut'  # prije crvenog: "KAPULA ŽUTA (CRV.LUK)"
+      crveni: '\bcrven|\bcrv\b'
+      _default: obicni
   loose_produce: true
 
 cesnjak:

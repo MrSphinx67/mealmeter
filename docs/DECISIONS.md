@@ -481,3 +481,10 @@ Izvještaji: [STEP2D_REVIEW.md](STEP2D_REVIEW.md) (`scripts/step2d_review.py`) i
 57. **Pileća prsa: stanje.** Atribut `stanje` (smrznuto: SMRZ, LEDO, FROZ, ZAMRZ, BRAZIL; inače svježe), zadano
     svježe. Novo polje `plausible_by` daje granice po vrijednosti atributa (`product_staples.ppu_min/ppu_max`):
     svježe 3–20 €/kg, smrznuto 2–12 €/kg. `clean.staple_rules` nosi najširi raspon (2–20). „Jeli“ ostaje isključeno.
+58. **Luk: sorte.** Obični luk (zadano) je crveni, žuti, kapula ili bez oznake sorte (`vrsta=obicni`).
+    - Srebrenac (`srebren\w*`), ljubičasti (`ljubic\w*`, i „LJUBIČ.“), mladi, slatki, borettan, perlice i
+      ljutika su vrijednosti `vrsta` izvan zadanog izbora.
+    - Sorte se provjeravaju prije boje („LUK CRVENI SLATKI“ je slatki), a žuti prije crvenog
+      („KAPULA ŽUTA (CRV.LUK)“).
+    - „bijeli luk“ / „luk bijeli“ je češnjak i isključen je iz luka.
+    - Rukavac 4/1 i dalje dobiva pretpostavljenih 500 g uz `unit_confidence=low`.
