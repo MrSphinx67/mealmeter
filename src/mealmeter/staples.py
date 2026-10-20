@@ -16,7 +16,9 @@ STAPLES_PATH = Path(__file__).with_name("staples.yaml")
 ABBREV_PATH = Path(__file__).resolve().parents[2] / "data" / "abbrev.yaml"
 # loose_produce: nazivi staklenki/konzervi koji prolaze pravilo ">= 500 g" ("KRASTAVCI 6-9 cm 1580g ...
 # ocijeđene mase", "KISELI ..."): kalibar u cm, ocijeđena masa, kiselo. Uzorak je na name_norm.
-LOOSE_REJECT_REGEX = r"\d+ \d+ cm|(^| )ocj|(^| )ocij|(^| )kis"
+# Uz to riječi prerade (Korak 2F): konzerva, kiselo, smrznuto, pire, umak, sok, ajvar, juha.
+LOOSE_REJECT_REGEX = (r"\d+ \d+ cm|(^| )ocj|(^| )ocij|(^| )kis"
+                      r"|(^| )(?:konzerv|kisel|smrzn|pire|umak|sok\b|ajvar|juha)")
 UNITS = ("kg", "l", "kom")
 
 
@@ -418,11 +420,13 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
             params.append(st.require_regex)
         if st.loose_produce:
             # Svježe voće/povrće: riječ namirnice kao prva ili druga riječ naziva, i proizvod
-            # na vagu (bez globalnog EAN-a), bez poznate gramature ili pakiranje >= 500 g;
+            # na vagu (bez globalnog EAN-a), bez poznate gramature (cijena po kg), na komad ili pakiranje >= 500 g;
             # nikad tekućina. Inače "banana" pogađa bombone, sokove i čokolade s okusom banane.
             # Staklenke ("KRASTAVCI 6-9 cm 1580g ... ocijeđene mase") odbija LOOSE_REJECT_REGEX.
+            # Korak 2F: i proizvod s globalnim EAN-om koji se prodaje na komad ("KRASTAVAC SALATAR kom")
             loose += """ AND regexp_matches(match_norm, ?)
-                       AND (NOT ean_global OR pack_unit IS NULL OR (pack_unit = 'g' AND pack_amount >= 500))
+                       AND (NOT ean_global OR pack_unit IS NULL OR pack_unit = 'kom'
+                            OR (pack_unit = 'g' AND pack_amount >= 500))
                        AND pack_unit IS DISTINCT FROM 'ml' AND NOT regexp_matches(match_norm, ?)"""
             params += [st.loose_regex, LOOSE_REJECT_REGEX]
         con.execute(

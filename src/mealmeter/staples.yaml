@@ -654,8 +654,8 @@ krastavac:
   name: krastavac (svježi)
   synonyms: [krastavac, krastavci, svježi krastavac]
   must_match: [krastav]
-  must_not_match: [octu, droga, neto, sirup, monin, rial, kisel, kis\b, delikates, delik\b, del\b, masa\b, mase\b, ocijed, ocj\b, salatar, salatni,
-                   staklo, pasterizir, sok\b, sjeme, namaz, lim\b, limun, kornison, salata, sendvic, toco,
+  must_not_match: [octu, droga, neto, sirup, monin, rial, kisel, kis\b, delikates, delik\b, del\b, masa\b, mase\b, ocijed, ocj\b, salatni,
+                   staklo, pasterizir, sok\b, sjeme, namaz, lim\b, limun, kornison, salata\b, sendvic, toco,
                    doora, vitaminka, zorela, podravka, zvijezda, giana, natureta, campo]
   unit: kg
   loose_produce: true

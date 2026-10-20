@@ -679,3 +679,11 @@ Sažetak: [REVIEW_2F.md](REVIEW_2F.md) (`scripts/review_2f.py`).
     - Novi oblici tjestenine: bucatini i linguine (provjeravaju se prije špageta), a špageti uključuju
       spaghetti i spagetini. „TJESTENINA BUCATINI 500 G RISCOSSA“ (isti EAN kao „ŠPAGETI N6“ u trgovini Krk)
       više nije špageti.
+83. **Svježe povrće na komad.**
+    - `loose_produce` sada propušta i proizvod s globalnim EAN-om koji se prodaje na komad (`pack_unit='kom'`),
+      uz dosadašnji uvjet prve ili druge riječi. Fiksno pakiranje u g ispod 500 g i dalje ne prolazi.
+    - Riječi prerade (konzerv, kisel, smrzn, pire, umak, sok, ajvar, juha) su dodane u `LOOSE_REJECT_REGEX`.
+    - Za krastavac: `salatar` je maknut iz `must_not_match`, a `salata` je sužena na `salata\b`, jer je
+      „KRASTAVAC SALATAR“ svježi salatni krastavac (18 proizvoda).
+    - Lijevak, konačno (zbroj 8 lanaca): krastavac 30 → 37, luk 43 → 48; rajčica, mrkva, paprika i tikvica
+      bez promjene (`docs/data/funnel_*_2f3.json`).

@@ -92,3 +92,33 @@ def test_product_without_required_attr_dropped(tmp_path):
         names[bool(req)] = {n for (n,) in c.execute(sql + " SELECT DISTINCT name FROM x", params).fetchall()}
     assert "TJESTENINA RISCOSSA 500 G" in names[False]  # bez pravila ulazi preko grupe
     assert names[True] >= {"TJESTENINA ŠPAGETI RISCOSSA 500 G"} and "TJESTENINA RISCOSSA 500 G" not in names[True]
+
+
+# --- 3. svježe povrće na komad ------------------------------------------------------------------
+
+def _ean(first12: str) -> str:
+    """EAN-13 s ispravnom kontrolnom znamenkom."""
+    total = sum(int(d) * (3 if i % 2 else 1) for i, d in enumerate(first12))
+    return first12 + str((10 - total % 10) % 10)
+
+
+def _loose_build(tmp_path, rows):
+    from mealmeter.build import build_clean, load_raw
+    from tests.conftest import FIXTURE
+
+    c = duckdb.connect(str(tmp_path / "l.duckdb"))
+    load_raw(c, FIXTURE, "2026-10-19")
+    c.executemany("INSERT INTO products (chain, product_id, barcode, name, category, unit) VALUES (?, ?, ?, ?, 'HRANA', 'KOM')", rows)
+    build_clean(c)
+    return c
+
+
+def test_loose_piece_with_global_ean(tmp_path):
+    c = _loose_build(tmp_path, [
+        ("spar", "K1", "8058056199577", "KRASTAVAC SALATAR kom"),  # globalni EAN, na komad
+        ("spar", "K2", _ean("383000000002"), "KRASTAVCI 680 G STAKLENKA"),  # fiksno pakiranje u g < 500? ne: 680 g
+        ("spar", "K3", _ean("383000000003"), "PAPRIKA AJVAR kom"),  # riječ prerade
+    ])
+    got = {pid: st for pid, st in c.execute("""SELECT product_id, staple FROM clean.product_staples
+                                               WHERE product_id IN ('K1', 'K2', 'K3') AND NOT excluded""").fetchall()}
+    assert got.get("K1") == "krastavac" and "K3" not in got
