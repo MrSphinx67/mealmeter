@@ -340,8 +340,10 @@ def extract_attributes_detail(staple: Staple, name: str) -> dict[str, tuple[str,
 
 
 def form_heuristic(staple: Staple, name: str, unit: str | None, pack_amount: float | None,
-                   pack_unit: str | None) -> str | None:
+                   pack_unit: str | None, drained_amount: float | None = None) -> str | None:
     """Oblik (konzerva/smrznuto/suho) kad ga naziv ne kaže, za namirnice s ambiguous_form.
+
+    0. Poznata ocijeđena masa ("GRAH CRVENI 400/240 g") znači konzervu (Korak 2D).
 
     1. Oznaka konzerve ili smrznutog u stupcu `unit` (isti uzorci kao za naziv).
     2. dry_rule: pakiranje u rasponu pack_g (g), bez oznake konzerve/smrznutog u nazivu i unit-u, a
@@ -350,6 +352,8 @@ def form_heuristic(staple: Staple, name: str, unit: str | None, pack_amount: flo
     if not staple.ambiguous_form:
         return None
     forms = staple.attributes["oblik"]
+    if drained_amount and "konzerva" in forms:
+        return "konzerva"
     unit_text = attr_text(unit or "")
     for form in ("konzerva", "smrznuto"):
         if form in forms and unit_text and re.search(forms[form], unit_text):
@@ -444,16 +448,17 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
             """, [st.key, _word_start(st.require_pack)])
 
     rows = con.execute("""
-        SELECT s.chain, s.product_id, s.staple, p.name, p.pack_amount, p.pack_unit, p.unit, p.unit_hint
+        SELECT s.chain, s.product_id, s.staple, p.name, p.pack_amount, p.pack_unit, p.unit, p.unit_hint,
+               p.drained_amount
         FROM clean.product_staples s JOIN clean.products p USING (chain, product_id)
         WHERE NOT s.excluded AND s.drop_reason IS NULL
     """).fetchall()
     attr_rows, unit_rows = [], []
-    for chain, pid, key, name, amount, pack_unit, unit, hint in rows:
+    for chain, pid, key, name, amount, pack_unit, unit, hint, drained in rows:
         st = staples[key]
         detail = extract_attributes_detail(st, name)
         if st.ambiguous_form and detail.get("oblik", (None, "default"))[1] == "default":
-            if form := form_heuristic(st, name, unit, amount, pack_unit):
+            if form := form_heuristic(st, name, unit, amount, pack_unit, drained):
                 detail["oblik"] = (form, "heuristic")
         attrs = {a: v for a, (v, _) in detail.items()}
         attr_rows += [(chain, pid, key, a, v, how) for a, (v, how) in detail.items()]

@@ -35,6 +35,18 @@ class IngredientError(ValueError):
     """Sastojak se ne može povezati: razlog ide u `unmatched`."""
 
 
+class FormAmbiguity(Exception):
+    """Mahunarka (ambiguous_form) bez oblika: ne pogađa se, nego se pita (`ambiguous`)."""
+
+    def __init__(self, ambiguity: dict):
+        super().__init__(ambiguity["question"])
+        self.ambiguity = ambiguity
+
+
+# redoslijed oblika u pitanju ("suho ili konzerva?")
+FORM_ORDER = ("suho", "konzerva", "smrznuto", "svjeze")
+
+
 @dataclass
 class Need:
     """Sastojak recepta preveden u namirnicu i količinu u njezinoj osnovnoj jedinici."""
@@ -279,7 +291,9 @@ def _prepare(con, need: Need, city: str, wholesale: bool = False) -> dict[tuple,
 
 
 def _resolve_form(con, need: Need, city: str, wholesale: bool = False) -> list[str]:
-    """Dvosmislena namirnica bez oblika: izaberi najjeftiniji oblik (po jedinici) i vrati upozorenje."""
+    """Namirnica bez oblika. Rajčica (form_staples): izaberi najjeftiniji oblik i vrati upozorenje.
+    Mahunarke, kukuruz i gljive (ambiguous_form): ne pogađaj, nego digni FormAmbiguity s oblicima koji
+    su dostupni u gradu i pitanjem ("suho ili konzerva?")."""
     st = need.staple
     if st.form_staples:  # oblik je druga namirnica (rajčica)
         options = {f: load_staples()[k] for f, k in st.form_staples.items()}
@@ -310,6 +324,10 @@ def _resolve_form(con, need: Need, city: str, wholesale: bool = False) -> list[s
             prices[form] = min(unit_costs)
     if not prices:
         return [f"'{st.name}': nijedan oblik nije dostupan u gradu"]
+    if st.ambiguous_form:
+        forms = sorted(prices, key=lambda f: FORM_ORDER.index(f) if f in FORM_ORDER else len(FORM_ORDER))
+        raise FormAmbiguity({"form": forms, "question": " ili ".join(forms) + "?",
+                             "prices": {f: round(prices[f], 2) for f in forms}})
     form = min(prices, key=prices.get)
     need.form, need.assumed_form = form, True
     if st.form_staples:
@@ -350,8 +368,8 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
     if mode != "single_store":
         raise ValueError("podržan je samo mode='single_store'")
     con = con or connect()
-    out = {"city": city, "mode": mode, "ingredients": [], "unmatched": [], "warnings": [], "stores": [],
-           "best_store": None}
+    out = {"city": city, "mode": mode, "ingredients": [], "unmatched": [], "ambiguous": [], "warnings": [],
+           "stores": [], "best_store": None}
     resolved_city = resolve_city(city, con=con) if city else None
     if not resolved_city:
         out["city_suggestions"] = city_suggestions(con, city or "")
@@ -377,6 +395,11 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
             needs.append(need)
         except IngredientError as e:
             out["unmatched"].append({"name": item.get("name"), "reason": str(e)})
+        except FormAmbiguity as e:
+            # bez oblika se ne računa: korisnik bira oblik ("form") i ponovi upit
+            out["ambiguous"].append({"name": item.get("name"), "staple": staple.key, "amount": amount, "unit": unit,
+                                     "ambiguity": e.ambiguity})
+            out["warnings"].append(f"'{item.get('name')}': {e.ambiguity['question']} (zadaj 'form'; nije uračunato)")
 
     stores: dict[tuple, dict] = {}
     for idx, need in enumerate(needs):

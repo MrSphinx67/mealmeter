@@ -20,7 +20,8 @@ PICK = {
         ["0907", "0001", "0201"],  # Osijek, Zagreb, Sesvete
         ["04030203", "01490037", "01310151",  # brašno glatko, Tabasco (11 znamenki), akcija
          ("02230471", OSIJEK_ONLY), ("02230085", OSIJEK_ONLY), ("04030162", OSIJEK_ONLY),  # mlijeko, čokoladno, oštro
-         ("02451416", OSIJEK_ONLY), ("90348702", OSIJEK_ONLY), ("90263987", ["0001"])],  # pureće mljeveno, kupus u masl. ulju, biljni parmezan
+         ("02451416", OSIJEK_ONLY), ("90348702", OSIJEK_ONLY), ("90263987", ["0001"]),  # pureće mljeveno, kupus u masl. ulju, biljni parmezan
+         ("91005161", OSIJEK_ONLY), ("01550062", OSIJEK_ONLY), ("90850327", OSIJEK_ONLY)],  # grah suhi, limenka, 400/240 g
     ),
     "eurospin": (["310017", "310002"], ["900006101", "001761601"]),  # akcija s price > special, duplikati, 0.00
     "lidl": (["105", "192"], ["6907930", "6909648", "6904110", ("6905984", ["105"])]),  # duplikati, gramatura u `unit`; pureće mljeveno

@@ -525,3 +525,12 @@ Izvještaji: [STEP2D_REVIEW.md](STEP2D_REVIEW.md) (`scripts/step2d_review.py`) i
       Kaufland, Tommy, Studenac i Eurospin.
     - Procjena dobitka od strogo pozitivnog `food_unverified` (naziv počinje riječju namirnice, cijena u
       granicama, poznata gramatura). **Nije primijenjeno.**
+65. **Mahunarke bez oblika se ne pogađaju.** Mijenja odluku 37: za grah, leću, slanutak, grašak, kukuruz i
+    gljive (`ambiguous_form`) bez `form`, `plan_basket` više ne bira najjeftiniji oblik.
+    - Sastojak ide u `ambiguous`: `{"name", "staple", "amount", "unit", "ambiguity": {"form": [...],
+      "question": "suho ili konzerva?", "prices": {...}}}`. Oblici su oni dostupni u gradu, redom suho,
+      konzerva, smrznuto, svježe.
+    - Sastojak se ne računa i nije među `missing`; upozorenje kaže da treba zadati `form`.
+    - Rajčica (`form_staples`) i dalje bira najjeftiniji oblik uz upozorenje.
+    - Moja dopuna: poznata ocijeđena masa („GRAH CRVENI 400/240 g“) znači `oblik=konzerva` (`form_heuristic`).
+      Na arhivi 2026-10-19 to je bilo 52 proizvoda s `nepoznato`.

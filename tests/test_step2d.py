@@ -376,3 +376,23 @@ def test_nonfood_in_food_edible_guard(name):
     from mealmeter.food import nonfood_in_food
 
     assert nonfood_in_food(name, broad=True) is None
+
+
+# --- 12. mahunarke bez oblika ---------------------------------------------------------------
+
+def test_beans_without_form_ask(con):
+    from mealmeter.basket import plan_basket
+
+    res = plan_basket([{"name": "grah", "amount": 400, "unit": "g"}], "Osijek", con=con)
+    assert res["ambiguous"] and not res["ingredients"]
+    amb = res["ambiguous"][0]["ambiguity"]
+    assert amb["form"] == ["suho", "konzerva"] and amb["question"] == "suho ili konzerva?"
+    assert set(amb["prices"]) == {"suho", "konzerva"}
+    res = plan_basket([{"name": "grah", "amount": 400, "unit": "g", "form": "suho"}], "Osijek", con=con)
+    assert not res["ambiguous"] and res["best_store"]["items"][0]["attributes"]["oblik"] == "suho"
+
+
+def test_drained_mass_means_can():
+    from mealmeter.staples import form_heuristic
+
+    assert form_heuristic(S["grah"], "GRAH CRVENI 400/240 g E BUONO", "KOM", 400, "g", 240) == "konzerva"

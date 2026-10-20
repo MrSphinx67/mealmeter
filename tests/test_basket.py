@@ -155,7 +155,7 @@ def test_unknown_city_suggestions(con):
 
 
 def test_ambiguous_form_without_products_warns(con):
-    res = plan_basket([{"name": "grah", "amount": 400, "unit": "g"}], "Osijek", con=con)
+    res = plan_basket([{"name": "slanutak", "amount": 400, "unit": "g"}], "Osijek", con=con)  # nema ga u fixtureu
     assert any("nijedan oblik" in w for w in res["warnings"])
     bad = plan_basket([{"name": "grah", "amount": 400, "unit": "g", "form": "zamrznut"}], "Osijek", con=con)
     assert "nepoznat oblik" in bad["unmatched"][0]["reason"]
@@ -177,7 +177,8 @@ def test_recipes_resolve_and_run(path, con):
         to_base(item["amount"], item["unit"], st)
     res = plan_basket(recipe["ingredients"], "Osijek", con=con)
     assert {u["name"] for u in res["unmatched"]} <= unknown
-    assert len(res["ingredients"]) + len(res["unmatched"]) == len(recipe["ingredients"])
+    # mahunarka bez oblika ide u "ambiguous" (Korak 2D)
+    assert len(res["ingredients"]) + len(res["unmatched"]) + len(res["ambiguous"]) == len(recipe["ingredients"])
 
 
 def test_three_recipes_exist():
