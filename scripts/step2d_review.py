@@ -11,7 +11,7 @@ import duckdb
 sys.path.insert(0, str(Path(__file__).parent))
 from morning_review import md_table  # noqa: E402
 
-from mealmeter.staples import BKEY_SQL  # noqa: E402
+from mealmeter.staples import BKEY_SQL, staple_suspect_sql  # noqa: E402
 
 OUT = Path("docs/STEP2D_REVIEW.md")
 
@@ -71,7 +71,27 @@ def section_groups(con) -> str:
     ])
 
 
-SECTIONS = [section_groups]
+def section_chicken(con) -> str:
+    rows = con.execute(f"""
+        SELECT a.value, count(DISTINCT p.chain || p.product_id), any_value(ps.ppu_min), any_value(ps.ppu_max),
+               count(*) FILTER (WHERE {staple_suspect_sql('c.price_per_unit', 'ps.n_units', 'ps')}), count(*),
+               median(c.price_per_unit)
+        FROM clean.product_staples ps JOIN clean.staple_rules r USING (staple)
+        JOIN clean.products p USING (chain, product_id) JOIN clean.prices c USING (chain, product_id)
+        JOIN clean.product_attrs a ON a.chain = ps.chain AND a.product_id = ps.product_id
+             AND a.staple = ps.staple AND a.attr = 'stanje'
+        WHERE ps.staple = 'pileca_prsa' AND NOT ps.excluded AND ps.drop_reason IS NULL AND c.per_unit = 'kg'
+        GROUP BY a.value ORDER BY a.value""").fetchall()
+    return "\n".join([
+        "## 4. Pileća prsa: stanje", "",
+        "Atribut `stanje`: smrznuto ako naziv sadrži SMRZ, LEDO, FROZ, ZAMRZ ili BRAZIL, inače svježe; zadano "
+        "svježe. Granice po stanju (`plausible_by`): svježe 3–20 €/kg, smrznuto 2–12 €/kg. „Jeli“ ostaje "
+        "isključeno. Prije (jedna granica 5–20 €/kg) je odbačeno 528 od 10.613 cijena po kg.", "",
+        md_table(["stanje", "proizvoda", "min €/kg", "max €/kg", "izvan granica", "cijena", "medijan €/kg"], rows),
+    ])
+
+
+SECTIONS = [section_groups, section_chicken]
 
 
 def main() -> None:

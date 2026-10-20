@@ -74,7 +74,8 @@ def test_chicken_jeli_temporarily_excluded(name):
 
 
 def test_chicken_range():
-    assert S["pileca_prsa"].plausible_per_unit == (5, 20)
+    # Korak 2D: granice po stanju umjesto [5, 20]
+    assert S["pileca_prsa"].plausible_by == {"stanje": {"svjeze": (3, 20), "smrznuto": (2, 12)}}
     assert name_match(S["pileca_prsa"], "PILEĆI FILE 500 g") == "match"
 
 

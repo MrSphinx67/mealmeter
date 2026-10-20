@@ -55,7 +55,7 @@ for key, lo, hi, unit, pct in heavy:
                any_value(p.pack_amount), any_value(p.pack_unit), any_value(ps.assumed_g)
         FROM (
           SELECT ps.*, {STAPLE_PPU_SQL} AS ppu, c.store_id,
-                 {staple_suspect_sql(STAPLE_PPU_SQL, "ps.n_units")} AS suspect
+                 {staple_suspect_sql(STAPLE_PPU_SQL, "ps.n_units", "ps")} AS suspect
           FROM clean.product_staples ps JOIN clean.staple_rules r USING (staple)
           JOIN clean.prices c USING (chain, product_id)
           WHERE ps.staple = ? AND NOT ps.excluded AND ps.drop_reason IS NULL

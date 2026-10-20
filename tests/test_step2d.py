@@ -128,3 +128,27 @@ def test_minced_meat_preference(available, expected):
 def test_minced_meat_find_default_values(con):
     res = find_products(ingredient="mljeveno_meso", limit=50, con=con)
     assert all(r["attributes"].get("vrsta") in ("mijesano", "junece", "svinjsko") for r in res)
+
+
+# --- 4. pileća prsa: stanje ------------------------------------------------------------------
+
+@pytest.mark.parametrize("name,stanje", [
+    ("PILEĆI FILE SMRZNUTI", "smrznuto"), ("PILEĆI FILE BRAZILSKI SMRZNUTI", "smrznuto"),
+    ("PILEĆI FILE SOLJENI 6X2 BRAZIL", "smrznuto"), ("PILEĆA PRSA LEDO 1 kg", "smrznuto"),
+    ("PILEĆI FILE FROZEN 1kg", "smrznuto"), ("PRSA PILEĆA K PLUS BEZ KOŽE", "svjeze"),
+])
+def test_chicken_stanje(name, stanje):
+    from mealmeter.staples import extract_attributes
+
+    assert extract_attributes(S["pileca_prsa"], name)["stanje"] == stanje
+
+
+def test_chicken_rules(con):
+    st = S["pileca_prsa"]
+    assert st.default_attributes == {"stanje": "svjeze"}
+    from mealmeter.staples import name_match
+
+    assert name_match(st, "PILEĆA PRSA JELI GAVRILOVIĆ") == "excluded"
+    lo, hi, src = con.execute("SELECT ppu_min, ppu_max, range_source FROM clean.staple_rules WHERE staple = 'pileca_prsa'").fetchone()
+    assert (lo, hi, src) == (2, 20, "manual")  # najširi raspon; po proizvodu vrijedi raspon stanja
+

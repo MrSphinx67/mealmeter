@@ -13,6 +13,8 @@
 #                   bez dijakritika, đ/dj -> d, zarez -> točka, interpunkcija ostaje
 #                   ("Mlijeko 2,8%MM" -> "mlijeko 2.8%mm"). Prva vrijednost koja pogodi pobjeđuje.
 #   plausible_per_unit [min, max] € po jedinici usporedbe; cijene izvan su price_suspect
+#   plausible_by    {atribut: {vrijednost: [min, max], _other: [min, max]}}: granice po vrijednosti atributa
+#                   (pileća prsa svježa/smrznuta, jaja bio/ostala); zamjenjuje plausible_per_unit
 #   plausible_per_pack [min, max] € po vrećici (samo uz compare_by: pack): skupo je sve iznad max, a jeftino
 #                   samo pojedinačna vrećica ispod min (rinfuza i višestruka pakiranja smiju biti jeftinija)
 #                   (ne ulaze u raspon cijena ni u plan_basket)
@@ -987,7 +989,14 @@ pileca_prsa:
                    # štruca), čeka potvrdu vlasnika; vidi docs/MORNING_REVIEW.md
                    jeli\b, je li\b]
   unit: kg
-  plausible_per_unit: [5, 20]
+  # zadano svježe; granice po stanju (Korak 2D, vlasnik): svježe 3-20 €/kg, smrznuto 2-12 €/kg
+  default_attributes: {stanje: svjeze}
+  plausible_by:
+    stanje: {svjeze: [3, 20], smrznuto: [2, 12]}
+  attributes:
+    stanje:
+      smrznuto: '\bsmrz|\bledo\b|\bfroz|\bzamrz|\bbrazil'
+      _default: svjeze
   max_pack: 3000
   min_pack: 250
   loose_produce: false

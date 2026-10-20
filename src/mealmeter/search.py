@@ -152,7 +152,7 @@ def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | 
                              WHEN psu.assumed_g > 0 THEN 'assumed'
                              WHEN c.unit_confidence = 'low' THEN 'unit_price' ELSE p.pack_source END"""
         suspect_sql = f"""coalesce(({per_unit_sql}) = r.compare_unit
-                                   AND {staple_suspect_sql(ppu_sql, "psu.n_units")}, false)"""
+                                   AND {staple_suspect_sql(ppu_sql, "psu.n_units", "psu")}, false)"""
         n_units_sql, assumed_sql = "psu.n_units", "psu.assumed_g"
         clearance_sql = "TRUE" if include_clearance else "NOT p.clearance"
     else:

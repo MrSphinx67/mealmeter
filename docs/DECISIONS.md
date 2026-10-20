@@ -478,3 +478,6 @@ Izvještaji: [STEP2D_REVIEW.md](STEP2D_REVIEW.md) (`scripts/step2d_review.py`) i
     `default_attributes: vrsta=mijesano`). `find_products` zadano vraća te tri vrste. `plan_basket` u svakoj
     trgovini uzima prvu vrstu redom koja daje proizvod bez zastavica, i kad je skuplja od iduće. Ako je to
     juneće ili svinjsko, piše to u `notes`. Pureće i pileće samo kad se traže (`attributes: {vrsta: purece}`).
+57. **Pileća prsa: stanje.** Atribut `stanje` (smrznuto: SMRZ, LEDO, FROZ, ZAMRZ, BRAZIL; inače svježe), zadano
+    svježe. Novo polje `plausible_by` daje granice po vrijednosti atributa (`product_staples.ppu_min/ppu_max`):
+    svježe 3–20 €/kg, smrznuto 2–12 €/kg. `clean.staple_rules` nosi najširi raspon (2–20). „Jeli“ ostaje isključeno.

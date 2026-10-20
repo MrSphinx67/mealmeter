@@ -31,6 +31,9 @@ class Staple:
     plausible_per_unit: tuple[float, float] | None = None
     # realna cijena jedne vrećice (compare_by: pack); zamjenjuje automatske granice, vidi STAPLE_SUSPECT_SQL
     plausible_per_pack: tuple[float, float] | None = None
+    # granice po vrijednosti atributa: {"stanje": {"svjeze": (3, 20), "smrznuto": (2, 12)}}; "_other"
+    # vrijedi za ostale vrijednosti (jaja: bio i ostali uzgoji)
+    plausible_by: dict[str, dict[str, tuple[float, float]]] = field(default_factory=dict, hash=False, compare=False)
     min_pack: float | None = None
     max_pack: float | None = None
     default_exclude_variants: tuple[tuple[str, str], ...] = ()
@@ -180,6 +183,8 @@ def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> d
             loose_produce=bool(d.get("loose_produce", False)),
             plausible_per_unit=tuple(d["plausible_per_unit"]) if d.get("plausible_per_unit") else None,
             plausible_per_pack=tuple(d["plausible_per_pack"]) if d.get("plausible_per_pack") else None,
+            plausible_by={a: {str(v): tuple(r) for v, r in vals.items()}
+                          for a, vals in (d.get("plausible_by") or {}).items()},
             min_pack=d.get("min_pack"),
             max_pack=d.get("max_pack"),
             default_exclude_variants=tuple(tuple(v.split("=", 1)) for v in d.get("default_exclude_variants", [])),
@@ -229,6 +234,10 @@ def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> d
         for attr, value in st.default_exclude_variants:
             if value not in attrs.get(attr, {}):
                 raise ValueError(f"{key}: default_exclude_variants {attr}={value} nije definiran atribut")
+        if st.plausible_by and (len(st.plausible_by) != 1 or st.plausible_per_unit or st.plausible_per_pack
+                                or any(v != "_other" and v not in attrs.get(a, {})
+                                       for a, vals in st.plausible_by.items() for v in vals)):
+            raise ValueError(f"{key}: plausible_by: jedan definiran atribut, bez plausible_per_unit/per_pack")
         if st.plausible_per_pack and (st.compare_by != "pack" or st.plausible_per_unit):
             raise ValueError(f"{key}: plausible_per_pack vrijedi samo uz compare_by: pack i bez plausible_per_unit")
         if st.compare_by not in ("unit", "pack", "count") or (st.compare_by == "pack" and not st.sachet_g):
@@ -382,8 +391,8 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
     """)
     con.executemany("INSERT INTO clean.staple_rules VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [
         (st.key, st.name, st.unit, st.compare_by, st.compare_unit,
-         *(st.plausible_per_unit or st.plausible_per_pack or (None, None)),
-         "manual" if st.plausible_per_unit else "pack" if st.plausible_per_pack else None,
+         *(st.plausible_per_unit or st.plausible_per_pack or _envelope(st.plausible_by) or (None, None)),
+         "manual" if st.plausible_per_unit or st.plausible_by else "pack" if st.plausible_per_pack else None,
          st.min_pack, st.max_pack, st.pantry, st.loose_produce)
         for st in staples.values()
     ])
@@ -438,6 +447,24 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
     # assumed_g: pretpostavljena masa pakiranja bez gramature u nazivu (luk rukavac 500 g)
     con.execute("ALTER TABLE clean.product_staples ADD COLUMN n_units DOUBLE")
     con.execute("ALTER TABLE clean.product_staples ADD COLUMN assumed_g DOUBLE")
+    # granice cijene proizvoda po vrijednosti atributa (plausible_by), inače NULL (vrijede granice namirnice)
+    con.execute("ALTER TABLE clean.product_staples ADD COLUMN ppu_min DOUBLE")
+    con.execute("ALTER TABLE clean.product_staples ADD COLUMN ppu_max DOUBLE")
+    for st in staples.values():
+        for attr, by_value in st.plausible_by.items():
+            other = by_value.get("_other")
+            cases_lo = " ".join(f"WHEN '{v}' THEN {lo}" for v, (lo, _) in by_value.items() if v != "_other")
+            cases_hi = " ".join(f"WHEN '{v}' THEN {hi}" for v, (_, hi) in by_value.items() if v != "_other")
+            con.execute(f"""
+                UPDATE clean.product_staples ps
+                SET ppu_min = CASE a.value {cases_lo} ELSE {other[0] if other else 'NULL'} END,
+                    ppu_max = CASE a.value {cases_hi} ELSE {other[1] if other else 'NULL'} END
+                FROM (SELECT ps2.chain, ps2.product_id, pa.value FROM clean.product_staples ps2
+                      LEFT JOIN clean.product_attrs pa ON pa.chain = ps2.chain AND pa.product_id = ps2.product_id
+                           AND pa.staple = ps2.staple AND pa.attr = ?
+                      WHERE ps2.staple = ?) a
+                WHERE ps.chain = a.chain AND ps.product_id = a.product_id AND ps.staple = ?
+            """, [attr, st.key, st.key])
     _temp_table(con, "units_tmp", {
         "chain": "VARCHAR", "product_id": "VARCHAR", "staple": "VARCHAR", "n_units": "DOUBLE", "assumed_g": "DOUBLE",
     }, unit_rows)
@@ -545,10 +572,20 @@ AUTO_RANGE = (0.25, 4.0)  # automatske granice: 0.25x do 4x medijana namirnice
 SINGLE_PACK_UNITS = 1.5
 
 
-def staple_suspect_sql(ppu: str, n_units: str) -> str:
+def _envelope(by: dict) -> tuple[float, float] | None:
+    """Najširi raspon iz plausible_by (za clean.staple_rules)."""
+    ranges = [r for vals in by.values() for r in vals.values()]
+    return (min(r[0] for r in ranges), max(r[1] for r in ranges)) if ranges else None
+
+
+def staple_suspect_sql(ppu: str, n_units: str, ps: str | None = None) -> str:
+    """SQL: je li cijena izvan granica. `ps` je alias clean.product_staples s granicama proizvoda
+    (plausible_by, npr. svježa/smrznuta prsa); bez njega vrijede granice namirnice (r)."""
+    lo = f"coalesce({ps}.ppu_min, r.ppu_min)" if ps else "r.ppu_min"
+    hi = f"coalesce({ps}.ppu_max, r.ppu_max)" if ps else "r.ppu_max"
     return f"""(CASE WHEN r.range_source = 'pack'
-                     THEN ({ppu}) > r.ppu_max OR (coalesce({n_units}, 0) <= {SINGLE_PACK_UNITS} AND ({ppu}) < r.ppu_min)
-                     ELSE NOT (({ppu}) BETWEEN r.ppu_min AND r.ppu_max) END)"""
+                     THEN ({ppu}) > {hi} OR (coalesce({n_units}, 0) <= {SINGLE_PACK_UNITS} AND ({ppu}) < {lo})
+                     ELSE NOT (({ppu}) BETWEEN {lo} AND {hi}) END)"""
 
 
 def set_auto_ranges(con: duckdb.DuckDBPyConnection) -> int:
@@ -577,7 +614,7 @@ def staple_price_suspects(con: duckdb.DuckDBPyConnection) -> list[tuple]:
                count(*) FILTER (WHERE suspect), count(*)
         FROM (
           SELECT ps.staple, r.range_source, {STAPLE_PPU_SQL} AS ppu,
-                 {staple_suspect_sql(STAPLE_PPU_SQL, "ps.n_units")} AS suspect
+                 {staple_suspect_sql(STAPLE_PPU_SQL, "ps.n_units", "ps")} AS suspect
           FROM clean.product_staples ps JOIN clean.staple_rules r USING (staple)
           JOIN clean.prices c USING (chain, product_id)
           WHERE NOT ps.excluded AND ps.drop_reason IS NULL AND r.ppu_min IS NOT NULL
