@@ -6,12 +6,13 @@ from dataclasses import dataclass, field
 
 import duckdb
 
+from mealmeter import units
 from mealmeter.build import NATIONAL_NOTE
 from mealmeter.normalize import date_hr, norm_text
 from mealmeter.search import _candidates, _food_filter, connect, resolve_city
 from mealmeter.staples import Staple, load_staples, resolve_ingredient
 
-# jedinica u receptu -> (osnovna jedinica, faktor); "spoon" = približno (gustoća 1)
+# jedinica u receptu -> (osnovna jedinica, faktor); kuhinjske mjere (žlica, šalica...) su u data/units.yaml
 _UNIT_ALIASES = {
     "g": ("g", 1), "gr": ("g", 1), "gram": ("g", 1), "grama": ("g", 1), "dag": ("g", 10), "dkg": ("g", 10),
     "kg": ("g", 1000), "kila": ("g", 1000),
@@ -21,9 +22,6 @@ _UNIT_ALIASES = {
     # vezica (svježe bilje) je komad bez mase: pretvara se samo uz piece_g, a peršin ga namjerno nema
     "vezica": ("kom", 1), "vezice": ("kom", 1),
     "vrecica": ("vrecica", 1), "vrecice": ("vrecica", 1), "paket": ("vrecica", 1), "paketic": ("vrecica", 1),
-    "zlica": ("spoon", 15), "zlice": ("spoon", 15), "jusna zlica": ("spoon", 15),
-    "zlicica": ("spoon", 5), "zlicice": ("spoon", 5), "cajna zlicica": ("spoon", 5),
-    "prstohvat": ("spoon", 0.5),
 }
 FLAG_TEXT = {
     "clearance": "rasprodaja (SNIŽENJE)",
@@ -83,19 +81,29 @@ def to_base(amount: float, unit: str, staple: Staple) -> tuple[float, str, list[
     if amount is None or amount <= 0:
         raise IngredientError("količina mora biti pozitivna")
     key = norm_text(unit or "") or ""
-    if key not in _UNIT_ALIASES:
-        raise IngredientError(f"nepoznata jedinica '{unit}'")
-    base, factor = _UNIT_ALIASES[key]
-    qty, warnings = amount * factor, []
     target = {"kg": "g", "l": "ml"}.get(staple.compare_unit, staple.compare_unit)  # g | ml | kom | vrecica
-    if base == "spoon":
-        warnings.append(f"{amount:g} {unit} ≈ {qty:g} {'ml' if target == 'ml' else 'g'} (približno)")
-        base = "ml" if target == "ml" else "g"
+    if units.is_measure(unit):
+        # žlica, šalica, čaša...: ml, pa grami preko gustoće namirnice (procjene iz data/units.yaml)
+        try:
+            qty, base, warnings = units.convert(amount, unit, staple)
+        except ValueError as e:
+            raise IngredientError(str(e)) from e
+    elif key in _UNIT_ALIASES:
+        base, factor = _UNIT_ALIASES[key]
+        qty, warnings = amount * factor, []
+    else:
+        raise IngredientError(f"nepoznata jedinica '{unit}'")
     if base == target:
         return qty, target, warnings
     if {base, target} == {"g", "ml"}:
-        warnings.append(f"{qty:g} {base} uzeto kao {qty:g} {target} (gustoća 1)")
-        return qty, target, warnings
+        # gustoća iz data/units.yaml (procjena), inače 1 g/ml
+        density = units.load_units().densities.get(staple.key)
+        if density is None:
+            warnings.append(f"{qty:g} {base} uzeto kao {qty:g} {target} (gustoća 1)")
+            return qty, target, warnings
+        out = qty / density if target == "ml" else qty * density
+        warnings.append(f"{qty:g} {base} ≈ {out:g} {target} (procjena, {density:g} g/ml)")
+        return out, target, warnings
     if base == "kom" and target in ("g", "ml") and staple.piece_g:
         warnings.append(f"{qty:g} kom ≈ {qty * staple.piece_g:g} g (komad {staple.piece_g:g} g)")
         return qty * staple.piece_g, "g" if target == "g" else "ml", warnings

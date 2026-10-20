@@ -149,6 +149,8 @@ ili `default`.
   unit_confidence, pack_source, data_quality, date, date_hr` i `note` za nacionalne cijene.
 - `plan_basket(ingredients, city, mode="single_store")` (`src/mealmeter/basket.py`): cijena recepta
   po trgovini, najbolja trgovina, nepovezani sastojci i pretpostavke (vidi DECISIONS.md, točka 37).
+- `units.convert(amount, unit, staple)` (`src/mealmeter/units.py`, vrijednosti u `data/units.yaml`): žlica,
+  žličica, šalica, dcl, prstohvat i čaša u ml, pa u grame preko gustoće namirnice; sve su procjene.
 - CLI: `uv run python -m mealmeter.cli find "brašno glatko" --city Osijek`,
   `uv run python -m mealmeter.cli basket data/recipes/test_grah.json --city Osijek`,
   `uv run python -m mealmeter.cli find --ingredient brasno --attr tip=glatko --city Osijek` i

@@ -151,3 +151,60 @@ def test_persin_kg_pantry():
     assert to_base(20, "g", st)[:2] == (20, "g")
     with pytest.raises(IngredientError):  # vezica bez mase se ne pretvara u grame
         to_base(1, "vezica", st)
+
+
+# --- 9. pretvorba mjera ------------------------------------------------------------
+
+@pytest.mark.parametrize("amount,unit,staple,expected", [
+    (1, "žlica", "brasno", (8.25, "g")),
+    (2, "žličice", "sol", (12.0, "g")),
+    (1, "šalica", "secer", (212.5, "g")),
+    (1, "šalicu", "riza", (212.5, "g")),
+    (1, "Čaša", "mlijeko", (200, "ml")),
+    (2, "dcl", "ulje", (200, "ml")),
+    (1, "prstohvat", "sol", (0.6, "g")),
+    (2, "žlice", "maslac", (28.5, "g")),
+    (1, "žlica", "med", (15, "g")),  # bez gustoće: 1 g/ml
+])
+def test_convert(amount, unit, staple, expected):
+    from mealmeter.units import convert
+
+    qty, base, warnings = convert(amount, unit, S[staple])
+    assert (round(qty, 3), base) == expected and "procjena" in warnings[0]
+
+
+def test_convert_errors():
+    from mealmeter.units import convert
+
+    with pytest.raises(ValueError):
+        convert(1, "žlica", S["jaja"])  # komadi
+    with pytest.raises(ValueError):
+        convert(1, "lonac", S["brasno"])
+
+
+def test_units_all_estimates():
+    import yaml
+
+    from mealmeter.units import UNITS_PATH
+
+    raw = yaml.safe_load(UNITS_PATH.read_text(encoding="utf-8"))
+    assert all(m["estimate"] for m in raw["measures"].values())
+    assert set(raw["densities"]) == {"brasno", "secer", "sol", "ulje", "mlijeko", "maslac", "riza"}
+    assert all(d["estimate"] for d in raw["densities"].values())
+
+
+def test_basket_accepts_measures(con):
+    from mealmeter.basket import plan_basket
+
+    res = plan_basket([{"name": "brašno glatko", "amount": 2, "unit": "šalica"},
+                       {"name": "mlijeko", "amount": 1, "unit": "čaša"}], "Osijek", con=con)
+    assert not res["unmatched"]
+    amounts = {i["staple"]: (i["amount"], i["unit"]) for i in res["ingredients"]}
+    assert amounts == {"brasno": (275.0, "g"), "mlijeko": (200.0, "ml")}
+
+
+def test_to_base_grams_of_liquid_use_density():
+    from mealmeter.basket import to_base
+
+    qty, unit, warnings = to_base(103, "g", S["mlijeko"])
+    assert (round(qty, 3), unit) == (100.0, "ml") and "1.03 g/ml" in warnings[0]

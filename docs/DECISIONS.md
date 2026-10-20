@@ -429,3 +429,9 @@ Izvještaji za pregled su u [MORNING_REVIEW.md](MORNING_REVIEW.md) (`scripts/mor
 49. **Peršin:** `unit: kg` (bio je `kom`) i `pantry: true`. Vezice i komadi bez gramature nemaju cijenu po kg i
     ne pretvaraju se. „vezica“ je poznata jedinica recepta, ali bez `piece_g` daje `unmatched`. Drugog
     svježeg bilja u rječniku nema.
+50. **Pretvorba mjera** (`data/units.yaml`, `src/mealmeter/units.py`, `convert(amount, unit, staple)`).
+    - Žlica 15 ml, žličica 5, šalica 250, dcl 100, prstohvat 0,5, čaša 200.
+    - Gustoće (g/ml): brašno 0,55, šećer 0,85, sol 1,2, ulje 0,92, mlijeko 1,03, maslac 0,95, riža 0,85.
+    - **Sve su procjene** (`estimate: true`) i čekaju pregled. Ostale namirnice računaju se s 1 g/ml, uz upozorenje.
+    - `plan_basket` koristi `units.convert` umjesto ugrađenih žlica (prije: gustoća 1 za sve), pa je
+      1 žlica šećera sada 12,75 g, a ne 15 g. Gustoća vrijedi i za g ↔ ml (npr. 103 g mlijeka = 100 ml).

@@ -41,7 +41,7 @@ def test_resolve_name_unknown(name):
     ("jaja", 3, "kom", (3, "kom")),
     ("luk", 2, "kom", (300, "g")),  # piece_g 150
     ("cesnjak", 3, "režanj", (15, "g")),
-    ("secer", 1, "žlica", (15, "g")),
+    ("secer", 1, "žlica", (12.75, "g")),  # 15 ml x 0,85 g/ml (data/units.yaml)
     ("ulje", 2, "žlica", (30, "ml")),
     ("vanilin_secer", 1, "vrećica", (1, "vrecica")),
     ("kvasac", 14, "g", (2, "vrecica")),
@@ -51,7 +51,7 @@ def test_to_base(key, amount, unit, expected):
     assert (pytest.approx(qty), base) == (expected[0], expected[1])
 
 
-@pytest.mark.parametrize("key,amount,unit", [("brasno", 2, "šalica"), ("brasno", 3, "kom"), ("brasno", 0, "g")])
+@pytest.mark.parametrize("key,amount,unit", [("brasno", 2, "lonac"), ("brasno", 3, "kom"), ("brasno", 0, "g")])
 def test_to_base_errors(key, amount, unit):
     with pytest.raises(IngredientError):
         to_base(amount, unit, S[key])

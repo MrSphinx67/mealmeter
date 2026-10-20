@@ -1,0 +1,43 @@
+# Kuhinjske mjere i gustoće za pretvorbu količina iz recepata (src/mealmeter/units.py).
+#
+# SVE VRIJEDNOSTI SU PROCJENE (estimate: true) i čekaju pregled vlasnika: žlica i šalica nisu
+# standardizirane, a gustoća rasutih namirnica ovisi o tome je li brašno prosijano, šećer kristal ili u
+# prahu itd. Pretvorba uvijek vraća upozorenje s korištenom vrijednošću.
+#
+# measures: mjera -> ml (aliases: kako je korisnik može napisati; velika slova i dijakritika nisu bitni)
+# densities: namirnica (ključ iz staples.yaml) -> g/ml; namirnica bez gustoće računa se s 1 g/ml, uz upozorenje
+
+measures:
+  zlica:
+    ml: 15
+    aliases: [žlica, žlice, žlicu, jušna žlica, jušne žlice, velika žlica]
+    estimate: true
+  zlicica:
+    ml: 5
+    aliases: [žličica, žličice, čajna žličica, čajne žličice, mala žlica]
+    estimate: true
+  salica:
+    ml: 250
+    aliases: [šalica, šalice, šalicu]
+    estimate: true
+  dcl:
+    ml: 100  # decilitar je točno 100 ml; procjena je samo u tome što recept "dcl" piše ugrubo
+    aliases: [dcl, decilitar, decilitra]
+    estimate: true
+  prstohvat:
+    ml: 0.5
+    aliases: [prstohvat, prstohvata]
+    estimate: true
+  casa:
+    ml: 200
+    aliases: [čaša, čaše, čašu]
+    estimate: true
+
+densities:  # g/ml
+  brasno: {g_per_ml: 0.55, estimate: true}   # glatko, neprosijano, zahvaćeno žlicom
+  secer: {g_per_ml: 0.85, estimate: true}    # kristal
+  sol: {g_per_ml: 1.2, estimate: true}       # sitna kuhinjska
+  ulje: {g_per_ml: 0.92, estimate: true}
+  mlijeko: {g_per_ml: 1.03, estimate: true}
+  maslac: {g_per_ml: 0.95, estimate: true}   # omekšan, utisnut u mjeru
+  riza: {g_per_ml: 0.85, estimate: true}     # sirova, dugo zrno

@@ -311,8 +311,35 @@ def section_parsley(con) -> str:
     ])
 
 
+def section_units(con) -> str:
+    import yaml
+
+    from mealmeter.units import UNITS_PATH, convert
+
+    raw = yaml.safe_load(UNITS_PATH.read_text(encoding="utf-8"))
+    staples = load_staples()
+    measures = [(k, hr(m["ml"], 1), ", ".join(m["aliases"]), "da" if m["estimate"] else "ne")
+                for k, m in raw["measures"].items()]
+    dens = []
+    for k, d in raw["densities"].items():
+        row = [k, hr(d["g_per_ml"])]
+        for m in ("zlica", "zlicica", "salica"):
+            qty, base, _ = convert(1, m, staples[k])
+            row.append(f"{hr(qty, 1)} {base}")
+        dens.append((*row, "da" if d["estimate"] else "ne"))
+    return "\n".join([
+        "## 9. Pretvorba mjera (PROCJENE, za pregled)", "",
+        "`data/units.yaml` i `src/mealmeter/units.py` (`convert(amount, unit, staple)` → (količina, g|ml, "
+        "upozorenja)). `plan_basket` prima ove mjere; svaka pretvorba vraća upozorenje s korištenom "
+        "vrijednošću. Namirnica bez gustoće računa se s 1 g/ml (uz upozorenje), a namirnica u komadima "
+        "(jaja) ne može se mjeriti žlicom.", "",
+        md_table(["mjera", "ml", "aliasi", "procjena"], measures), "",
+        md_table(["namirnica", "g/ml", "1 žlica", "1 žličica", "1 šalica", "procjena"], dens),
+    ])
+
+
 SECTIONS = [section_chicken, section_onion, section_food, section_eggs, section_variants, section_kakao,
-            section_salt, section_milk, section_parsley]
+            section_salt, section_milk, section_parsley, section_units]
 
 
 def main() -> None:

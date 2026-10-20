@@ -15,8 +15,8 @@ Sve grupe s „jeli“ ili „je li“ u nazivu. To je Gavrilovićeva linija **J
 | branka:salama prsa pileca jeli gavrilovic | SALAMA PRSA PILEĆA JELI GAVRILOVIĆ | branka | 9,49 | 9,74 | 9,99 | 2 |
 | 3858892724316 | JELI PILEĆA PRSA 2600G,GAVRILOVIĆ; PILEĆA PRSA JELI GAV RILOVIĆ; PILEĆA PRSA JELI GAVRILOVIĆ; PRSA PILEĆA JELI 2600 g; PRSA PILEĆA JELI kg; Pileća prsa Jeli | konzum, ktc, ribola, spar, studenac, trgocentar | 3,84 | 10,29 | 11,69 | 205 |
 | tommy:pileca prsa jeli gavrilovic | PILEĆA PRSA JELI GAVRILOVIĆ | tommy | 9,99 | 10,49 | 10,99 | 81 |
-| ntl:prsa pileca jeli kg gavrilovic | PRSA PILEĆA JELI kg GAVRILOVIĆ | ntl | 10,49 | 10,49 | 10,49 | 2 |
 | gavranovic:gav jeli pileca prsa delikates | GAV.JELI PILEĆA PRSA DELIKATES | gavranovic | 10,49 | 10,49 | 10,49 | 44 |
+| ntl:prsa pileca jeli kg gavrilovic | PRSA PILEĆA JELI kg GAVRILOVIĆ | ntl | 10,49 | 10,49 | 10,49 | 2 |
 | 3858892722572 | ŠUNKA JELI PIL. PRSA; ŠUNKA PILEĆA PRSA JELI | djelo_vodice, studenac | 10,69 | 11,04 | 11,39 | 2 |
 | 3858892724392 | GAV.JELI PILEĆA PRSA 350g; Gavrilović Jeli Pileća prsa 350 g; JELI PILECA PRSA 350 G GAVRILOVIC; PILEĆA PRSA 350 g JE LI GAVRILOVIĆ; PILEĆA PRSA 350G JELI; PILEĆA PRSA 350g JELI GAVRILOVIĆ; PILEĆA PRSA JELI 350 g; PRSA PILEĆA JELI 350 g; PRSA PILEĆA JELI 350g | djelo_vodice, gavranovic, kaufland, konzum, ktc, plodine, ribola, spar, studenac | 8,11 | 11,11 | 13,40 | 310 |
 
@@ -36,11 +36,11 @@ Napomena: štruca od 2,6 kg ima 2,30–4,38 €/kg, pa vjerojatno nosi cijenu po
 | metro | CCA5KG MC PILEĆI FILE MAP | 4,99 | 4,99 | 7 |
 | metro | 2,5KG UKR. PILEĆI FILE SMRZ | 31,50 | 31,50 | 7 |
 | studenac | PILECI FILE SMRZ.STANIC | 3,92 | 3,98 | 5 |
-| konzum | PILEĆI FILE SOLJENI 6X2 BRAZIL | 3,28 | 4,11 | 4 |
 | trgovina-krk | PILEĆI FILE ZA GASTRO 1 kg | 1,95 | 4,08 | 4 |
+| konzum | PILEĆI FILE SOLJENI 6X2 BRAZIL | 3,28 | 4,11 | 4 |
 | branka | PRSA PILEĆA SVJEŽA | 4,79 | 4,99 | 2 |
-| branka | -PRSA PILEĆA SVJEŽA | 4,79 | 4,79 | 2 |
 | studenac | GASTRO PILEĆI FILE PEČENI | 209,90 | 209,90 | 2 |
+| studenac | PILEĆI FILE BRAZIL 2KG LEDO | 4,91 | 4,91 | 2 |
 
 ## 5. Luk: nazivi s bojom (ČEKA POTVRDU, mapiranje nije mijenjano)
 
@@ -222,24 +222,24 @@ Proizvodi izvan zadanog izbora (`find_products`/`get_prices` bez `include_*`), p
 |---|---|---|---|---|
 | branka | CVJETIĆI UKRASNI | HRANA | hrana | chain |
 | ktc | BOMBONI 4g +IGRAČKA PONY | HRANA | hrana | chain |
-| plodine | VINO KORLAT MERLOT + CASA 0,75 L |  | alkohol | ean_inherited |
+| studenac | IGRAČKA HUGI WUGI BLOW BUBBLE 12/1 | HRANA | hrana | chain |
 | boso | CVIJE ORHID.POSUD.CIKL.47 cm | ZELENI PROGRAM | hrana | chain |
 | ktc | ROLADA VANILIJA 300g DEKOR DOMA | HRANA | hrana | chain |
-| vrutak | N-KRUH PIROV KALUP 500 G | PEKARSRVO | hrana | chain |
 | lorenco | MAČJI JEZICI PRALINE OD ML.I BJ.ČOK |  | hrana | ean_inherited |
 | gavranovic | TANJURIĆI STAKLO 15X15cm HO-rasprodaja | Hrana | hrana | chain |
 | branka | SALVETE DAISY MI BOŽIĆNA ZVIJEZDA 20/1 | HRANA | hrana | chain |
-| studenac | KING DESIRE ČAŠA 450 ml | HRANA | hrana | chain |
-| tommy | DEKOR ŠARENO PISMO 76 g DR.OET | PAKIRANA HRANA I PIĆE | pice | chain |
+| vrutak | \*TEMPRANILLO CASA SOLAR 0.75L COSECHEROS ZOZP SUHO 2025 -6/1- | VINO INOZEMNO | alkohol | chain |
+| plodine | CROISSANT COK. 300 G 6/1 CASALINI |  | hrana | ean_inherited |
+| ribola | GORDONS PINK 0,7L+COPA ČAŠA | PIĆE | pice | chain |
 | gavranovic | VREĆICA UKRASNA 26X32X12 cm-rasprodaja | Hrana | hrana | chain |
-| studenac | WHISKY BALLANTINES 2 ČAŠE 0,7 l | PIĆE | alkohol | chain |
+| plodine | KAVA 400 G MLJEVENA FOLIJA ANAMARIJA |  | hrana | ean_inherited |
 | gavranovic | TETA VIOLETA OMEKŠIVAČ 900ml LAGOON | Hrana | hrana | chain |
-| vrutak | N-LEDO MACHO ČAŠA BIJELA ČOKOLADA 255G | SMRZNUTO MESO, POVRĆE, RIBA | hrana | chain |
-| spar | VINO CASA DE C.CARMENER.0,75 L | Pića | alkohol | chain |
+| trgovina-krk | JIM BEAM 0,7L + 1 ČAŠE | Piće | alkohol | chain |
 | gavranovic | ČESTITKA-rasprodaja | Hrana | hrana | chain |
 | boso | WHISK JACK 0,7 l DANIELS+2 ČAŠE | VINO I JAP | alkohol | chain |
 | ntl | IGRAČKA FINGER SLUG VELIKI | Ostalo | hrana | ean_inherited |
 | konzum | DRAŽEI JAJA RUM KOKOS 175 g CASALI | HRANA | hrana | chain |
+| plodine | NOODLES CURRY 65 G FINI MINI CASA |  | hrana | ean_inherited |
 
 ## 1. Jaja
 
@@ -312,16 +312,16 @@ Izvor atributa za 10 grupa riže (`find_products(ingredient="riza")`):
 
 | id | naziv | atributi | izvor (how, naziv) |
 |---|---|---|---|
-| 8001860100017 | Riso Scotti riža originario okr.zrno 1kg | vrsta=originario | vrsta: name („RIŽA SCOTTI NIKAS ORIGINARIO 1 kg“) |
+| 8001860100017 | Riso Scotti riža originario okr.zrno 1kg | vrsta=originario | vrsta: name („RIŽA SCOTTI ORIGINARIO 1/1 KK“) |
 | 3838700540291 | RIŽA ZA DOMAĆA JELA ZLATO POLJE PODRAVKA 1 kg (12) | vrsta=originario | vrsta: name („RIŽA ZL.POLJE 1 kg (OKRUGLO ZRNO)“) |
 | 3838700540369 | RIŽA ZLATO POLJE BLAZINICA PODRAVKA 800 g (9) |  |  |
-| 8001860201011 | Riso Scotti riža arborio dugo zrno 1kg | vrsta=arborio | vrsta: name („RIŽA ARBORIO 1 kg RISO SCOT“) |
-| 8001860190520 | Riso Scotti riža oro dugog zrna 1kg | vrsta=parboiled | vrsta: name („RIŽA ORO PARBOILED 1 kg SCO“) |
+| 8001860201011 | Riso Scotti riža arborio dugo zrno 1kg | vrsta=arborio | vrsta: name („RIŽA ARBORIO 1 kg“) |
+| 8001860190520 | Riso Scotti riža oro dugog zrna 1kg | vrsta=parboiled | vrsta: name („RIŽA 1 kg ORO PARBOILED SCOTTI“) |
 | 3838700540314 | RIŽA BIJELA 800 g VREĆICA ZLATO POLJE | vrsta=dugo_zrno | vrsta: name („Zlato polje riža dugo zrno pvc 800 g“) |
 | 3838700540482 | RIŽA ZL POLJE ST ANDREA 500G KUT (18) |  |  |
-| 5410673007490 | RIZA PARABOILED DUGO ZRNO VRECICA 500 G BENS ORIGINAL | vrsta=dugo_zrno | vrsta: name („RIŽA BENS DUGO ZRNO 500 g“) |
-| 3838700540406 | RIŽA ZLATNO POLJE SANT ANDREA VAKUUM 1KG |  |  |
-| 3838700540604 | RIŽA ARBORIO VAKUMIRANA 1000 g PODRA | vrsta=arborio | vrsta: name („RIŽA ZLATO POLJE ARBORIO VP 1 kg“) |
+| 5410673007490 | RIZA PARABOILED DUGO ZRNO VRECICA 500 G BENS ORIGINAL | vrsta=dugo_zrno | vrsta: name („RIŽA BENS ORIG. 500 g DUGO ZRNO“) |
+| 3838700540406 | RIŽA ZL POLJE ST ANDREA 1KG KUT VAK (12) |  |  |
+| 3838700540604 | RIŽA ARBORIO VAKUMIRANA 1000 g PODRA | vrsta=arborio | vrsta: name („RIŽA ARBORIO 1 kg“) |
 
 ## 3. Kakao
 
@@ -418,8 +418,8 @@ Primjer: `plan_basket` 0,5 l mlijeka u Osijeku (prvih 8 trgovina):
 | eurospin | Ulica Josipa Jurja Strossmayera 343A | MLIJEKO TRAJNO 2,8% m.m.1l | trajno | 2.8 | 0,62 |  |
 | eurospin | Ulica 3 gardijske brigade „Kune“ 30 | MLIJEKO TRAJNO 2,8% m.m.1l | trajno | 2.8 | 0,62 |  |
 | ntl | Zeleno polje 9b, Osijek | MLIJEKO TRAJNO 2,8 % m. m. 1L TOJETO | trajno | 2.8 | 0,65 |  |
+| ntl | Dobra ulica 2, Brijest, Osijek | MLIJEKO TRAJNO 2,8 % m. m. 1L TOJETO | trajno | 2.8 | 0,65 |  |
 | ntl | LOSINJSKA 43 | MLIJEKO TRAJNO 2,8 % m. m. 1L TOJETO | trajno | 2.8 | 0,65 |  |
-| ntl | Cvrsnicka 64 | MLIJEKO TRAJNO 2,8 % m. m. 1L TOJETO | trajno | 2.8 | 0,65 |  |
 
 ## 8. Peršin i svježe bilje
 
@@ -431,3 +431,26 @@ Peršin: `unit: kg`, `pantry: true` (u ukupno ulazi utrošeni dio). Proizvodi be
 | cijena po kg | 49 | 0,20 | 6,36 | 27,96 | 500G PERŠIN KORIJEN |
 
 `plan_basket` 20 g peršina u Zagrebu: stridon, „PERŠIN KORJEN AGROVIR“, pakiranje 0,04 €, utrošeno (u ukupno) 0,04 €.
+
+## 9. Pretvorba mjera (PROCJENE, za pregled)
+
+`data/units.yaml` i `src/mealmeter/units.py` (`convert(amount, unit, staple)` → (količina, g|ml, upozorenja)). `plan_basket` prima ove mjere; svaka pretvorba vraća upozorenje s korištenom vrijednošću. Namirnica bez gustoće računa se s 1 g/ml (uz upozorenje), a namirnica u komadima (jaja) ne može se mjeriti žlicom.
+
+| mjera | ml | aliasi | procjena |
+|---|---|---|---|
+| zlica | 15,0 | žlica, žlice, žlicu, jušna žlica, jušne žlice, velika žlica | da |
+| zlicica | 5,0 | žličica, žličice, čajna žličica, čajne žličice, mala žlica | da |
+| salica | 250,0 | šalica, šalice, šalicu | da |
+| dcl | 100,0 | dcl, decilitar, decilitra | da |
+| prstohvat | 0,5 | prstohvat, prstohvata | da |
+| casa | 200,0 | čaša, čaše, čašu | da |
+
+| namirnica | g/ml | 1 žlica | 1 žličica | 1 šalica | procjena |
+|---|---|---|---|---|---|
+| brasno | 0,55 | 8,2 g | 2,8 g | 137,5 g | da |
+| secer | 0,85 | 12,8 g | 4,2 g | 212,5 g | da |
+| sol | 1,20 | 18,0 g | 6,0 g | 300,0 g | da |
+| ulje | 0,92 | 15,0 ml | 5,0 ml | 250,0 ml | da |
+| mlijeko | 1,03 | 15,0 ml | 5,0 ml | 250,0 ml | da |
+| maslac | 0,95 | 14,2 g | 4,8 g | 237,5 g | da |
+| riza | 0,85 | 12,8 g | 4,2 g | 212,5 g | da |
