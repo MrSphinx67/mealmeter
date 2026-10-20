@@ -124,13 +124,15 @@ def test_plan_basket_osijek(con):
     assert [i["staple"] for i in res["ingredients"]] == ["brasno", "mlijeko", "banana"]
     best = res["best_store"]
     assert best["n_matched"] == 2 and best["n_ingredients"] == 3 and len(best["missing"]) == 1
-    assert best["total"] == pytest.approx(sum(i["counted"] for i in best["items"]))
+    assert best["total_to_buy"] == pytest.approx(sum(i["cost_pack"] for i in best["items"]))
+    assert best["total_used"] == pytest.approx(sum(i["cost_used"] for i in best["items"]))
+    assert "total" not in best and "total_pack" not in best
     for s in res["stores"]:
         assert s["date_hr"] == "19.10.2026."
         assert s["city"] == "Osijek" or s["scope"] == "national"
     # najbolja: najviše povezanih sastojaka, zatim najmanji zbroj
     top = [s for s in res["stores"] if s["n_matched"] == best["n_matched"]]
-    assert best["total"] == min(s["total"] for s in top)
+    assert best["total_to_buy"] == min(s["total_to_buy"] for s in top if not s["flagged_items"]) or best["flagged_items"]
 
 
 def test_plan_basket_avoids_clearance(con):
@@ -206,3 +208,23 @@ def test_get_prices_two_level_class_id(con, monkeypatch):
     assert search.get_prices("brasno:ostro", con=con)  # samo prvi atribut
     with pytest.raises(ValueError):
         search.get_prices("brasno:ostro:kokosovo", con=con)
+
+
+# --- Korak 2E.6: najjeftinije pokrivanje, total_to_buy / total_used, already_have ----------------
+
+def test_cheapest_covering_pack_absolute():
+    rows = [row("1kg", 0.79, 1000), row("2kg", 0.75, 2000)]  # veće pakiranje je jeftinije u apsolutnom iznosu
+    assert choose_product(rows, 700, "g", "kg", loose=False)["product_id"] == "2kg"
+    rows = [row("1kg", 0.79, 1000), row("2kg", 0.79, 2000)]  # ista cijena: manje
+    assert choose_product(rows, 700, "g", "kg", loose=False)["product_id"] == "1kg"
+
+
+def test_already_have_and_totals(con):
+    items = [{"name": "brašno glatko", "amount": 500, "unit": "g"}, {"name": "mlijeko", "amount": 0.5, "unit": "l"}]
+    res = plan_basket(items, "Osijek", con=con, already_have=["mlijeko", "nepostojeće"])
+    assert res["already_have"] == ["mlijeko"] and any("nepostojeće" in w for w in res["warnings"])
+    for s in res["stores"]:
+        have = {it["staple"]: it["have"] for it in s["items"]}
+        assert have.get("mlijeko", True) and not have.get("brasno", False)
+        assert s["total_to_buy"] == pytest.approx(sum(it["cost_pack"] for it in s["items"] if not it["have"]))
+        assert s["total_used"] == pytest.approx(sum(it["cost_used"] for it in s["items"]))

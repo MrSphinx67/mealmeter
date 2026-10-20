@@ -610,3 +610,13 @@ Izvještaji: [STEP2E_REVIEW.md](STEP2E_REVIEW.md) (`scripts/step2e_review.py`) i
     - Vrećica sjemena ostaje neprehrana i prije zaštite za jestivo („SJEME GARDEN CVJETAČA“).
     - Dječji pjenušac (dječj…, spužva bob, bez alkohola, 0,0) i kategorija „DJEČJI PJENUŠCI“ su `pice`.
       Ta kategorija je u mapi bila `djeca`, a sada je `pice`.
+73. **plan_basket: odabir i iznosi.**
+    - Među pakiranjima koja pokrivaju količinu bira se najjeftinije u apsolutnom iznosu (`cost_pack`), uz
+      jednaku cijenu manje. Prije je bilo najmanje pakiranje.
+    - `total_to_buy`: cijela pakiranja svega što nije u `already_have`.
+    - `total_used`: razmjerni trošak svih stavki.
+    - Uklonjeni su `total`, `total_pack` i `counted`. Pantry se više ne računa posebno, jer `already_have`
+      pokriva začine koje korisnik ima.
+    - Novi parametar `already_have` (lista namirnica, CLI `--have "sol,papar"`): stavke ostaju, uz `have=true`.
+      Nepoznata namirnica daje upozorenje.
+    - Trgovine se rangiraju po `total_to_buy`.

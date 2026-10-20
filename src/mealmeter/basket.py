@@ -58,6 +58,7 @@ class Need:
     attributes: dict = field(default_factory=dict)
     form: str | None = None
     assumed_form: bool = False
+    input_staple: str | None = None
     warnings: list = field(default_factory=list)
 
 
@@ -174,7 +175,7 @@ def choose_product(rows: list[dict], need: float, need_unit: str, by_weight_unit
 
     1. Kandidati bez zastavica (rasprodaja, cijena izvan granica, nesigurna gramatura, sumnjiv
        lanac); samo ako takvih nema, uzimaju se označeni.
-    2. Najmanje pakiranje koje pokriva količinu (uz jednaku veličinu najjeftinije). Roba na vagu
+    2. Najjeftinije pakiranje (apsolutna cijena) koje pokriva količinu, uz jednaku cijenu manje. Roba na vagu
        (cijena po kg/l, bez pakiranja: svježe voće/povrće ako je `loose`, inače samo promjenjiva
        težina) pokriva točno potrebnu količinu.
     3. Inače najjeftinije po jedinici, u potrebnom broju pakiranja.
@@ -197,8 +198,9 @@ def choose_product(rows: list[dict], need: float, need_unit: str, by_weight_unit
 
     covering = [o for o in pool if o["by_weight"] or o["qty"] >= need]
     if covering:
-        best = min(covering, key=lambda o: (need if o["by_weight"] else o["qty"], o["price_eff"] if not o["by_weight"]
-                                            else o["price_per_unit"] * need / 1000))
+        # najjeftinije pakiranje koje pokriva količinu (apsolutna cijena), uz jednaku cijenu manje
+        best = min(covering, key=lambda o: (o["price_per_unit"] * need / 1000 if o["by_weight"] else o["price_eff"],
+                                            need if o["by_weight"] else o["qty"]))
     else:
         best = min(pool, key=per_unit_cost)
     if best["by_weight"]:
@@ -360,13 +362,15 @@ def city_suggestions(con, city: str, n: int = 5) -> list[str]:
 
 def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
                 con: duckdb.DuckDBPyConnection | None = None, max_stores: int | None = None,
-                include_wholesale: bool = False) -> dict:
+                include_wholesale: bool = False, already_have: list[str] | None = None) -> dict:
     """Cijena recepta po trgovini u gradu (+ nacionalne cijene) i najbolja trgovina.
 
     ingredients: [{"name": "brašno", "amount": 500, "unit": "g", "form": None, "attributes": {...}}]
     Vraća ingredients (povezani sastojci s pretpostavkama), unmatched, stores (svaka trgovina:
     stavke, total, broj povezanih sastojaka), best_store, warnings, date i date_hr.
     Veleprodaja (Metro, store_type 'cash_and_carry') je uključena samo uz include_wholesale=True.
+    already_have: namirnice koje korisnik već ima ("sol", "papar"); ostaju u stavkama s have=true, ali ne
+    ulaze u total_to_buy (cijela pakiranja za kupiti). total_used je razmjerni trošak svih stavki.
     """
     if mode != "single_store":
         raise ValueError("podržan je samo mode='single_store'")
@@ -380,6 +384,13 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
             f"; možda: {', '.join(out['city_suggestions'])}" if out["city_suggestions"] else ""))
         return out
     out["city"] = resolved_city
+    have = set()
+    for name in already_have or []:
+        try:
+            have.add(resolve_name(name)[0].key)
+        except IngredientError:
+            out["warnings"].append(f"already_have: nepoznata namirnica '{name}'")
+    out["already_have"] = sorted(have)
 
     needs = []
     for item in ingredients:
@@ -391,6 +402,7 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
                     raise IngredientError(f"nepoznat atribut {a}={v} za '{staple.name}'")
             amount, unit, warns = to_base(*_input_amount(item), staple)
             need = Need(item, staple, amount, unit, attrs, form=item.get("form"), warnings=warns)
+            need.input_staple = staple.key  # prije oblika (rajčica -> pasirana_rajcica), za already_have
             need.warnings += _resolve_form(con, need, city, include_wholesale)
             if need.staple is not staple:  # oblik je druga namirnica: količina u njezinoj jedinici
                 need.amount, need.unit, more = to_base(*_input_amount(item), need.staple)
@@ -445,7 +457,7 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
                 "name": pick["name"], "attributes": chosen,
                 "pack_qty": pick["qty"], "n_packs": pick["n_packs"],
                 "price_eff": pick["price_eff"], "cost_pack": pick["cost_pack"], "cost_used": pick["cost_used"],
-                "counted": pick["cost_used"] if need.staple.pantry else pick["cost_pack"],
+                "have": need.staple.key in have or need.input_staple in have,
                 "pantry": need.staple.pantry, "price_per_unit": pick["price_per_unit"], "per_unit": pick["per_unit"],
                 "unit_confidence": pick["unit_confidence"], "pack_source": pick["pack_source"],
                 "is_special": pick["is_special"], "flags": pick["flags"], "notes": pick["notes"] + subst,
@@ -459,8 +471,9 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
         s["items"] = items
         s["n_matched"] = len(items)
         s["n_ingredients"] = n_needs
-        s["total"] = round(sum(it["counted"] for it in items), 2)
-        s["total_pack"] = round(sum(it["cost_pack"] for it in items), 2)
+        # za kupiti: cijela pakiranja svega što korisnik nema; utrošeno: razmjerno, za sve stavke
+        s["total_to_buy"] = round(sum(it["cost_pack"] for it in items if not it["have"]), 2)
+        s["total_used"] = round(sum(it["cost_used"] for it in items), 2)
         s["flagged_items"] = sum(1 for it in items if it["flags"])
         s["unit_confidence"] = "low" if any(it["unit_confidence"] != "high" for it in items) else "high"
         if s["scope"] == "national":
@@ -468,7 +481,7 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
         d = s.pop("date")
         s["date"], s["date_hr"] = d.isoformat(), date_hr(d)
     ranked = sorted(stores.values(), key=lambda s: (-s["n_matched"], s["data_quality"] == "suspect",
-                                                    s["flagged_items"], s["total"]))
+                                                    s["flagged_items"], s["total_to_buy"]))
     out["stores"] = ranked[:max_stores] if max_stores else ranked
     eligible = [s for s in ranked if s["data_quality"] != "suspect"] or ranked
     if eligible:

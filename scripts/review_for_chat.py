@@ -35,7 +35,7 @@ def basket_lines(con, recipe: str) -> list[str]:
     extra = [f"nije povezano: {u['name']} ({u['reason']})" for u in res["unmatched"]]
     extra += [f"pitanje: {a['name']}: {a['ambiguity']['question']}" for a in res["ambiguous"]]
     return [f"**{data['name']}**: {best['chain']}, {best['address']} · {best['n_matched']}/{best['n_ingredients']} "
-            f"sastojaka · ukupno {hr(best['total'])} € (cijela pakiranja {hr(best['total_pack'])} €) · "
+            f"sastojaka · za kupiti {hr(best['total_to_buy'])} € · utrošeno {hr(best['total_used'])} € · "
             f"{res.get('date_hr', '')}", "",
             md_table(["sastojak", "proizvod", "pakiranje", "cost_pack €", "cost_used €", "pouzdanost"], rows),
             *([""] + [f"- {e}" for e in extra] if extra else []), ""]

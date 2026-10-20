@@ -148,8 +148,9 @@ ili `default`.
   trgovini vraća `chain, store_id, address, city, scope, product_id, ean, name, price_eff,
   is_special, special_price, anchor_price, best_price_30, price_per_unit, per_unit,
   unit_confidence, pack_source, data_quality, date, date_hr` i `note` za nacionalne cijene.
-- `plan_basket(ingredients, city, mode="single_store")` (`src/mealmeter/basket.py`): cijena recepta
-  po trgovini, najbolja trgovina, nepovezani sastojci i pretpostavke (vidi DECISIONS.md, točka 37).
+- `plan_basket(ingredients, city, mode="single_store", already_have=None)` (`src/mealmeter/basket.py`):
+  cijena recepta po trgovini (`total_to_buy`: cijela pakiranja bez `already_have`; `total_used`: razmjerno),
+  najbolja trgovina, nepovezani i dvosmisleni sastojci i pretpostavke (DECISIONS.md, točke 37 i 73).
 - `units.convert(amount, unit, staple)` (`src/mealmeter/units.py`, vrijednosti u `data/units.yaml`): žlica,
   žličica, šalica, dcl, prstohvat i čaša u ml, pa u grame preko gustoće namirnice; sve su procjene.
 - CLI: `uv run python -m mealmeter.cli find "brašno glatko" --city Osijek`,

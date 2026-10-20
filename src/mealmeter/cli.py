@@ -128,7 +128,8 @@ def cmd_basket(args) -> None:
 
     recipe = json.loads(open(args.recipe, encoding="utf-8").read())
     ingredients = recipe["ingredients"] if isinstance(recipe, dict) else recipe
-    res = plan_basket(ingredients, args.city)
+    have = [h.strip() for h in (args.have or "").split(",") if h.strip()]
+    res = plan_basket(ingredients, args.city, already_have=have)
     if args.json:
         print(json.dumps(res, ensure_ascii=False, indent=2, default=str))
         return
@@ -143,7 +144,8 @@ def cmd_basket(args) -> None:
         print("\nNema trgovine s ovim sastojcima.")
         return
     print(f"\nNajbolja trgovina: {best['chain']}, {best['address'] or '(sve poslovnice)'}, {best['city'] or ''}"
-          f"  ·  {best['n_matched']}/{best['n_ingredients']} sastojaka  ·  ukupno {_fmt_money(best['total'])} €")
+          f"  ·  {best['n_matched']}/{best['n_ingredients']} sastojaka  ·  za kupiti {_fmt_money(best['total_to_buy'])} €"
+          f"  ·  utrošeno {_fmt_money(best['total_used'])} €")
     if best["missing"]:
         print(f"  nedostaje: {', '.join(best['missing'])}")
     rows = [
@@ -151,8 +153,8 @@ def cmd_basket(args) -> None:
             it["ingredient"],
             it["name"][:42],
             f"{it['n_packs']} x {_fmt_money(it['price_eff'])}" if it["n_packs"] else "na vagu",
-            _fmt_money(it["cost_pack"]),
-            _fmt_money(it["cost_used"]) + (" *" if it["pantry"] else ""),
+            _fmt_money(it["cost_pack"]) + (" (imam)" if it["have"] else ""),
+            _fmt_money(it["cost_used"]),
             f"{it['unit_confidence']}/{it['pack_source']}",
             ", ".join(f"{k}={v}" for k, v in it["attributes"].items()),
             ", ".join([search_flag(f) for f in it["flags"]] + [n for n in it["notes"] if "zamjenjivo" in n]),
@@ -162,12 +164,12 @@ def cmd_basket(args) -> None:
     print()
     print(_table(rows, ["sastojak", "proizvod", "pakiranja", "cijena €", "utrošeno €", "pouzdanost", "atributi",
                         "napomena"]))
-    print("  * pantry (začini i sl.): u ukupno ulazi samo utrošeni dio")
+    print("  za kupiti = cijela pakiranja bez onoga što već imaš (--have); utrošeno = razmjerni dio svih stavki")
     print()
     rows = [[s["chain"], (s["address"] or "(sve poslovnice)")[:34], f"{s['n_matched']}/{s['n_ingredients']}",
-             _fmt_money(s["total"]), s["scope"] + (" (suspect)" if s["data_quality"] == "suspect" else "")]
+             _fmt_money(s["total_to_buy"]), s["scope"] + (" (suspect)" if s["data_quality"] == "suspect" else "")]
             for s in res["stores"][: args.top]]
-    print(_table(rows, ["lanac", "adresa", "sastojaka", "ukupno €", "scope"]))
+    print(_table(rows, ["lanac", "adresa", "sastojaka", "za kupiti €", "scope"]))
 
 
 def search_flag(flag: str) -> str:
@@ -202,6 +204,7 @@ def main(argv: list[str] | None = None) -> None:
     b.add_argument("recipe", help='JSON: {"name": ..., "ingredients": [{"name", "amount", "unit", "form"?}]}')
     b.add_argument("--city", required=True)
     b.add_argument("--top", type=int, default=8, help="koliko trgovina ispisati")
+    b.add_argument("--have", help='namirnice koje već imaš, odvojene zarezom (npr. "sol,papar,ulje")')
     b.add_argument("--json", action="store_true")
     b.set_defaults(func=cmd_basket)
 
