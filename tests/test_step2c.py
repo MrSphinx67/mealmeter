@@ -64,3 +64,15 @@ def test_riza_oro_alone_not_parboiled():
 
 def test_riza_paraboiled_typo():
     assert extract_attributes(S["riza"], "RIZA PARABOILED DUGO ZRNO VRECICA 500 G BENS")["vrsta"] == "parboiled"
+
+
+# --- 4. pileća prsa ------------------------------------------------------------------
+
+@pytest.mark.parametrize("name", ["PILEĆA PRSA JELI GAVRILOVIĆ", "PILEĆA PRSA 350 g JE LI GAVRILOVIĆ"])
+def test_chicken_jeli_temporarily_excluded(name):
+    assert name_match(S["pileca_prsa"], name) == "excluded"
+
+
+def test_chicken_range():
+    assert S["pileca_prsa"].plausible_per_unit == (5, 20)
+    assert name_match(S["pileca_prsa"], "PILEĆI FILE 500 g") == "match"

@@ -2,6 +2,46 @@
 
 Izvještaj generira `scripts/morning_review.py`. Točke 4 i 5 čekaju potvrdu vlasnika.
 
+## 4. Pileća prsa: „Jeli“ (ČEKA POTVRDU)
+
+`plausible_per_unit: [5, 20]` €/kg je primijenjen: izvan granica je 528 od 10613 cijena po kg preostalih (neisključenih) proizvoda.
+
+Sve grupe s „jeli“ ili „je li“ u nazivu. To je Gavrilovićeva linija **Jeli**: delikatesna pileća prsa (narezak od 350 g i štruca od 2,6 kg), a ne svježi file. **Privremeno su isključene** iz `pileca_prsa` (`must_not_match: jeli\b, je li\b`) dok ne potvrdiš. Ako ih treba vratiti, dovoljno je obrisati ta dva uzorka u `staples.yaml`.
+
+| grupa | nazivi | lanci | min €/kg | medijan €/kg | max €/kg | cijena |
+|---|---|---|---|---|---|---|
+| stridon:jeli pileca prsa 2600 g gavrilovic | JELI PILEĆA PRSA 2600 g GAVRILOVIĆ | stridon | 2,30 | 2,81 | 4,00 | 9 |
+| trgovina-krk:jeli pileca prsa 2600 gr | JELI PILEĆA PRSA 2600 gr | trgovina-krk | 4,23 | 4,23 | 4,38 | 11 |
+| branka:salama prsa pileca jeli gavrilovic | SALAMA PRSA PILEĆA JELI GAVRILOVIĆ | branka | 9,49 | 9,74 | 9,99 | 2 |
+| 3858892724316 | JELI PILEĆA PRSA 2600G,GAVRILOVIĆ; PILEĆA PRSA JELI GAV RILOVIĆ; PILEĆA PRSA JELI GAVRILOVIĆ; PRSA PILEĆA JELI 2600 g; PRSA PILEĆA JELI kg; Pileća prsa Jeli | konzum, ktc, ribola, spar, studenac, trgocentar | 3,84 | 10,29 | 11,69 | 205 |
+| tommy:pileca prsa jeli gavrilovic | PILEĆA PRSA JELI GAVRILOVIĆ | tommy | 9,99 | 10,49 | 10,99 | 81 |
+| ntl:prsa pileca jeli kg gavrilovic | PRSA PILEĆA JELI kg GAVRILOVIĆ | ntl | 10,49 | 10,49 | 10,49 | 2 |
+| gavranovic:gav jeli pileca prsa delikates | GAV.JELI PILEĆA PRSA DELIKATES | gavranovic | 10,49 | 10,49 | 10,49 | 44 |
+| 3858892722572 | ŠUNKA JELI PIL. PRSA; ŠUNKA PILEĆA PRSA JELI | djelo_vodice, studenac | 10,69 | 11,04 | 11,39 | 2 |
+| 3858892724392 | GAV.JELI PILEĆA PRSA 350g; Gavrilović Jeli Pileća prsa 350 g; JELI PILECA PRSA 350 G GAVRILOVIC; PILEĆA PRSA 350 g JE LI GAVRILOVIĆ; PILEĆA PRSA 350G JELI; PILEĆA PRSA 350g JELI GAVRILOVIĆ; PILEĆA PRSA JELI 350 g; PRSA PILEĆA JELI 350 g; PRSA PILEĆA JELI 350g | djelo_vodice, gavranovic, kaufland, konzum, ktc, plodine, ribola, spar, studenac | 8,11 | 11,11 | 13,40 | 310 |
+
+Napomena: štruca od 2,6 kg ima 2,30–4,38 €/kg, pa vjerojatno nosi cijenu po kg kao cijenu pakiranja (lanac je cijenu po kg upisao kao cijenu proizvoda).
+
+**Upozorenje uz granicu od 5 €/kg:** ispod nje su i stvarna svježa prsa po akcijskoj ili diskontnoj cijeni (Konzum K Plus 4,69 €/kg u 184 trgovine, Eurospin 4,99 €/kg). Ona sada postaju `price_suspect` i u košarici su samo rezerva. Prijedlog: donja granica 2,5 ili 3 €/kg. Najčešće cijene izvan granica:
+
+| lanac | naziv | min €/kg | max €/kg | cijena |
+|---|---|---|---|---|
+| konzum | PRSA PILEĆA K PLUS BEZ KOŽE | 4,69 | 4,69 | 184 |
+| konzum | PILEĆI FILE OD PRSA VAKUUM | 2,99 | 4,99 | 95 |
+| tommy | PILEĆI FILE BRAZILSKI SMRZNUTI | 4,25 | 4,99 | 83 |
+| eurospin | DOMAĆI PIL. FILE OD PRSA OBIT.RFZ | 4,99 | 4,99 | 43 |
+| eurospin | DOMAĆI PIL. FILE OD PRSA OBIT. PAK. | 4,99 | 4,99 | 43 |
+| stanic | PILEĆI FILE SMRZNUTI | 2,75 | 2,75 | 29 |
+| roto | PILEĆI FILE SVJEŽI sniženje (12) | 2,50 | 2,50 | 9 |
+| metro | 2,5KG UKR. PILEĆI FILE SMRZ | 31,50 | 31,50 | 7 |
+| metro | CCA5KG MC PILEĆI FILE MAP | 4,99 | 4,99 | 7 |
+| studenac | PILECI FILE SMRZ.STANIC | 3,92 | 3,98 | 5 |
+| trgovina-krk | PILEĆI FILE ZA GASTRO 1 kg | 1,95 | 4,08 | 4 |
+| konzum | PILEĆI FILE SOLJENI 6X2 BRAZIL | 3,28 | 4,11 | 4 |
+| branka | PRSA PILEĆA SVJEŽA | 4,79 | 4,99 | 2 |
+| studenac | PILEĆI FILE BRAZIL 2KG LEDO | 4,91 | 4,91 | 2 |
+| studenac | GASTRO PILEĆI FILE PEČENI | 209,90 | 209,90 | 2 |
+
 ## 0. Filtar hrane
 
 Proizvodi bez korisne kategorije lanca (nema je, ili je „Ostalo“) po lancu: koliko ih je naslijedilo skupinu preko globalnog EAN-a (većinska skupina u lancima s kategorijom, > 50 %), koliko ih je razvrstano popisom riječi i koliko ostaje `unknown`.
@@ -39,26 +79,26 @@ Proizvodi izvan zadanog izbora (`find_products`/`get_prices` bez `include_*`), p
 
 | lanac | naziv | kategorija lanca | skupina | izvor |
 |---|---|---|---|---|
-| ribola | DUKAT ČOK.MLI 0,2l ČAŠA | HRANA | hrana | chain |
-| gavranovic | KRPA KUH.40X60cm 100%PAMUK HT-8902 | Hrana | hrana | chain |
-| boso | POSUD DALAS ARANŽ. MALA | ZELENI PROGRAM | hrana | chain |
-| studenac | IGRAČKA HUGI WUGI BLOW BUBBLE 12/1 | HRANA | hrana | chain |
-| gavranovic | VREĆICA UKRASNA 26x32x12cm TOČKICE ROZA/BIJELA -rasprodaja | Hrana | hrana | chain |
-| plodine | SVIJECE ZA TORTU UKRASNE 12/1 52506 |  | hrana | ean_inherited |
-| branka | DEKOR ROZA KRISTALIĆI 10g | HRANA | hrana | chain |
-| djelo_vodice | SENF ČAŠA 250ML | SENF ČAŠICA | hrana | chain |
-| gavranovic | NOŽ 3/1 23360/335-rasprodaja | Hrana | hrana | chain |
+| ktc | JACK DANIEL S 0,7L + 1 ČAŠA | PIĆA | alkohol | chain |
+| gavranovic | POSUDA S POKLOPCEM 3,6L-rasprodaja | Hrana | hrana | chain |
+| plodine | WHISKEY JAMESON 0,7 L + 2 CASE |  | alkohol | ean_inherited |
+| boso | SJEME GARDEN PAPR.ŠOROKŠARI | ZELENI PROGRAM | hrana | chain |
+| konzum | MEDENJACI DEKORAT SET 480 G LAMBERTZ | HRANA | hrana | chain |
+| gavranovic | SYOSS ŠAMPON FULL HAIR 5D 440ml | Hrana | hrana | chain |
+| gavranovic | VREĆICA UKRASNA 31X42X12Cm-rasprodaja | Hrana | hrana | chain |
+| ribola | ABC 100G SPUŽVA BOB | HRANA | hrana | chain |
+| vrutak | N-KRUH PIROV KALUP 500 G | PEKARSRVO | hrana | chain |
+| roto | WHISKEY JACK DANIELS HONEY 0,70 + 2 ČAŠE (6)\* | ŽESTOKO | alkohol | chain |
+| ntl | IGRAČKA FINGER SLUG VELIKI | Ostalo | hrana | ean_inherited |
+| ktc | ČOK BOMONI 80g SA GLAZB. IGRAČKOM | HRANA | hrana | chain |
+| gavranovic | H&S ŠAMPON 250ml OCEAN | Hrana | hrana | chain |
+| studenac | KING DESIRE ČAŠA 450 ml | HRANA | hrana | chain |
+| tommy | DEKOR ŠARENO PISMO 76 g DR.OET | PAKIRANA HRANA I PIĆE | pice | chain |
+| studenac | WHISKY BALLANTINES 2 ČAŠE 0,7 l | PIĆE | alkohol | chain |
+| vrutak | N-LEDO MACHO ČAŠA BIJELA ČOKOLADA 255G | SMRZNUTO MESO, POVRĆE, RIBA | hrana | chain |
+| gavranovic | VREĆE ZA SMEĆE 50x65 TRGOMIX | Hrana | hrana | chain |
+| konzum | KRUH KALUP 600g MARYMAT | HRANA | hrana | chain |
 | spar | Kruh craft Karla u kalup.400 g | Hrana | hrana | chain |
-| ribola | PLAZMA ČAŠA 450ml LEDO | HRANA | hrana | chain |
-| vrutak | \*TEMPRANILLO CASA SOLAR 0.75L COSECHEROS ZOZP SUHO 2025 -6/1- | VINO INOZEMNO | alkohol | chain |
-| ktc | NUTELLA 200g ČAŠA | HRANA | hrana | chain |
-| ktc | MUFFINS CLASIC 250g U POSUDI | HRANA | hrana | chain |
-| konzum | ČAJ CVIJET BAZGE EKO 40g DARVITALIS | HRANA | hrana | chain |
-| plodine | UKRAS DRAZESNA SRCA 7 G DR OETKER |  | hrana | ean_inherited |
-| trgovina-krk | JIM BEAM 0,7L + 1 ČAŠE | Piće | alkohol | chain |
-| plodine | PALOMA SALVETE STYLE 33X33/20 RUZA |  | hrana | ean_inherited |
-| gavranovic | TANJURIĆI STAKLO 15X15cm HO-rasprodaja | Hrana | hrana | chain |
-| boso | SJEME GARDEN MJEŠ.CVIJEĆA LUN.ST | ZELENI PROGRAM | hrana | chain |
 
 ## 1. Jaja
 
@@ -131,16 +171,16 @@ Izvor atributa za 10 grupa riže (`find_products(ingredient="riza")`):
 
 | id | naziv | atributi | izvor (how, naziv) |
 |---|---|---|---|
-| 8001860100017 | Riso Scotti riža originario okr.zrno 1kg | vrsta=originario | vrsta: name („RIŽA SCOTTI NIKAS ORIGINARIO 1 kg“) |
+| 8001860100017 | Riso Scotti riža originario okr.zrno 1kg | vrsta=originario | vrsta: name („RIŽA ORIGINARIO 1 kg SCOTTI“) |
 | 3838700540291 | RIŽA ZA DOMAĆA JELA ZLATO POLJE PODRAVKA 1 kg (12) | vrsta=originario | vrsta: name („RIŽA ZL.POLJE 1 kg (OKRUGLO ZRNO)“) |
 | 3838700540369 | RIŽA ZLATO POLJE BLAZINICA PODRAVKA 800 g (9) |  |  |
-| 8001860201011 | Riso Scotti riža arborio dugo zrno 1kg | vrsta=arborio | vrsta: name („RIŽA ARBORIO 1 kg RISO SCOT“) |
-| 8001860190520 | Riso Scotti riža oro dugog zrna 1kg | vrsta=parboiled | vrsta: name („RIŽA ORO PARBOILED 1 kg SCO“) |
+| 8001860201011 | Riso Scotti riža arborio dugo zrno 1kg | vrsta=arborio | vrsta: name („RIŽA ARBORIO 1 kg SCOTTI“) |
+| 8001860190520 | Riso Scotti riža oro dugog zrna 1kg | vrsta=parboiled | vrsta: name („RIŽA SCOTTI ORO 1 kg PARBOILED“) |
 | 3838700540314 | RIŽA BIJELA 800 g VREĆICA ZLATO POLJE | vrsta=dugo_zrno | vrsta: name („Zlato polje riža dugo zrno pvc 800 g“) |
 | 3838700540482 | RIŽA ZL POLJE ST ANDREA 500G KUT (18) |  |  |
-| 5410673007490 | RIZA PARABOILED DUGO ZRNO VRECICA 500 G BENS ORIGINAL | vrsta=dugo_zrno | vrsta: name („RIŽA BENS DUGO ZRNO 500 g“) |
+| 5410673007490 | RIZA PARABOILED DUGO ZRNO VRECICA 500 G BENS ORIGINAL | vrsta=dugo_zrno | vrsta: name („RIŽA DUGO ZRNO 500 g 4 VREĆICE BEN S“) |
 | 3838700540406 | RIŽA ZL POLJE ST ANDREA 1KG KUT VAK (12) |  |  |
-| 3838700540604 | RIŽA ARBORIO VAKUMIRANA 1000 g PODRA | vrsta=arborio | vrsta: name („RIŽA ZLATO POLJE ARBORIO VP 1 kg“) |
+| 3838700540604 | RIŽA ARBORIO VAKUMIRANA 1000 g PODRA | vrsta=arborio | vrsta: name („RIZA ARBORIO 1 KG VP ZLATO POLJE“) |
 
 ## 3. Kakao
 

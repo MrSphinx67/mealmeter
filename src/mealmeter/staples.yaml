@@ -949,8 +949,12 @@ pileca_prsa:
   must_not_match: [nar\b, naresc, narezak, zabatk, batk, zabatak, dimcek, narzak, gavelino, odresc,
                    kids, panir, pohan, dimljen, kuhan, narez, salam, pasteta, hrenov, kobas, sunka,
                    grill sir, juha, nuggets, medaljon, odrez, cordon, stapic, macke, pse\b, felix,
-                   kebab, gyros, marinir, rolica, salata, sendvic, tortilj, wrap, mini\b, cca\b]
+                   kebab, gyros, marinir, rolica, salata, sendvic, tortilj, wrap, mini\b, cca\b,
+                   # PRIVREMENO (Korak 2C, točka 4): Gavrilović "Jeli" je delikatesna prsa (narezak, 2,6 kg
+                   # štruca), čeka potvrdu vlasnika; vidi docs/MORNING_REVIEW.md
+                   jeli\b, je li\b]
   unit: kg
+  plausible_per_unit: [5, 20]
   max_pack: 3000
   min_pack: 250
   loose_produce: false

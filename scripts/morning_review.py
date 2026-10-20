@@ -167,7 +167,46 @@ def section_kakao(con) -> str:
     ])
 
 
-SECTIONS = [section_food, section_eggs, section_variants, section_kakao]
+def section_chicken(con) -> str:
+    rows = con.execute("""
+        SELECT CASE WHEN p.ean_global THEN p.ean_norm ELSE p.chain || ':' || p.name_norm END AS grp,
+               string_agg(DISTINCT p.name, '; ' ORDER BY p.name), string_agg(DISTINCT p.chain, ', ' ORDER BY p.chain),
+               min(c.price_per_unit), median(c.price_per_unit), max(c.price_per_unit), count(*)
+        FROM clean.product_staples ps JOIN clean.products p USING (chain, product_id)
+        JOIN clean.prices c USING (chain, product_id)
+        WHERE ps.staple = 'pileca_prsa' AND c.per_unit = 'kg' AND regexp_matches(p.name_norm, '(^| )(jeli|je li)\\b')
+        GROUP BY grp ORDER BY median(c.price_per_unit)""").fetchall()
+    lo, hi, n_bad, n_all = con.execute(f"""
+        SELECT any_value(r.ppu_min), any_value(r.ppu_max),
+               count(*) FILTER (WHERE c.price_per_unit NOT BETWEEN r.ppu_min AND r.ppu_max), count(*)
+        FROM clean.product_staples ps JOIN clean.staple_rules r USING (staple) JOIN clean.prices c USING (chain, product_id)
+        WHERE ps.staple = 'pileca_prsa' AND NOT ps.excluded AND ps.drop_reason IS NULL AND c.per_unit = 'kg'""").fetchone()
+    outside = con.execute("""
+        SELECT p.chain, p.name, min(c.price_per_unit), max(c.price_per_unit), count(*)
+        FROM clean.product_staples ps JOIN clean.staple_rules r USING (staple)
+        JOIN clean.prices c USING (chain, product_id) JOIN clean.products p USING (chain, product_id)
+        WHERE ps.staple = 'pileca_prsa' AND NOT ps.excluded AND ps.drop_reason IS NULL AND c.per_unit = 'kg'
+          AND c.price_per_unit NOT BETWEEN r.ppu_min AND r.ppu_max
+        GROUP BY ALL ORDER BY count(*) DESC LIMIT 15""").fetchall()
+    return "\n".join([
+        "## 4. Pileća prsa: „Jeli“ (ČEKA POTVRDU)", "",
+        f"`plausible_per_unit: [{lo:g}, {hi:g}]` €/kg je primijenjen: izvan granica je {n_bad} od {n_all} cijena "
+        "po kg preostalih (neisključenih) proizvoda.", "",
+        "Sve grupe s „jeli“ ili „je li“ u nazivu. To je Gavrilovićeva linija **Jeli**: delikatesna pileća prsa "
+        "(narezak od 350 g i štruca od 2,6 kg), a ne svježi file. **Privremeno su isključene** iz `pileca_prsa` "
+        "(`must_not_match: jeli\\b, je li\\b`) dok ne potvrdiš. Ako ih treba vratiti, dovoljno je obrisati ta "
+        "dva uzorka u `staples.yaml`.", "",
+        md_table(["grupa", "nazivi", "lanci", "min €/kg", "medijan €/kg", "max €/kg", "cijena"], rows), "",
+        "Napomena: štruca od 2,6 kg ima 2,30–4,38 €/kg, pa vjerojatno nosi cijenu po kg kao cijenu "
+        "pakiranja (lanac je cijenu po kg upisao kao cijenu proizvoda).", "",
+        "**Upozorenje uz granicu od 5 €/kg:** ispod nje su i stvarna svježa prsa po akcijskoj ili diskontnoj "
+        "cijeni (Konzum K Plus 4,69 €/kg u 184 trgovine, Eurospin 4,99 €/kg). Ona sada postaju `price_suspect` "
+        "i u košarici su samo rezerva. Prijedlog: donja granica 2,5 ili 3 €/kg. Najčešće cijene izvan granica:", "",
+        md_table(["lanac", "naziv", "min €/kg", "max €/kg", "cijena"], outside),
+    ])
+
+
+SECTIONS = [section_chicken, section_food, section_eggs, section_variants, section_kakao]
 
 
 def main() -> None:
