@@ -11,7 +11,8 @@ import duckdb
 sys.path.insert(0, str(Path(__file__).parent))
 from morning_review import md_table  # noqa: E402
 
-from mealmeter.staples import BKEY_SQL, staple_suspect_sql  # noqa: E402
+from mealmeter.search import _candidates  # noqa: E402
+from mealmeter.staples import BKEY_SQL, load_staples, staple_suspect_sql  # noqa: E402
 
 OUT = Path("docs/STEP2D_REVIEW.md")
 
@@ -131,7 +132,55 @@ def section_food(con) -> str:
     ])
 
 
-SECTIONS = [section_groups, section_chicken, section_food]
+COVERAGE_CHAINS = ("plodine", "konzum", "spar", "lidl", "kaufland", "tommy", "studenac", "eurospin")
+
+
+def coverage(con) -> list[dict]:
+    """Po namirnici: lanci s barem jednim proizvodom u zadanom izboru (kao find_products: zadani atributi,
+    bez rasprodaje, bez price_suspect), i procjena dobitka od strogo pozitivnog food_unverified (naziv
+    počinje riječju namirnice, cijena u granicama, poznata gramatura). Procjena se NE primjenjuje."""
+    out = []
+    for st in load_staples().values():
+        strict = f"""(coalesce(p.is_food, false) OR (p.is_food IS NULL AND psu.staple IS NOT NULL AND NOT psu.excluded
+                      AND regexp_matches(p.name_norm, '^(?:{"|".join(st.must_match)})')))
+                     AND p.food_group <> 'alkohol'"""
+        counts = {}
+        for label, food_sql in (("default", None), ("strict", strict)):
+            sql, params, _ = _candidates(st, [], st.defaults() or None, None, False, food_sql)
+            rows = con.execute(sql + """ SELECT chain, count(DISTINCT product_id) FROM x
+                                        WHERE NOT price_suspect
+                                          AND (? = 'default' OR is_food IS NOT NULL OR price_per_unit IS NOT NULL)
+                                        GROUP BY chain""", params + [label]).fetchall()
+            counts[label] = dict(rows)
+        out.append({"staple": st.key, **counts})
+    return out
+
+
+def section_coverage(con) -> str:
+    cov = coverage(con)
+    rows = []
+    for c in cov:
+        d, s = c["default"], c["strict"]
+        gained = sorted(set(s) - set(d))
+        rows.append((c["staple"], len(d), *[d.get(ch, 0) for ch in COVERAGE_CHAINS],
+                     s.get("plodine", 0) - d.get("plodine", 0), len(s), ", ".join(gained)))
+    zero = [c["staple"] for c in cov if not c["default"].get("plodine")]
+    return "\n".join([
+        "## 11. Pokrivenost (zadani izbor, cijela Hrvatska)", "",
+        f"{len(cov)} aktivnih namirnica. Stupci lanaca: broj proizvoda u zadanom izboru (bez rasprodaje i "
+        "`price_suspect`, sa zadanim atributima). Veleprodaja (Metro) nije uključena.", "",
+        "**Procjena, nije primijenjeno:** strogo pozitivni `food_unverified` (proizvod nepoznate skupine ulazi ako "
+        "naziv počinje riječju namirnice, cijena je u granicama i gramatura je poznata). Stupac „+Plodine“ je "
+        "dobitak proizvoda za Plodine, „lanaca (strogo)“ broj lanaca s tim pravilom, a zadnji stupac novi lanci.", "",
+        md_table(["namirnica", "lanaca", *COVERAGE_CHAINS, "+Plodine", "lanaca (strogo)", "novi lanci"], rows), "",
+        f"Namirnice bez ijednog proizvoda u Plodinama (zadano): {len(zero)} od {len(cov)}"
+        + (f" ({', '.join(zero)})." if zero else ".") + " Svježe voće i povrće Plodina (bez kategorije i "
+        "EAN-a) `plan_basket` ipak koristi (`food_unverified`, pravilo prve ili druge riječi); u ovoj tablici "
+        "i u `find_products` nije.",
+    ])
+
+
+SECTIONS = [section_groups, section_chicken, section_food, section_coverage]
 
 
 def main() -> None:

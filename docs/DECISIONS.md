@@ -520,3 +520,8 @@ Izvještaji: [STEP2D_REVIEW.md](STEP2D_REVIEW.md) (`scripts/step2d_review.py`) i
     - Zaštita za jestivo (šećerni ukrasi, Dr. Oetker, čokolada, bomboni ili flips s igračkom, naresci).
     - „ČAŠA“ je neprehrana samo kao „ČAŠE“, „+ ČAŠ“ ili „ČAŠA ZA“ (moja dopuna); „KALUP“ samo kao „KALUP ZA“.
     - Promjene su u `docs/data/food_changes_2d10.csv` i STEP2D_REVIEW.md.
+64. **Pokrivenost** (samo izvještaj, `scripts/step2d_review.py`, točka 11).
+    - Po namirnici broj lanaca s proizvodom u zadanom izboru, i broj proizvoda za Plodine, Konzum, Spar, Lidl,
+      Kaufland, Tommy, Studenac i Eurospin.
+    - Procjena dobitka od strogo pozitivnog `food_unverified` (naziv počinje riječju namirnice, cijena u
+      granicama, poznata gramatura). **Nije primijenjeno.**
