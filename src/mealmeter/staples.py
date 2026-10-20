@@ -440,8 +440,10 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
               AND ps.drop_reason IS NULL AND NOT ps.excluded AND ps.n_units IS NOT NULL
               AND (ps.n_units < r.min_pack OR ps.n_units > r.max_pack)
         """)
+    groups = build_staple_groups(con)
     return {
         "staples": len(staples),
+        "groups": groups,
         "matched": con.execute(
             "SELECT count(*) FROM clean.product_staples WHERE NOT excluded AND drop_reason IS NULL").fetchone()[0],
         "excluded": con.execute("SELECT count(*) FROM clean.product_staples WHERE excluded").fetchone()[0],
@@ -450,6 +452,68 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
         "auto_ranges": set_auto_ranges(con),
         "suspect_prices": staple_price_suspects(con),
     }
+
+
+# Ključ grupe proizvoda (alias p = clean.products): globalni EAN, inače lanac + normalizirani naziv
+BKEY_SQL = "CASE WHEN p.ean_global THEN p.ean_norm ELSE p.chain || ':' || p.name_norm END"
+# Pripadnost grupe namirnici: udio lanaca čiji naziv prolazi pravila (> MEMBER_SHARE) i najveći udio
+# lanaca jednog isključenog naziva (< EXCLUDED_SHARE)
+MEMBER_SHARE, EXCLUDED_SHARE = 0.5, 0.25
+HOW_RANK_SQL = "CASE how WHEN 'name' THEN 0 WHEN 'inferred' THEN 1 WHEN 'heuristic' THEN 2 ELSE 3 END"
+
+
+def build_staple_groups(con: duckdb.DuckDBPyConnection) -> list[tuple]:
+    """clean.staple_groups i clean.staple_group_attrs: pripadnost grupe (EAN) namirnici i atributi grupe.
+
+    Grupa pripada namirnici (status 'member') ako naziv prolazi pravila (must_match, bez must_not_match)
+    u više od 50 % lanaca grupe, a nijedan isključeni naziv nema udio >= 25 % lanaca; inače je
+    'ambiguous' (izvan zadanog izbora), a 'excluded' ako nijedan naziv ne prolazi. Proizvod izbačen samo za sebe (drop_reason) računa se kao
+    pogodak naziva (izbačen zbog pakiranja), osim neprehrambenog (drop_reason 'kategorija:*'), a
+    n_usable je broj lanaca s proizvodom koji ostaje u izboru. Vrijednost atributa grupe: najprije iz naziva (how name > inferred > heuristic >
+    default), zatim po broju lanaca, pa abecedno. Vraća (namirnica, članova, dvosmislenih, isključenih).
+    """
+    con.execute(f"""CREATE OR REPLACE TEMP TABLE product_bkeys AS
+                     SELECT p.chain, p.product_id, p.name_norm, {BKEY_SQL} AS bkey FROM clean.products p""")
+    con.execute("""
+        CREATE OR REPLACE TEMP TABLE staple_bkeys AS
+        SELECT DISTINCT ps.staple, pb.bkey FROM clean.product_staples ps JOIN product_bkeys pb USING (chain, product_id)
+    """)
+    con.execute(f"""
+        CREATE OR REPLACE TABLE clean.staple_groups AS
+        WITH m AS (  -- svi proizvodi grupa koje namirnica dotiče
+          SELECT b.staple, b.bkey, p.chain, p.name_norm,
+                 -- neprehrambeni član ("MLIJEKO ZA DJECU" u kozmetici) nije pogodak naziva
+                 ps.excluded OR coalesce(starts_with(ps.drop_reason, 'kategorija:'), false) AS excluded,
+                 ps.drop_reason IS NULL AND NOT ps.excluded AS usable
+          FROM staple_bkeys b JOIN product_bkeys p USING (bkey)
+          LEFT JOIN clean.product_staples ps ON ps.chain = p.chain AND ps.product_id = p.product_id
+               AND ps.staple = b.staple
+        ),
+        n AS (SELECT staple, bkey, count(DISTINCT chain) AS n_chains,
+                     count(DISTINCT chain) FILTER (WHERE excluded = false) AS n_match,
+                     count(DISTINCT chain) FILTER (WHERE usable) AS n_usable FROM m GROUP BY ALL),
+        e AS (SELECT staple, bkey, max(n_ex) AS n_ex_max FROM (
+                SELECT staple, bkey, name_norm, count(DISTINCT chain) AS n_ex FROM m WHERE excluded GROUP BY ALL)
+              GROUP BY ALL)
+        SELECT n.staple, n.bkey, n.n_chains, n.n_usable, n.n_match / n.n_chains AS share_match,
+               coalesce(e.n_ex_max, 0) / n.n_chains AS share_excluded,
+               CASE WHEN n.n_match / n.n_chains > {MEMBER_SHARE} AND coalesce(e.n_ex_max, 0) / n.n_chains < {EXCLUDED_SHARE}
+                    THEN 'member' WHEN n.n_match = 0 THEN 'excluded' ELSE 'ambiguous' END AS status
+        FROM n LEFT JOIN e USING (staple, bkey)
+    """)
+    con.execute(f"""
+        CREATE OR REPLACE TABLE clean.staple_group_attrs AS
+        SELECT staple, bkey, attr, value, how FROM (
+          SELECT a.staple, p.bkey, a.attr, a.value, arg_min(a.how, {HOW_RANK_SQL}) AS how,
+                 min({HOW_RANK_SQL}) AS rnk, count(DISTINCT a.chain) AS n
+          FROM clean.product_attrs a JOIN product_bkeys p USING (chain, product_id)
+          GROUP BY ALL
+        ) QUALIFY row_number() OVER (PARTITION BY staple, bkey, attr ORDER BY rnk, n DESC, value) = 1
+    """)
+    return con.execute("""
+        SELECT staple, count(*) FILTER (WHERE status = 'member'), count(*) FILTER (WHERE status = 'ambiguous'),
+               count(*) FILTER (WHERE status = 'excluded')
+        FROM clean.staple_groups GROUP BY staple ORDER BY staple""").fetchall()
 
 
 # Cijena po jedinici usporedbe namirnice (aliasi: c = clean.prices, ps = clean.product_staples,

@@ -9,7 +9,7 @@ import duckdb
 
 from mealmeter.build import NATIONAL_NOTE
 from mealmeter.normalize import canonical_city, date_hr, norm_text, normalize_ean
-from mealmeter.staples import STAPLE_PPU_SQL, load_staples, resolve_ingredient, staple_suspect_sql
+from mealmeter.staples import BKEY_SQL, STAPLE_PPU_SQL, load_staples, resolve_ingredient, staple_suspect_sql
 
 DEFAULT_DB = Path(os.environ.get("MEALMETER_DB", Path(__file__).resolve().parents[2] / "data" / "mealmeter.duckdb"))
 
@@ -82,13 +82,17 @@ def _food_filter(include_nonfood: bool = False, include_alcohol: bool = False, u
 
 
 def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | None,
-                include_clearance: bool, food_sql: str | None = None) -> tuple[str, list, str]:
+                include_clearance: bool, food_sql: str | None = None,
+                include_ambiguous: bool = False) -> tuple[str, list, str]:
     """SQL (CTE-ovi g, hit, x) za kandidate: jedan redak po (trgovina, proizvod).
 
     x sadrži sve proizvode iz grupa koje odgovaraju upitu/namirnici, s cijenom po jedinici u
     jedinici usporedbe namirnice (STAPLE_PPU_SQL), pouzdanošću, izvorom gramature i zastavicama
     (price_suspect, clearance, pack_confidence, data_quality). Koriste ga find_products i plan_basket.
     `food_sql` je uvjet filtra hrane (_food_filter; zadano samo provjerena hrana bez alkohola).
+    Grupe (bkey: EAN, inače lanac + naziv) biraju se po clean.staple_groups (status 'member'; uz
+    include_ambiguous i 'ambiguous') i atributima grupe (clean.staple_group_attrs). Kod namirnice s
+    group_by (jaja) izlazni ključ gkey je klasa, a izbor je i dalje po EAN grupi.
     Vraća (sql, parametri, stupac relevantnosti za razinu grupe).
     """
     food_sql = food_sql or _food_filter()
@@ -99,20 +103,18 @@ def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | 
     # --- koje grupe ulaze u rezultat ---
     hit_parts, hit_params = [], []
     if tokens:
-        hit_parts.append(f"SELECT DISTINCT gkey FROM g p WHERE {name_sql}")
+        hit_parts.append(f"SELECT DISTINCT bkey FROM g p WHERE {name_sql}")
         hit_params += likes
     if staple:
-        hit_parts.append("""
-            SELECT g.gkey FROM g JOIN clean.product_staples ps USING (chain, product_id)
-            WHERE ps.staple = ? AND ps.drop_reason IS NULL
-            GROUP BY g.gkey HAVING bool_or(NOT ps.excluded) AND NOT bool_or(ps.excluded)""")
+        statuses = "'member', 'ambiguous'" if include_ambiguous else "'member'"
+        hit_parts.append(f"SELECT bkey FROM clean.staple_groups WHERE staple = ? AND status IN ({statuses})")
         hit_params.append(staple.key)
         for attr, value in (attributes or {}).items():
             # zamjenjive vrijednosti (mlijeko: mast 2.8 = 3.2 = 3.5 = 3.8)
             accepted = staple.accepted_values(attr, value)
             hit_parts.append(f"""
-                SELECT DISTINCT g.gkey FROM g JOIN clean.product_attrs pa USING (chain, product_id)
-                WHERE pa.staple = ? AND pa.attr = ? AND pa.value IN ({", ".join("?" for _ in accepted)})""")
+                SELECT bkey FROM clean.staple_group_attrs
+                WHERE staple = ? AND attr = ? AND value IN ({", ".join("?" for _ in accepted)})""")
             hit_params += [staple.key, attr, *accepted]
     hit_sql = " INTERSECT ".join(f"({h})" for h in hit_parts)
     if staple:
@@ -121,8 +123,7 @@ def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | 
             if attr in (attributes or {}):
                 continue
             hit_sql = f"""({hit_sql}) EXCEPT (
-                SELECT DISTINCT g.gkey FROM g JOIN clean.product_attrs pa USING (chain, product_id)
-                WHERE pa.staple = ? AND pa.attr = ? AND pa.value = ?)"""
+                SELECT bkey FROM clean.staple_group_attrs WHERE staple = ? AND attr = ? AND value = ?)"""
             hit_params += [staple.key, attr, value]
 
     if staple:
@@ -171,7 +172,7 @@ def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | 
     gkey_expr, gkey_join = _gkey_sql(staple)
     sql = f"""
         WITH g AS (
-          SELECT p.*, {gkey_expr} AS gkey FROM clean.products p {gkey_join}
+          SELECT p.*, {gkey_expr} AS gkey, {BKEY_SQL} AS bkey FROM clean.products p {gkey_join}
         ),
         hit AS ({hit_sql}),
         x AS (
@@ -186,7 +187,7 @@ def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | 
                  c.is_special, c.date, s.scope, s.address, s.city, ch.data_quality,
                  p.is_food, p.food_group, p.category_source
           FROM g p
-          JOIN hit USING (gkey)
+          JOIN hit USING (bkey)
           JOIN clean.prices c USING (chain, product_id)
           JOIN clean.stores s USING (chain, store_id)
           JOIN clean.chains ch USING (chain)
@@ -207,13 +208,16 @@ def find_products(
     include_nonfood: bool = False,
     include_alcohol: bool = False,
     include_unverified: bool = False,
+    include_ambiguous: bool = False,
 ) -> list[dict]:
     """Pronađi proizvode po nazivu ili po osnovnoj namirnici (staples.yaml).
 
     Zadano vraća samo hranu (is_food = true) bez alkohola. `include_nonfood` dodaje neprehrambene
     proizvode, `include_alcohol` alkoholna pića, a `include_unverified` proizvode nepoznate skupine
     (food_group 'unknown', npr. Plodine bez EAN-a u drugim lancima); grupa sastavljena samo od
-    takvih nosi `food_unverified = true`.
+    takvih nosi `food_unverified = true`. Za namirnicu se zadano vraćaju samo grupe sa statusom
+    'member' (clean.staple_groups: većina lanaca ima naziv namirnice); `include_ambiguous` dodaje
+    dvosmislene grupe ("KUPUS KIS MASL ULJE" kod maslinovog ulja).
 
     - Slobodan upit: proizvod odgovara ako normalizirani naziv sadrži sve riječi upita. Ako je
       upit točno sinonim namirnice ("mlijeko", "brašno"), automatski se koristi namirnica.
@@ -258,7 +262,8 @@ def find_products(
         return []
     con = con or connect()
     food_sql = _food_filter(include_nonfood, include_alcohol, "yes" if include_unverified else "no")
-    cand_sql, cand_params, cov_col = _candidates(staple, tokens, attributes, city, include_clearance, food_sql)
+    cand_sql, cand_params, cov_col = _candidates(staple, tokens, attributes, city, include_clearance, food_sql,
+                                                 include_ambiguous)
     best = "x.unit_confidence = pick.conf AND x.per_unit = pick.per_unit AND NOT x.price_suspect"
     sql = f"""
         {cand_sql},
@@ -362,7 +367,7 @@ def _gkey_sql(staple) -> tuple[str, str]:
 
 
 def _attach_attributes(con: duckdb.DuckDBPyConnection, staple, rows: list[dict]) -> None:
-    """Atributi grupe = najčešća vrijednost svakog atributa među proizvodima u grupi.
+    """Atributi grupe: vrijednost iz naziva ispred zaključene i zadane, zatim najčešća u grupi.
 
     attribute_sources daje za svaki atribut {"name": naziv proizvoda, "how": "name" | "inferred" | "heuristic" |
     "default"}: "name" ako barem jedan proizvod u grupi vrijednost izričito ima u nazivu, inače
@@ -395,7 +400,8 @@ def _attach_attributes(con: duckdb.DuckDBPyConnection, staple, rows: list[dict])
         r["attributes"], r["attribute_sources"] = {}, {}
         for (gkey, attr), by_value in counts.items():
             if gkey == r["_gkey"]:
-                value = max(sorted(by_value), key=by_value.get)
+                # kao clean.staple_group_attrs: vrijednost iz naziva ispred zadane, zatim broj proizvoda
+                value = min(sorted(by_value), key=lambda v: (rank[sources[(gkey, attr, v)]["how"]], -by_value[v]))
                 r["attributes"][attr] = value
                 r["attribute_sources"][attr] = sources[(gkey, attr, value)]
 

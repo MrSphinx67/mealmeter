@@ -450,3 +450,19 @@ Izvještaji za pregled su u [MORNING_REVIEW.md](MORNING_REVIEW.md) (`scripts/mor
     - U pretrazi heuristika ima manju prednost od naziva i zaključka, a veću od zadane vrijednosti.
 53. **cijene.dev ne traži API ključ** za popis arhiva ni za preuzimanje (HTTP 200/206, vidi SCHEMA.md), pa
     `update.py` nije mijenjan.
+
+## Korak 2D: razrješavanje grupa, zadani izbori, mjere (2026-10-20)
+
+Izvještaji: [STEP2D_REVIEW.md](STEP2D_REVIEW.md) (`scripts/step2d_review.py`) i [REVIEW_FOR_CHAT.md](REVIEW_FOR_CHAT.md).
+
+54. **Pripadnost grupe namirnici** (`clean.staple_groups`, `clean.staple_group_attrs`).
+    - Grupa (globalni EAN, inače lanac + naziv) je `member` ako naziv prolazi pravila u > 50 % lanaca grupe i
+      nijedan isključeni naziv nema udio ≥ 25 % lanaca.
+    - Inače je `ambiguous` (izvan zadanog izbora, `find_products(include_ambiguous=True)`), a `excluded` ako
+      nijedan naziv ne prolazi (moja dopuna: takva grupa nije dvosmislena).
+    - Proizvod izbačen zbog pakiranja računa se kao pogodak naziva, a neprehrambeni (`kategorija:*`) ne.
+    - **Atribut grupe** je jedna vrijednost: iz naziva ispred zaključene, heurističke i zadane, zatim po
+      broju lanaca. Filtri atributa i zadano isključene varijante gledaju tu vrijednost, a ne „bilo koji
+      proizvod grupe“. Zato pureće mljeveno meso (u jednom lancu bez vrste) više nije zadano miješano.
+    - Cijena pravila: grupe sa skraćenim ili samo markom imenovanim nazivima ispadaju (najviše tjestenina,
+      202 grupe). Vidi STEP2D_REVIEW.md.

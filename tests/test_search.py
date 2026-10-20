@@ -65,7 +65,7 @@ def test_stores_clean(con):
 
 
 def test_name_norm(con):
-    assert q(con, "SELECT name_norm FROM clean.products WHERE chain = 'spar'") == [("bras ps glatko t 550 pod 1 kg",)]
+    assert q(con, "SELECT name_norm FROM clean.products WHERE chain = 'spar' AND product_id = '18058'") == [("bras ps glatko t 550 pod 1 kg",)]
 
 
 # --- find_products -------------------------------------------------------------

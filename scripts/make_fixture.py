@@ -19,13 +19,14 @@ PICK = {
     "konzum": (
         ["0907", "0001", "0201"],  # Osijek, Zagreb, Sesvete
         ["04030203", "01490037", "01310151",  # brašno glatko, Tabasco (11 znamenki), akcija
-         ("02230471", OSIJEK_ONLY), ("02230085", OSIJEK_ONLY), ("04030162", OSIJEK_ONLY)],  # mlijeko, čokoladno, oštro
+         ("02230471", OSIJEK_ONLY), ("02230085", OSIJEK_ONLY), ("04030162", OSIJEK_ONLY),  # mlijeko, čokoladno, oštro
+         ("02451416", OSIJEK_ONLY), ("90348702", OSIJEK_ONLY), ("90263987", ["0001"])],  # pureće mljeveno, kupus u masl. ulju, biljni parmezan
     ),
     "eurospin": (["310017", "310002"], ["900006101", "001761601"]),  # akcija s price > special, duplikati, 0.00
-    "lidl": (["105", "192"], ["6907930", "6909648", "6904110"]),  # duplikati, gramatura u `unit`
+    "lidl": (["105", "192"], ["6907930", "6909648", "6904110", ("6905984", ["105"])]),  # duplikati, gramatura u `unit`; pureće mljeveno
     "ntl": (["20654", "10102"], ["169600", "245063", "110379",  # PLU banana, Tabasco 11 znamenki
                                  ("001069", ["20654"])]),  # "BANANA SNIŽENJE" (rasprodaja)
-    "spar": (["87089"], ["18058"]),  # adresa sa sufiksom "87089 Spar"
+    "spar": (["87089"], ["18058", "48759", "306692"]),  # adresa sa sufiksom "87089 Spar"; pureće mljeveno, GreenVie parmezan
     "roto": (["D22"], ["04030203", "15598"]),  # cijena 0.00
     "dm": (["all"], ["1000105"]),  # nacionalna cijena
     "plodine": (["053"], ["021793",  # "NAPITAK SOJINO MLIJEKO" (Osijek), bez kategorije
