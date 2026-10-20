@@ -16,7 +16,9 @@ from step2e_review import FUNNEL_CHAINS  # noqa: E402
 from weak_suspects import weak_suspects  # noqa: E402
 
 from mealmeter.basket import plan_basket  # noqa: E402
-from mealmeter.staples import STAPLE_PPU_SQL, UNIT_SUSPECT_RATIO  # noqa: E402
+from mealmeter.staples import STAPLE_PPU_SQL  # noqa: E402
+
+UNIT_SUSPECT_RATIO = (0.6, 1.6)  # pravilo iz Koraka 2F (u Koraku 4 zamijenjeno, vidi staples.flag_unit_suspects)
 
 OUT = Path("docs/REVIEW_2F.md")
 MAX_LINES = 100

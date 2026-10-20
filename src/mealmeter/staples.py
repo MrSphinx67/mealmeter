@@ -701,27 +701,45 @@ def staple_suspect_sql(ppu: str, n_units: str, ps: str | None = None) -> str:
     return f"""(NOT (({ppu}) BETWEEN {lo} AND {hi}))"""
 
 
-UNIT_SUSPECT_RATIO = (0.6, 1.6)  # cijena po jedinici iz stupca unit naspram medijana namirnice
+# unit_suspect (Korak 4): omjer prema medijanu istog EAN-a u drugim lancima izvan ovog raspona
+UNIT_SUSPECT_EAN_RATIO = (0.4, 2.5)
+UNIT_SUSPECT_MIN_CHAINS = 2
 
 
 def flag_unit_suspects(con: duckdb.DuckDBPyConnection) -> int:
-    """Proizvod čija gramatura dolazi iz stupca `unit` (pack_source 'unit', uglavnom Lidl), a medijan
-    cijene po jedinici mu je izvan 0,6x-1,6x medijana namirnice: product_staples.unit_suspect = true
-    i drop_reason 'unit_suspect' (izvan zadanog izbora). Vraća broj takvih proizvoda."""
-    lo, hi = UNIT_SUSPECT_RATIO
+    """product_staples.unit_suspect za proizvode čija gramatura dolazi iz stupca `unit` (pack_source
+    'unit', uglavnom Lidl), kad je medijan cijene po jedinici:
+    - izvan ručnih granica namirnice (plausible_per_unit, ili plausible_by po stanju/uzgoju), ili
+    - izvan 0,4x-2,5x medijana istog globalnog EAN-a u barem 2 druga lanca.
+    Označeni se ne izbacuju: find_products ih rangira ispod neoznačenih, a plan_basket ih uzima samo
+    kao rezervu (zastavica unit_suspect). Vraća broj označenih."""
+    lo, hi = UNIT_SUSPECT_EAN_RATIO
     con.execute("ALTER TABLE clean.product_staples ADD COLUMN unit_suspect BOOLEAN DEFAULT false")
     con.execute(f"""
         CREATE OR REPLACE TEMP TABLE unit_ppu AS
-        SELECT ps.staple, ps.chain, ps.product_id, p.pack_source, median({STAPLE_PPU_SQL}) AS ppu
+        SELECT ps.staple, ps.chain, ps.product_id, p.pack_source, p.ean_norm, p.ean_global,
+               any_value(coalesce(ps.ppu_min, CASE WHEN r.range_source = 'manual' THEN r.ppu_min END)) AS lo,
+               any_value(coalesce(ps.ppu_max, CASE WHEN r.range_source = 'manual' THEN r.ppu_max END)) AS hi,
+               median({STAPLE_PPU_SQL}) AS ppu
         FROM clean.product_staples ps JOIN clean.staple_rules r USING (staple)
         JOIN clean.prices c USING (chain, product_id) JOIN clean.products p USING (chain, product_id)
-        WHERE NOT ps.excluded AND ps.drop_reason IS NULL GROUP BY ALL
+        WHERE NOT ps.excluded AND ps.drop_reason IS NULL GROUP BY ps.staple, ps.chain, ps.product_id,
+              p.pack_source, p.ean_norm, p.ean_global
     """)
     con.execute(f"""
-        UPDATE clean.product_staples ps SET unit_suspect = true, drop_reason = 'unit_suspect'
-        FROM unit_ppu u, (SELECT staple, median(ppu) AS med FROM unit_ppu GROUP BY staple) m
-        WHERE u.staple = ps.staple AND u.chain = ps.chain AND u.product_id = ps.product_id AND m.staple = u.staple
-          AND u.pack_source = 'unit' AND m.med > 0 AND (u.ppu / m.med > {hi} OR u.ppu / m.med < {lo})
+        UPDATE clean.product_staples ps SET unit_suspect = true
+        FROM (
+          SELECT u.staple, u.chain, u.product_id FROM unit_ppu u
+          LEFT JOIN LATERAL (
+            SELECT count(DISTINCT o.chain) AS n_other, median(o.ppu) AS med_other FROM unit_ppu o
+            WHERE u.ean_global AND o.ean_norm = u.ean_norm AND o.staple = u.staple AND o.chain <> u.chain
+          ) e ON true
+          WHERE u.pack_source = 'unit' AND u.ppu IS NOT NULL
+            AND (u.ppu < u.lo OR u.ppu > u.hi
+                 OR (e.n_other >= {UNIT_SUSPECT_MIN_CHAINS} AND e.med_other > 0
+                     AND (u.ppu / e.med_other < {lo} OR u.ppu / e.med_other > {hi})))
+        ) x
+        WHERE x.staple = ps.staple AND x.chain = ps.chain AND x.product_id = ps.product_id
     """)
     return con.execute("SELECT count(*) FROM clean.product_staples WHERE unit_suspect").fetchone()[0]
 

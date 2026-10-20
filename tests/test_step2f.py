@@ -181,6 +181,8 @@ def test_fresh_meat_by_weight_primary():
 # --- 6. provjera jedinice (pack_source = unit) ---------------------------------------------------------
 
 def test_unit_suspect(tmp_path):
+    """Korak 4: unit_suspect = cijena izvan ručnih granica ili daleko od istog EAN-a u >= 2 druga lanca;
+    označeni se ne izbacuju (drop_reason ostaje prazan)."""
     from mealmeter.build import build_clean, load_raw
     from tests.conftest import FIXTURE
 
@@ -188,11 +190,45 @@ def test_unit_suspect(tmp_path):
     load_raw(c, FIXTURE, "2026-10-19")
     c.execute("""INSERT INTO products (chain, product_id, barcode, name, category, unit) VALUES
                  ('lidl', 'L1', 'lidl:L1', 'Brašno pšenično glatko', 'Hrana', '1kg'),
-                 ('lidl', 'L2', 'lidl:L2', 'Brašno pšenično oštro', 'Hrana', '500g')""")  # 2,80 €/kg: krivi unit
+                 ('lidl', 'L2', 'lidl:L2', 'Brašno pšenično oštro', 'Hrana', '500g'),
+                 ('lidl', 'M1', 'lidl:M1', 'Križevačka mljekara Trajno mlijeko', 'Hrana', '1l'),
+                 ('lidl', 'M2', 'lidl:M2', 'Milkland trajno mlijeko 2,8%', 'Hrana', '1l'),
+                 ('lidl', 'B1', '3850104223624', 'Brašno glatko Podravka', 'Hrana', '1kg')""")
     c.execute("""INSERT INTO prices (chain, store_id, product_id, price, date) VALUES
-                 ('lidl', '105', 'L1', 0.69, DATE '2026-10-19'), ('lidl', '105', 'L2', 1.40, DATE '2026-10-19')""")
+                 ('lidl', '105', 'L1', 0.69, DATE '2026-10-19'), ('lidl', '105', 'L2', 3.50, DATE '2026-10-19'),
+                 ('lidl', '105', 'M1', 0.52, DATE '2026-10-19'), ('lidl', '105', 'M2', 0.39, DATE '2026-10-19'),
+                 ('lidl', '105', 'B1', 0.75, DATE '2026-10-19')""")
     build_clean(c)
     got = dict(c.execute("""SELECT product_id, unit_suspect FROM clean.product_staples
-                            WHERE staple = 'brasno' AND product_id IN ('L1', 'L2')""").fetchall())
-    assert got == {"L1": False, "L2": True}
-    assert c.execute("SELECT drop_reason FROM clean.product_staples WHERE product_id = 'L2'").fetchone()[0] == "unit_suspect"
+                            WHERE product_id IN ('L1', 'L2', 'M1', 'M2', 'B1') AND NOT excluded""").fetchall())
+    # L2: 7 €/kg > 6 (plausible); M1: 0,52 €/l u granicama; M2: 0,39 < 0,5; B1: isti EAN kao Podravka 1 kg
+    # u 5 lanaca (~0,79 €/kg), 0,75 €/kg -> omjer 0,95, nije označen
+    assert got == {"L1": False, "L2": True, "M1": False, "M2": True, "B1": False}
+    assert c.execute("SELECT count(*) FROM clean.product_staples WHERE unit_suspect AND drop_reason IS NOT NULL").fetchone()[0] == 0
+
+
+def test_unit_suspect_ean_ratio(tmp_path):
+    from mealmeter.build import build_clean, load_raw
+    from tests.conftest import FIXTURE
+
+    c = duckdb.connect(str(tmp_path / "e.duckdb"))
+    load_raw(c, FIXTURE, "2026-10-19")
+    # isti EAN kao Podravkino brašno 1 kg (5 lanaca u fixtureu, ~0,79 €/kg); stupac unit kaže 1 kg, a cijena
+    # 2,20 € je cijena manjeg pakiranja: 2,20 €/kg je u granicama (0,4-6), ali 2,8x medijana drugih lanaca.
+    # (Različita gramatura od ostalih s istim EAN-om već ispada kao drop_reason 'pakiranje'.)
+    c.execute("""INSERT INTO products (chain, product_id, barcode, name, category, unit) VALUES
+                 ('lidl', 'B2', '3850104223624', 'Brašno glatko Podravka', 'Hrana', '1kg')""")
+    c.execute("INSERT INTO prices (chain, store_id, product_id, price, date) VALUES ('lidl', '105', 'B2', 2.20, DATE '2026-10-19')")
+    build_clean(c)
+    assert c.execute("SELECT unit_suspect FROM clean.product_staples WHERE product_id = 'B2' AND staple = 'brasno'").fetchone() == (True,)
+
+
+def test_unit_suspect_basket_fallback():
+    from mealmeter.basket import choose_product
+
+    sus = {**_row("sus", 0.39, "strong", grams=1000), "unit_suspect": True}
+    ok = _row("ok", 0.79, "strong", grams=1000)
+    pick = choose_product([sus, ok], 500, "g", None)
+    assert pick["product_id"] == "ok" and not pick["fallback"]
+    pick = choose_product([sus], 500, "g", None)
+    assert pick["product_id"] == "sus" and pick["fallback"] and "unit_suspect" in pick["flags"]

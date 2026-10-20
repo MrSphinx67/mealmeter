@@ -714,3 +714,12 @@ Sažetak: [REVIEW_2F.md](REVIEW_2F.md) (`scripts/review_2f.py`).
     se pri izradi), lijevak prije i poslije točke 3, 20 sumnjivih slabih članova, tablica Lidla za točku 6 i
     košarice u Osijeku. Medijan šećera je oko 3,8 €/kg, jer uključuje šećer u prahu, smeđi i mala pakiranja.
     Zato je i ispravni kristal šećer na omjeru 0,2–0,3, što dodatno govori protiv granice 0,6x.
+88. **unit_suspect, novo pravilo (Korak 4, 0.1; zamjenjuje odluku 86).** Vrijedi samo za gramaturu iz stupca `unit`.
+    - Proizvod se označava kad mu je cijena po jedinici izvan ručnih granica (`plausible_per_unit` ili
+      `plausible_by` po stanju/uzgoju), ili kad je izvan 0,4x–2,5x medijana istog globalnog EAN-a u ≥ 2 druga lanca.
+    - Označeni se ne izbacuju. `find_products` ih rangira ispod neoznačenih (`unit_suspect` u izlazu). U
+      `plan_basket` zastavica `unit_suspect` znači da su samo rezerva.
+    - Na 20.10.: 10 proizvoda, svi u Lidlu (prije 267). „Križevačka mljekara Trajno mlijeko 1l“ 0,52 €/l nije
+      označen, „Milkland“ 0,39 €/l jest.
+    - Isti EAN s drugom gramaturom već ispada kao `drop_reason = 'pakiranje'`. Omjer prema EAN-u zato hvata
+      samo istu gramaturu s cijenom drugog pakiranja (Dolcela 6x12 g po cijeni jedne vrećice?).
