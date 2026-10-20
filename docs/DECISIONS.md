@@ -694,3 +694,11 @@ Sažetak: [REVIEW_2F.md](REVIEW_2F.md) (`scripts/review_2f.py`).
     - Isključenja: grašak `poli\b`, `salam`; med `cokolad`, `riki\b`, `medenjak`, `lambertz`, `keks`.
     - `scripts/weak_suspects.py`: slabi članovi kojima nijedan naziv nema riječ namirnice među prve tri riječi
       (na 20.10. 39 od 447). Popis je u REVIEW_2F.md.
+85. **Kupnja na vagu.**
+    - Ravnopravan izbor za `loose_produce` (voće, povrće) i svježe meso. Novo polje `fresh_meat`: pileća prsa,
+      piletina, mljeveno meso, svinjetina, junetina. Tu ulazi i meso na vagu bez „cca“.
+    - Za ostalo (sirevi, šunke…) kupnja na vagu je samo roba promjenjive težine i samo kad u trgovini nema
+      pakiranog proizvoda (`by_weight_fallback = true` u stavci). Parmezan u pakiranju ima prednost pred
+      „CCA 4 KG“.
+    - Usput: maslinovo ulje isključuje taralli i focacciu („TARALLI DJEVIČANSKO MASL.ULJE 500g“ bio je izbor
+      u košarici).

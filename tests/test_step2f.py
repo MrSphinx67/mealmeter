@@ -149,3 +149,30 @@ def test_point4_exclusions(key, name):
     from mealmeter.staples import name_match
 
     assert name_match(S[key], name) in ("excluded", None)
+
+
+# --- 5. kupnja na vagu ------------------------------------------------------------------------------
+
+def _w(pid, ppu, **kw):
+    return {"product_id": pid, "price_eff": ppu, "pack_amount": None, "pack_unit": None, "price_per_unit": ppu,
+            "per_unit": "kg", **kw}
+
+
+def test_parmezan_packed_before_weight():
+    from mealmeter.basket import choose_product
+
+    packed = {**_row("pak", 2.49, "strong", grams=100)}
+    cca = _w("cca", 22.0, variable_weight=True)
+    pick = choose_product([cca, packed], 50, "g", "kg", loose=False)
+    assert pick["product_id"] == "pak" and not pick["by_weight_fallback"]
+    pick = choose_product([cca], 50, "g", "kg", loose=False)
+    assert pick["product_id"] == "cca" and pick["by_weight"] and pick["by_weight_fallback"]
+
+
+def test_fresh_meat_by_weight_primary():
+    from mealmeter.basket import _by_weight_primary, choose_product
+
+    assert _by_weight_primary(S["svinjetina"]) and _by_weight_primary(S["luk"]) and not _by_weight_primary(S["parmezan"])
+    counter = _w("vaga", 6.0)  # bez pakiranja i bez "cca": vaga u mesnici
+    pick = choose_product([counter, _row("pak", 4.50, "strong", grams=500)], 500, "g", "kg", loose=True)
+    assert pick["product_id"] == "vaga" and not pick["by_weight_fallback"]  # 3,00 € < 4,50 €

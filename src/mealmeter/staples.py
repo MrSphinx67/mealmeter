@@ -65,6 +65,8 @@ class Staple:
     # proizvod bez gramature koji se ne prodaje na vagu dobiva procijenjenu težinu komada iz
     # data/units.yaml (vezica peršina 50 g), uz unit_confidence=low i pack_source=assumed
     assume_piece: bool = False
+    # svježe meso: kupnja na vagu (bez pakiranja) je ravnopravan izbor, kao kod svježeg povrća
+    fresh_meat: bool = False
     # oblik=suho bez oznake u nazivu: {"pack_g": (400, 1000), "unit": (...), "words": (...)}
     dry_rule: dict = field(default_factory=dict, hash=False, compare=False)
     # uzorci: proizvod ispada samo ako nema gramature (prazna soljenka), drop_reason 'bez_gramature'
@@ -234,6 +236,7 @@ def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> d
             ambiguous_form=bool(d.get("ambiguous_form", False)),
             require_pack=tuple(_fold(p) for p in d.get("require_pack", [])),
             assume_piece=bool(d.get("assume_piece", False)),
+            fresh_meat=bool(d.get("fresh_meat", False)),
             dry_rule={k: tuple(_fold(str(x)) if k != "pack_g" else float(x) for x in v)
                       for k, v in (d.get("dry_rule") or {}).items()},
             substitutes={a: tuple(str(v) for v in vals) for a, vals in (d.get("substitutes") or {}).items()},

@@ -38,6 +38,7 @@
 #                   dobiva pretpostavljenu masu, uz unit_confidence=low i pack_source=assumed
 #   inferred_attributes  atribut zaključen iz naziva linije (LAGANO JUTRO -> laktoza=bez), u izlazu
 #                   označen kao "inferred"
+#   fresh_meat      svježe meso: kupnja na vagu je ravnopravan izbor (inače samo rezerva kad nema pakiranog)
 #   assume_piece    proizvod bez gramature koji se ne prodaje na vagu dobiva masu komada iz data/units.yaml
 #                   (pieces), npr. vezica peršina 50 g, uz unit_confidence=low i pack_source=assumed
 #   piece_g         (zastarjelo) masa komada; mase komada su u data/units.yaml (pieces). Ovo polje je samo rezerva:
@@ -256,7 +257,7 @@ maslinovo_ulje:
   must_match: [maslinovo ulje, ulje maslinovo, masl ulje, ulje masl, ekstra devicansko, extra devicansko,
                extra virgin]
   must_not_match: [grissin, okus, tartuf, umak, kruh, pecivo, kreker, tuna, sardin, fileti, skus, inci, masline\b, rajcic, ocat, set\b, sapun, krema,
-                   kupus, kis, salat]
+                   kupus, kis, salat, tarall, focacc]
   unit: l
   max_pack: 5000
   min_pack: 250
@@ -1010,6 +1011,7 @@ pileca_prsa:
                    # štruca), čeka potvrdu vlasnika; vidi docs/MORNING_REVIEW.md
                    jeli\b, je li\b]
   unit: kg
+  fresh_meat: true  # na vagu je ravnopravan izbor (Korak 2F)
   # zadano svježe; granice po stanju (Korak 2D, vlasnik): svježe 3-20 €/kg, smrznuto 2-12 €/kg
   default_attributes: {stanje: svjeze}
   plausible_by:
@@ -1032,6 +1034,7 @@ piletina:
                    zacin, alu\b, grill zacin, gotov, umak, mini\b, prsa\b, file\b, filet\b, purec, puret,
                    gusc, patk]
   unit: kg
+  fresh_meat: true  # na vagu je ravnopravan izbor (Korak 2F)
   attributes:
     dio:
       cijelo: '\bpile\b(?!.*\b(batak|zabatak|krila|krilca|prsa))|\bcijelo|\bkalibro|\bgrill'
@@ -1047,6 +1050,7 @@ mljeveno_meso:
                mljeveno purece, mljeveno pilece, mljeveno telece, mljev meso]
   must_not_match: [posipac, secer, papar, aluminij, veggie, polpete, cevap, pljeskav, burger]
   unit: kg
+  fresh_meat: true  # na vagu je ravnopravan izbor (Korak 2F)
   # zadano miješano, pa juneće, pa svinjsko (prva dostupna u trgovini); pureće i pileće samo na zahtjev
   default_preference: {vrsta: [mijesano, junece, svinjsko]}
   max_pack: 2000
@@ -1072,6 +1076,7 @@ svinjetina:
                    kuhan, narez, salam, pasteta, kobas, hrenov, sunka, pecen, pohan, panir, mast\b,
                    cvarc, juha, gulas, gotov, konzerv, lim\b, mljev, kotanyi, zacin, cca\b]
   unit: kg
+  fresh_meat: true  # na vagu je ravnopravan izbor (Korak 2F)
   require_any: [gulas, but\b, lopatic, ramstek, file, rebr, vrat, juh, prsa, kotlet, karee]
   attributes:
     dio:
@@ -1095,6 +1100,7 @@ junetina:
                    macke, pse\b, hrana, felix, whiskas, piletin, puretin, povrce, umak, jela\b, cca\b,
                    pastet, carpaccio, prsut, mesnat]
   unit: kg
+  fresh_meat: true  # na vagu je ravnopravan izbor (Korak 2F)
   require_any: [gulas, but\b, lopatic, ramstek, file, rebr, vrat, juh, prsa]
   attributes:
     dio:

@@ -173,8 +173,10 @@ def choose_product(rows: list[dict], need: float, need_unit: str, by_weight_unit
     1. Kandidati bez zastavica (rasprodaja, cijena izvan granica, nesigurna gramatura, sumnjiv
        lanac); samo ako takvih nema, uzimaju se označeni.
     2. Najjeftinije pakiranje (apsolutna cijena) koje pokriva količinu, uz jednaku cijenu manje. Roba na vagu
-       (cijena po kg/l, bez pakiranja: svježe voće/povrće ako je `loose`, inače samo promjenjiva
-       težina) pokriva točno potrebnu količinu.
+       (cijena po kg/l, bez pakiranja) pokriva točno potrebnu količinu:
+       - `loose` (svježe voće i povrće, svježe meso: _by_weight_primary): ravnopravan izbor;
+       - inače (sirevi, šunke...): samo roba promjenjive težine ("CCA 4 KG") i samo kad u trgovini nema
+         pakiranog proizvoda (rezerva, `by_weight_fallback = True`).
     3. Inače najjeftinije po jedinici, u potrebnom broju pakiranja.
     """
     options = []
@@ -187,6 +189,11 @@ def choose_product(rows: list[dict], need: float, need_unit: str, by_weight_unit
             options.append({**r, "qty": None, "notes": ["na vagu"], "flags": flags_of(r), "by_weight": True})
     if not options:
         return None
+    fallback_weight = False
+    if not loose and any(not o["by_weight"] for o in options):
+        options = [o for o in options if not o["by_weight"]]  # pakirano ima prednost pred vagom
+    elif not loose:
+        fallback_weight = True
     # slabi članovi namirnice (clean.staple_groups.match_quality = 'weak') samo kad u trgovini nema snažnog
     strong = [o for o in options if o.get("match_quality") != "weak"]
     options = strong or options
@@ -211,7 +218,7 @@ def choose_product(rows: list[dict], need: float, need_unit: str, by_weight_unit
         cost_pack = round(n_packs * best["price_eff"], 2)
         cost_used = round(best["price_eff"] / best["qty"] * need, 2)
     return {**best, "n_packs": n_packs, "cost_pack": cost_pack, "cost_used": cost_used,
-            "fallback": not clean}
+            "fallback": not clean, "by_weight_fallback": fallback_weight and best["by_weight"]}
 
 
 # --- plan_basket -------------------------------------------------------------------
@@ -268,7 +275,7 @@ def _group_values(con, staple: Staple, prefs: dict) -> dict[str, dict]:
 def _choose_preferred(rows: list[dict], need: "Need", prefs: dict, group_values: dict) -> dict | None:
     """choose_product uz zadani redoslijed vrijednosti (default_preference): prva vrijednost koja u
     trgovini daje proizvod bez zastavica; inače najbolji izbor među svim kandidatima."""
-    args = (need.amount, need.unit, _by_weight_unit(need.staple), need.staple.loose_produce)
+    args = (need.amount, need.unit, _by_weight_unit(need.staple), _by_weight_primary(need.staple))
     for attr, order in prefs.items():
         for value in order:
             sub = [r for r in rows if group_values[attr].get(r["bkey"]) == value]
@@ -324,7 +331,7 @@ def _resolve_form(con, need: Need, city: str, wholesale: bool = False) -> list[s
             continue
         unit_costs = []
         for rows in _prepare(con, probe, city, wholesale).values():
-            pick = choose_product(rows, probe.amount, probe.unit, _by_weight_unit(fst), fst.loose_produce)
+            pick = choose_product(rows, probe.amount, probe.unit, _by_weight_unit(fst), _by_weight_primary(fst))
             if pick and not pick["fallback"]:
                 unit_costs.append(pick["cost_used"])
         if unit_costs:
@@ -346,6 +353,12 @@ def _resolve_form(con, need: Need, city: str, wholesale: bool = False) -> list[s
 
 def _input_amount(item: dict) -> tuple[float, str]:
     return float(item.get("amount") or 0), item.get("unit") or ""
+
+
+def _by_weight_primary(st: Staple) -> bool:
+    """Kupnja na vagu je ravnopravan izbor za svježe voće i povrće (loose_produce) i svježe meso
+    (fresh_meat); za ostalo je samo rezerva kad nema pakiranog proizvoda."""
+    return st.loose_produce or st.fresh_meat
 
 
 def _by_weight_unit(st: Staple) -> str | None:
@@ -465,7 +478,7 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
                 "is_special": pick["is_special"], "flags": pick["flags"], "notes": pick["notes"] + subst,
                 "fallback": pick["fallback"], "food_unverified": pick["is_food"] is None,
                 "date": pick["date"].isoformat(), "date_hr": date_hr(pick["date"]), "stale_days": pick["stale_days"],
-                "match_quality": pick.get("match_quality"),
+                "match_quality": pick.get("match_quality"), "by_weight_fallback": pick["by_weight_fallback"],
             }
 
     n_needs = len(needs)
