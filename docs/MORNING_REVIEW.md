@@ -14,8 +14,8 @@ Sve grupe s „jeli“ ili „je li“ u nazivu. To je Gavrilovićeva linija **J
 | trgovina-krk:jeli pileca prsa 2600 gr | JELI PILEĆA PRSA 2600 gr | trgovina-krk | 4,23 | 4,23 | 4,38 | 11 |
 | branka:salama prsa pileca jeli gavrilovic | SALAMA PRSA PILEĆA JELI GAVRILOVIĆ | branka | 9,49 | 9,74 | 9,99 | 2 |
 | 3858892724316 | JELI PILEĆA PRSA 2600G,GAVRILOVIĆ; PILEĆA PRSA JELI GAV RILOVIĆ; PILEĆA PRSA JELI GAVRILOVIĆ; PRSA PILEĆA JELI 2600 g; PRSA PILEĆA JELI kg; Pileća prsa Jeli | konzum, ktc, ribola, spar, studenac, trgocentar | 3,84 | 10,29 | 11,69 | 205 |
-| tommy:pileca prsa jeli gavrilovic | PILEĆA PRSA JELI GAVRILOVIĆ | tommy | 9,99 | 10,49 | 10,99 | 81 |
 | ntl:prsa pileca jeli kg gavrilovic | PRSA PILEĆA JELI kg GAVRILOVIĆ | ntl | 10,49 | 10,49 | 10,49 | 2 |
+| tommy:pileca prsa jeli gavrilovic | PILEĆA PRSA JELI GAVRILOVIĆ | tommy | 9,99 | 10,49 | 10,99 | 81 |
 | gavranovic:gav jeli pileca prsa delikates | GAV.JELI PILEĆA PRSA DELIKATES | gavranovic | 10,49 | 10,49 | 10,49 | 44 |
 | 3858892722572 | ŠUNKA JELI PIL. PRSA; ŠUNKA PILEĆA PRSA JELI | djelo_vodice, studenac | 10,69 | 11,04 | 11,39 | 2 |
 | 3858892724392 | GAV.JELI PILEĆA PRSA 350g; Gavrilović Jeli Pileća prsa 350 g; JELI PILECA PRSA 350 G GAVRILOVIC; PILEĆA PRSA 350 g JE LI GAVRILOVIĆ; PILEĆA PRSA 350G JELI; PILEĆA PRSA 350g JELI GAVRILOVIĆ; PILEĆA PRSA JELI 350 g; PRSA PILEĆA JELI 350 g; PRSA PILEĆA JELI 350g | djelo_vodice, gavranovic, kaufland, konzum, ktc, plodine, ribola, spar, studenac | 8,11 | 11,11 | 13,40 | 310 |
@@ -38,9 +38,150 @@ Napomena: štruca od 2,6 kg ima 2,30–4,38 €/kg, pa vjerojatno nosi cijenu po
 | studenac | PILECI FILE SMRZ.STANIC | 3,92 | 3,98 | 5 |
 | trgovina-krk | PILEĆI FILE ZA GASTRO 1 kg | 1,95 | 4,08 | 4 |
 | konzum | PILEĆI FILE SOLJENI 6X2 BRAZIL | 3,28 | 4,11 | 4 |
+| studenac | GASTRO PILEĆI FILE PEČENI | 209,90 | 209,90 | 2 |
 | branka | PRSA PILEĆA SVJEŽA | 4,79 | 4,99 | 2 |
 | studenac | PILEĆI FILE BRAZIL 2KG LEDO | 4,91 | 4,91 | 2 |
-| studenac | GASTRO PILEĆI FILE PEČENI | 209,90 | 209,90 | 2 |
+
+## 5. Luk: nazivi s bojom (ČEKA POTVRDU, mapiranje nije mijenjano)
+
+Svi različiti nazivi kandidata za `luk` (`must_match` luk/kapula) koji sadrže crveni, ljubičasti, srebrenac, žuti ili bijeli, uz trenutni status, vrstu iz naziva, raspon cijene po kg (s pretpostavljenih 500 g za „rukavac“) i broj lanaca. `vrsta`: crveni = crven|ljubičast, žuti = žut|srebren, bijeli = bijel.
+
+| naziv | status | vrsta | min €/kg | max €/kg | lanaca | lanci |
+|---|---|---|---|---|---|---|
+| LUK BIJELI (ČEŠNJAK) DOMAĆI RF | isključen | - | 3,05 | 3,05 | 1 | tommy |
+| LUK BIJELI (ČEŠNJAK) RFS | isključen | - | 2,19 | 2,19 | 1 | tommy |
+| LUK CRVENI OGULJENI REZANI 5 kg | isključen | - | 2,12 | 2,12 | 1 | tommy |
+| LUK LJUBIČ./BIJELI ZA GASTRO 1 kg | luk | bijeli | 0,68 | 1,30 | 1 | trgovina-krk |
+| 10KG LUK CRVENI | luk | crveni | 0,74 | 0,74 | 1 | metro |
+| 10KG LUK CRVENI 50/70 VC KL II | luk | crveni | 0,74 | 0,74 | 1 | metro |
+| 10KG LUK CRVENI 60/80 VC | luk | crveni | 0,74 | 0,74 | 1 | metro |
+| 1KG LUK CRVEN SLATKI 50-70 VC | luk | crveni | 3,28 | 3,28 | 1 | metro |
+| 5KG LUK CRVENI 4 MR | luk | crveni | 0,91 | 0,91 | 1 | metro |
+| 5KG LUK LJUBIČASTI - VC | luk | crveni | 1,59 | 1,59 | 1 | metro |
+| 5KG LUK LJUBIČASTI 50-70 | luk | crveni | 1,40 | 1,40 | 1 | metro |
+| BIO LUK LJUBIČASTI NP 500 g | luk | crveni | 2,98 | 3,18 | 1 | spar |
+| KAPULA (CRVENI LUK) SNIŽENO | luk | crveni | 0,40 | 0,40 | 1 | tommy |
+| KAPULA LJUBIČASTA | luk | crveni | 1,59 | 1,63 | 2 | bure, lorenco |
+| KAPULA LJUBIČASTA (CRVENI LUK) | luk | crveni | 1,19 | 1,39 | 1 | tommy |
+| LUK CRVENI | luk | crveni | 0,49 | 0,95 | 6 | gavranovic, konzum, ktc, ntl, trgocentar, trgovina-krk |
+| LUK CRVENI (20) | luk | crveni | 0,75 | 0,75 | 1 | roto |
+| LUK CRVENI (PT) | luk | crveni | 0,49 | 0,49 | 1 | trgocentar |
+| LUK CRVENI 1 kg BIO ZONE | luk | crveni | 1,69 | 1,69 | 1 | konzum |
+| LUK CRVENI 1KG EKOZONA | luk | crveni | 1,99 | 2,19 | 1 | tommy |
+| LUK CRVENI 1kg | luk | crveni | 1,05 | 1,05 | 1 | ktc |
+| LUK CRVENI 2,5 kg | luk | crveni | 1,08 | 1,08 | 1 | ntl |
+| LUK CRVENI 2,5 kg SNIŽENJE | luk | crveni | 0,40 | 0,48 | 1 | ntl |
+| LUK CRVENI 2,50 kg | luk | crveni | 0,96 | 0,96 | 1 | trgovina-krk |
+| LUK CRVENI 2,5kg | luk | crveni | 1,30 | 1,30 | 1 | gavranovic |
+| LUK CRVENI 2,5kg SNIŽENJE | luk | crveni | 0,74 | 0,74 | 1 | gavranovic |
+| LUK CRVENI 2kg | luk | crveni | 1,00 | 1,00 | 1 | ktc |
+| LUK CRVENI 4/1 | luk | crveni |  |  | 1 | ribola |
+| LUK CRVENI 5/1 | luk | crveni | 0,53 | 0,53 | 1 | ntl |
+| LUK CRVENI 5/1 NTL | luk | crveni | 0,33 | 0,33 | 1 | trgovina-krk |
+| LUK CRVENI 5KG | luk | crveni | 0,46 | 0,46 | 1 | trgocentar |
+| LUK CRVENI 5kg | luk | crveni | 0,80 | 0,80 | 1 | ktc |
+| LUK CRVENI AGROVIR | luk | crveni | 0,69 | 1,25 | 1 | stridon |
+| LUK CRVENI BIM | luk | crveni | 0,66 | 0,86 | 1 | stridon |
+| LUK CRVENI II KL | luk | crveni | 0,49 | 0,49 | 1 | boso |
+| LUK CRVENI II KL HR | luk | crveni | 0,53 | 0,53 | 1 | boso |
+| LUK CRVENI KLIPER 1 KG | luk | crveni | 1,25 | 1,45 | 1 | tommy |
+| LUK CRVENI PAK 1 kg | luk | crveni | 0,99 | 0,99 | 1 | trgovina-krk |
+| LUK CRVENI PAK. 1 kg | luk | crveni | 0,99 | 0,99 | 1 | ntl |
+| LUK CRVENI PAK. 1 kg SNIŽENJE | luk | crveni | 0,50 | 0,50 | 1 | ntl |
+| LUK CRVENI PAKIR.1kg | luk | crveni | 1,29 | 1,45 | 1 | gavranovic |
+| LUK CRVENI PAKIR.1kg SNIŽENJE | luk | crveni | 0,79 | 0,84 | 1 | gavranovic |
+| LUK CRVENI RUKAVAC 3/1 VOĆ. STUDENAC | luk | crveni | 2,38 | 2,62 | 1 | studenac |
+| LUK CRVENI RUKAVAC 4/1 | luk | crveni | 1,98 | 2,90 | 3 | gavranovic, ntl, trgovina-krk |
+| LUK CRVENI RUKAVAC 4/1 SNIŽENJE | luk | crveni | 1,00 | 1,00 | 1 | ntl |
+| LUK CRVENI RUKAVAC KOM | luk | crveni | 1,78 | 1,78 | 1 | ktc |
+| LUK CRVENI SNIŽENI kg | luk | crveni | 0,59 | 0,59 | 1 | studenac |
+| LUK CRVENI SNIŽENJE | luk | crveni | 0,20 | 0,71 | 2 | gavranovic, ntl |
+| LUK CRVENI SNIŽENO | luk | crveni | 0,30 | 0,50 | 1 | ktc |
+| LUK CRVENI ZA GASTRO 1 kg | luk | crveni | 0,26 | 1,89 | 1 | trgovina-krk |
+| LUK CRVENI kg | luk | crveni | 0,84 | 0,84 | 1 | studenac |
+| LUK LJUBICASTI | luk | crveni | 1,19 | 1,19 | 1 | plodine |
+| LUK LJUBICASTI 1 KG | luk | crveni | 0,99 | 1,29 | 1 | plodine |
+| LUK LJUBICASTI 500G | luk | crveni | 1,86 | 2,46 | 1 | plodine |
+| LUK LJUBIČAST RUKAVAC VH 4/1 | luk | crveni | 2,58 | 2,58 | 1 | spar |
+| LUK LJUBIČASTI | luk | crveni | 0,99 | 1,89 | 7 | gavranovic, konzum, ktc, ntl, ribola, trgovina-krk, vrutak |
+| LUK LJUBIČASTI (10) | luk | crveni | 1,01 | 1,01 | 1 | roto |
+| LUK LJUBIČASTI (PT) | luk | crveni | 1,39 | 1,39 | 1 | trgocentar |
+| LUK LJUBIČASTI - KG | luk | crveni | 1,16 | 1,16 | 1 | metro |
+| LUK LJUBIČASTI 1kg | luk | crveni | 1,09 | 1,09 | 1 | eurospin |
+| LUK LJUBIČASTI 4/1 | luk | crveni |  |  | 1 | ribola |
+| LUK LJUBIČASTI AGROVIR | luk | crveni | 1,27 | 2,20 | 1 | stridon |
+| LUK LJUBIČASTI II KL | luk | crveni | 0,99 | 1,69 | 1 | boso |
+| LUK LJUBIČASTI KG | luk | crveni | 0,93 | 0,93 | 1 | metro |
+| LUK LJUBIČASTI PAKIRANI 1KG | luk | crveni | 1,49 | 1,49 | 1 | djelo_vodice |
+| LUK LJUBIČASTI RUKAVAC 4/1 | luk | crveni | 1,98 | 3,78 | 5 | branka, eurospin, gavranovic, ntl, trgovina-krk |
+| LUK LJUBIČASTI RUKAVAC 4/1 SNIŽENJE | luk | crveni | 1,98 | 2,40 | 1 | gavranovic |
+| LUK LJUBIČASTI RUKAVAC 4/1SNIŽENJE | luk | crveni | 1,40 | 1,40 | 1 | ntl |
+| LUK LJUBIČASTI RUKAVAC KOM | luk | crveni | 2,38 | 2,38 | 1 | ktc |
+| LUK LJUBIČASTI SNIŽ.kg | luk | crveni | 0,90 | 0,99 | 1 | studenac |
+| LUK LJUBIČASTI SNIŽENJE | luk | crveni | 0,25 | 1,16 | 2 | gavranovic, ntl |
+| LUK LJUBIČASTI SNIŽENO | luk | crveni | 0,40 | 0,40 | 1 | ktc |
+| LUK LJUBIČASTI VH 1 kg | luk | crveni | 1,29 | 1,29 | 1 | spar |
+| LUK LJUBIČASTI kg | luk | crveni | 1,29 | 1,42 | 1 | studenac |
+| LUK LJUBIČASTI rfz | luk | crveni | 0,99 | 0,99 | 1 | eurospin |
+| LUK LJUBIČASTI Š-27 | luk | crveni | 1,59 | 1,69 | 1 | branka |
+| LUK LJUBIČASTI- KG | luk | crveni | 1,53 | 1,53 | 1 | metro |
+| Luk crveni 1kg | luk | crveni | 0,79 | 0,89 | 2 | kaufland, lidl |
+| Luk crveni 2kg | luk | crveni | 0,77 | 0,80 | 2 | kaufland, lidl |
+| Luk crveni 5kg | luk | crveni | 0,39 | 0,59 | 2 | kaufland, lidl |
+| Luk crveni rinfuza | luk | crveni | 0,79 | 0,79 | 1 | lidl |
+| Luk crveni_OC | luk | crveni | 0,79 | 0,79 | 1 | kaufland |
+| Luk ljubičasti | luk | crveni | 1,09 | 1,09 | 1 | kaufland |
+| Luk ljubičasti 1kg | luk | crveni | 0,99 | 0,99 | 1 | lidl |
+| Luk ljubičasti rfs | luk | crveni | 1,29 | 1,49 | 1 | spar |
+| Luk ljubičasti rinfuza | luk | crveni | 1,09 | 1,09 | 1 | lidl |
+| Luk ljubičasti rukavac | luk | crveni | 2,58 | 2,58 | 1 | kaufland |
+| N-LUK CRVENI (ŽUTI) | luk | crveni |  |  | 1 | vrutak |
+| KAPULA MLADA LJUBIČASTA | luk | mladi | 1,39 | 1,59 | 1 | tommy |
+| \*KAPULA ŽUTA 1 kg | luk | zuti | 1,25 | 1,25 | 1 | ribola |
+| \*LUK SREBRENAC 4/1 | luk | zuti |  |  | 1 | ribola |
+| BIO LUK ŽUTI 500 g | luk | zuti | 2,78 | 2,78 | 1 | tommy |
+| BIO LUK ŽUTI NATUR PUR 1 kg | luk | zuti | 1,69 | 1,79 | 1 | spar |
+| KAPULA BIJELA-SREBRENAC | luk | zuti |  |  | 1 | lorenco |
+| KAPULA SREBRENAC kg | luk | zuti | 1,68 | 1,68 | 1 | studenac |
+| KAPULA ŽUTA | luk | zuti | 0,84 | 0,84 | 1 | ribola |
+| KAPULA ŽUTA (CRV.LUK) | luk | zuti | 0,79 | 0,79 | 1 | tommy |
+| KAPULA ŽUTA EMM | luk | zuti | 0,84 | 0,84 | 1 | ribola |
+| KBio.Luk žuti 1kg | luk | zuti | 1,99 | 1,99 | 1 | kaufland |
+| KBio.Luk žuti 500g | luk | zuti | 3,58 | 3,58 | 1 | kaufland |
+| LUK SREBRENAC | luk | zuti | 1,79 | 3,45 | 9 | gavranovic, konzum, ktc, ntl, plodine, ribola, trgocentar, trgovina-krk, vrutak |
+| LUK SREBRENAC (10) | luk | zuti | 1,83 | 1,83 | 1 | roto |
+| LUK SREBRENAC (PT) | luk | zuti | 2,09 | 2,29 | 1 | trgocentar |
+| LUK SREBRENAC 3/1 | luk | zuti |  |  | 1 | djelo_vodice |
+| LUK SREBRENAC 500G | luk | zuti | 2,22 | 2,46 | 1 | plodine |
+| LUK SREBRENAC AGROVIR | luk | zuti | 4,71 | 4,71 | 1 | stridon |
+| LUK SREBRENAC RFS | luk | zuti | 1,49 | 1,79 | 2 | eurospin, tommy |
+| LUK SREBRENAC SNIŽENJE | luk | zuti | 1,00 | 1,84 | 2 | gavranovic, ntl |
+| LUK SREBRENAC SNIŽENO | luk | zuti | 1,00 | 1,00 | 1 | ktc |
+| LUK SREBRENAC kg | luk | zuti | 3,29 | 3,69 | 1 | studenac |
+| LUK ZUTI | luk | zuti | 0,79 | 0,84 | 1 | plodine |
+| LUK ZUTI 1 KG | luk | zuti | 0,89 | 0,99 | 1 | plodine |
+| LUK ZUTI 1 KG GIRO | luk | zuti | 1,79 | 1,95 | 1 | plodine |
+| LUK ŽUTI 1 kg | luk | zuti | 1,09 | 1,29 | 1 | konzum |
+| LUK ŽUTI 1kg | luk | zuti | 0,79 | 1,69 | 2 | branka, eurospin |
+| LUK ŽUTI 2kg | luk | zuti | 0,75 | 0,75 | 1 | eurospin |
+| LUK ŽUTI PAKIRANI 1KG | luk | zuti | 1,29 | 1,29 | 1 | djelo_vodice |
+| LUK ŽUTI RUKAVAC 4/1 | luk | zuti | 1,98 | 1,98 | 1 | eurospin |
+| LUK ŽUTI RUKAVAC VH 4/1 | luk | zuti | 1,98 | 1,98 | 1 | spar |
+| LUK ŽUTI SVJ 40/60 II KL V-V | luk | zuti | 0,56 | 0,56 | 1 | studenac |
+| LUK ŽUTI SVJ II KL V-V | luk | zuti | 1,55 | 1,55 | 1 | studenac |
+| LUK ŽUTI VH 1 kg | luk | zuti | 0,99 | 0,99 | 1 | spar |
+| LUK ŽUTI rfz | luk | zuti | 0,64 | 0,64 | 1 | eurospin |
+| Luk rukavac žuti kom | luk | zuti | 1,98 | 1,98 | 1 | kaufland |
+| Luk srebrenac | luk | zuti | 1,99 | 2,99 | 2 | kaufland, spar |
+| Luk srebrenac rinfuza | luk | zuti | 1,99 | 1,99 | 1 | lidl |
+| Luk srebrenac, slatki | luk | zuti | 2,19 | 2,19 | 1 | lidl |
+| Luk žuti rfs | luk | zuti | 0,39 | 0,84 | 1 | spar |
+
+Zapažanja (bez promjene mapiranja):
+- „LUK BIJELI (ČEŠNJAK)“ je češnjak; isključen je kroz `cesnjak`. Vrsta `bijeli` zato pogađa samo „LUK LJUBIČ./BIJELI ZA GASTRO“, koji je ljubičasti luk: kratica „ljubič.“ ne pogađa `ljubicast`.
+- „LUK SREBRENAC“ postoji u 20-ak lanaca i **jest u namirnici** (vrsta `zuti`): uzorak `srebrn` u `must_not_match` ne pogađa „srebrenac“ (srebr-e-nac), pa ništa ne isključuje. Ako je srebrenac trebao biti isključen, uzorak bi bio `srebren`.
+- Pakiranja bez gramature („LUK SREBRENAC 4/1“, „3/1“) nemaju cijenu po kg; `packaged` (500 g) vrijedi samo za „rukavac“.
+- Metroove vreće od 10 kg imaju oko 0,74 €/kg, a „slatki“ crveni luk 3,28 €/kg.
 
 ## 0. Filtar hrane
 
@@ -79,26 +220,26 @@ Proizvodi izvan zadanog izbora (`find_products`/`get_prices` bez `include_*`), p
 
 | lanac | naziv | kategorija lanca | skupina | izvor |
 |---|---|---|---|---|
-| ktc | JACK DANIEL S 0,7L + 1 ČAŠA | PIĆA | alkohol | chain |
-| gavranovic | POSUDA S POKLOPCEM 3,6L-rasprodaja | Hrana | hrana | chain |
-| plodine | WHISKEY JAMESON 0,7 L + 2 CASE |  | alkohol | ean_inherited |
-| boso | SJEME GARDEN PAPR.ŠOROKŠARI | ZELENI PROGRAM | hrana | chain |
-| konzum | MEDENJACI DEKORAT SET 480 G LAMBERTZ | HRANA | hrana | chain |
-| gavranovic | SYOSS ŠAMPON FULL HAIR 5D 440ml | Hrana | hrana | chain |
-| gavranovic | VREĆICA UKRASNA 31X42X12Cm-rasprodaja | Hrana | hrana | chain |
-| ribola | ABC 100G SPUŽVA BOB | HRANA | hrana | chain |
-| vrutak | N-KRUH PIROV KALUP 500 G | PEKARSRVO | hrana | chain |
-| roto | WHISKEY JACK DANIELS HONEY 0,70 + 2 ČAŠE (6)\* | ŽESTOKO | alkohol | chain |
-| ntl | IGRAČKA FINGER SLUG VELIKI | Ostalo | hrana | ean_inherited |
-| ktc | ČOK BOMONI 80g SA GLAZB. IGRAČKOM | HRANA | hrana | chain |
-| gavranovic | H&S ŠAMPON 250ml OCEAN | Hrana | hrana | chain |
-| studenac | KING DESIRE ČAŠA 450 ml | HRANA | hrana | chain |
-| tommy | DEKOR ŠARENO PISMO 76 g DR.OET | PAKIRANA HRANA I PIĆE | pice | chain |
-| studenac | WHISKY BALLANTINES 2 ČAŠE 0,7 l | PIĆE | alkohol | chain |
-| vrutak | N-LEDO MACHO ČAŠA BIJELA ČOKOLADA 255G | SMRZNUTO MESO, POVRĆE, RIBA | hrana | chain |
-| gavranovic | VREĆE ZA SMEĆE 50x65 TRGOMIX | Hrana | hrana | chain |
-| konzum | KRUH KALUP 600g MARYMAT | HRANA | hrana | chain |
+| gavranovic | SLADOLED KING DESIRE 450ml ČAŠA LEDO | Hrana | hrana | chain |
+| ribola | DUKAT ČOK.MLI 0,2l ČAŠA | HRANA | hrana | chain |
+| ktc | BOMBONI 4g +IGRAČKA PONY | HRANA | hrana | chain |
+| studenac | IGRAČKA HUGI WUGI BLOW BUBBLE 12/1 | HRANA | hrana | chain |
+| plodine | SVIJECE ZA TORTU UKRASNE 12/1 52506 |  | hrana | ean_inherited |
+| ktc | ROLADA VANILIJA 300g DEKOR DOMA | HRANA | hrana | chain |
+| gavranovic | SVIJEĆA ROĐENDANSKA 10kom-rasprodaja | Hrana | hrana | chain |
+| lorenco | MAČJI JEZICI PRALINE OD ML.I BJ.ČOK |  | hrana | ean_inherited |
 | spar | Kruh craft Karla u kalup.400 g | Hrana | hrana | chain |
+| ribola | PLAZMA ČAŠA 450ml LEDO | HRANA | hrana | chain |
+| vrutak | \*TEMPRANILLO CASA SOLAR 0.75L COSECHEROS ZOZP SUHO 2025 -6/1- | VINO INOZEMNO | alkohol | chain |
+| boso | SJEME GARDEN KRAST.DUGI ZELENI | ZELENI PROGRAM | hrana | chain |
+| branka | ČAJ LIPA CVIJET 50g | HRANA | hrana | chain |
+| jadranka_trgovina | LIKER PELINKOVAC 0,7L VERSUS + 2 ČAŠE PROMO | PIĆE | alkohol | chain |
+| boso | SJEME GARDEN PRKOS FIORI DOPPI | ZELENI PROGRAM | hrana | chain |
+| gavranovic | VREĆICA UKRASNA ZA BOCU 12x36x9cm BIJELA/SIVA - rasprodaja | Hrana | hrana | chain |
+| gavranovic | BATERIJE PHILIPS 6F22 9V 1/1-rasprodaja | Hrana | hrana | chain |
+| trgovina-krk | JIM BEAM 0,7L + 1 ČAŠE | Piće | alkohol | chain |
+| gavranovic | SCABIOSA CVIJET - rasprodaja | Hrana | hrana | chain |
+| plodine | PALOMA SALVETE STYLE 33X33/20 RUZA |  | hrana | ean_inherited |
 
 ## 1. Jaja
 
@@ -114,8 +255,8 @@ Nazivi u `jaja:m` s krajnjim cijenama po jajetu (≥ 1,00 ili ≤ 0,16 €; 1,30
 | metro | 15/1 MC JAJA PODNI UZGOJ M | 15,00 | 45,36 | 3,02 | 7 |
 | metro | 30/1 ARO JAJA A KL M | 30,00 | 39,00 | 1,30 | 7 |
 | studenac | SVJEŽA JAJA 10/1, RAZRED M | 10,00 | 1,59 | 0,16 | 1 |
-| lidl | Žito Jaja razred M | 18,00 | 2,75 | 0,15 | 116 |
 | lidl | PERFA Jaja podni uzgoj razred M | 15,00 | 2,25 | 0,15 | 116 |
+| lidl | Žito Jaja razred M | 18,00 | 2,75 | 0,15 | 116 |
 | lidl | Kones Bi Jaja, razred M | 10,00 | 1,45 | 0,14 | 116 |
 | stridon | SVJEŽA JAJA A KLASE RAZRED M 10/1 PERFA | 10,00 | 0,16 | 0,02 | 1 |
 | jadranka_trgovina | JAJA SVJEŽA 30/1 KLASA A, RAZRED M | 30,00 | 0,26 | 0,01 | 1 |
@@ -171,16 +312,16 @@ Izvor atributa za 10 grupa riže (`find_products(ingredient="riza")`):
 
 | id | naziv | atributi | izvor (how, naziv) |
 |---|---|---|---|
-| 8001860100017 | Riso Scotti riža originario okr.zrno 1kg | vrsta=originario | vrsta: name („RIŽA ORIGINARIO 1 kg SCOTTI“) |
+| 8001860100017 | Riso Scotti riža originario okr.zrno 1kg | vrsta=originario | vrsta: name („RIŽA SCOTTI NIKAS ORIGINARIO 1 kg“) |
 | 3838700540291 | RIŽA ZA DOMAĆA JELA ZLATO POLJE PODRAVKA 1 kg (12) | vrsta=originario | vrsta: name („RIŽA ZL.POLJE 1 kg (OKRUGLO ZRNO)“) |
 | 3838700540369 | RIŽA ZLATO POLJE BLAZINICA PODRAVKA 800 g (9) |  |  |
-| 8001860201011 | Riso Scotti riža arborio dugo zrno 1kg | vrsta=arborio | vrsta: name („RIŽA ARBORIO 1 kg SCOTTI“) |
-| 8001860190520 | Riso Scotti riža oro dugog zrna 1kg | vrsta=parboiled | vrsta: name („RIŽA SCOTTI ORO 1 kg PARBOILED“) |
+| 8001860201011 | Riso Scotti riža arborio dugo zrno 1kg | vrsta=arborio | vrsta: name („RIŽA ARBORIO 1 kg RISO SCOT“) |
+| 8001860190520 | Riso Scotti riža oro dugog zrna 1kg | vrsta=parboiled | vrsta: name („RIŽA ORO PARBOILED 1 kg SCO“) |
 | 3838700540314 | RIŽA BIJELA 800 g VREĆICA ZLATO POLJE | vrsta=dugo_zrno | vrsta: name („Zlato polje riža dugo zrno pvc 800 g“) |
 | 3838700540482 | RIŽA ZL POLJE ST ANDREA 500G KUT (18) |  |  |
-| 5410673007490 | RIZA PARABOILED DUGO ZRNO VRECICA 500 G BENS ORIGINAL | vrsta=dugo_zrno | vrsta: name („RIŽA DUGO ZRNO 500 g 4 VREĆICE BEN S“) |
-| 3838700540406 | RIŽA ZL POLJE ST ANDREA 1KG KUT VAK (12) |  |  |
-| 3838700540604 | RIŽA ARBORIO VAKUMIRANA 1000 g PODRA | vrsta=arborio | vrsta: name („RIZA ARBORIO 1 KG VP ZLATO POLJE“) |
+| 5410673007490 | RIZA PARABOILED DUGO ZRNO VRECICA 500 G BENS ORIGINAL | vrsta=dugo_zrno | vrsta: name („RIŽA BENS DUGO ZRNO 500 g“) |
+| 3838700540406 | RIŽA ZLATNO POLJE SANT ANDREA VAKUUM 1KG |  |  |
+| 3838700540604 | RIŽA ARBORIO VAKUMIRANA 1000 g PODRA | vrsta=arborio | vrsta: name („RIŽA ZLATO POLJE ARBORIO VP 1 kg“) |
 
 ## 3. Kakao
 

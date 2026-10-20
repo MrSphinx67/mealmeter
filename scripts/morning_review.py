@@ -206,7 +206,40 @@ def section_chicken(con) -> str:
     ])
 
 
-SECTIONS = [section_chicken, section_food, section_eggs, section_variants, section_kakao]
+def section_onion(con) -> str:
+    rows = con.execute(f"""
+        SELECT p.name,
+               CASE WHEN bool_or(ps.excluded) THEN 'isključen' WHEN bool_or(ps.drop_reason IS NOT NULL)
+                    THEN any_value(ps.drop_reason) ELSE 'luk' END AS status,
+               coalesce(any_value(a.value), '-') AS vrsta,
+               min({STAPLE_PPU_SQL}), max({STAPLE_PPU_SQL}),
+               count(DISTINCT p.chain), string_agg(DISTINCT p.chain, ', ' ORDER BY p.chain)
+        FROM clean.product_staples ps JOIN clean.staple_rules r USING (staple)
+        JOIN clean.products p USING (chain, product_id) JOIN clean.prices c USING (chain, product_id)
+        LEFT JOIN clean.product_attrs a ON a.chain = ps.chain AND a.product_id = ps.product_id
+             AND a.staple = 'luk' AND a.attr = 'vrsta'
+        WHERE ps.staple = 'luk' AND regexp_matches(p.name_norm, '(^| )(crven|ljubicast|srebren|zut|bijel)')
+        GROUP BY p.name ORDER BY vrsta, status, p.name""").fetchall()
+    return "\n".join([
+        "## 5. Luk: nazivi s bojom (ČEKA POTVRDU, mapiranje nije mijenjano)", "",
+        "Svi različiti nazivi kandidata za `luk` (`must_match` luk/kapula) koji sadrže crveni, ljubičasti, "
+        "srebrenac, žuti ili bijeli, uz trenutni status, vrstu iz naziva, raspon cijene po kg (s pretpostavljenih "
+        "500 g za „rukavac“) i broj lanaca. `vrsta`: crveni = crven|ljubičast, žuti = žut|srebren, "
+        "bijeli = bijel.", "",
+        md_table(["naziv", "status", "vrsta", "min €/kg", "max €/kg", "lanaca", "lanci"], rows), "",
+        "Zapažanja (bez promjene mapiranja):",
+        "- „LUK BIJELI (ČEŠNJAK)“ je češnjak; isključen je kroz `cesnjak`. Vrsta `bijeli` zato pogađa samo "
+        "„LUK LJUBIČ./BIJELI ZA GASTRO“, koji je ljubičasti luk: kratica „ljubič.“ ne pogađa `ljubicast`.",
+        "- „LUK SREBRENAC“ postoji u 20-ak lanaca i **jest u namirnici** (vrsta `zuti`): uzorak `srebrn` u "
+        "`must_not_match` ne pogađa „srebrenac“ (srebr-e-nac), pa ništa ne isključuje. Ako je srebrenac "
+        "trebao biti isključen, uzorak bi bio `srebren`.",
+        "- Pakiranja bez gramature („LUK SREBRENAC 4/1“, „3/1“) nemaju cijenu po kg; `packaged` (500 g) "
+        "vrijedi samo za „rukavac“.",
+        "- Metroove vreće od 10 kg imaju oko 0,74 €/kg, a „slatki“ crveni luk 3,28 €/kg.",
+    ])
+
+
+SECTIONS = [section_chicken, section_onion, section_food, section_eggs, section_variants, section_kakao]
 
 
 def main() -> None:
