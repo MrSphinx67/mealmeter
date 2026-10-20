@@ -2,7 +2,7 @@
 
 | točka | stanje |
 |---|---|
-| 1-6 | gotovo |
-| 7 | gotovo |
+| 1-7 | gotovo |
+| 8 | gotovo |
 
-Sljedeća točka: 8.
+Sljedeća točka: 9.

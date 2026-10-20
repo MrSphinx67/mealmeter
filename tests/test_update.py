@@ -200,3 +200,28 @@ def test_small_drop_not_carried(env, tmp_path):
     assert run(base + ["--archive", str(drop1), "--date", "2026-10-20"]) == 0
     assert q(db, "SELECT count(*) FROM clean.prices WHERE chain = 'konzum' AND store_id = '0907'")[0][0] == 10
     assert q(db, "SELECT max(stale_days) FROM clean.prices")[0][0] == 0
+
+
+def test_stale_days_in_outputs(env, tmp_path):
+    """Korak 2E.8: find_products, get_prices i plan_basket vraćaju date, date_hr i stale_days."""
+    from mealmeter.basket import plan_basket
+    from mealmeter.search import find_products, get_prices
+
+    db, base = env["db"], env["base"]
+    no_dm = make_zip_custom(tmp_path / "no_dm.zip", skip={"dm"})
+    assert run(base + ["--archive", str(env["full"]), "--date", "2026-10-19"]) == 0
+    assert run(base + ["--archive", str(no_dm), "--date", "2026-10-20"]) == 0
+    con = duckdb.connect(str(db), read_only=True)
+    try:
+        rows = get_prices("dm:1000105", con=con, include_nonfood=True)
+        assert rows and rows[0]["stale_days"] == 1 and rows[0]["date"] == "2026-10-19" and rows[0]["date_hr"] == "19.10.2026."
+        res = find_products("hipp", con=con, include_nonfood=True)
+        assert res[0]["stale_days"] == 1 and res[0]["date"] == "2026-10-19"
+        fresh = get_prices("3850104223624", city="Osijek", con=con)
+        assert fresh and all(r["stale_days"] == 0 and r["date"] == "2026-10-20" for r in fresh)
+        basket = plan_basket([{"name": "brašno glatko", "amount": 500, "unit": "g"}], "Osijek", con=con)
+        store = basket["best_store"]
+        assert store["stale_days"] == 0 and store["date"] == "2026-10-20"
+        assert all({"date", "date_hr", "stale_days"} <= set(it) for it in store["items"])
+    finally:
+        con.close()

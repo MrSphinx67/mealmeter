@@ -157,7 +157,8 @@ def cmd_basket(args) -> None:
             _fmt_money(it["cost_used"]),
             f"{it['unit_confidence']}/{it['pack_source']}",
             ", ".join(f"{k}={v}" for k, v in it["attributes"].items()),
-            ", ".join([search_flag(f) for f in it["flags"]] + [n for n in it["notes"] if "zamjenjivo" in n]),
+            ", ".join([search_flag(f) for f in it["flags"]] + [n for n in it["notes"] if "zamjenjivo" in n]
+                      + ([f"cijena od {it['date_hr']} ({it['stale_days']} d)"] if it.get("stale_days") else [])),
         ]
         for it in best["items"]
     ]

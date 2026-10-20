@@ -462,6 +462,7 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
                 "unit_confidence": pick["unit_confidence"], "pack_source": pick["pack_source"],
                 "is_special": pick["is_special"], "flags": pick["flags"], "notes": pick["notes"] + subst,
                 "fallback": pick["fallback"], "food_unverified": pick["is_food"] is None,
+                "date": pick["date"].isoformat(), "date_hr": date_hr(pick["date"]), "stale_days": pick["stale_days"],
             }
 
     n_needs = len(needs)
@@ -478,8 +479,11 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
         s["unit_confidence"] = "low" if any(it["unit_confidence"] != "high" for it in items) else "high"
         if s["scope"] == "national":
             s["note"] = NATIONAL_NOTE
-        d = s.pop("date")
-        s["date"], s["date_hr"] = d.isoformat(), date_hr(d)
+        s.pop("date")
+        # datum trgovine = najstarija cijena među stavkama (prenesena cijena ima stale_days > 0)
+        oldest = min(items, key=lambda it: it["date"]) if items else None
+        s["date"], s["date_hr"] = (oldest["date"], oldest["date_hr"]) if oldest else (None, None)
+        s["stale_days"] = max((it["stale_days"] or 0 for it in items), default=0)
     ranked = sorted(stores.values(), key=lambda s: (-s["n_matched"], s["data_quality"] == "suspect",
                                                     s["flagged_items"], s["total_to_buy"]))
     out["stores"] = ranked[:max_stores] if max_stores else ranked

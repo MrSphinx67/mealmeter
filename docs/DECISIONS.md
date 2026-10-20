@@ -629,3 +629,8 @@ Izvještaji: [STEP2E_REVIEW.md](STEP2E_REVIEW.md) (`scripts/step2e_review.py`) i
     - Testovi: nedostaje lanac, pad 18 % (2 od 11 cijena), pad 9 % (ne prenosi se), 4. dan (ne prenosi se).
     - Baza je već na nepotpunoj arhivi 20.10., a 19.10. nije u sirovim tablicama, pa se Stanić neće vratiti
       sam od sebe. To bi tražilo ponovno učitavanje 19.10. pa 20.10. (`update.py --date … --force`).
+75. **Datum po stavci i trgovini.**
+    - `get_prices`: svaki redak ima `date`/`date_hr` (datum cijene) i `stale_days`.
+    - `find_products`: grupa nosi najstariju cijenu (`date`) i najveći `stale_days`.
+    - `plan_basket`: stavka nosi datum i starost odabranog proizvoda, a trgovina najstariju stavku i najveći
+      `stale_days`. CLI uz prenesenu cijenu piše „cijena od dd.mm.yyyy. (n d)“.

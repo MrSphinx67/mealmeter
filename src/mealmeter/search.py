@@ -186,7 +186,7 @@ def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | 
                  ({conf_sql}) AS unit_confidence, ({source_sql}) AS pack_source, ({suspect_sql}) AS price_suspect,
                  {n_units_sql} AS n_units, {assumed_sql} AS assumed_g,
                  c.price_per_kg_drained, p.variable_weight, p.clearance,
-                 c.is_special, c.date, s.scope, s.address, s.city, ch.data_quality,
+                 c.is_special, c.date, c.stale_days, s.scope, s.address, s.city, ch.data_quality,
                  p.is_food, p.food_group, p.category_source, p.bkey, {quality_sql} AS match_quality
           FROM g p
           JOIN hit USING (bkey)
@@ -323,7 +323,9 @@ def find_products(
           -- pripadnost namirnici (clean.staple_groups): strong / weak (rangira se ispod snažnih)
           any_value(x.match_quality) AS match_quality,
           bool_and(x.is_food IS NULL) AS food_unverified,
-          max(x.date) AS date,
+          -- najstarija cijena u grupi (carry-forward: stale_days > 0) i njezina starost
+          min(x.date) AS date,
+          max(x.stale_days) AS stale_days,
           bool_or(starts_with(x.name_norm, ?)) AS _starts,
           CASE WHEN any_value({cov_col}) >= 0.5 THEN 0 WHEN any_value({cov_col}) >= 0.25 THEN 1 ELSE 2 END AS _tier
         FROM x LEFT JOIN pick USING (gkey) JOIN cov USING (gkey)
@@ -460,6 +462,7 @@ def get_prices(
                CASE WHEN c.unit_confidence = 'low' THEN 'unit_price'
                     WHEN c.unit_confidence = 'high' THEN p.pack_source END AS pack_source,
                ch.data_quality, c.price_per_kg_drained, p.drained_amount, p.variable_weight, p.clearance, c.date,
+               c.stale_days,
                p.food_group, p.is_food IS NULL AS food_unverified
         FROM clean.products p
         JOIN clean.prices c USING (chain, product_id)
