@@ -659,3 +659,15 @@ Izvještaji: [STEP2E_REVIEW.md](STEP2E_REVIEW.md) (`scripts/step2e_review.py`) i
 80. **Izvještaji Koraka 2E:** `docs/STEP2E_REVIEW.md` (`scripts/step2e_review.py`, detalji po točkama) i
     `docs/REVIEW_2E.md` (`scripts/review_2e.py`, najviše 150 redaka). Oba su generirana nad arhivom 2026-10-20
     s carry-forwardom.
+
+## Korak 2F (2026-10-20)
+
+Sažetak: [REVIEW_2F.md](REVIEW_2F.md) (`scripts/review_2f.py`).
+
+81. **Lažni EAN-ovi** (`build.flag_dummy_eans`, `clean.products.ean_note`). Postaju `ean_global = false`, pa se
+    grupiraju po lancu + `name_norm`:
+    - EAN-ovi s popisa `data/dummy_eans.yaml` i EAN od jedne ponavljajuće znamenke (u svim lancima);
+    - EAN koji jedan lanac koristi za ≥ 5 različitih `name_norm` (samo u tom lancu).
+    
+    Provjera je prije nasljeđivanja gramature i skupine preko EAN-a. Na 20.10.: Eurospin 9999999999994 (83
+    proizvoda) i jedan Plodinin proizvod s ponavljajućom znamenkom; pravilo „≥ 5 naziva“ ne pogađa ništa drugo.

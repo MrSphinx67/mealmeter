@@ -58,6 +58,10 @@ for row in stats["quality"]:
     chain, dq, *vals = row
     print(f"{chain:<20}{dq:<10}" + "".join(f"{'' if v is None else v:>7}" for v in vals))
 
+print("\n=== Lažni EAN-ovi (ean_global = false): lanac, razlog, EAN-ova, proizvoda")
+for row in stats["dummy_eans"]:
+    print("  ", row)
+
 food = stats["food"]
 print("\n=== Filtar hrane (food.py): proizvodi bez korisne kategorije lanca po lancu")
 print(f"{'lanac':<20}{'proizvoda':>10}{'bez kat.':>10}{'EAN':>8}{'% EAN':>7}{'riječi':>8}{'unknown':>9}{'sukob':>7}")

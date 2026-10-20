@@ -3,6 +3,7 @@ data/*
 !data/category_map.yaml
 !data/units.yaml
 !data/abbrev.yaml
+!data/dummy_eans.yaml
 *.duckdb
 *.duckdb.wal
 .env

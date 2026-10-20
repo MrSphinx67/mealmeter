@@ -150,6 +150,8 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
         FROM products r JOIN product_derived d USING (chain, product_id)
     """)
 
+    stats_dummy = flag_dummy_eans(con)
+
     # Isti globalni EAN = isti proizvod: gramaturu bez naziva ("BRAŠNO GLATKO 1/1") naslijedi od
     # drugih lanaca, ali samo ako se svi parsirani nazivi za taj EAN slažu.
     con.execute("""
@@ -216,7 +218,7 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
         FROM clean.stores s GROUP BY s.chain
     """)
 
-    stats = {"food": food_stats}
+    stats = {"food": food_stats, "dummy_eans": stats_dummy}
     stats["quality"] = chain_quality_report(con)
     stats["staples"] = build_staples(con)
     stats["dedup"] = con.execute("""
@@ -243,6 +245,40 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
         FROM clean.prices GROUP BY chain ORDER BY chain
     """).fetchall()
     return stats
+
+
+DUMMY_EANS_PATH = Path(__file__).resolve().parents[2] / "data" / "dummy_eans.yaml"
+DUMMY_MIN_NAMES = 5  # isti EAN za toliko različitih name_norm u jednom lancu = zamjenski barkod
+
+
+def flag_dummy_eans(con: duckdb.DuckDBPyConnection) -> list[tuple]:
+    """Lažni EAN-ovi postaju ean_global = false (grupa po lancu + name_norm), uz razlog u ean_note:
+    - 'dummy_list': na popisu data/dummy_eans.yaml (svi lanci);
+    - 'repeated_digit': jedna ponavljajuća znamenka, npr. 0000000000000 (svi lanci);
+    - 'multi_name': lanac ga koristi za >= DUMMY_MIN_NAMES različitih name_norm (samo taj lanac;
+      Eurospinov 9999999999994 za biljke, voće i povrće).
+    Vraća (lanac, razlog, EAN-ova, proizvoda)."""
+    import yaml
+
+    listed = [str(e) for e in (yaml.safe_load(DUMMY_EANS_PATH.read_text(encoding="utf-8")) or [])] \
+        if DUMMY_EANS_PATH.exists() else []
+    con.execute("ALTER TABLE clean.products ADD COLUMN ean_note VARCHAR")
+    con.execute("CREATE OR REPLACE TEMP TABLE dummy_list (ean VARCHAR)")
+    con.executemany("INSERT INTO dummy_list VALUES (?)", [(e,) for e in listed])
+    con.execute("""
+        UPDATE clean.products SET ean_global = false,
+               ean_note = CASE WHEN ean_norm IN (SELECT ean FROM dummy_list) THEN 'dummy_list' ELSE 'repeated_digit' END
+        WHERE ean_norm IS NOT NULL
+          AND (ean_norm IN (SELECT ean FROM dummy_list) OR length(ltrim(ean_norm, left(ean_norm, 1))) = 0)
+    """)
+    con.execute(f"""
+        UPDATE clean.products p SET ean_global = false, ean_note = 'multi_name'
+        FROM (SELECT chain, ean_norm FROM clean.products WHERE ean_global
+              GROUP BY ALL HAVING count(DISTINCT name_norm) >= {DUMMY_MIN_NAMES}) d
+        WHERE p.chain = d.chain AND p.ean_norm = d.ean_norm
+    """)
+    return con.execute("""SELECT chain, ean_note, count(DISTINCT ean_norm), count(*) FROM clean.products
+                          WHERE ean_note IS NOT NULL GROUP BY ALL ORDER BY 4 DESC""").fetchall()
 
 
 def chain_quality_report(con: duckdb.DuckDBPyConnection) -> list[tuple]:

@@ -1,0 +1,6 @@
+# Lažni / zamjenski EAN-ovi: nikad nisu globalni (ean_global = false, grupa po lancu + name_norm).
+# Uz ovaj popis lažnim se smatraju i EAN-ovi od jedne ponavljajuće znamenke (0000000000000, 2222222222222...)
+# te EAN koji jedan lanac koristi za >= 5 različitih normaliziranih naziva (build.flag_dummy_eans).
+- "9999999999994"  # Eurospin: biljke, voće i povrće pod istim barkodom
+- "0000000000000"
+- "1111111111111"

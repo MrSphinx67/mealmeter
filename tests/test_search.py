@@ -15,7 +15,7 @@ def q(con, sql, *params):
 def test_dedup_counts(built):
     con, stats = built
     dedup = {chain: (n_raw, n_clean) for chain, n_raw, n_clean, _ in stats["dedup"]}
-    assert dedup["eurospin"] == (12, 4)  # svaki red 3x
+    assert dedup["eurospin"] == (32, 7)  # duplikati (2F: + mrkva, krumpir, begonija s lažnim EAN-om)
     assert dedup["lidl"][0] - dedup["lidl"][1] > 0
     assert dedup["roto"] == (2, 1)  # red s cijenom 0.00 izbačen
     assert q(con, """SELECT count(*) FROM (SELECT chain, store_id, product_id FROM clean.prices

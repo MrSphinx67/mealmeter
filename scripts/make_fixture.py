@@ -23,7 +23,9 @@ PICK = {
          ("02451416", OSIJEK_ONLY), ("90348702", OSIJEK_ONLY), ("90263987", ["0001"]),  # pureće mljeveno, kupus u masl. ulju, biljni parmezan
          ("91005161", OSIJEK_ONLY), ("01550062", OSIJEK_ONLY), ("90850327", OSIJEK_ONLY)],  # grah suhi, limenka, 400/240 g
     ),
-    "eurospin": (["310017", "310002"], ["900006101", "001761601"]),  # akcija s price > special, duplikati, 0.00
+    "eurospin": (["310017", "310002"], ["900006101", "001761601",  # akcija s price > special, duplikati, 0.00
+                                        # isti lažni EAN 9999999999994: mrkva, krumpir, begonija
+                                        ("080034201", ["310017"]), ("080041101", ["310017"]), ("080001101", ["310017"])]),
     "lidl": (["105", "192"], ["6907930", "6909648", "6904110", ("6905984", ["105"])]),  # duplikati, gramatura u `unit`; pureće mljeveno
     "ntl": (["20654", "10102"], ["169600", "245063", "110379",  # PLU banana, Tabasco 11 znamenki
                                  ("001069", ["20654"])]),  # "BANANA SNIŽENJE" (rasprodaja)
