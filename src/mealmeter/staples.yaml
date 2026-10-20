@@ -123,10 +123,11 @@ brasno:
   name: brašno
   synonyms: [brašno, brasno, pšenično brašno, psenicno brasno]
   must_match: [brasn, bras\b]
-  must_not_match: [toast, brasnom, kokos, rizin, heljd, zob, badem, slanut, kestenj, chia, lanen, konoplj, mix\b,
+  must_not_match: [toast, brasnom, kokos, rizin, zob, badem, slanut, kestenj, chia, lanen, konoplj, mix\b,
                    mjesavin, smjes, keks, kruh, pecivo, palacink, tortilj, napolitank]
   unit: kg
-  default_exclude_variants: [tip=integralno, gluten=bez]
+  # vrsta: zadano pšenično; kukuruzno, pirovo, raženo i heljdino samo na zahtjev
+  default_exclude_variants: [tip=integralno, gluten=bez, vrsta=kukuruzno, vrsta=pirovo, vrsta=razeno, vrsta=heljdino]
   max_pack: 5000
   min_pack: 500
   plausible_per_unit: [0.4, 6]
@@ -137,10 +138,12 @@ brasno:
       polubijelo: '\bpolubijel'
       integralno: '\bintegral|\bcrn'
     vrsta:
-      psenicno: '\bpsen|\bpse\b'
       pirovo: '\bpir'
       razeno: '\braz'
       kukuruzno: '\bkukuruz'
+      heljdino: '\bheljd'
+      psenicno: '\bpsen|\bpse\b'
+      _default: psenicno
     gluten:
       bez: 'bez glutena|gluten free|\bschar|\bschär'
     oznaka:
@@ -169,6 +172,7 @@ secer:
       smedi: '\bsmed|\bdemerara|\btrsk'
       kocke: '\bkock'
       bijeli: '\bbijel|\bkristal'
+      _default: bijeli
   loose_produce: false
 
 sol:
@@ -205,7 +209,8 @@ ulje:
                    usne, baby, argan, etericn, spreju, bucin, palmin, lanen, ocat, set\b, kozm, motor,
                    lampe, masaz]
   unit: l
-  default_exclude_variants: [vrsta=avokado, vrsta=sezam, vrsta=kokos, vrsta=grozde, vrsta=specijalno]
+  default_exclude_variants: [vrsta=avokado, vrsta=sezam, vrsta=kokos, vrsta=grozde, vrsta=specijalno,
+                             vrsta=omegol, vrsta=mediteran, presanje=hladno]
   max_pack: 5000
   min_pack: 500
   plausible_per_unit: [1, 12]
@@ -217,9 +222,14 @@ ulje:
       kokos: '\bkokos|\bcoco'
       grozde: '\bgrozd|\bkostic\w* grozd|\bgrape'
       specijalno: '\bpistacij|\bkonoplj|\borah|\bkikiriki|\bbadem|\bljesnjak|\bcrni kim|\bchia|\bmakov'
+      # mješavine Zvijezde: postoje, ali nisu zadani izbor
+      omegol: '\bomegol'
+      mediteran: '\bmediteran'
       suncokretovo: '\bsuncokret|\bsunc\b'
       repicino: '\brepic|\buljane repice'
       biljno: '\bbiljn|\bbilj\b'
+    presanje:
+      hladno: '\bhladno pres|\bhl\.? ?pres|\bcold press'
   loose_produce: false
 
 maslinovo_ulje:
@@ -529,9 +539,14 @@ rajcica:
   piece_g: 120
   attributes:
     vrsta:
-      cherry: '\bcherry|\bcheri|\bkoktel|\bmini'
-      sljiva: '\bsljiv|\bdatter'
+      # sitne i specijalne sorte: postoje, ali nisu zadani izbor
+      datterino: '\bdat+erin'
+      cherry: '\bcherry|\bcheri|\bkoktel|\bcocktail|\bmini'
+      harmony: '\bharmony'
+      campari: '\bcampari'
+      sljiva: '\bsljiv'
       grozd: '\bgrozd|\bgrapolo'
+  default_exclude_variants: [vrsta=cherry, vrsta=datterino, vrsta=harmony, vrsta=campari]
   loose_produce: true
 
 pasirana_rajcica:
@@ -768,7 +783,7 @@ riza:
       arborio: '\barborio'
       carnaroli: '\bcarnaroli'
       originario: '\boriginario|\bokrugl|\bokr\.|kratko zrno|kratkog zrna'
-      parboiled: '\bparboil'
+      parboiled: '\bpara?boil'  # i "PARABOILED" (Ben's)
       integralna: '\bintegral|\bintegr\.|\bsmed|\bbrown'
       dugo_zrno: 'dugo zrno|dugog zrna|dugoga zrna|dugo zrna|\bdugo z\.|\bdugozrn|long grain'
   loose_produce: false

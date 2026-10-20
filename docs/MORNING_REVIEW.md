@@ -39,26 +39,26 @@ Proizvodi izvan zadanog izbora (`find_products`/`get_prices` bez `include_*`), p
 
 | lanac | naziv | kategorija lanca | skupina | izvor |
 |---|---|---|---|---|
-| gavranovic | SLADOLED KING DESIRE 450ml ČAŠA LEDO | Hrana | hrana | chain |
-| ribola | DUKAT ČOK.MLI 0,2l ČAŠA | HRANA | hrana | chain |
-| ktc | BOMBONI 4g +IGRAČKA PONY | HRANA | hrana | chain |
+| ktc | JACK DANIEL S 0,7L + 1 ČAŠA | PIĆA | alkohol | chain |
+| gavranovic | KRPA KUH.40X60cm 100%PAMUK HT-8902 | Hrana | hrana | chain |
+| boso | POSUD DALAS ARANŽ. MALA | ZELENI PROGRAM | hrana | chain |
 | studenac | IGRAČKA HUGI WUGI BLOW BUBBLE 12/1 | HRANA | hrana | chain |
-| plodine | SVIJECE ZA TORTU UKRASNE 12/1 52506 |  | hrana | ean_inherited |
-| ktc | ROLADA VANILIJA 300g DEKOR DOMA | HRANA | hrana | chain |
-| gavranovic | SVIJEĆA ROĐENDANSKA 10kom-rasprodaja | Hrana | hrana | chain |
-| lorenco | MAČJI JEZICI PRALINE OD ML.I BJ.ČOK |  | hrana | ean_inherited |
-| spar | Kruh craft Karla u kalup.400 g | Hrana | hrana | chain |
-| ribola | PLAZMA ČAŠA 450ml LEDO | HRANA | hrana | chain |
-| vrutak | *TEMPRANILLO CASA SOLAR 0.75L COSECHEROS ZOZP SUHO 2025 -6/1- | VINO INOZEMNO | alkohol | chain |
-| boso | SJEME GARDEN KRAST.DUGI ZELENI | ZELENI PROGRAM | hrana | chain |
-| branka | ČAJ LIPA CVIJET 50g | HRANA | hrana | chain |
-| jadranka_trgovina | LIKER PELINKOVAC 0,7L VERSUS + 2 ČAŠE PROMO | PIĆE | alkohol | chain |
-| boso | SJEME GARDEN PRKOS FIORI DOPPI | ZELENI PROGRAM | hrana | chain |
-| gavranovic | VREĆICA UKRASNA ZA BOCU 12x36x9cm BIJELA/SIVA - rasprodaja | Hrana | hrana | chain |
-| gavranovic | BATERIJE PHILIPS 6F22 9V 1/1-rasprodaja | Hrana | hrana | chain |
+| gavranovic | VREĆICA UKRASNA 26x32x12cm TOČKICE ROZA/BIJELA -rasprodaja | Hrana | hrana | chain |
+| konzum | MEDENJACI DEKORAT SET 480 G LAMBERTZ | HRANA | hrana | chain |
+| branka | DEKOR ROZA KRISTALIĆI 10g | HRANA | hrana | chain |
+| djelo_vodice | SENF ČAŠA 250ML | SENF ČAŠICA | hrana | chain |
+| gavranovic | NOŽ 3/1 23360/335-rasprodaja | Hrana | hrana | chain |
+| ntl | IGRAČKA FINGER SLUG VELIKI | Ostalo | hrana | ean_inherited |
+| ktc | ČOK BOMONI 80g SA GLAZB. IGRAČKOM | HRANA | hrana | chain |
+| vrutak | \*TEMPRANILLO CASA SOLAR 0.75L COSECHEROS ZOZP SUHO 2025 -6/1- | VINO INOZEMNO | alkohol | chain |
+| plodine | CROISSANT COK. 300 G 6/1 CASALINI |  | hrana | ean_inherited |
+| ribola | GORDONS PINK 0,7L+COPA ČAŠA | PIĆE | pice | chain |
+| plodine | KAVA 400 G MLJEVENA FOLIJA ANAMARIJA |  | hrana | ean_inherited |
 | trgovina-krk | JIM BEAM 0,7L + 1 ČAŠE | Piće | alkohol | chain |
-| gavranovic | SCABIOSA CVIJET - rasprodaja | Hrana | hrana | chain |
-| plodine | PALOMA SALVETE STYLE 33X33/20 RUZA |  | hrana | ean_inherited |
+| konzum | KRUH KALUP 600g MARYMAT | HRANA | hrana | chain |
+| gavranovic | TANJURIĆI STAKLO 15X15cm HO-rasprodaja | Hrana | hrana | chain |
+| boso | SJEME GARDEN MJEŠ.CVIJEĆA LUN.ST | ZELENI PROGRAM | hrana | chain |
+| gavranovic | TANJUR DOLOMITE | Hrana | hrana | chain |
 
 ## 1. Jaja
 
@@ -69,13 +69,13 @@ Nazivi u `jaja:m` s krajnjim cijenama po jajetu (≥ 1,00 ili ≤ 0,16 €; 1,30
 | lanac | naziv | komada | cijena € | €/kom | trgovina |
 |---|---|---|---|---|---|
 | metro | 10/1 PERFA JAJA M | 10,00 | 44,10 | 4,41 | 5 |
-| metro | 10/1 ARO JAJA A KL M | 10,00 | 44,04 | 4,40 | 7 |
 | metro | 10/1 ŽITO JAJA M | 10,00 | 44,04 | 4,40 | 5 |
+| metro | 10/1 ARO JAJA A KL M | 10,00 | 44,04 | 4,40 | 7 |
 | metro | 15/1 MC JAJA PODNI UZGOJ M | 15,00 | 45,36 | 3,02 | 7 |
 | metro | 30/1 ARO JAJA A KL M | 30,00 | 39,00 | 1,30 | 7 |
 | studenac | SVJEŽA JAJA 10/1, RAZRED M | 10,00 | 1,59 | 0,16 | 1 |
-| lidl | Žito Jaja razred M | 18,00 | 2,75 | 0,15 | 116 |
 | lidl | PERFA Jaja podni uzgoj razred M | 15,00 | 2,25 | 0,15 | 116 |
+| lidl | Žito Jaja razred M | 18,00 | 2,75 | 0,15 | 116 |
 | lidl | Kones Bi Jaja, razred M | 10,00 | 1,45 | 0,14 | 116 |
 | stridon | SVJEŽA JAJA A KLASE RAZRED M 10/1 PERFA | 10,00 | 0,16 | 0,02 | 1 |
 | jadranka_trgovina | JAJA SVJEŽA 30/1 KLASA A, RAZRED M | 30,00 | 0,26 | 0,01 | 1 |
@@ -91,3 +91,53 @@ Distribucija cijene po jajetu (provjerena hrana, 491 različitih parova proizvod
 | bio | 11 | 0,34 | 0,47 | 0,53 | 5 |
 
 Klase (veličina:uzgoj) i broj različitih proizvoda: `-:bio` 10, `-:kavezni` 3, `-:nepoznato` 40, `-:podni` 13, `-:slobodni` 3, `l:kavezni` 6, `l:nepoznato` 102, `l:podni` 41, `l:slobodni` 5, `m:bio` 1, `m:kavezni` 15, `m:nepoznato` 165, `m:podni` 56, `m:slobodni` 10, `s:nepoznato` 5, `s:podni` 2, `xl:nepoznato` 8, `xl:podni` 6
+
+## 2. Zadane varijante
+
+Zadano isključene varijante (vraćaju se samo kad je atribut izričito zadan) i broj grupa (EAN ili lanac + naziv) s tom vrijednošću:
+
+| namirnica | varijanta | grupa | primjer |
+|---|---|---|---|
+| brasno | tip=integralno | 34 | 1KG FARINA BRAŠ.PŠ.CRNO T-1100 |
+| brasno | gluten=bez | 5 | BRASNO BEZ GLUTENA 1 KG NUTRIFREE |
+| brasno | vrsta=kukuruzno | 13 | 1KG PODRAVKA BRAŠNO KUKURUZNO |
+| brasno | vrsta=pirovo | 33 | BIO BRAŠNO PIR PUN.ZRNO 1 kg |
+| brasno | vrsta=razeno | 11 | 900G FARINA RAŽENO BRAŠ T 1250 |
+| brasno | vrsta=heljdino | 10 | BRASNO HELJDA 1 KG FARINA SPECIALE |
+| secer | vrsta=smedi | 70 | \*\*UGO. ŠEĆER SMEĐI 200/1 LOGO VRIJEME ZA KAVU\*\* |
+| secer | vrsta=u_prahu | 22 | \*NE\*ŠEĆER U PRAHU U PET BOČICI 250g |
+| secer | vrsta=kocke | 13 | 1KG RIOBA ŠEĆER KOCKA BIJELI |
+| ulje | vrsta=avokado | 0 |  |
+| ulje | vrsta=sezam | 5 | 2,5L DIAMOND SEZAMOVO ULJE |
+| ulje | vrsta=kokos | 6 | Encian ulje kokosa 1 l |
+| ulje | vrsta=grozde | 1 | ULJE KOŠTICA GROŽĐA 1 L FARCHI |
+| ulje | vrsta=specijalno | 3 | 500ML MC ORAHOVO ULJE |
+| ulje | vrsta=omegol | 2 | 1L ZVIJEZDA ULJE OMEGOL |
+| ulje | vrsta=mediteran | 2 | ULJE 1L MEDITERAN ZVIJEZDA |
+| ulje | presanje=hladno | 5 | Sunce Vinkovaca Hl. preš. sunc.ulje |
+| rajcica | vrsta=cherry | 58 | \*RAJČIC CHERRY RFS |
+| rajcica | vrsta=datterino | 1 | RAJČICA CHERRY DATERINO 500g SG |
+| rajcica | vrsta=harmony | 4 | 500G RAJČICA TREŠNJAR HARMONY |
+| rajcica | vrsta=campari | 2 | RAJČICA CAMPARI 400G SNIŽENJE |
+
+- brašno: `vrsta` bez oznake je `psenicno` (zadano); heljdino više nije u `must_not_match`, nego je varijanta.
+- šećer: `vrsta` bez oznake je `bijeli`.
+- ulje: Zvijezda Omegol i Mediteran su `vrsta=omegol|mediteran`, hladno prešano je `presanje=hladno`.
+- rajčica: cherry (i koktel, cocktail, mini), datterino, harmony i campari su izvan zadanog izbora.
+
+**Riža i „oro“:** nijedan proizvod ne dobiva `parboiled` bez riječi „parboiled“ u nazivu (test `test_riza_oro_alone_not_parboiled`). Grupa 8001860190520 prikazuje se kao „Riso Scotti riža oro dugog zrna“, ali isti EAN u 10 lanaca glasi „RIŽA ORO PARBOILED“, pa je skupni atribut `parboiled` s izvorom `name`. To nisam mijenjao: Scotti Oro jest parboiled riža.
+
+Izvor atributa za 10 grupa riže (`find_products(ingredient="riza")`):
+
+| id | naziv | atributi | izvor (how, naziv) |
+|---|---|---|---|
+| 8001860100017 | Riso Scotti riža originario okr.zrno 1kg | vrsta=originario | vrsta: name („RIŽA SCOTTI NIKAS ORIGINARIO 1 kg“) |
+| 3838700540291 | RIŽA ZA DOMAĆA JELA ZLATO POLJE PODRAVKA 1 kg (12) | vrsta=originario | vrsta: name („RIŽA ZL.POLJE 1 kg (OKRUGLO ZRNO)“) |
+| 3838700540369 | RIŽA ZLATO POLJE BLAZINICA PODRAVKA 800 g (9) |  |  |
+| 8001860201011 | Riso Scotti riža arborio dugo zrno 1kg | vrsta=arborio | vrsta: name („RIŽA ARBORIO 1 kg RISO SCOT“) |
+| 8001860190520 | Riso Scotti riža oro dugog zrna 1kg | vrsta=parboiled | vrsta: name („RIŽA ORO PARBOILED 1 kg SCO“) |
+| 3838700540314 | RIŽA BIJELA 800 g VREĆICA ZLATO POLJE | vrsta=dugo_zrno | vrsta: name („Zlato polje riža dugo zrno pvc 800 g“) |
+| 3838700540482 | RIŽA ZL POLJE ST ANDREA 500G KUT (18) |  |  |
+| 5410673007490 | RIZA PARABOILED DUGO ZRNO VRECICA 500 G BENS ORIGINAL | vrsta=dugo_zrno | vrsta: name („RIŽA BENS DUGO ZRNO 500 g“) |
+| 3838700540406 | RIŽA ZL POLJE ST ANDREA 1KG KUT VAK (12) |  |  |
+| 3838700540604 | RIŽA ARBORIO VAKUMIRANA 1000 g PODRA | vrsta=arborio | vrsta: name („RIŽA ZLATO POLJE ARBORIO VP 1 kg“) |

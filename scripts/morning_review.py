@@ -12,7 +12,8 @@ from pathlib import Path
 import duckdb
 
 from mealmeter.food import food_report
-from mealmeter.staples import STAPLE_PPU_SQL
+from mealmeter.search import find_products
+from mealmeter.staples import STAPLE_PPU_SQL, load_staples
 
 OUT = Path("docs/MORNING_REVIEW.md")
 
@@ -30,7 +31,7 @@ def md_table(headers: list[str], rows) -> str:
             v = float(v)
         if isinstance(v, float):
             return f"{v:.2f}".replace(".", ",")
-        return str(v).replace("|", "\\|")
+        return str(v).replace("|", "\\|").replace("*", "\\*")
     lines = ["| " + " | ".join(headers) + " |", "|" + "---|" * len(headers)]
     lines += ["| " + " | ".join(cell(v) for v in r) + " |" for r in rows]
     return "\n".join(lines)
@@ -112,7 +113,41 @@ def section_eggs(con) -> str:
     ])
 
 
-SECTIONS = [section_food, section_eggs]
+def section_variants(con) -> str:
+    staples = load_staples()
+    rows = []
+    for key in ("brasno", "secer", "ulje", "rajcica"):
+        st = staples[key]
+        for attr, value in st.default_exclude_variants:
+            n, example = con.execute("""
+                SELECT count(DISTINCT CASE WHEN p.ean_global THEN p.ean_norm ELSE p.chain || ':' || p.name_norm END),
+                       min(p.name)
+                FROM clean.product_attrs a JOIN clean.products p USING (chain, product_id)
+                WHERE a.staple = ? AND a.attr = ? AND a.value = ? AND p.is_food""", [key, attr, value]).fetchone()
+            rows.append((key, f"{attr}={value}", n, example))
+    rice = find_products(ingredient="riza", limit=10, con=con)
+    rice_rows = [(r["id"], r["name"], ", ".join(f"{a}={v}" for a, v in r["attributes"].items()),
+                  "; ".join(f"{a}: {src['how']} („{src['name']}“)" for a, src in r["attribute_sources"].items()))
+                 for r in rice]
+    return "\n".join([
+        "## 2. Zadane varijante", "",
+        "Zadano isključene varijante (vraćaju se samo kad je atribut izričito zadan) i broj grupa (EAN ili "
+        "lanac + naziv) s tom vrijednošću:", "",
+        md_table(["namirnica", "varijanta", "grupa", "primjer"], rows), "",
+        "- brašno: `vrsta` bez oznake je `psenicno` (zadano); heljdino više nije u `must_not_match`, nego je varijanta.",
+        "- šećer: `vrsta` bez oznake je `bijeli`.",
+        "- ulje: Zvijezda Omegol i Mediteran su `vrsta=omegol|mediteran`, hladno prešano je `presanje=hladno`.",
+        "- rajčica: cherry (i koktel, cocktail, mini), datterino, harmony i campari su izvan zadanog izbora.", "",
+        "**Riža i „oro“:** nijedan proizvod ne dobiva `parboiled` bez riječi „parboiled“ u nazivu "
+        "(test `test_riza_oro_alone_not_parboiled`). Grupa 8001860190520 prikazuje se kao „Riso Scotti riža oro "
+        "dugog zrna“, ali isti EAN u 10 lanaca glasi „RIŽA ORO PARBOILED“, pa je skupni atribut `parboiled` "
+        "s izvorom `name`. To nisam mijenjao: Scotti Oro jest parboiled riža.", "",
+        "Izvor atributa za 10 grupa riže (`find_products(ingredient=\"riza\")`):", "",
+        md_table(["id", "naziv", "atributi", "izvor (how, naziv)"], rice_rows),
+    ])
+
+
+SECTIONS = [section_food, section_eggs, section_variants]
 
 
 def main() -> None:

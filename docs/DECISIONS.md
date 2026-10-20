@@ -398,3 +398,12 @@ Izvještaji za pregled su u [MORNING_REVIEW.md](MORNING_REVIEW.md) (`scripts/mor
       (provjerena hrana), umjesto mog prijedloga [0.1, 1.5].
       - Ispadaju Metroovi kartoni (1,30–4,41 €/kom, „10/1“ je broj kutija) i greške (0,01 €/kom).
       - Ispada i 5 od 11 bio proizvoda (do 0,53 €); vidi MORNING_REVIEW.md.
+43. **Zadane varijante** (`default_exclude_variants`, vraćaju se kad je atribut izričito zadan).
+    - Brašno: `vrsta` bez oznake je `psenicno`; kukuruzno, pirovo, raženo i heljdino su varijante.
+      `heljd` je maknut iz `must_not_match`, pa je heljdino brašno dohvatljivo s `vrsta=heljdino`.
+    - Šećer: `vrsta` bez oznake je `bijeli`; u prahu, kocke i smeđi ostaju izvan zadanog.
+    - Ulje: nove vrijednosti `vrsta=omegol|mediteran` (Zvijezdine mješavine) i atribut `presanje=hladno`,
+      sve izvan zadanog. To mijenja odluku 29, gdje je Omegol ostajao u zadanom izboru.
+    - Rajčica: cherry (i koktel, cocktail, mini), datterino (i „daterino“), harmony i campari su izvan zadanog.
+    - Riža: „oro“ ne daje `parboiled`; parboiled dolazi samo iz riječi u nazivu (sada i „PARABOILED“).
+      Grupa Scotti Oro (8001860190520) je parboiled jer tako glasi naziv u 10 lanaca.

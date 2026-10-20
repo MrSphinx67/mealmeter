@@ -517,7 +517,7 @@ def test_oil_kinds(name, match, vrsta):
 
 def test_oil_default_selection():
     excluded = {v for a, v in S["ulje"].default_exclude_variants if a == "vrsta"}
-    assert excluded == {"avokado", "sezam", "kokos", "grozde", "specijalno"}
+    assert excluded == {"avokado", "sezam", "kokos", "grozde", "specijalno", "omegol", "mediteran"}
     assert name_match(S["ulje"], "ULJE ZA KOSU ARGAN 100ML") == "excluded"
 
 
