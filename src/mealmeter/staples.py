@@ -417,13 +417,13 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
         CREATE OR REPLACE TABLE clean.staple_rules (
           staple VARCHAR PRIMARY KEY, name VARCHAR, unit VARCHAR, compare_by VARCHAR, compare_unit VARCHAR,
           ppu_min DOUBLE, ppu_max DOUBLE, range_source VARCHAR, min_pack DOUBLE, max_pack DOUBLE,
-          pantry BOOLEAN, loose_produce BOOLEAN)
+          pantry BOOLEAN, loose_produce BOOLEAN, piece_g DOUBLE)
     """)
-    con.executemany("INSERT INTO clean.staple_rules VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [
+    con.executemany("INSERT INTO clean.staple_rules VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [
         (st.key, st.name, st.unit, st.compare_by, st.compare_unit,
          *(st.plausible_per_unit or st.plausible_per_pack or _envelope(st.plausible_by) or (None, None)),
          "manual" if st.plausible_per_unit or st.plausible_by else "pack" if st.plausible_per_pack else None,
-         st.min_pack, st.max_pack, st.pantry, st.loose_produce)
+         st.min_pack, st.max_pack, st.pantry, st.loose_produce, piece_weight(st.key))
         for st in staples.values()
     ])
     # pakiranje izvan [min_pack, max_pack]: porcije i ugostiteljska pakiranja ispadaju iz namirnice
@@ -516,6 +516,13 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
               AND ps.drop_reason IS NULL AND NOT ps.excluded AND ps.n_units IS NOT NULL
               AND (ps.n_units < r.min_pack OR ps.n_units > r.max_pack)
         """)
+    # jedinica pakiranja nespojiva s namirnicom (jaje od 15 g, luk u komadima bez mase komada)
+    con.execute(f"""
+        UPDATE clean.product_staples ps SET drop_reason = 'jedinica'
+        FROM clean.products p, clean.staple_rules r
+        WHERE p.chain = ps.chain AND p.product_id = ps.product_id AND r.staple = ps.staple
+          AND ps.drop_reason IS NULL AND NOT ps.excluded AND NOT {unit_compatible_sql()}
+    """)
     auto_ranges = set_auto_ranges(con)  # granice prije grupa: slabi član traži cijenu u granicama
     groups = build_staple_groups(con)
     return {
@@ -539,12 +546,18 @@ STRONG_SHARE, STRONG_MAX_EXCLUDED, WEAK_SHARE = 0.5, 0.10, 0.25
 HOW_RANK_SQL = "CASE how WHEN 'name' THEN 0 WHEN 'inferred' THEN 1 WHEN 'heuristic' THEN 2 ELSE 3 END"
 
 
-def unit_compatible_sql(staple_unit: str, pack_unit: str, compare_by: str = "'unit'") -> str:
-    """SQL: je li jedinica pakiranja spojiva s jedinicom namirnice (kom -> kom, kg -> g, l -> ml).
-    Nepoznata jedinica pakiranja ne isključuje; vrećice (compare_by pack) primaju sve."""
-    return f"""({pack_unit} IS NULL OR {compare_by} = 'pack'
-               OR ({staple_unit} = 'kom' AND {pack_unit} = 'kom') OR ({staple_unit} = 'kg' AND {pack_unit} = 'g')
-               OR ({staple_unit} = 'l' AND {pack_unit} = 'ml'))"""
+def unit_compatible_sql(r: str = "r", p: str = "p", ps: str = "ps") -> str:
+    """SQL: je li jedinica pakiranja (p.pack_unit) spojiva s jedinicom namirnice (r = clean.staple_rules).
+
+    - namirnica u komadima (jaja): pakiranje u komadima, ili broj komada pročitan iz naziva (ps.n_units);
+      "JAJE PRINCESS SURPRISE 15g" nije jaje;
+    - namirnica u kg ili l: g ili ml (kod vrhnja, jogurta, passate i majoneze oboje je uobičajeno), a komad
+      samo ako namirnica ima masu komada (r.piece_g, "SALATA PUTERICA 1KOM");
+    - vrećice (compare_by pack) i nepoznata jedinica pakiranja: uvijek spojivo.
+    """
+    return f"""({p}.pack_unit IS NULL OR {r}.compare_by = 'pack'
+               OR ({r}.unit = 'kom' AND ({p}.pack_unit = 'kom' OR {ps}.n_units IS NOT NULL))
+               OR ({r}.unit IN ('kg', 'l') AND ({p}.pack_unit IN ('g', 'ml') OR {r}.piece_g IS NOT NULL)))"""
 
 
 def build_staple_groups(con: duckdb.DuckDBPyConnection) -> list[tuple]:
@@ -588,8 +601,9 @@ def build_staple_groups(con: duckdb.DuckDBPyConnection) -> list[tuple]:
                      count(DISTINCT chain) FILTER (WHERE usable) AS n_usable FROM m GROUP BY ALL),
         u AS (  -- jedinica i cijena po jedinici iskoristivih proizvoda (za slabe članove)
           SELECT m.staple, m.bkey,
-                 bool_and({unit_compatible_sql("r.unit", "p.pack_unit", "r.compare_by")}) AS unit_ok
+                 bool_and({unit_compatible_sql()}) AS unit_ok
           FROM m JOIN clean.products p USING (chain, product_id) JOIN clean.staple_rules r USING (staple)
+          JOIN clean.product_staples ps USING (staple, chain, product_id)
           WHERE m.usable GROUP BY ALL
         ),
         pr AS (

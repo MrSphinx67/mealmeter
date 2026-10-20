@@ -71,4 +71,5 @@ pieces:  # g po komadu (srednje veliki, neočišćen, kakav se kupuje)
   krastavac: {g: 300, estimate: true}
   kupus: {g: 1500, piece: glavica, estimate: true}
   zelena_salata: {g: 400, piece: glavica, estimate: true}
+  endivija: {g: 300, piece: glavica, estimate: true}
   jaja: {g: 60, estimate: true}  # jaje M

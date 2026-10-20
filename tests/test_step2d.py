@@ -25,7 +25,7 @@ def _mini_groups(rows, pack_unit=None):
     c.execute("""CREATE TABLE clean.product_attrs (chain VARCHAR, product_id VARCHAR, staple VARCHAR,
                  attr VARCHAR, value VARCHAR, how VARCHAR)""")
     c.execute("""CREATE TABLE clean.staple_rules AS SELECT 'x' AS staple, 'kg' AS unit, 'unit' AS compare_by,
-                 NULL::DOUBLE AS ppu_min, NULL::DOUBLE AS ppu_max""")
+                 NULL::DOUBLE AS ppu_min, NULL::DOUBLE AS ppu_max, NULL::DOUBLE AS piece_g""")
     c.execute("""CREATE TABLE clean.prices (chain VARCHAR, product_id VARCHAR, price_eff DOUBLE, per_unit VARCHAR,
                  price_per_unit DOUBLE)""")
     for i, (chain, ean, name, excluded) in enumerate(rows):
@@ -54,8 +54,9 @@ def test_group_tiers():
 
 def test_weak_needs_compatible_unit():
     rows = [("a", "1", "x", False), ("b", "1", "b", None), ("c", "1", "b", None)]
-    assert _mini_groups(rows, pack_unit="ml")["1"] == ("ambiguous", None)  # kg namirnica, pakiranje u ml
+    assert _mini_groups(rows, pack_unit="kom")["1"] == ("ambiguous", None)  # kg namirnica, komad bez mase komada
     assert _mini_groups(rows, pack_unit="g")["1"] == ("member", "weak")
+    assert _mini_groups(rows, pack_unit="ml")["1"] == ("member", "weak")  # g i ml su zamjenjivi
 
 
 def test_turkey_mince_not_default_mince(con):
@@ -469,3 +470,23 @@ def test_garden_food_brands_not_hard(name):
     from mealmeter.food import hard_nonfood
 
     assert not hard_nonfood(name, "HRANA", "g")
+
+
+# --- 2E.3 jedinica pakiranja ---------------------------------------------------------------
+
+def test_egg_in_grams_dropped(tmp_path):
+    from mealmeter.build import build_clean, load_raw
+    from tests.conftest import FIXTURE
+
+    c = duckdb.connect(str(tmp_path / "u.duckdb"))
+    load_raw(c, FIXTURE, "2026-10-19")
+    c.execute("""INSERT INTO products (chain, product_id, barcode, name, category, unit) VALUES
+                 ('konzum', 'E1', 'konzum:E1', 'JAJE PRINCESS SUPRISE 15g', 'HRANA', 'KOM'),
+                 ('konzum', 'E2', 'konzum:E2', 'JAJA M 10 KOM 600 g', 'HRANA', 'KOM'),
+                 ('konzum', 'S1', 'konzum:S1', 'SALATA PUTERICA 1KOM', 'HRANA', 'KOM'),
+                 ('konzum', 'V1', 'konzum:V1', 'VRHNJE ZA KUHANJE 20% 200 g', 'HRANA', 'KOM')""")
+    build_clean(c)
+    got = dict(c.execute("""SELECT product_id, coalesce(drop_reason, 'ok') FROM clean.product_staples
+                            WHERE product_id IN ('E1', 'E2', 'S1', 'V1') AND NOT excluded""").fetchall())
+    assert got == {"E1": "jedinica", "E2": "ok", "S1": "ok", "V1": "ok"}
+

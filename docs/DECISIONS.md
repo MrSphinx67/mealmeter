@@ -577,3 +577,11 @@ Izvještaji: [STEP2E_REVIEW.md](STEP2E_REVIEW.md) (`scripts/step2e_review.py`) i
       PROGRAM“: „GARDEN 100 g GRAH ŽUTI BER“ je vrećica sjemena). Doslovno pravilo isključilo bi hranu: Konzumov
       „GARDEN GOOD“ (19 grupa graha, ajvar, suho voće), bio „Garden“ rižu, leću i slanutak, „GARDEN GOURMET“
       i Garden pivo.
+70. **Spojivost jedinice** (`staples.unit_compatible_sql`, `drop_reason = 'jedinica'`, i uvjet za slabog člana).
+    - Namirnica u komadima (jaja) traži pakiranje u komadima ili broj komada iz naziva („JAJE PRINCESS
+      SUPRISE 15g“ ispada, „JAJA M 10 KOM 600 g“ ostaje).
+    - Nepoznata jedinica pakiranja i vrećice ne isključuju.
+    - **Odstupanje:** kod namirnica u kg ili l g i ml su zamjenjivi. Doslovno „kg traži g, l traži ml“ izbacilo
+      bi jogurt u bocama od 1 l, passatu, majonezu, kečap i senf u ml te vrhnje u g.
+    - Komad je spojiv samo ako namirnica ima masu komada u `units.yaml` („SALATA PUTERICA 1KOM“; dodana
+      endivija, 300 g). Na arhivi 2026-10-20 ispada 80 proizvoda, od toga 64 „jaja“ (čokoladna i igračke).

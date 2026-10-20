@@ -4,5 +4,6 @@
 |---|---|
 | 1 | gotovo |
 | 2 | gotovo |
+| 3 | gotovo |
 
-Sljedeća točka: 3.
+Sljedeća točka: 4.
