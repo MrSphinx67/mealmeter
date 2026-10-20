@@ -364,7 +364,7 @@ def _gkey_sql(staple) -> tuple[str, str]:
 def _attach_attributes(con: duckdb.DuckDBPyConnection, staple, rows: list[dict]) -> None:
     """Atributi grupe = najčešća vrijednost svakog atributa među proizvodima u grupi.
 
-    attribute_sources daje za svaki atribut {"name": naziv proizvoda, "how": "name" | "inferred" |
+    attribute_sources daje za svaki atribut {"name": naziv proizvoda, "how": "name" | "inferred" | "heuristic" |
     "default"}: "name" ako barem jedan proizvod u grupi vrijednost izričito ima u nazivu, inače
     "inferred" (zaključeno, npr. LAGANO JUTRO -> bez laktoze) ili "default" (npr. oblik=nepoznato).
     """
@@ -384,7 +384,7 @@ def _attach_attributes(con: duckdb.DuckDBPyConnection, staple, rows: list[dict])
     ).fetchall()
     counts: dict[tuple, dict[str, int]] = {}
     sources: dict[tuple, dict] = {}
-    rank = {"name": 0, "inferred": 1, "default": 2}
+    rank = {"name": 0, "inferred": 1, "heuristic": 2, "default": 3}
     for gkey, attr, value, name, how in found:
         counts.setdefault((gkey, attr), {}).setdefault(value, 0)
         counts[(gkey, attr)][value] += 1

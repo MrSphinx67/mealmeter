@@ -392,7 +392,6 @@ def test_canned_tomato(name, oblik):
     ("leca", "LEĆA LIM 400 g NETO OC.MASA 240 g (12) PODRAVKA", "konzerva"),
     ("leca", "LEĆA ZELENA 500G NATURA MARJAN VOĆE", "nepoznato"),
     ("slanutak", "SLANUTAK 800 g LIMENKA ( OCJ. MASA 480 g) PODRA", "konzerva"),
-    ("slanutak", "SLANUTAK 500 G MARJAN VOCE PVC", "suho"),
     ("grasak", "N-LEDO GRAŠAK 400G -18/1- 065672", "smrznuto"),
     ("grasak", "GRAŠAK U LIMENCI 850G/520G I KVALITETA (6),(PAL 96) PODRAVKA", "konzerva"),
     ("kukuruz", "KUKURUZ ŠEĆERAC 340 g PODRAVKA (10) OC. MASA 280 g", "konzerva"),

@@ -229,3 +229,32 @@ def test_pack_suspect_rule(con):
         SELECT ppu, n, {sql} FROM (SELECT 'pack' AS range_source, 0.30 AS ppu_min, 1.25 AS ppu_max) r,
         (VALUES (0.10, 70.0), (0.10, 1.0), (0.60, 1.0), (19.5, 1.0), (2.0, 30.0)) v(ppu, n)""").fetchall()
     assert [s for _, _, s in rows] == [False, True, False, True, True]
+
+
+# --- 11. oblik mahunarki ---------------------------------------------------------------
+
+@pytest.mark.parametrize("key,name,unit,amount,expected", [
+    ("leca", "LEĆA CRVENA NATURA 500 g", "KOM", 500, "suho"),
+    ("leca", "LECA SMEDJA 500 G ADVENT", "KOM", 500, "suho"),
+    ("leca", "Vedrini Leća zelena 1 kg", "KOM", 1000, "suho"),
+    ("slanutak", "SLANUTAK 500 G MARJAN VOCE PVC", "KOM", 500, "suho"),
+    ("grah", "GRAH ŠARENI 2500G PVC", "KOM", 2500, None),  # izvan 400-1000 g
+    ("grah", "GRAH CRVENI 400 g", "RINF", 400, "suho"),
+    ("grah", "GRAH CRVENI 400 g", "LIM", 400, "konzerva"),  # oznaka u stupcu unit
+    ("grasak", "GRAŠAK 450 g", "ZAMRZ.", 450, "smrznuto"),
+    ("gljive", "ŠAMPINJONI 500g PVC", "KOM", 500, None),  # gljive nemaju dry_rule
+])
+def test_form_heuristic(key, name, unit, amount, expected):
+    from mealmeter.staples import form_heuristic
+
+    assert form_heuristic(S[key], name, unit, amount, "g") == expected
+
+
+@pytest.mark.parametrize("key,name,form", [
+    ("grah", "GRAH U NALJEVU 400 g", "konzerva"),
+    ("grah", "GRAH OC.MASA 240 g", "konzerva"),
+    ("grasak", "GRAŠAK FROZY 450 g", "smrznuto"),
+    ("grasak", "GRAŠAK FRESCO ZA GASTRO", "smrznuto"),
+])
+def test_form_name_markers(key, name, form):
+    assert extract_attributes(S[key], name)["oblik"] == form

@@ -33,14 +33,14 @@ Napomena: štruca od 2,6 kg ima 2,30–4,38 €/kg, pa vjerojatno nosi cijenu po
 | eurospin | DOMAĆI PIL. FILE OD PRSA OBIT. PAK. | 4,99 | 4,99 | 43 |
 | stanic | PILEĆI FILE SMRZNUTI | 2,75 | 2,75 | 29 |
 | roto | PILEĆI FILE SVJEŽI sniženje (12) | 2,50 | 2,50 | 9 |
-| metro | 2,5KG UKR. PILEĆI FILE SMRZ | 31,50 | 31,50 | 7 |
 | metro | CCA5KG MC PILEĆI FILE MAP | 4,99 | 4,99 | 7 |
+| metro | 2,5KG UKR. PILEĆI FILE SMRZ | 31,50 | 31,50 | 7 |
 | studenac | PILECI FILE SMRZ.STANIC | 3,92 | 3,98 | 5 |
 | trgovina-krk | PILEĆI FILE ZA GASTRO 1 kg | 1,95 | 4,08 | 4 |
 | konzum | PILEĆI FILE SOLJENI 6X2 BRAZIL | 3,28 | 4,11 | 4 |
-| studenac | PILEĆI FILE BRAZIL 2KG LEDO | 4,91 | 4,91 | 2 |
-| branka | PRSA PILEĆA BEZ KOŽE | 4,79 | 4,79 | 2 |
+| studenac | GASTRO PILEĆI FILE PEČENI | 209,90 | 209,90 | 2 |
 | branka | -PRSA PILEĆA SVJEŽA | 4,79 | 4,79 | 2 |
+| branka | PRSA PILEĆA SVJEŽA | 4,79 | 4,99 | 2 |
 
 ## 5. Luk: nazivi s bojom (ČEKA POTVRDU, mapiranje nije mijenjano)
 
@@ -220,26 +220,26 @@ Proizvodi izvan zadanog izbora (`find_products`/`get_prices` bez `include_*`), p
 
 | lanac | naziv | kategorija lanca | skupina | izvor |
 |---|---|---|---|---|
-| branka | CVJETIĆI UKRASNI | HRANA | hrana | chain |
+| gavranovic | SLADOLED KING DESIRE 450ml ČAŠA LEDO | Hrana | hrana | chain |
+| ktc | JACK DANIEL S 0,7L + 1 ČAŠA | PIĆA | alkohol | chain |
 | plodine | WHISKEY JAMESON 0,7 L + 2 CASE |  | alkohol | ean_inherited |
 | studenac | IGRAČKA HUGI WUGI BLOW BUBBLE 12/1 | HRANA | hrana | chain |
-| boso | CVIJE ORHID.POSUD.CIKL.47 cm | ZELENI PROGRAM | hrana | chain |
+| konzum | MEDENJACI DEKORAT SET 480 G LAMBERTZ | HRANA | hrana | chain |
 | ribola | ABC 100G SPUŽVA BOB | HRANA | hrana | chain |
+| gavranovic | SVIJEĆA ROĐENDANSKA 10kom-rasprodaja | Hrana | hrana | chain |
 | roto | WHISKEY JACK DANIELS HONEY 0,70 + 2 ČAŠE (6)\* | ŽESTOKO | alkohol | chain |
-| gavranovic | TANJURIĆI STAKLO 15X15cm HO-rasprodaja | Hrana | hrana | chain |
-| branka | SALVETE DAISY MI BOŽIĆNA ZVIJEZDA 20/1 | HRANA | hrana | chain |
+| ntl | IGRAČKA FINGER SLUG VELIKI | Ostalo | hrana | ean_inherited |
+| ktc | ČOK BOMONI 80g SA GLAZB. IGRAČKOM | HRANA | hrana | chain |
 | vrutak | \*TEMPRANILLO CASA SOLAR 0.75L COSECHEROS ZOZP SUHO 2025 -6/1- | VINO INOZEMNO | alkohol | chain |
-| ktc | NUTELLA 200g ČAŠA | HRANA | hrana | chain |
-| ktc | MUFFINS CLASIC 250g U POSUDI | HRANA | hrana | chain |
-| gavranovic | VREĆICA UKRASNA 26X32X12 cm-rasprodaja | Hrana | hrana | chain |
-| konzum | ČAJ CVIJET BAZGE EKO 40g DARVITALIS | HRANA | hrana | chain |
-| gavranovic | TETA VIOLETA OMEKŠIVAČ 900ml LAGOON | Hrana | hrana | chain |
-| plodine | UKRAS DRAZESNA SRCA 7 G DR OETKER |  | hrana | ean_inherited |
+| boso | SJEME GARDEN KRAST.DUGI ZELENI | ZELENI PROGRAM | hrana | chain |
+| branka | ČAJ LIPA CVIJET 50g | HRANA | hrana | chain |
+| jadranka_trgovina | LIKER PELINKOVAC 0,7L VERSUS + 2 ČAŠE PROMO | PIĆE | alkohol | chain |
+| boso | SJEME GARDEN PRKOS FIORI DOPPI | ZELENI PROGRAM | hrana | chain |
+| gavranovic | VREĆICA UKRASNA ZA BOCU 12x36x9cm BIJELA/SIVA - rasprodaja | Hrana | hrana | chain |
+| gavranovic | BATERIJE PHILIPS 6F22 9V 1/1-rasprodaja | Hrana | hrana | chain |
 | trgovina-krk | JIM BEAM 0,7L + 1 ČAŠE | Piće | alkohol | chain |
-| gavranovic | ČESTITKA-rasprodaja | Hrana | hrana | chain |
-| boso | WHISK JACK 0,7 l DANIELS+2 ČAŠE | VINO I JAP | alkohol | chain |
-| spar | Kruh craft Karla u kalup.400 g | Hrana | hrana | chain |
-| plodine | UKRASNE VRECICE KARO BIJELO SIVA |  | hrana | ean_inherited |
+| gavranovic | SCABIOSA CVIJET - rasprodaja | Hrana | hrana | chain |
+| konzum | KRUH KALUP 600g MARYMAT | HRANA | hrana | chain |
 
 ## 1. Jaja
 
@@ -312,16 +312,16 @@ Izvor atributa za 10 grupa riže (`find_products(ingredient="riza")`):
 
 | id | naziv | atributi | izvor (how, naziv) |
 |---|---|---|---|
-| 8001860100017 | Riso Scotti riža originario okr.zrno 1kg | vrsta=originario | vrsta: name („RIŽA ORIGINARIO 1 kg SCOTTI“) |
+| 8001860100017 | Riso Scotti riža originario okr.zrno 1kg | vrsta=originario | vrsta: name („RIŽA SCOTTI NIKAS ORIGINARIO 1 kg“) |
 | 3838700540291 | RIŽA ZA DOMAĆA JELA ZLATO POLJE PODRAVKA 1 kg (12) | vrsta=originario | vrsta: name („RIŽA ZL.POLJE 1 kg (OKRUGLO ZRNO)“) |
 | 3838700540369 | RIŽA ZLATO POLJE BLAZINICA PODRAVKA 800 g (9) |  |  |
-| 8001860201011 | Riso Scotti riža arborio dugo zrno 1kg | vrsta=arborio | vrsta: name („RIŽA ARBORIO 1 kg SCOTTI“) |
-| 8001860190520 | Riso Scotti riža oro dugog zrna 1kg | vrsta=parboiled | vrsta: name („RIŽA SCOTTI ORO 1 kg PARBOILED“) |
+| 8001860201011 | Riso Scotti riža arborio dugo zrno 1kg | vrsta=arborio | vrsta: name („RIŽA ARBORIO 1 kg RISO SCOT“) |
+| 8001860190520 | Riso Scotti riža oro dugog zrna 1kg | vrsta=parboiled | vrsta: name („RIŽA ORO PARBOILED 1 kg SCO“) |
 | 3838700540314 | RIŽA BIJELA 800 g VREĆICA ZLATO POLJE | vrsta=dugo_zrno | vrsta: name („Zlato polje riža dugo zrno pvc 800 g“) |
 | 3838700540482 | RIŽA ZL POLJE ST ANDREA 500G KUT (18) |  |  |
-| 5410673007490 | RIZA PARABOILED DUGO ZRNO VRECICA 500 G BENS ORIGINAL | vrsta=dugo_zrno | vrsta: name („RIŽA DUGO ZRNO 500 g 4 VREĆICE BEN S“) |
+| 5410673007490 | RIZA PARABOILED DUGO ZRNO VRECICA 500 G BENS ORIGINAL | vrsta=dugo_zrno | vrsta: name („RIŽA BENS DUGO ZRNO 500 g“) |
 | 3838700540406 | RIŽA ZL POLJE ST ANDREA 1KG KUT VAK (12) |  |  |
-| 3838700540604 | RIŽA ARBORIO VAKUMIRANA 1000 g PODRA | vrsta=arborio | vrsta: name („RIZA ARBORIO 1 KG VP ZLATO POLJE“) |
+| 3838700540604 | RIŽA ARBORIO VAKUMIRANA 1000 g PODRA | vrsta=arborio | vrsta: name („RIŽA ZLATO POLJE ARBORIO VP 1 kg“) |
 
 ## 3. Kakao
 
@@ -412,14 +412,14 @@ Primjer: `plan_basket` 0,5 l mlijeka u Osijeku (prvih 8 trgovina):
 
 | lanac | adresa | proizvod | vrsta | mast | € | zamjena |
 |---|---|---|---|---|---|---|
-| lidl | Svetog Leopolda Bogdana Mandića 33 A | Križevačka mljekara Trajno mlijeko | trajno | 2.8 | 0,52 |  |
 | lidl | Ulica J. J. Strossmayera 350 | Križevačka mljekara Trajno mlijeko | trajno | 2.8 | 0,52 |  |
+| lidl | Svetog Leopolda Bogdana Mandića 33 A | Križevačka mljekara Trajno mlijeko | trajno | 2.8 | 0,52 |  |
 | lidl | Zeleno Polje 8 A | Križevačka mljekara Trajno mlijeko | trajno | 2.8 | 0,52 |  |
 | eurospin | Ulica 3 gardijske brigade „Kune“ 30 | MLIJEKO TRAJNO 2,8% m.m.1l | trajno | 2.8 | 0,62 |  |
 | eurospin | Ulica Josipa Jurja Strossmayera 343A | MLIJEKO TRAJNO 2,8% m.m.1l | trajno | 2.8 | 0,62 |  |
-| ntl | TVRDAVICA 47 | MLIJEKO TRAJNO 2,8 % m. m. 1L TOJETO | trajno | 2.8 | 0,65 |  |
 | ntl | Zeleno polje 9b, Osijek | MLIJEKO TRAJNO 2,8 % m. m. 1L TOJETO | trajno | 2.8 | 0,65 |  |
-| ntl | Cvrsnicka 64 | MLIJEKO TRAJNO 2,8 % m. m. 1L TOJETO | trajno | 2.8 | 0,65 |  |
+| ntl | Dobra ulica 2, Brijest, Osijek | MLIJEKO TRAJNO 2,8 % m. m. 1L TOJETO | trajno | 2.8 | 0,65 |  |
+| ntl | PAPUK GORE 44 | MLIJEKO TRAJNO 2,8 % m. m. 1L TOJETO | trajno | 2.8 | 0,65 |  |
 
 ## 8. Peršin i svježe bilje
 
@@ -484,3 +484,97 @@ Najčešće cijene izvan granica:
 | vanilin_secer | metro | 6X8G DOLCELA VANILIN ŠEĆER 5+1 | 6,00 | 24,30 | 4,05 | 2 |
 
 Napomena: donja granica kvasca (0,30 €) pogađa i vjerojatno stvarne cijene trgovačkih marki (Kaufland 0,13 €, Harmer 0,24 €). Ako su to stvarne cijene, donja granica bi trebala biti oko 0,10 €.
+
+## 11. Oblik mahunarki, kukuruza i gljiva
+
+Heuristika: konzerva ako naziv ili stupac `unit` sadrži LIM, LIMENK, OC.MASA, OCIJE, STAKLO, VAKUM ili NALJEV (uz postojeće oznake: konz, ocij., neto, 400/240 g…). Smrznuto ako sadrži LEDO, SMRZ, FROZY, FRESCO ili ZAMRZ. Suho (`dry_rule`, `how = heuristic`) ako je pakiranje 400–1000 g, nema oznaka konzerve ni smrznutog, a `unit` je rinfuza ili naziv sadrži PVC, VREĆICA, NATURA, VEDRINI, PRIMAVITA ili ADVENT. Vrećica i PVC više sami ne znače suho, nego samo uz taj uvjet. Gljive nemaju `dry_rule` (500 g u vrećici su svježi šampinjoni). Stupac `unit` u ovoj arhivi nikad ne sadrži LIM ni RINF (KOM/KG), pa provjera stupca zasad ništa ne mijenja.
+
+Broj grupa po obliku, sada (prije); vrijednost grupe je ona s najviše proizvoda:
+
+| namirnica | konzerva | suho | smrznuto | svjeze | nepoznato |
+|---|---|---|---|---|---|
+| gljive | 7 (7) | 1 (1) | 1 (1) | 17 (17) | 90 (90) |
+| grah | 72 (72) | 38 (28) | 4 (4) | 1 (1) | 303 (313) |
+| grasak | 24 (24) | 6 (4) | 27 (19) | 0 (0) | 96 (106) |
+| kukuruz | 27 (27) | 0 (0) | 6 (5) | 2 (2) | 125 (126) |
+| leca | 11 (10) | 17 (11) | 0 (0) | 0 (0) | 104 (111) |
+| slanutak | 20 (20) | 10 (7) | 2 (2) | 0 (0) | 95 (98) |
+
+20 nasumičnih grupa: **konzerva**
+
+| namirnica | grupa | naziv | g | izvor |
+|---|---|---|---|---|
+| grah | 3858883225068 | GRAH BIJ.CANNELLINI 2500 g/1500 g N.O., BAKINA KUHINJA | 2500,00 | naziv |
+| grah | 3858886520979 | GRAH CRVENI 2500G/1500G,MARI | 2500,00 | naziv |
+| kukuruz | 3850104221682 | Podravka Kukuruz šećerac 150g/140g | 150,00 | naziv |
+| leca | 3856022650955 | LECA 400 G CAMPO KUHANA STERILIZIRANA | 400,00 | naziv |
+| slanutak | 3858883225570 | SLANUTAK 400g/240g O.M. BAKINA KUHINJA | 400,00 | naziv |
+| slanutak | 8718976020046 | SLANUTAK 200G LIMENKA EKOZONA -12/1 | 200,00 | naziv |
+| grah | 3850104020728 | Podravka crveni grah, lim 800g/460g | 800,00 | naziv |
+| grah | 3856030701205 | GRAH ŠARENI KONZ. VERDEAMO 400g/240g | 400,00 | naziv |
+| kukuruz | 3850104063435 | Podravka kukuruz šećerac 340g /280g | 340,00 | naziv |
+| slanutak | 8001440118531 | Valfrutta Slanutak 3x150g/140g | 450,00 | naziv |
+| grah | 3856003929704 | GRAH BIJELI 800g-ocijeđena masa 480g ZORELA | 800,00 | naziv |
+| grah | 3856030701229 | GRAH ŠARENI KONZ. VERDEAMO 800g/480g | 800,00 | naziv |
+| grah | ribola:grah sareni 2500 g 2500g 1500g castelo | GRAH ŠARENI 2500 g 2500g/1500g CASTELO | 2500,00 | naziv |
+| leca | 8017596014825 | LEĆA ZELENA 400g/240g | 400,00 | naziv |
+| slanutak | 8001440001376 | SLANUTAK ST 230/360g VALFRUTTA | 360,00 | naziv |
+| grasak | 8028343400167 | GRASAK 800 G TESORI DEL SUD LIMENKA | 800,00 | naziv |
+| grah | 4070765135992 | dmBio crveni grah Kidney 400 g/240 g | 400,00 | naziv |
+| grah | 8028343400099 | GRAH BIJELI 400 G TESORI DEL SUD LIMENKA | 400,00 | naziv |
+| slanutak | 3859891496839 | Slanutak kuhani vakum 350g | 350,00 | naziv |
+| grasak | 3858894142835 | GRAŠAK ZELENI 420g E BUONO | 420,00 | naziv |
+
+20 nasumičnih grupa: **suho**
+
+| namirnica | grupa | naziv | g | izvor |
+|---|---|---|---|---|
+| leca | 3858882920353 | LEĆA SMEĐA ADVENT 500 g | 500,00 | heuristika |
+| grasak | 3859890630746 | Vedrini Grašak zeleni polovice 1 kg | 1000,00 | heuristika |
+| grasak | 8051566318551 | SUHI GRAŠAK 500G | 500,00 | naziv |
+| grah | trgocentar:grah tetovac rinfuza pt | GRAH TETOVAC RINFUZA (PT) |  | naziv |
+| leca | bure:leca rfs | LEĆA RFS |  | naziv |
+| grah | gavranovic:grah sareni rinfuza snizenje | GRAH ŠARENI RINFUZA SNIŽENJE |  | naziv |
+| grah | 3858889334269 | GRAH PINTO VEDRINI 500 g | 500,00 | heuristika |
+| slanutak | studenac:slanutak rfz | SLANUTAK RFZ |  | naziv |
+| leca | vrutak:leca zelena rinfuza | LEĆA ZELENA RINFUZA |  | naziv |
+| grasak | 3859890630739 | GRAŠAK SUŠENI VEDRINI 500g | 500,00 | heuristika |
+| leca | studenac:leca zelena rfs kg | LEĆA ZELENA RFS kg |  | naziv |
+| grasak | 3859891427932 | GRASAK SUHI-POLOVICE |  | naziv |
+| grah | trgocentar:grah tresnjevac rinfuza pt | GRAH TREŠNJEVAC RINFUZA (PT) |  | naziv |
+| grah | 3859890630630 | GRAH ŠARENI 500 g PRIMORAC D.O.O. (16) 1992 | 500,00 | heuristika |
+| leca | 3859890630784 | Vedrini Leća zelena 1 kg | 1000,00 | heuristika |
+| grah | gavranovic:grah zelencak rfs | GRAH ZELENČAK RFS |  | naziv |
+| grah | gavranovic:grah sareni pinto rfs | GRAH ŠARENI PINTO RFS |  | naziv |
+| grah | gavranovic:grah zelencak rfs snizenje | GRAH ZELENČAK RFS SNIŽENJE |  | naziv |
+| grah | 3850334173843 | GRAH TREŠNJEVAC RFZ VELPRO (25) |  | naziv |
+| grah | 3858882920315 | GRAH MUNGO SOJA ZELENA 500g PRIMAVITA ADVENT | 500,00 | heuristika |
+
+20 nasumičnih grupa: **smrznuto**
+
+| namirnica | grupa | naziv | g | izvor |
+|---|---|---|---|---|
+| grasak | 3858894110247 | GRAŠAK SMRZNUTI HLAD 2,5 kg (4) | 2500,00 | naziv |
+| gljive | 5412532321051 | ŠAMPINJONI REZANI SMRZ FLANDERS 2,5kg (4) | 2500,00 | naziv |
+| grasak | 8600038003664 | ZAMRZ PIK B 400 g GRAŠAK | 400,00 | naziv |
+| grasak | 3850116613956 | GRAŠAK SMRZ.450 g U-GR LEDO | 450,00 | naziv |
+| slanutak | tommy:sipa sa slanutkom smrz | SIPA SA SLANUTKOM SMRZ. |  | naziv |
+| grasak | 3858896220081 | GRAŠAK FRESHY 600 g ZAMRZNUTI | 600,00 | naziv |
+| grasak | 3850116035451 | GRAŠAK UG 2,5 LEDO | 2500,00 | naziv |
+| grasak | 3877000505791 | GRAŠAK SMRZNUTI 400 g AG | 400,00 | naziv |
+| kukuruz | 3858894110391 | KUKURUZ ŠEĆERAC SMRZNUTI HLAD 2,5 kg (4) | 2500,00 | naziv |
+| grasak | 3858891042558 | GRAŠAK 2.5kg FROZY | 2500,00 | naziv |
+| grah | 3850116106304 | GRAH 450g LEDO | 450,00 | naziv |
+| grasak | lidl:grasak smrznuto | Grašak, smrznuto | 1000,00 | naziv |
+| grasak | 3850116053165 | ZAMRZ LEDO 400 g GRAŠAK | 400,00 | naziv |
+| grasak | 5412532270052 | GRAŠAK SMRZ 2,5 VINKA (4) |  | naziv |
+| grasak | 3850116775005 | GRAŠAK FRESCO 400 g LEDO | 400,00 | naziv |
+| grasak | 3850116058627 | ZAMRZ LEDO 700 g GRAŠAK XXL | 700,00 | naziv |
+| grah | 3850116053134 | GRAH 400g LEDO | 400,00 | naziv |
+| grasak | 3859889284585 | N-GRAŠAK FROZY 400G -10/1- | 400,00 | naziv |
+| grasak | 3877000505487 | GRAŠAK SMRZNUTI 1000 g AG | 1000,00 | naziv |
+| kukuruz | 5999553897074 | KUKURUZ SMRZ. 2,5 kg DELTA | 2500,00 | naziv |
+
+Zapažanja:
+- Većina preostalih `nepoznato` su konzerve bez oznake u nazivu („GRAH ZVIJEZDA 420 g“, „GRAŠAK 400 g ZVIJEZDA“, „KUKURUZ ŠEĆERAC 340g“). Dodatni signal mogao bi biti tipična gramatura limenke (212/340/400/425 g) uz marku konzervi, ali to nije dio zadane heuristike.
+- Krivi pogoci u uzorku (gotova jela): „GRAH S KOB.SMRZ.“ („KOB.“ nije `kobasic`) i „SIPA SA SLANUTKOM SMRZ.“; nisu ispravljeni u ovom koraku.

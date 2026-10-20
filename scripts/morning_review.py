@@ -375,8 +375,67 @@ def section_sachets(con) -> str:
     ])
 
 
+# grupe po obliku prije Koraka 2C.11: pravila iz staples.yaml u commitu 2918655 na istim grupama, uz isti
+# izbor vrijednosti grupe (najviše proizvoda, pa abecedno)
+FORMS = ("konzerva", "suho", "smrznuto", "svjeze", "nepoznato")
+FORMS_BEFORE = {
+    "gljive": (7, 1, 1, 17, 90), "grah": (72, 28, 4, 1, 313), "grasak": (24, 4, 19, 0, 106),
+    "kukuruz": (27, 0, 5, 2, 126), "leca": (10, 11, 0, 0, 111), "slanutak": (20, 7, 2, 0, 98),
+}
+FORM_STAPLES = tuple(FORMS_BEFORE)
+
+
+def section_forms(con) -> str:
+    keys = ", ".join(f"'{k}'" for k in FORM_STAPLES)
+    groups = f"""
+        WITH m AS (
+          SELECT ps.staple, CASE WHEN p.ean_global THEN p.ean_norm ELSE p.chain || ':' || p.name_norm END AS grp,
+                 a.value, a.how, p.name, p.pack_amount
+          FROM clean.product_staples ps JOIN clean.products p USING (chain, product_id)
+          JOIN clean.product_attrs a ON a.chain = ps.chain AND a.product_id = ps.product_id
+               AND a.staple = ps.staple AND a.attr = 'oblik'
+          WHERE ps.staple IN ({keys}) AND NOT ps.excluded AND ps.drop_reason IS NULL AND p.is_food IS NOT false
+        ),
+        v AS (  -- vrijednost grupe: najviše proizvoda, pa abecedno
+          SELECT staple, grp, value FROM (SELECT staple, grp, value, count(*) AS n FROM m GROUP BY ALL)
+          QUALIFY row_number() OVER (PARTITION BY staple, grp ORDER BY n DESC, value) = 1
+        )
+        SELECT m.staple, m.grp, v.value AS oblik, bool_or(m.how = 'heuristic' AND m.value = v.value) AS heur,
+               max(m.name) AS name, any_value(m.pack_amount) AS pack
+        FROM m JOIN v USING (staple, grp) GROUP BY ALL"""
+    counts = dict(((k, f), n) for k, f, n in con.execute(
+        f"SELECT staple, oblik, count(*) FROM ({groups}) GROUP BY ALL").fetchall())
+    forms = list(FORMS)
+    count_rows = [(k, *[f"{counts.get((k, f), 0)} ({b})" for f, b in zip(forms, FORMS_BEFORE[k])])
+                  for k in FORM_STAPLES]
+    con.execute("SELECT setseed(0.11)")
+    out = ["## 11. Oblik mahunarki, kukuruza i gljiva", "",
+           "Heuristika: konzerva ako naziv ili stupac `unit` sadrži LIM, LIMENK, OC.MASA, OCIJE, STAKLO, VAKUM ili "
+           "NALJEV (uz postojeće oznake: konz, ocij., neto, 400/240 g…). Smrznuto ako sadrži LEDO, SMRZ, FROZY, "
+           "FRESCO ili ZAMRZ. Suho (`dry_rule`, `how = heuristic`) ako je pakiranje 400–1000 g, nema oznaka "
+           "konzerve ni smrznutog, a `unit` je rinfuza ili naziv sadrži PVC, VREĆICA, NATURA, VEDRINI, PRIMAVITA ili "
+           "ADVENT. Vrećica i PVC više sami ne znače suho, nego samo uz taj uvjet. Gljive nemaju `dry_rule` "
+           "(500 g u vrećici su svježi šampinjoni). Stupac `unit` u ovoj arhivi nikad ne sadrži LIM ni RINF "
+           "(KOM/KG), pa provjera stupca zasad ništa ne mijenja.", "",
+           "Broj grupa po obliku, sada (prije); vrijednost grupe je ona s najviše proizvoda:", "",
+           md_table(["namirnica", *forms], count_rows)]
+    for form in ("konzerva", "suho", "smrznuto"):
+        sample = con.execute(f"""SELECT staple, grp, name, pack, CASE WHEN heur THEN 'heuristika' ELSE 'naziv' END
+                                 FROM ({groups}) WHERE oblik = ? ORDER BY random() LIMIT 20""", [form]).fetchall()
+        out += ["", f"20 nasumičnih grupa: **{form}**", "",
+                md_table(["namirnica", "grupa", "naziv", "g", "izvor"], sample)]
+    out += ["", "Zapažanja:",
+            "- Većina preostalih `nepoznato` su konzerve bez oznake u nazivu („GRAH ZVIJEZDA 420 g“, „GRAŠAK 400 g "
+            "ZVIJEZDA“, „KUKURUZ ŠEĆERAC 340g“). Dodatni signal mogao bi biti tipična gramatura limenke "
+            "(212/340/400/425 g) uz marku konzervi, ali to nije dio zadane heuristike.",
+            "- Krivi pogoci u uzorku (gotova jela): „GRAH S KOB.SMRZ.“ („KOB.“ nije `kobasic`) i „SIPA SA SLANUTKOM SMRZ.“; "
+            "nisu ispravljeni u ovom koraku."]
+    return "\n".join(out)
+
+
 SECTIONS = [section_chicken, section_onion, section_food, section_eggs, section_variants, section_kakao,
-            section_salt, section_milk, section_parsley, section_units, section_sachets]
+            section_salt, section_milk, section_parsley, section_units, section_sachets,
+            section_forms]
 
 
 def main() -> None:

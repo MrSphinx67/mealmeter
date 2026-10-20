@@ -55,6 +55,8 @@ class Staple:
     # oblik namirnice preko drugih namirnica: {"konzerva": "rajcica_konzerva", ...}
     form_staples: dict[str, str] = field(default_factory=dict, hash=False, compare=False)
     ambiguous_form: bool = False
+    # oblik=suho bez oznake u nazivu: {"pack_g": (400, 1000), "unit": (...), "words": (...)}
+    dry_rule: dict = field(default_factory=dict, hash=False, compare=False)
     # uzorci: proizvod ispada samo ako nema gramature (prazna soljenka), drop_reason 'bez_gramature'
     require_pack: tuple[str, ...] = ()
     # zamjenjive vrijednosti atributa: {"mast": ("2.8", "3.2", "3.5", "3.8")}; traženi ili zadani
@@ -188,6 +190,8 @@ def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> d
             form_staples=d.get("form_staples") or {},
             ambiguous_form=bool(d.get("ambiguous_form", False)),
             require_pack=tuple(_fold(p) for p in d.get("require_pack", [])),
+            dry_rule={k: tuple(_fold(str(x)) if k != "pack_g" else float(x) for x in v)
+                      for k, v in (d.get("dry_rule") or {}).items()},
             substitutes={a: tuple(str(v) for v in vals) for a, vals in (d.get("substitutes") or {}).items()},
         )
         for a, vals in st.substitutes.items():
@@ -195,6 +199,8 @@ def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> d
                 raise ValueError(f"{key}: substitutes {a}={vals} sadrži nedefiniranu vrijednost")
         if st.ambiguous_form and "oblik" not in attrs:
             raise ValueError(f"{key}: ambiguous_form traži atribut oblik")
+        if st.dry_rule and not (st.ambiguous_form and "suho" in attrs["oblik"] and len(st.dry_rule.get("pack_g", ())) == 2):
+            raise ValueError(f"{key}: dry_rule traži ambiguous_form, oblik=suho i pack_g: [min, max]")
         for a, v in st.default_attributes.items():
             if v not in attrs.get(a, {}):
                 raise ValueError(f"{key}: default_attributes {a}={v} nije definiran atribut")
@@ -259,6 +265,7 @@ def name_match(staple: Staple, name: str) -> str | None:
 
 def extract_attributes_detail(staple: Staple, name: str) -> dict[str, tuple[str, str]]:
     """Atributi iz naziva s porijeklom: {atribut: (vrijednost, "name" | "inferred" | "default")}.
+    Build uz to može postaviti oblik s how="heuristic" (form_heuristic: stupac unit, dry_rule).
 
     "name": vrijednost izričito piše u nazivu (prva vrijednost čiji regex pogodi);
     "inferred": zaključena iz naziva linije (inferred_attributes, npr. LAGANO JUTRO -> bez laktoze);
@@ -280,6 +287,34 @@ def extract_attributes_detail(staple: Staple, name: str) -> dict[str, tuple[str,
                 if attr in staple.attribute_defaults:
                     out[attr] = (staple.attribute_defaults[attr], "default")
     return out
+
+
+def form_heuristic(staple: Staple, name: str, unit: str | None, pack_amount: float | None,
+                   pack_unit: str | None) -> str | None:
+    """Oblik (konzerva/smrznuto/suho) kad ga naziv ne kaže, za namirnice s ambiguous_form.
+
+    1. Oznaka konzerve ili smrznutog u stupcu `unit` (isti uzorci kao za naziv).
+    2. dry_rule: pakiranje u rasponu pack_g (g), bez oznake konzerve/smrznutog u nazivu i unit-u, a
+       unit pogađa dry_rule.unit (rinfuza) ili naziv pogađa dry_rule.words (vrećica, PVC, marke).
+    """
+    if not staple.ambiguous_form:
+        return None
+    forms = staple.attributes["oblik"]
+    unit_text = attr_text(unit or "")
+    for form in ("konzerva", "smrznuto"):
+        if form in forms and unit_text and re.search(forms[form], unit_text):
+            return form
+    rule = staple.dry_rule
+    if not rule or pack_unit != "g" or pack_amount is None:
+        return None
+    lo, hi = rule["pack_g"]
+    text = attr_text(name)
+    if not lo <= pack_amount <= hi or any(re.search(forms[f], text) for f in ("konzerva", "smrznuto") if f in forms):
+        return None
+    words = _word_start(rule.get("words", ()))
+    if (rule.get("unit") and re.search(_word_start(rule["unit"]), unit_text)) or (rule.get("words") and re.search(words, text)):
+        return "suho"
+    return None
 
 
 def extract_attributes(staple: Staple, name: str) -> dict[str, str]:
@@ -359,14 +394,17 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
             """, [st.key, _word_start(st.require_pack)])
 
     rows = con.execute("""
-        SELECT s.chain, s.product_id, s.staple, p.name, p.pack_amount, p.pack_unit
+        SELECT s.chain, s.product_id, s.staple, p.name, p.pack_amount, p.pack_unit, p.unit
         FROM clean.product_staples s JOIN clean.products p USING (chain, product_id)
         WHERE NOT s.excluded AND s.drop_reason IS NULL
     """).fetchall()
     attr_rows, unit_rows = [], []
-    for chain, pid, key, name, amount, pack_unit in rows:
+    for chain, pid, key, name, amount, pack_unit, unit in rows:
         st = staples[key]
         detail = extract_attributes_detail(st, name)
+        if st.ambiguous_form and detail.get("oblik", (None, "default"))[1] == "default":
+            if form := form_heuristic(st, name, unit, amount, pack_unit):
+                detail["oblik"] = (form, "heuristic")
         attrs = {a: v for a, (v, _) in detail.items()}
         attr_rows += [(chain, pid, key, a, v, how) for a, (v, how) in detail.items()]
         n = st.units_in_pack(name, amount, pack_unit, attrs)

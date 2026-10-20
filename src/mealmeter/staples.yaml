@@ -37,6 +37,9 @@
 #   piece_g         masa jednog komada u g, za recepte u komadima ("2 luka"; češnjak: jedan češanj)
 #   ambiguous_form  oblik (atribut oblik: konzerva/suho/smrznuto/svjeze) bitno mijenja proizvod; košarica
 #                   bez zadanog oblika bira najjeftiniji i upozorava
+#   dry_rule        {pack_g: [min, max], unit: [...], words: [...]}: oblik=suho kad naziv ne kaže oblik, pakiranje
+#                   je u rasponu, nema oznake konzerve/smrznutog (ni u stupcu unit), a unit ili naziv pogađa popis
+#                   (how = heuristic). Oznake konzerve i smrznutog provjeravaju se i u stupcu unit.
 #   form_staples    oblik namirnice je druga namirnica (rajčica: svjeze/konzerva/pasirana/koncentrat)
 #   loose_produce   svježe voće/povrće. Dodatno pravilo: riječ namirnice je prva ili druga riječ
 #                   naziva, a proizvod je bez globalnog EAN-a (vaga/PLU), bez gramature ili >= 500 g,
@@ -767,8 +770,8 @@ gljive:
   ambiguous_form: true
   attributes:
     oblik:
-      konzerva: '\blim\.|\blimenk|\blim\b|\bkonz|\bocij|\bocj|\boc\.|\bo\.m\.|\bstaklo|\bstaklenk|\btetra|\bkuhan|\bvakum|\bvak\b|netto|neto|\d+\s*(?:g|gr)\.?\s*/\s*\d+'
-      smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen'
+      konzerva: '\blim\.|\blimenk|\blim\b|\bkonz|\bocij|\bocj|\boc\.|\boc\.?\s?masa|\bo\.m\.|\bstaklo|\bstaklenk|\btetra|\bkuhan|\bvakum|\bvak\b|\bnaljev|netto|neto|\d+\s*(?:g|gr)\.?\s*/\s*\d+'
+      smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen|\bfrozy|\bfresco|\bzamrz'
       suho: '\bsuh|\brinfuz|\bvrecic|\bpvc\b'
       svjeze: '\bsvjez|\bsvj\.|\brfz\b|\brfs\b|\bpodloz|bez korijena'
       _default: nepoznato
@@ -1121,6 +1124,9 @@ grah:
                    konzerv mesn, tortilj, burrito, mix\b, kukuruz]
   unit: kg
   ambiguous_form: true
+  # bez oznake u nazivu: suho ako je pakiranje 400-1000 g, nema oznake konzerve ni smrznutog, a unit je
+  # rinfuza ili naziv ima vrećicu/PVC ili marku suhih mahunarki (Korak 2C, točka 11)
+  dry_rule: {pack_g: [400, 1000], unit: [rinf], words: [pvc, vrecic, natura, vedrini, primavita, advent]}
   max_pack: 5000
   min_pack: 150
   attributes:
@@ -1131,10 +1137,10 @@ grah:
       smedi: '\bsmed'
       crni: '\bcrni'
     oblik:
-      konzerva: '\blim\.|\blimenk|\blim\b|\bkonz|\bocij|\bocj|\boc\.|\bo\.m\.|\bstaklo|\bstaklenk|\btetra|\bkuhan|\bvakum|\bvak\b|netto|neto|\d+\s*(?:g|gr)\.?\s*/\s*\d+'
-      smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen'
+      konzerva: '\blim\.|\blimenk|\blim\b|\bkonz|\bocij|\bocj|\boc\.|\boc\.?\s?masa|\bo\.m\.|\bstaklo|\bstaklenk|\btetra|\bkuhan|\bvakum|\bvak\b|\bnaljev|netto|neto|\d+\s*(?:g|gr)\.?\s*/\s*\d+'
+      smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen|\bfrozy|\bfresco|\bzamrz'
       svjeze: '\bsvjez|\bsvj\.'
-      suho: '\bsuh|\brinfuz|\brfs\b|\brfz\b|\bvrecic|\bpvc\b'  # rinfuza mahunarki = suho na vagu
+      suho: '\bsuh|\brinfuz|\brfs\b|\brfz\b'  # rinfuza mahunarki = suho na vagu; vrećica/PVC: dry_rule
       _default: nepoznato
   loose_produce: false
 
@@ -1146,6 +1152,9 @@ leca:
                    juha, salata, sir\b, kava\b, paprika]
   unit: kg
   ambiguous_form: true
+  # bez oznake u nazivu: suho ako je pakiranje 400-1000 g, nema oznake konzerve ni smrznutog, a unit je
+  # rinfuza ili naziv ima vrećicu/PVC ili marku suhih mahunarki (Korak 2C, točka 11)
+  dry_rule: {pack_g: [400, 1000], unit: [rinf], words: [pvc, vrecic, natura, vedrini, primavita, advent]}
   max_pack: 5000
   min_pack: 150
   attributes:
@@ -1155,10 +1164,10 @@ leca:
       crna: '\bcrna|\bbeluga'
       smeda: '\bsmed'
     oblik:
-      konzerva: '\blim\.|\blimenk|\blim\b|\bkonz|\bocij|\bocj|\boc\.|\bo\.m\.|\bstaklo|\bstaklenk|\btetra|\bkuhan|\bvakum|\bvak\b|netto|neto|\d+\s*(?:g|gr)\.?\s*/\s*\d+'
-      smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen'
+      konzerva: '\blim\.|\blimenk|\blim\b|\bkonz|\bocij|\bocj|\boc\.|\boc\.?\s?masa|\bo\.m\.|\bstaklo|\bstaklenk|\btetra|\bkuhan|\bvakum|\bvak\b|\bnaljev|netto|neto|\d+\s*(?:g|gr)\.?\s*/\s*\d+'
+      smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen|\bfrozy|\bfresco|\bzamrz'
       svjeze: '\bsvjez|\bsvj\.'
-      suho: '\bsuh|\brinfuz|\brfs\b|\brfz\b|\bvrecic|\bpvc\b'  # rinfuza mahunarki = suho na vagu
+      suho: '\bsuh|\brinfuz|\brfs\b|\brfz\b'  # rinfuza mahunarki = suho na vagu; vrećica/PVC: dry_rule
       _default: nepoznato
   loose_produce: false
 
@@ -1169,14 +1178,17 @@ slanutak:
   must_not_match: [hummus, humus, namaz, brasno, chips, cips, snack, salata, krem\b, pasta, falafel]
   unit: kg
   ambiguous_form: true
+  # bez oznake u nazivu: suho ako je pakiranje 400-1000 g, nema oznake konzerve ni smrznutog, a unit je
+  # rinfuza ili naziv ima vrećicu/PVC ili marku suhih mahunarki (Korak 2C, točka 11)
+  dry_rule: {pack_g: [400, 1000], unit: [rinf], words: [pvc, vrecic, natura, vedrini, primavita, advent]}
   max_pack: 5000
   min_pack: 150
   attributes:
     oblik:
-      konzerva: '\blim\.|\blimenk|\blim\b|\bkonz|\bocij|\bocj|\boc\.|\bo\.m\.|\bstaklo|\bstaklenk|\btetra|\bkuhan|\bvakum|\bvak\b|netto|neto|\d+\s*(?:g|gr)\.?\s*/\s*\d+'
-      smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen'
+      konzerva: '\blim\.|\blimenk|\blim\b|\bkonz|\bocij|\bocj|\boc\.|\boc\.?\s?masa|\bo\.m\.|\bstaklo|\bstaklenk|\btetra|\bkuhan|\bvakum|\bvak\b|\bnaljev|netto|neto|\d+\s*(?:g|gr)\.?\s*/\s*\d+'
+      smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen|\bfrozy|\bfresco|\bzamrz'
       svjeze: '\bsvjez|\bsvj\.'
-      suho: '\bsuh|\brinfuz|\brfs\b|\brfz\b|\bvrecic|\bpvc\b'  # rinfuza mahunarki = suho na vagu
+      suho: '\bsuh|\brinfuz|\brfs\b|\brfz\b'  # rinfuza mahunarki = suho na vagu; vrećica/PVC: dry_rule
       _default: nepoznato
   loose_produce: false
 
@@ -1189,14 +1201,17 @@ kukuruz:
                    pecivo, tortilj, nachos, klip na zaru, kukuruzni, kukuruzno]
   unit: kg
   ambiguous_form: true
+  # bez oznake u nazivu: suho ako je pakiranje 400-1000 g, nema oznake konzerve ni smrznutog, a unit je
+  # rinfuza ili naziv ima vrećicu/PVC ili marku suhih mahunarki (Korak 2C, točka 11)
+  dry_rule: {pack_g: [400, 1000], unit: [rinf], words: [pvc, vrecic, natura, vedrini, primavita, advent]}
   max_pack: 5000
   min_pack: 150
   attributes:
     oblik:
-      konzerva: '\blim\.|\blimenk|\blim\b|\bkonz|\bocij|\bocj|\boc\.|\bo\.m\.|\bstaklo|\bstaklenk|\btetra|\bkuhan|\bvakum|\bvak\b|netto|neto|\d+\s*(?:g|gr)\.?\s*/\s*\d+'
-      smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen'
+      konzerva: '\blim\.|\blimenk|\blim\b|\bkonz|\bocij|\bocj|\boc\.|\boc\.?\s?masa|\bo\.m\.|\bstaklo|\bstaklenk|\btetra|\bkuhan|\bvakum|\bvak\b|\bnaljev|netto|neto|\d+\s*(?:g|gr)\.?\s*/\s*\d+'
+      smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen|\bfrozy|\bfresco|\bzamrz'
       svjeze: '\bsvjez|\bsvj\.'
-      suho: '\bsuh|\brinfuz|\brfs\b|\brfz\b|\bvrecic|\bpvc\b'  # rinfuza mahunarki = suho na vagu
+      suho: '\bsuh|\brinfuz|\brfs\b|\brfz\b'  # rinfuza mahunarki = suho na vagu; vrećica/PVC: dry_rule
       _default: nepoznato
   loose_produce: false
 
@@ -1208,14 +1223,17 @@ grasak:
                    povrce, kukuruz]
   unit: kg
   ambiguous_form: true
+  # bez oznake u nazivu: suho ako je pakiranje 400-1000 g, nema oznake konzerve ni smrznutog, a unit je
+  # rinfuza ili naziv ima vrećicu/PVC ili marku suhih mahunarki (Korak 2C, točka 11)
+  dry_rule: {pack_g: [400, 1000], unit: [rinf], words: [pvc, vrecic, natura, vedrini, primavita, advent]}
   max_pack: 5000
   min_pack: 150
   attributes:
     oblik:
-      konzerva: '\blim\.|\blimenk|\blim\b|\bkonz|\bocij|\bocj|\boc\.|\bo\.m\.|\bstaklo|\bstaklenk|\btetra|\bkuhan|\bvakum|\bvak\b|netto|neto|\d+\s*(?:g|gr)\.?\s*/\s*\d+'
-      smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen'
+      konzerva: '\blim\.|\blimenk|\blim\b|\bkonz|\bocij|\bocj|\boc\.|\boc\.?\s?masa|\bo\.m\.|\bstaklo|\bstaklenk|\btetra|\bkuhan|\bvakum|\bvak\b|\bnaljev|netto|neto|\d+\s*(?:g|gr)\.?\s*/\s*\d+'
+      smrznuto: '\bsmrz|\bledo\b|\bduboko|\bfrozen|\bfrozy|\bfresco|\bzamrz'
       svjeze: '\bsvjez|\bsvj\.'
-      suho: '\bsuh|\brinfuz|\brfs\b|\brfz\b|\bvrecic|\bpvc\b'  # rinfuza mahunarki = suho na vagu
+      suho: '\bsuh|\brinfuz|\brfs\b|\brfz\b'  # rinfuza mahunarki = suho na vagu; vrećica/PVC: dry_rule
       _default: nepoznato
   loose_produce: false
 

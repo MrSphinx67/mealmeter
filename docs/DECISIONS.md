@@ -441,3 +441,10 @@ Izvještaji za pregled su u [MORNING_REVIEW.md](MORNING_REVIEW.md) (`scripts/mor
       kvasac 0,30–1,25, prašak 0,10–0,40, vanilin šećer 0,10–0,85.
     - `price_suspect`: cijena po vrećici iznad gornje granice, ili pojedinačna vrećica (≤ 1,5 vrećice u
       pakiranju) ispod donje. Rinfuza i višestruka pakiranja nisu kažnjeni zbog niže cijene po vrećici.
+52. **Oblik mahunarki, kukuruza i gljiva** (`staples.form_heuristic`, polje `dry_rule`, `product_attrs.how = 'heuristic'`).
+    - Oznake konzerve: dodani NALJEV i OC.MASA. Oznake smrznutog: dodani FROZY, FRESCO i ZAMRZ. Obje se
+      provjeravaju i u stupcu `unit`.
+    - Suho: pakiranje 400–1000 g, bez oznaka konzerve i smrznutog, a `unit` je rinfuza ili naziv sadrži PVC,
+      vrećicu, NATURA, VEDRINI, PRIMAVITA ili ADVENT. Vrećica i PVC izvan tog uvjeta više ne znače suho.
+    - Gljive nemaju `dry_rule`.
+    - U pretrazi heuristika ima manju prednost od naziva i zaključka, a veću od zadane vrijednosti.
