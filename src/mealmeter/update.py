@@ -250,7 +250,12 @@ def _previous(db_path: Path) -> tuple[str | None, list[tuple]]:
         tables = {r[0] for r in con.execute(
             "SELECT schema_name || '.' || table_name FROM duckdb_tables()").fetchall()}
         if "clean.archive_stats" in tables:
-            last = con.execute("SELECT max(date) FROM clean.archive_stats").fetchone()[0]
+            # učitana arhiva (archive_info), a ne najveći datum u povijesti: nakon ponovnog učitavanja
+            # starijeg dana (--force) prethodna je ta, a ne noviji dan iz povijesti
+            last = None
+            if "clean.archive_info" in tables:
+                last = con.execute("SELECT max(date) FROM clean.archive_info").fetchone()[0]
+            last = last or con.execute("SELECT max(date) FROM clean.archive_stats").fetchone()[0]
             if last:
                 rows = con.execute("SELECT chain, n_stores, n_products, n_prices FROM clean.archive_stats "
                                    "WHERE date = ? ORDER BY chain", [last]).fetchall()

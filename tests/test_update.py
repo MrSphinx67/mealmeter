@@ -225,3 +225,13 @@ def test_stale_days_in_outputs(env, tmp_path):
         assert all({"date", "date_hr", "stale_days"} <= set(it) for it in store["items"])
     finally:
         con.close()
+
+
+def test_reload_older_then_newer_carries(env, tmp_path):
+    """Ponovno učitavanje starijeg dana (--force) pa novijeg: prethodna je učitana arhiva, pa radi carry-forward."""
+    db, base = env["db"], env["base"]
+    no_dm = make_zip_custom(tmp_path / "no_dm.zip", skip={"dm"})
+    assert run(base + ["--archive", str(no_dm), "--date", "2026-10-20"]) == 0
+    assert run(base + ["--archive", str(env["full"]), "--date", "2026-10-19", "--force"]) == 0
+    assert run(base + ["--archive", str(no_dm), "--date", "2026-10-20", "--force"]) == 0
+    assert q(db, "SELECT DISTINCT stale_days FROM clean.prices WHERE chain = 'dm'") == [(1,)]

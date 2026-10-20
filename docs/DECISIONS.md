@@ -634,3 +634,6 @@ Izvještaji: [STEP2E_REVIEW.md](STEP2E_REVIEW.md) (`scripts/step2e_review.py`) i
     - `find_products`: grupa nosi najstariju cijenu (`date`) i najveći `stale_days`.
     - `plan_basket`: stavka nosi datum i starost odabranog proizvoda, a trgovina najstariju stavku i najveći
       `stale_days`. CLI uz prenesenu cijenu piše „cijena od dd.mm.yyyy. (n d)“.
+76. **Prethodna arhiva = učitana arhiva** (`update._previous`). Uzima se iz `clean.archive_info`, a ne kao
+    najveći datum u `archive_stats`. Inače ponovno učitavanje starijeg dana (`--force`) pa novijeg ne bi
+    prepoznalo prethodni dan, pa ne bi bilo ni carry-forwarda.
