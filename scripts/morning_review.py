@@ -433,9 +433,23 @@ def section_forms(con) -> str:
     return "\n".join(out)
 
 
+def section_api(con) -> str:
+    return "\n".join([
+        "## 12. cijene.dev bez API ključa", "",
+        "Provjereno 2026-10-20 (curl, bez zaglavlja `Authorization`):", "",
+        md_table(["zahtjev", "HTTP", "napomena"], [
+            ("GET https://api.cijene.dev/v0/list", 200, "JSON s popisom arhiva (~70 kB)"),
+            ("HEAD https://api.cijene.dev/v0/archive/2026-10-19.zip", 200, "content-length 128.905.233"),
+            ("GET …/2026-10-19.zip, Range: bytes=0-1023", 206, "application/zip"),
+            ("HEAD https://api.cijene.dev/v0/archive/2026-10-20.zip", 200, "objavljena u 14:26"),
+        ]), "",
+        "Ključ nije potreban, pa `update.py` nije mijenjan; zapis je u SCHEMA.md (Dnevno ažuriranje).",
+    ])
+
+
 SECTIONS = [section_chicken, section_onion, section_food, section_eggs, section_variants, section_kakao,
             section_salt, section_milk, section_parsley, section_units, section_sachets,
-            section_forms]
+            section_forms, section_api]
 
 
 def main() -> None:

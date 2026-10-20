@@ -248,6 +248,10 @@ Ostaje:
 ## Dnevno ažuriranje (`scripts/update.py`)
 
 - Popis arhiva: `https://api.cijene.dev/v0/list` → `{"archives": [{"date", "url", "size", "updated"}]}`.
+- **API ključ nije potreban** (provjereno 2026-10-20, bez zaglavlja `Authorization`): `GET /v0/list` vraća
+  HTTP 200 (JSON, ~70 kB), `HEAD /v0/archive/2026-10-19.zip` HTTP 200 (`content-length` 128.905.233), a
+  `GET` s `Range: bytes=0-1023` HTTP 206 (`application/zip`). `update.py` zato ostaje na istim URL-ovima.
+  Arhiva 2026-10-20 bila je objavljena već u 14:26 (`updated` u popisu), dakle ne uvijek tek oko 22 h.
   Obrazac URL-a je stabilan: `https://api.cijene.dev/v0/archive/YYYY-MM-DD.zip`, a arhiva za dan D
   objavljuje se oko 22 h (20.10. u 13 h još nije postojala, 404). Ako popis nije dostupan, skripta
   ispituje obrazac URL-a za zadnjih 7 dana.

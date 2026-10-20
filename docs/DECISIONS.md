@@ -448,3 +448,5 @@ Izvještaji za pregled su u [MORNING_REVIEW.md](MORNING_REVIEW.md) (`scripts/mor
       vrećicu, NATURA, VEDRINI, PRIMAVITA ili ADVENT. Vrećica i PVC izvan tog uvjeta više ne znače suho.
     - Gljive nemaju `dry_rule`.
     - U pretrazi heuristika ima manju prednost od naziva i zaključka, a veću od zadane vrijednosti.
+53. **cijene.dev ne traži API ključ** za popis arhiva ni za preuzimanje (HTTP 200/206, vidi SCHEMA.md), pa
+    `update.py` nije mijenjan.
