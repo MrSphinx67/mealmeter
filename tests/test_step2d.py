@@ -99,3 +99,32 @@ def test_pack_glued_unit(name, pack):
     from mealmeter.normalize import parse_pack
 
     assert parse_pack(name) == pack
+
+
+# --- 3. mljeveno meso -----------------------------------------------------------------
+
+def _row(bkey, price, grams=500, **kw):
+    return {"bkey": bkey, "price_eff": price, "pack_amount": grams, "pack_unit": "g", "n_units": None,
+            "assumed_g": None, "drained_amount": None, "price_per_unit": price / grams * 1000, "per_unit": "kg",
+            "clearance": False, "price_suspect": False, "pack_confidence": "high", "data_quality": "ok",
+            "variable_weight": False, **kw}
+
+
+@pytest.mark.parametrize("available,expected", [
+    ({"m": "mijesano", "j": "junece", "s": "svinjsko"}, "m"),  # miješano iako je skuplje
+    ({"j": "junece", "s": "svinjsko"}, "j"),
+    ({"s": "svinjsko", "p": "purece"}, "s"),
+])
+def test_minced_meat_preference(available, expected):
+    from mealmeter.basket import Need, _choose_preferred
+
+    prices = {"m": 6.0, "j": 5.0, "s": 4.0, "p": 3.0}
+    rows = [_row(k, prices[k]) for k in available]
+    need = Need({"name": "mljeveno meso"}, S["mljeveno_meso"], 500, "g")
+    pick = _choose_preferred(rows, need, S["mljeveno_meso"].default_preference, {"vrsta": available})
+    assert pick["bkey"] == expected
+
+
+def test_minced_meat_find_default_values(con):
+    res = find_products(ingredient="mljeveno_meso", limit=50, con=con)
+    assert all(r["attributes"].get("vrsta") in ("mijesano", "junece", "svinjsko") for r in res)

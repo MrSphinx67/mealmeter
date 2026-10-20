@@ -185,7 +185,7 @@ def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | 
                  {n_units_sql} AS n_units, {assumed_sql} AS assumed_g,
                  c.price_per_kg_drained, p.variable_weight, p.clearance,
                  c.is_special, c.date, s.scope, s.address, s.city, ch.data_quality,
-                 p.is_food, p.food_group, p.category_source
+                 p.is_food, p.food_group, p.category_source, p.bkey
           FROM g p
           JOIN hit USING (bkey)
           JOIN clean.prices c USING (chain, product_id)
@@ -248,11 +248,13 @@ def find_products(
         staple = resolve_ingredient(query)
         if staple:
             query = None  # upit je samo naziv namirnice
-    if staple and staple.default_attributes:
-        # zadani filtar namirnice (npr. mljeveno meso: vrsta=mijesano) osim ako je atribut zadan
-        attributes = {**staple.default_attributes, **(attributes or {})}
+    if staple and staple.defaults():
+        # zadani filtar namirnice (mlijeko: vrsta=trajno; mljeveno meso: miješano, juneće ili svinjsko)
+        # osim ako je atribut zadan
+        attributes = {**staple.defaults(), **(attributes or {})}
     if attributes:
-        unknown = {a: v for a, v in attributes.items() if v not in staple.attributes.get(a, {})}
+        unknown = {a: v for a, v in attributes.items()
+                   if any(x not in staple.attributes.get(a, {}) for x in (v if isinstance(v, tuple) else (v,)))}
         if unknown:
             available = {a: list(v) for a, v in staple.attributes.items()}
             raise ValueError(f"Nepoznati atributi za '{staple.key}': {unknown}; dostupni: {available}")

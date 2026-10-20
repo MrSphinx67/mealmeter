@@ -62,9 +62,19 @@ class Staple:
     # zamjenjive vrijednosti atributa: {"mast": ("2.8", "3.2", "3.5", "3.8")}; traženi ili zadani
     # 2.8 prihvaća bilo koju vrijednost iz iste skupine (vidi accepted_values)
     substitutes: dict[str, tuple[str, ...]] = field(default_factory=dict, hash=False, compare=False)
+    # zadani redoslijed vrijednosti kad atribut nije tražen (mljeveno meso: miješano, pa juneće, pa
+    # svinjsko); ostale vrijednosti (pureće, pileće) samo kad se izričito traže
+    default_preference: dict[str, tuple[str, ...]] = field(default_factory=dict, hash=False, compare=False)
 
-    def accepted_values(self, attr: str, value: str) -> tuple[str, ...]:
-        """Vrijednosti atributa koje vrijede kao `value` (s njom na prvom mjestu)."""
+    def defaults(self) -> dict:
+        """Zadani filtri atributa: vrijednost (default_attributes) ili n-torka redoslijeda (default_preference)."""
+        return {**self.default_attributes, **self.default_preference}
+
+    def accepted_values(self, attr: str, value) -> tuple[str, ...]:
+        """Vrijednosti atributa koje vrijede kao `value` (s njom na prvom mjestu); n-torka iz
+        default_preference vrijedi takva kakva jest."""
+        if isinstance(value, tuple):
+            return value
         group = self.substitutes.get(attr, ())
         return (value, *[v for v in group if v != value]) if value in group else (value,)
 
@@ -193,7 +203,12 @@ def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> d
             dry_rule={k: tuple(_fold(str(x)) if k != "pack_g" else float(x) for x in v)
                       for k, v in (d.get("dry_rule") or {}).items()},
             substitutes={a: tuple(str(v) for v in vals) for a, vals in (d.get("substitutes") or {}).items()},
+            default_preference={a: tuple(str(v) for v in vals)
+                                for a, vals in (d.get("default_preference") or {}).items()},
         )
+        for a, vals in st.default_preference.items():
+            if any(v not in attrs.get(a, {}) for v in vals) or a in st.default_attributes:
+                raise ValueError(f"{key}: default_preference {a}={vals}: nedefinirana vrijednost ili i default_attributes")
         for a, vals in st.substitutes.items():
             if any(v not in attrs.get(a, {}) for v in vals):
                 raise ValueError(f"{key}: substitutes {a}={vals} sadrži nedefiniranu vrijednost")

@@ -425,7 +425,8 @@ def test_minced_meat_default(name, vrsta):
 
 
 def test_minced_meat_default_filter():
-    assert S["mljeveno_meso"].default_attributes == {"vrsta": "mijesano"}
+    # Korak 2D: redoslijed umjesto jedne vrijednosti
+    assert S["mljeveno_meso"].default_preference == {"vrsta": ("mijesano", "junece", "svinjsko")}
 
 
 def test_default_attributes_applied(con, monkeypatch):

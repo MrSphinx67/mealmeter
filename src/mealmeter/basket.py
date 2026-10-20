@@ -235,6 +235,27 @@ def chosen_attributes(pick: dict, by_product: dict, by_ean: dict) -> dict:
     return out
 
 
+def _group_values(con, staple: Staple, prefs: dict) -> dict[str, dict]:
+    """{atribut: {bkey: vrijednost grupe}} za atribute s default_preference (clean.staple_group_attrs)."""
+    out = {}
+    for attr in prefs:
+        out[attr] = dict(con.execute("SELECT bkey, value FROM clean.staple_group_attrs WHERE staple = ? AND attr = ?",
+                                     [staple.key, attr]).fetchall())
+    return out
+
+
+def _choose_preferred(rows: list[dict], need: "Need", prefs: dict, group_values: dict) -> dict | None:
+    """choose_product uz zadani redoslijed vrijednosti (default_preference): prva vrijednost koja u
+    trgovini daje proizvod bez zastavica; inače najbolji izbor među svim kandidatima."""
+    args = (need.amount, need.unit, _by_weight_unit(need.staple), need.staple.loose_produce)
+    for attr, order in prefs.items():
+        for value in order:
+            sub = [r for r in rows if group_values[attr].get(r["bkey"]) == value]
+            if sub and (pick := choose_product(sub, *args)) and not pick["fallback"]:
+                return pick
+    return choose_product(rows, *args)
+
+
 def _num(v):
     return float(v) if v is not None else None
 
@@ -244,7 +265,7 @@ def _prepare(con, need: Need, city: str) -> dict[tuple, list[dict]]:
     attrs = dict(need.attributes)
     if need.form and "oblik" in need.staple.attributes:
         attrs["oblik"] = need.form
-    for a, v in need.staple.default_attributes.items():
+    for a, v in need.staple.defaults().items():
         attrs.setdefault(a, v)
     by_store: dict[tuple, list[dict]] = {}
     for r in _rows_for(con, need.staple, attrs, city):
@@ -358,17 +379,20 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
             "name": need.input.get("name"), "staple": need.staple.key, "amount": round(need.amount, 3),
             "unit": need.unit, "attributes": need.attributes, "form": need.form,
             # traženi atributi uz zadane (mlijeko: vrsta=trajno, mast=2.8) i prihvaćene zamjene
-            "applied_attributes": {**need.staple.default_attributes, **need.attributes},
+            "applied_attributes": {a: list(v) if isinstance(v, tuple) else v
+                                   for a, v in {**need.staple.defaults(), **need.attributes}.items()},
             "accepted_values": {a: list(need.staple.accepted_values(a, v)) for a, v in
-                                {**need.staple.default_attributes, **need.attributes}.items()
+                                {**need.staple.defaults(), **need.attributes}.items()
                                 if len(need.staple.accepted_values(a, v)) > 1},
             "assumed_form": need.form if need.assumed_form else None, "pantry": need.staple.pantry,
             "warnings": need.warnings,
         })
         out["warnings"] += need.warnings
         attrs_of, attrs_of_ean = _product_attrs(con, need.staple)
+        prefs = {a: v for a, v in need.staple.default_preference.items() if a not in need.attributes}
+        group_values = _group_values(con, need.staple, prefs)
         for key, rows in _prepare(con, need, city).items():
-            pick = choose_product(rows, need.amount, need.unit, _by_weight_unit(need.staple), need.staple.loose_produce)
+            pick = _choose_preferred(rows, need, prefs, group_values)
             if pick is None:
                 continue
             first = rows[0]
@@ -378,9 +402,12 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
                 "items": {}, "date": first["date"],
             })
             chosen = chosen_attributes(pick, attrs_of, attrs_of_ean)
-            wanted = {**need.staple.default_attributes, **need.attributes}
+            wanted = {**need.staple.defaults(), **need.attributes}
             subst = [f"{a}={chosen[a]} umjesto {v} (zamjenjivo)" for a, v in wanted.items()
-                     if chosen.get(a) not in (None, v) and chosen[a] in need.staple.accepted_values(a, v)]
+                     if not isinstance(v, tuple) and chosen.get(a) not in (None, v)
+                     and chosen[a] in need.staple.accepted_values(a, v)]
+            subst += [f"{a}={chosen[a]}: prva dostupna po zadanom redoslijedu ({', '.join(v)})"
+                      for a, v in wanted.items() if isinstance(v, tuple) and chosen.get(a) not in (None, v[0])]
             store["items"][idx] = {
                 "ingredient": need.input.get("name"), "staple": need.staple.key, "need": round(need.amount, 3),
                 "need_unit": need.unit, "product_id": pick["product_id"], "ean": pick["ean_norm"],

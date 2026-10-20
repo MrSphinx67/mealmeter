@@ -25,6 +25,7 @@
 #   group_by        atribut ili popis atributa po kojima se grupira umjesto EAN-a (jaja: [velicina, uzgoj])
 #   require_any     dodatni uzorci: barem jedan mora pogoditi (npr. dio mesa: but, vrat...)
 #   default_attributes  zadani filtar ako atribut nije zadan (mljeveno meso: vrsta=mijesano)
+#   default_preference {atribut: [vrijednosti]}: zadani redoslijed kad atribut nije tražen (prva dostupna)
 #   substitutes     {atribut: [vrijednosti]}: zamjenjive vrijednosti (mlijeko: mast 2.8 = 3.2 = 3.5 = 3.8)
 #   disabled        namirnica postoji, ali nije u v1 (ne gradi se i ne može se tražiti)
 #   attributes._default  vrijednost atributa kad nijedan uzorak ne pogodi
@@ -1016,7 +1017,8 @@ mljeveno_meso:
                mljeveno purece, mljeveno pilece, mljeveno telece, mljev meso]
   must_not_match: [posipac, secer, papar, aluminij, veggie, polpete, cevap, pljeskav, burger]
   unit: kg
-  default_attributes: {vrsta: mijesano}
+  # zadano miješano, pa juneće, pa svinjsko (prva dostupna u trgovini); pureće i pileće samo na zahtjev
+  default_preference: {vrsta: [mijesano, junece, svinjsko]}
   max_pack: 2000
   min_pack: 300
   attributes:

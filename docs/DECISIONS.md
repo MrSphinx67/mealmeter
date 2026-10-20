@@ -474,3 +474,7 @@ Izvještaji: [STEP2D_REVIEW.md](STEP2D_REVIEW.md) (`scripts/step2d_review.py`) i
       psa\b i novi `hrana za`.
     - Gramatura: jedinica zalijepljena za iduću riječ čita se kad je jedinica malim, a iduće slovo velikim slovom
       („250 gVOĆARNA“, „500gPAGANI“). „5 LIMUNA“ i dalje nije 5 l.
+56. **Mljeveno meso:** novo polje `default_preference: {vrsta: [mijesano, junece, svinjsko]}` (umjesto
+    `default_attributes: vrsta=mijesano`). `find_products` zadano vraća te tri vrste. `plan_basket` u svakoj
+    trgovini uzima prvu vrstu redom koja daje proizvod bez zastavica, i kad je skuplja od iduće. Ako je to
+    juneće ili svinjsko, piše to u `notes`. Pureće i pileće samo kad se traže (`attributes: {vrsta: purece}`).
