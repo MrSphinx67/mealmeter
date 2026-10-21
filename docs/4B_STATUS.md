@@ -8,7 +8,7 @@
 | 4 višestruka pakiranja iz stupca unit | gotovo |
 | 5 jaja plausible_by | gotovo |
 | 6 koherentnost EAN grupe | kod i testovi gotovi; docs/ean_incoherent.md nakon ponovne izgradnje baze |
-| 7 pravila (tjestenina, med, mlijeko, slanina, krastavac) | - |
+| 7 pravila (tjestenina, med, mlijeko, slanina, krastavac) | gotovo (slanina: "carsko", krastavac: i "ult\\b") |
 | 8 rate limit (IP, sesija, globalno) | - |
 | 9 zamjena datoteke baze bez restarta | - |
 | 10 smoke_4b i shelf_check.csv | - |

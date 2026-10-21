@@ -323,7 +323,9 @@ mlijeko:
                    kras\b, bijela cokolada, prahu, zamjen, zamj\b, nan\b, junior, kiselo, jogurt,
                    sir\b, sladoled, puding, kroasan, croissant, bombon, cokoladic, med\b, sun\b,
                    suncanje, disney, dorina, ciste, cisti, pjena za, ukrasn, proteinsk, kefir, kondenz,
-                   lgg\b, aktiv, acidofil, acedofil, kis\b, palacink, protein, cokol, set\b, ker\b, keram]
+                   lgg\b, aktiv, acidofil, acedofil, kis\b, palacink, protein, cokol, set\b, ker\b, keram,
+                   # Korak 4B: šlag pjena s mlijekom
+                   slag, pjen]
   unit: l
   default_exclude_variants: [laktoza=bez]
   # zadano trajno 2,8 %; masnoća 2,8-3,8 % je zamjenjiva (svježe i trajno su zasebne vrste)
@@ -675,7 +677,9 @@ krastavac:
   must_match: [krastav]
   must_not_match: [octu, droga, neto, sirup, monin, rial, kisel, kis\b, delikates, delik\b, del\b, masa\b, mase\b, ocijed, ocj\b, salatni,
                    staklo, pasterizir, sok\b, sjeme, namaz, lim\b, limun, kornison, salata\b, sendvic, toco,
-                   doora, vitaminka, zorela, podravka, zvijezda, giana, natureta, campo]
+                   doora, vitaminka, zorela, podravka, zvijezda, giana, natureta, campo,
+                   # Korak 4B: kiseli/ukiseljeni, Ultra staklenke ("ULT.PL.1400g"), ocijeđeno, volumen
+                   kis, ultra, ult\b, ocj, '\d+ ?ml']
   unit: kg
   loose_produce: true
 
@@ -848,8 +852,10 @@ tjestenina:
   must_match: [tjestenin, spaget, spaghett, penne, fusill, makaron, tagliatell, farfalle, rigatoni,
                linguine, tortiglioni, puzic, svrdl, mascice, leptiric, pipe rigate, sedanini, tjest\b,
                # Korak 2E: oblici i marke (lazanje su sada tjestenina; gotova jela isključuju gotov/bolognese/smrz)
-               cavatappi, elicoidali, elicodiali, gomiti, ljiljan, zlatica, rezanc, pipette, fusil, fuzi, spirali,
-               lasagn, lazanj, conchiglie, skoljk, tj\b]
+               cavatappi, elicoidali, elicodiali, gomiti, zlatica, rezanc, pipette, fusil, fuzi, spirali,
+               lasagn, lazanj, conchiglie, skoljk, tj\b,
+               # Korak 4B: ljiljani samo uz tjesteninu ("AGAPANTHUS / afrički ljiljan" je biljka)
+               'ljiljani\b.* (?:tj|tijesto|tjestenin|klara)|(?:tj|tijesto|tjestenin|klara).* ljiljani\b']
   must_not_match: ['tal?ianetta', napolitana, juha, instant, bolognese, piletin, goved, kokosj, salata,
                    umak, gotov, sira\b, punjen, tortelin, tortellin, ravioli, njoki,
                    maggi, carbonara, pesto, mesn, sir\b, skus, tuna, povrce,
@@ -1134,7 +1140,9 @@ slanina:
   name: slanina / panceta
   synonyms: [slanina, panceta, špek, spek, bacon]
   must_match: [slanin, pancet, spek\b, bacon]
-  must_not_match: [chips, cips, grah, kobas, pizza, kreker, umak, sir\b, krumpir, zacin, aroma, ulje]
+  must_not_match: [chips, cips, grah, kobas, pizza, kreker, umak, sir\b, krumpir, zacin, aroma, ulje,
+                   # Korak 4B: carsko meso (i "PANCETA ... CARSKO PIK" u istoj EAN grupi)
+                   carsko]
   unit: kg
   attributes:
     oblik:
@@ -1435,7 +1443,9 @@ med:
                    kremom, keks, bombon, caj\b, rakij, liker, jogurt, mlijek, musli, pahuljic, zitaric,
                    senf, umak, sampon, krema, gel\b, sapun, balzam, losion, slanina, sunka, oraha, orasi,
                    cimet, pastil, sirup, pastile, lizalic, napitak, kolac, kroasan, zlatni med, bar\b,
-                   cokolad, riki\b, medenjak, lambertz, keks]
+                   cokolad, riki\b, medenjak, lambertz, keks,
+                   # Korak 4B: "MED." je i mediteransko (skuša u ulju)
+                   med ulj, skus, filet, mediteran]
   unit: kg
   attributes:
     vrsta:

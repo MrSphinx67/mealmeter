@@ -278,3 +278,33 @@ def test_incoherent_eans_in_build(tmp_path):
     bkeys = dict(c.execute(f"SELECT product_id, {BKEY_SQL} FROM clean.products p WHERE product_id IN ('K1', 'K2')").fetchall())
     assert bkeys["K1"] != bkeys["K2"] and bkeys["K2"].startswith("spar:")
     c.close()
+
+
+# --- 7. pravila namirnica ----------------------------------------------------------------------------------
+
+@pytest.mark.parametrize("key,name,expected", [
+    ("tjestenina", "AGAPANTHUS /afrički ljiljan", None),
+    ("tjestenina", "LJILJANI 500 g", None),
+    ("tjestenina", "TIJESTO LJILJANI 400 g", "match"),
+    ("tjestenina", "LJILJANI TJESTENINA 500 g KLARA", "match"),
+    ("tjestenina", "KLARA LJILJANI 500 g", "match"),
+    ("med", "SKUŠA FILET MED.ULJE 125g DEL", "excluded"),
+    ("med", "MED.ULJE SKUŠA 125 g", "excluded"),
+    ("med", "MED LIVADNI 900 g", "match"),
+    ("mlijeko", "ŠLAG PJENA S MLIJEKOM 800 g PODRAVKA", "excluded"),
+    ("mlijeko", "ŠLAG PJENA MLIJEKO 800g PODRAVKA (10)", "excluded"),
+    ("mlijeko", "MLIJEKO TRAJNO 2,8% 1 l", "match"),
+    ("slanina", "PANCETA SVJ. SA REB. CARSKO PIK", "excluded"),
+    ("slanina", "SLANINA CARSKO MESO DIMLJENO 300 g", "excluded"),
+    ("slanina", "SLANINA DIMLJENA 200 g", "match"),
+    ("krastavac", "ULT.PL.1400g KRASTAVCI", "excluded"),
+    ("krastavac", "ULTRA KRASTAVCI (3-6) 1400G-800G (6)", "excluded"),
+    ("krastavac", "KRASTAVCI KIS. 680 g", "excluded"),
+    ("krastavac", "KRASTAVCI OCJ. 360 g", "excluded"),
+    ("krastavac", "KRASTAVCI 720 ml", "excluded"),
+    ("krastavac", "KRASTAVAC SALATAR", "match"),
+])
+def test_rules_4b(key, name, expected):
+    from mealmeter.staples import load_staples, name_match
+
+    assert name_match(load_staples()[key], name) == expected
