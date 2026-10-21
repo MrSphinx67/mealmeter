@@ -8,7 +8,7 @@
 | 4 nove namirnice | gotovo: origano, bosiljak, lovorov_list, kobasica; papar (mljeveni zadano), paprika (slatka zadano); parmezan -> tvrdi_sir_talijanski (Grana = substitution); slanina već pokriva pancetu |
 | 5 free_text sinonimi (data/synonyms.yaml) | gotovo (12 unosa; bez pogotka: candidates s razlogom) |
 | 6 pretpostavke (assumptions) | gotovo (data/assumptions.yaml, 14 namirnica) |
-| 7 alternative na istu količinu | - |
+| 7 alternative na istu količinu | gotovo (delta_eur iz cost_used, size_note) |
 | 8 upute poslužitelja | - |
 | 9 smoke_5b | - |
 

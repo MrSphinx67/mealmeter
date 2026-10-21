@@ -601,7 +601,8 @@ def quality_better(staple: Staple | None, alt_attrs: dict, item_attrs: dict) -> 
 def _alternatives(rows: list[dict], need: "Need", item: dict, n: int = 2) -> list[dict]:
     """Jeftinije alternative u istoj trgovini (cheaper = true), najviše n, od najjeftinije; uz to iznimno
     jedna iste cijene i bolje kvalitete (quality_rank, npr. bolji uzgoj jaja). Kandidati prolaze
-    alt_eligible; delta_eur je alternativa minus odabrano."""
+    alt_eligible. Usporedba je na ISTU potrebnu količinu (cost_used, Korak 5B): delta_eur je utrošak
+    alternative minus utrošak odabranog; drukčija veličina pakiranja nosi size_note."""
     args = _choose_args(need)
     seen, picks = {item["product_id"], item["name"]}, []
     for r in rows:
@@ -611,20 +612,29 @@ def _alternatives(rows: list[dict], need: "Need", item: dict, n: int = 2) -> lis
             seen.update((r["product_id"], r["name"]))
             picks.append(pick)
     attrs = need.attr_fn or (lambda p: {})
-    cheaper = sorted((p for p in picks if p["cost_pack"] < item["cost_pack"]), key=lambda p: p["cost_pack"])[:n]
-    same = [p for p in picks if p["cost_pack"] == item["cost_pack"]
+    cheaper = sorted((p for p in picks if p["cost_used"] < item["cost_used"]), key=lambda p: p["cost_used"])[:n]
+    same = [p for p in picks if p["cost_used"] == item["cost_used"]
             and quality_better(need.staple, attrs(p), item.get("attributes") or {})][:1]
     out = []
     for p in cheaper + same:
         alt = {"product_id": p["product_id"], "ean": p["ean_norm"], "name": p["name"],
                "pack_size": pack_size(p, need.unit), "n_packs": p["n_packs"], "price_eff": p["price_eff"],
                "cost_pack": p["cost_pack"], "cost_used": p["cost_used"],
-               "delta_eur": round(p["cost_pack"] - item["cost_pack"], 2), "cheaper": p["cost_pack"] < item["cost_pack"],
+               **alt_delta(p["cost_used"], p.get("pack_size") or pack_size(p, need.unit), item),
                "price_per_unit": p["price_per_unit"], "per_unit": p["per_unit"],
                "match_quality": "free_text" if need.free_text else p.get("match_quality")}
         if note := need.note_fn(attrs(p)) if need.note_fn else None:
             alt["note"] = note
         out.append(alt)
+    return out
+
+
+def alt_delta(alt_used: float, alt_size: str | None, item: dict) -> dict:
+    """Razlika na istu potrebnu količinu (cost_used) i napomena kad je pakiranje drukčije."""
+    out = {"delta_eur": round(alt_used - item["cost_used"], 2), "cheaper": alt_used < item["cost_used"]}
+    if alt_size and alt_size != item.get("pack_size"):
+        out["size_note"] = (f"usporedba za {item['need']:g} {item['need_unit']}: pakiranje {alt_size}, "
+                            f"odabrano {item.get('pack_size')}")
     return out
 
 
@@ -1007,8 +1017,7 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
             rows = store_rows.get(((s["chain"], it.get("_from_store", s["store_id"])), it["_idx"]), [])
             it["alternatives"] = _alternatives(rows, needs[it["_idx"]], it)
             if brand_alt := it.get("_brand_alt"):
-                it["alternatives"].append({**brand_alt, "delta_eur": round(brand_alt["cost_pack"] - it["cost_pack"], 2),
-                                           "cheaper": brand_alt["cost_pack"] < it["cost_pack"]})
+                it["alternatives"].append({**brand_alt, **alt_delta(brand_alt["cost_used"], brand_alt["pack_size"], it)})
     for s in ranked:
         for it in s["items"]:
             it.pop("_idx", None)

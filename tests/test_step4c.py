@@ -143,7 +143,8 @@ def test_brand_missing_substitution_and_other_store(con4c):
     assert item["substitution"] == {"requested": "nutella", "brand": "Nutella", "chosen": "Namaz od lješnjaka"}
     other = [a for a in item["alternatives"] if a.get("other_store")]
     assert len(other) == 1 and other[0]["product_id"] == "N1" and other[0]["chain"] == "konzum"
-    assert other[0]["delta_eur"] == 1.50 and not other[0]["cheaper"]
+    # Korak 5B: razlika na istu potrebnu količinu (300 g): 3,37 - 2,24
+    assert other[0]["delta_eur"] == 1.13 and not other[0]["cheaper"] and "size_note" not in other[0]
     # generički naziv: bez marke, najjeftiniji namaz
     generic = plan_basket([{"name": "čokoladni namaz", "amount": 300, "unit": "g"}], "Osijek", con=con4c, store=KONZUM)
     assert generic["best_store"]["items"][0]["product_id"] == "N2"

@@ -249,8 +249,8 @@ def plan_basket(
 
 _ITEM_KEYS = ("ingredient", "staple", "name", "pack_size", "n_packs", "cost_pack", "cost_used")
 _ITEM_OPTIONAL = ("have", "user_provided", "computed_cost_pack", "substitution", "needs_confirmation", "candidates")
-_ALT_KEYS = ("name", "pack_size", "cost_pack", "delta_eur", "cheaper", "note", "brand", "other_store", "chain",
-             "address")
+_ALT_KEYS = ("name", "pack_size", "cost_pack", "cost_used", "delta_eur", "cheaper", "size_note", "note", "brand",
+             "other_store", "chain", "address")
 
 
 def _compact_item(it: dict) -> dict:

@@ -38,6 +38,9 @@ PRODUCTS = [
     ("P23", "PANCETA DIMLJENA NAREZANA 100 g", "ko", {K: 1.79, L: 1.49}),
     ("P24", "SIR PARMIGIANO REGGIANO 200 g", "ko", {K: 4.99}),
     ("P25", "SIR GRANA PADANO 200 g", "ko", {L: 3.49}),
+    # Korak 5B.7: alternative na istu količinu
+    ("P26", "NUTELLA 400 g", "ko", {K: 4.49}),
+    ("P27", "LINO LADA GOLD 350 g", "ko", {K: 3.49}),
 ]
 
 
@@ -246,3 +249,16 @@ def test_assumptions_for_missing_amounts(con5b):
     # namirnica bez pretpostavke: jasan razlog
     res = plan_basket([{"name": "špageti"}], "Osijek", con=con5b)
     assert "količina nije navedena" in res["unmatched"][0]["reason"] and res["assumptions"] == []
+
+
+# --- 7. alternative na istu količinu -----------------------------------------------------------------------
+
+def test_alternative_delta_on_needed_amount(con5b):
+    res = plan_basket([{"name": "nutella", "amount": 300, "unit": "g"}], "Osijek", con=con5b,
+                      store={"chain": "konzum", "address_contains": ""}, alternatives=True)
+    item = res["best_store"]["items"][0]
+    assert item["product_id"] == "P26" and item["cost_used"] == round(4.49 / 400 * 300, 2)  # 3,37
+    lino = next(a for a in item["alternatives"] if a["product_id"] == "P27")
+    # cijela pakiranja: 3,49 - 4,49 = -1,00; za potrebnih 300 g: 2,99 - 3,37 = -0,38
+    assert lino["cost_used"] == round(3.49 / 350 * 300, 2) and lino["delta_eur"] == -0.38 and lino["cheaper"]
+    assert lino["size_note"] == "usporedba za 300 g: pakiranje 350 g, odabrano 400 g"
