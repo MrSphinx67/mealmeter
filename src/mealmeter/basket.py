@@ -9,7 +9,8 @@ import duckdb
 
 from mealmeter import units
 from mealmeter.build import NATIONAL_NOTE
-from mealmeter.normalize import date_hr, norm_text
+from mealmeter.build import WHOLESALE_CHAINS
+from mealmeter.normalize import date_hr, norm_text, parse_multipack_unit
 from mealmeter.search import _candidates, _food_filter, connect, find_products, format_pack, resolve_city
 from mealmeter.staples import Staple, load_staples, resolve_ingredient
 
@@ -30,6 +31,7 @@ FLAG_TEXT = {
     "pack_confidence_low": "nesigurna gramatura (višestruko pakiranje)",
     "chain_suspect": "lanac sa sumnjivim podacima",
     "unit_suspect": "gramatura iz stupca unit izgleda krivo (cijena izvan granica ili daleko od drugih lanaca)",
+    "portion_pack": "porcijsko pakiranje (>= 20 komada po <= 20 g)",
 }
 
 
@@ -64,6 +66,8 @@ class Need:
     warnings: list = field(default_factory=list)
     free_text: bool = False
     free_rows: dict = field(default_factory=dict)
+    attr_fn: object = None  # odabrani proizvod -> atributi (chosen_attributes), za alternative
+    note_fn: object = None  # atributi -> napomena za alternativu izvan zadanog izbora ("kavezni, s")
 
 
 def resolve_name(name: str) -> tuple[Staple, dict]:
@@ -170,7 +174,21 @@ def flags_of(row: dict) -> list[str]:
         out.append("chain_suspect")
     if row.get("unit_suspect"):
         out.append("unit_suspect")
+    if row.get("portion_pack"):
+        out.append("portion_pack")
     return out
+
+
+PORTION_MIN_COUNT, PORTION_MAX_G, PORTION_STAPLE_MIN_PACK = 20, 20, 250
+
+
+def portion_pack(row: dict, staple: Staple | None) -> bool:
+    """Porcijsko pakiranje ("ŠEĆER MINUTE 1000X4g"): >= 20 komada po <= 20 g, kod namirnica čije je
+    najmanje pakiranje >= 250 g (šećer, brašno...), gdje porcije nisu usporedive kupnja."""
+    if not (staple and (staple.min_pack or 0) >= PORTION_STAPLE_MIN_PACK and staple.unit in ("kg", "l")):
+        return False
+    multi = parse_multipack_unit(row.get("name"))
+    return bool(multi and multi[0] >= PORTION_MIN_COUNT and multi[2] in ("g", "ml") and multi[1] <= PORTION_MAX_G)
 
 
 def choose_product(rows: list[dict], need: float, need_unit: str, by_weight_unit: str | None,
@@ -308,6 +326,7 @@ def _prepare(con, need: Need, city: str, wholesale: bool = False) -> dict[tuple,
     for r in _rows_for(con, need.staple, attrs, city, wholesale, required):
         for k in ("price_eff", "price_per_unit", "pack_amount", "drained_amount", "n_units", "assumed_g"):
             r[k] = _num(r.get(k))
+        r["portion_pack"] = portion_pack(r, need.staple)
         by_store.setdefault((r["chain"], r["store_id"]), []).append(r)
     return by_store
 
@@ -430,31 +449,52 @@ def pack_size(pick: dict, need_unit: str) -> str | None:
     return size or format_pack(pick.get("qty"), need_unit)
 
 
-ALT_POOL = 6  # koliko sljedećih najboljih izbora se gleda prije sortiranja alternativa po cijeni
+def alt_eligible(row: dict, staple: Staple | None) -> bool:
+    """Proizvod smije biti alternativa: ista pravila kao glavni izbor bez rezerve, tj. bez veleprodaje,
+    robe promjenjive težine ("GRANA PADANO cca 1KG"), cijene ili gramature izvan granica, porcijskih
+    pakiranja i slabih članova namirnice."""
+    return not (row["chain"] in WHOLESALE_CHAINS or row.get("variable_weight") or row.get("price_suspect")
+                or row.get("unit_suspect") or row.get("clearance") or portion_pack(row, staple)
+                or row.get("match_quality") == "weak" or row.get("data_quality") == "suspect")
+
+
+def quality_better(staple: Staple | None, alt_attrs: dict, item_attrs: dict) -> bool:
+    """Je li alternativa bolje kvalitete po quality_rank namirnice (jaja: bolji uzgoj)."""
+    for attr, order in (staple.quality_rank.items() if staple else ()):
+        a, b = alt_attrs.get(attr), item_attrs.get(attr)
+        if a in order and (b not in order or order.index(a) < order.index(b)):
+            return True
+    return False
 
 
 def _alternatives(rows: list[dict], need: "Need", item: dict, n: int = 2) -> list[dict]:
-    """Do n drugih proizvoda u istoj trgovini, od najjeftinijeg pakiranja (cost_pack), s razlikom prema
-    odabranom (delta_eur = alternativa minus odabrano) i cheaper (je li alternativa jeftinija). Gleda se
-    ALT_POOL sljedećih najboljih izbora (choose_product); oni bez zastavica i snažni idu ispred ostalih."""
+    """Jeftinije alternative u istoj trgovini (cheaper = true), najviše n, od najjeftinije; uz to iznimno
+    jedna iste cijene i bolje kvalitete (quality_rank, npr. bolji uzgoj jaja). Kandidati prolaze
+    alt_eligible; delta_eur je alternativa minus odabrano."""
     args = _choose_args(need)
-    taken, names, picks = {item["product_id"]}, {item["name"]}, []
-    while len(picks) < ALT_POOL:
-        rest = [r for r in rows if r["product_id"] not in taken and r["name"] not in names]
-        pick = choose_product(rest, *args) if rest else None
-        if pick is None:
-            break
-        taken.add(pick["product_id"])
-        names.add(pick["name"])
-        picks.append(pick)
-    weaker = lambda p: p["fallback"] or p.get("match_quality") == "weak"  # noqa: E731
-    chosen = sorted(sorted(picks, key=lambda p: (weaker(p), p["cost_pack"]))[:n], key=lambda p: p["cost_pack"])
-    return [{"product_id": p["product_id"], "ean": p["ean_norm"], "name": p["name"],
-             "pack_size": pack_size(p, need.unit), "n_packs": p["n_packs"], "price_eff": p["price_eff"],
-             "cost_pack": p["cost_pack"], "cost_used": p["cost_used"],
-             "delta_eur": round(p["cost_pack"] - item["cost_pack"], 2), "cheaper": p["cost_pack"] < item["cost_pack"],
-             "price_per_unit": p["price_per_unit"], "per_unit": p["per_unit"], "flags": p["flags"],
-             "match_quality": "free_text" if need.free_text else p.get("match_quality")} for p in chosen]
+    seen, picks = {item["product_id"], item["name"]}, []
+    for r in rows:
+        if r["product_id"] in seen or r["name"] in seen or not alt_eligible(r, need.staple):
+            continue
+        if pick := choose_product([r], *args):
+            seen.update((r["product_id"], r["name"]))
+            picks.append(pick)
+    attrs = need.attr_fn or (lambda p: {})
+    cheaper = sorted((p for p in picks if p["cost_pack"] < item["cost_pack"]), key=lambda p: p["cost_pack"])[:n]
+    same = [p for p in picks if p["cost_pack"] == item["cost_pack"]
+            and quality_better(need.staple, attrs(p), item.get("attributes") or {})][:1]
+    out = []
+    for p in cheaper + same:
+        alt = {"product_id": p["product_id"], "ean": p["ean_norm"], "name": p["name"],
+               "pack_size": pack_size(p, need.unit), "n_packs": p["n_packs"], "price_eff": p["price_eff"],
+               "cost_pack": p["cost_pack"], "cost_used": p["cost_used"],
+               "delta_eur": round(p["cost_pack"] - item["cost_pack"], 2), "cheaper": p["cost_pack"] < item["cost_pack"],
+               "price_per_unit": p["price_per_unit"], "per_unit": p["per_unit"],
+               "match_quality": "free_text" if need.free_text else p.get("match_quality")}
+        if note := need.note_fn(attrs(p)) if need.note_fn else None:
+            alt["note"] = note
+        out.append(alt)
+    return out
 
 
 # --- sastojak izvan rječnika (free_text) ---------------------------------------------
@@ -665,6 +705,7 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
             "warnings": need.warnings,
         })
         attrs_of, attrs_of_ean = _product_attrs(con, need.staple)
+        need.attr_fn = lambda p, a=attrs_of, e=attrs_of_ean: chosen_attributes(p, a, e)
         prefs = {a: v for a, v in need.staple.default_preference.items() if a not in need.attributes}
         group_values = _group_values(con, need.staple, prefs)
         for key, rows in _prepare(con, need, city, include_wholesale).items():

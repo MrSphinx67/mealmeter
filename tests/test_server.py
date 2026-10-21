@@ -197,8 +197,8 @@ def test_alternatives(alt_con):
     items = out["best_store"]["items"]
     assert all(len(it["alternatives"]) <= 2 for it in items)
     flour = next(it for it in items if it["staple"] == "brasno")
-    assert len(flour["alternatives"]) == 2
-    assert all(a["product_id"] != flour["product_id"] and a["cost_pack"] > 0 for a in flour["alternatives"])
+    # Korak 4C: samo jeftinije alternative; odabrano brašno je najjeftinije pakiranje koje pokriva količinu
+    assert all(a["cheaper"] and a["product_id"] != flour["product_id"] for a in flour["alternatives"])
     _, _, out = call(con, "plan_basket", {"ingredients": PANCAKES, "city": "Osijek", "alternatives": False})
     assert all("alternatives" not in it for it in out["best_store"]["items"])
 

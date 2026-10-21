@@ -77,6 +77,9 @@ class Staple:
     # zadani redoslijed vrijednosti kad atribut nije tražen (mljeveno meso: miješano, pa juneće, pa
     # svinjsko); ostale vrijednosti (pureće, pileće) samo kad se izričito traže
     default_preference: dict[str, tuple[str, ...]] = field(default_factory=dict, hash=False, compare=False)
+    # redoslijed kvalitete vrijednosti atributa, od najbolje (jaja: uzgoj bio > slobodni > podni > kavezni):
+    # pri jednakoj cijeni bolja ima prednost, a alternativa iste cijene i bolje kvalitete se prikazuje
+    quality_rank: dict[str, tuple[str, ...]] = field(default_factory=dict, hash=False, compare=False)
 
     def defaults(self) -> dict:
         """Zadani filtri atributa: vrijednost (default_attributes) ili n-torka redoslijeda (default_preference)."""
@@ -246,6 +249,7 @@ def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> d
             substitutes={a: tuple(str(v) for v in vals) for a, vals in (d.get("substitutes") or {}).items()},
             default_preference={a: tuple(str(v) for v in vals)
                                 for a, vals in (d.get("default_preference") or {}).items()},
+            quality_rank={a: tuple(str(v) for v in vals) for a, vals in (d.get("quality_rank") or {}).items()},
         )
         for a, vals in st.default_preference.items():
             if any(v not in attrs.get(a, {}) for v in vals) or a in st.default_attributes:

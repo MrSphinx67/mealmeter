@@ -505,6 +505,9 @@ jaja:
   max_pack: 30
   min_pack: 4
   group_by: [velicina, uzgoj]
+  # Korak 4C: pri jednakoj cijeni bolji uzgoj; alternativa iste cijene samo uz bolji uzgoj
+  quality_rank:
+    uzgoj: [bio, slobodni, podni, kavezni, nepoznato]
   # broj komada: "10/1", "10 KOM" (ne "-18/1-", to je broj pakiranja u kartonu)
   count_regex: '(?<![\d-])(\d+)\s*/\s*1\b(?!\s*-)|(\d+)\s*kom'
   compare_by: count

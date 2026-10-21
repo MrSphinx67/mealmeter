@@ -54,15 +54,9 @@ def test_summary_hr(con4b):
 def test_alternatives_delta_and_cheaper(con4b):
     res = plan_basket(PANCAKES, "Osijek", con=con4b, store=KONZUM, alternatives=True)
     flour = next(it for it in res["best_store"]["items"] if it["staple"] == "brasno")
-    alts = flour["alternatives"]
-    assert 1 <= len(alts) <= 2
-    assert [a["cost_pack"] for a in alts] == sorted(a["cost_pack"] for a in alts)  # od najjeftinije
-    for a in alts:
-        assert a["delta_eur"] == round(a["cost_pack"] - flour["cost_pack"], 2)
-        assert a["cheaper"] is (a["cost_pack"] < flour["cost_pack"])
-        assert a["product_id"] != flour["product_id"] and a["pack_size"]
-    # najbolji izbor je najjeftinije pakiranje koje pokriva količinu, pa nijedna alternativa nije jeftinija
-    assert not any(a["cheaper"] for a in alts)
+    # najbolji izbor je najjeftinije pakiranje koje pokriva količinu; od Koraka 4C prikazuju se samo jeftinije
+    # alternative (test_step4c), pa ih ovdje nema
+    assert flour["alternatives"] == []
     # alternative samo u odabranoj (najboljoj) trgovini
     res = plan_basket(PANCAKES, "Osijek", con=con4b, alternatives=True)
     for s in res["stores"]:
