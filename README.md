@@ -48,8 +48,18 @@ Poslužitelj sam primijeti kad `scripts/update.py` zamijeni datoteku baze i otvo
 [docs/claude_desktop_config.json](docs/claude_desktop_config.json). Putanju zamijeni stvarnom putanjom do
 repozitorija. Ako `uv` nije u PATH-u, upiši punu putanju do `uv`. Zatim ponovno pokreni Claude Desktop.
 
-**Claude (web, udaljeno):** kad poslužitelj radi preko HTTPS-a (`--http` iza HTTPS proxyja), dodaj URL
-`https://<domena>/mcp` kao prilagođeni konektor (Settings → Connectors).
+**Claude (web, udaljeno):** MCP endpoint je točno `/mcp` (streamable HTTP, POST). Pokretanje:
+
+```sh
+MM_ALLOWED_HOSTS='*.trycloudflare.com' uv run python -m mealmeter.server --http --port 8000
+```
+
+Poslužitelj sluša na `127.0.0.1:8000` (`--host` za drugu adresu), a HTTPS daje proxy ili tunel ispred
+njega. `MM_ALLOWED_HOSTS` (zarezom odvojeni hostovi, `*` za poddomene) mora sadržavati javni host, inače
+zaštita od DNS rebindinga vraća 421; `MM_ALLOWED_ORIGINS` isto za Origin preglednika. Zatim u Claudeu:
+Settings → Connectors → Add custom connector, URL **`https://<host>/mcp`** (npr.
+`https://primjer.trycloudflare.com/mcp`). `GET /` je kratka stranica s tim URL-om, a `GET /healthz` vraća
+`{status, db_date, db_age_hours, version}`.
 
 ### Dodavanje u ChatGPT
 
@@ -129,8 +139,18 @@ The server notices when `scripts/update.py` replaces the database file and reope
 replace the path with the real path to the repository. If `uv` is not on your PATH, use the full path
 to `uv`. Then restart Claude Desktop.
 
-**Claude (web, remote):** once the server runs over HTTPS (`--http` behind an HTTPS proxy), add
-`https://<domain>/mcp` as a custom connector (Settings → Connectors).
+**Claude (web, remote):** the MCP endpoint is exactly `/mcp` (streamable HTTP, POST). Run:
+
+```sh
+MM_ALLOWED_HOSTS='*.trycloudflare.com' uv run python -m mealmeter.server --http --port 8000
+```
+
+The server listens on `127.0.0.1:8000` (`--host` for another address); HTTPS comes from a proxy or tunnel in
+front of it. `MM_ALLOWED_HOSTS` (comma-separated hosts, `*` for subdomains) must include the public host,
+otherwise DNS-rebinding protection answers 421; `MM_ALLOWED_ORIGINS` does the same for browser Origins. Then
+in Claude: Settings → Connectors → Add custom connector, URL **`https://<host>/mcp`** (e.g.
+`https://example.trycloudflare.com/mcp`). `GET /` is a short page showing that URL, and `GET /healthz` returns
+`{status, db_date, db_age_hours, version}`.
 
 ### Adding to ChatGPT
 
