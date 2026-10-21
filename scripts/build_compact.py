@@ -21,7 +21,7 @@ import duckdb
 
 ROOT = Path(__file__).resolve().parents[1]
 KEYS = ("chain", "store_id", "product_id")
-SKIP = {"prices", "price_history"}
+SKIP = {"prices", "price_history", "staple_prices", "staple_items"}
 
 
 def build(SRC: Path, OUT: Path) -> dict:
@@ -63,8 +63,12 @@ def build(SRC: Path, OUT: Path) -> dict:
     c.execute(f"""CREATE VIEW dst.clean.prices AS
         SELECT {select_cols} FROM clean.store_products s JOIN clean.chain_prices b USING (chain, product_id)
         UNION ALL SELECT {", ".join(cols)} FROM clean.price_exceptions""")
+    from mealmeter.staples import build_staple_prices
+
+    # kopirane iz pune baze ili ih nema; grade se iznova nad view-om cijena
+    build_staple_prices(c, "dst.")
     counts = {t: c.execute(f"SELECT count(*) FROM dst.clean.{t}").fetchone()[0]
-              for t in ("chain_prices", "store_products", "price_exceptions")}
+              for t in ("chain_prices", "store_products", "price_exceptions", "staple_prices")}
     full = c.execute("SELECT count(*) FROM src.clean.prices").fetchone()[0]
     view = c.execute("SELECT count(*) FROM dst.clean.prices").fetchone()[0]
     if view != full:

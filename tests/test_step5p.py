@@ -96,3 +96,23 @@ def test_compact_db_same_outputs(tmp_path):
     finally:
         srv._shared_con, srv._fixed_con, srv._db_path, srv._db_key = state
     assert outs[0] == outs[1]
+
+
+# --- 4. predizračunate cijene po namirnici: isti rezultat kao preko svih cijena ----------------------------
+
+def test_staple_prices_same_as_full_scan(con5b, monkeypatch):  # noqa: F811
+    from mealmeter import basket, search
+
+    assert search.has_staple_prices(con5b)
+    n = con5b.execute("SELECT count(*) FROM clean.staple_prices").fetchone()[0]
+    assert n and con5b.execute("SELECT count(*) FROM clean.staple_items").fetchone()[0]
+    ing = [{"name": "brašno glatko", "amount": 250, "unit": "g"}, {"name": "mlijeko", "amount": 500, "unit": "ml"},
+           {"name": "jaja", "amount": 3, "unit": "kom"}, {"name": "kobasica", "amount": 400, "unit": "g"},
+           {"name": "grašak", "amount": 800, "unit": "g"}]
+    fast = (basket.plan_basket(ing, "Osijek", con=con5b, alternatives=True),
+            search.find_products(ingredient="jaja", city="Osijek", con=con5b))
+    monkeypatch.setattr(search, "has_staple_prices", lambda con: False)
+    monkeypatch.setattr(basket, "has_staple_prices", lambda con: False)
+    slow = (basket.plan_basket(ing, "Osijek", con=con5b, alternatives=True),
+            search.find_products(ingredient="jaja", city="Osijek", con=con5b))
+    assert fast == slow

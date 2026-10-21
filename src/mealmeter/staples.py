@@ -707,6 +707,28 @@ def build_staple_groups(con: duckdb.DuckDBPyConnection) -> list[tuple]:
         FROM clean.staple_groups GROUP BY staple ORDER BY staple""").fetchall()
 
 
+def build_staple_prices(con: duckdb.DuckDBPyConnection, db: str = "") -> int:
+    """clean.staple_prices i clean.staple_items (Korak 5P): cijene i proizvodi iz grupa namirnice (staple_groups
+    'member' i 'ambiguous'), složeni po (staple, chain, product_id). Kandidati za namirnicu (search._candidates)
+    čitaju samo njezin dio umjesto svih cijena i proizvoda; isti stupci kao clean.prices / clean.products uz
+    `staple`. `db` je prefiks baze ("dst.")."""
+    con.execute(f"""
+        CREATE OR REPLACE TABLE {db}clean.staple_prices AS
+        SELECT DISTINCT sg.staple, c.*
+        FROM {db}clean.staple_groups sg
+        JOIN (SELECT chain, product_id, {BKEY_SQL} AS bkey FROM {db}clean.products p) pb ON pb.bkey = sg.bkey
+        JOIN {db}clean.prices c USING (chain, product_id)
+        WHERE sg.status IN ('member', 'ambiguous')
+        ORDER BY sg.staple, c.chain, c.product_id, c.store_id""")
+    # proizvodi istih grupa (stupci clean.products), za CTE g u search._candidates
+    con.execute(f"""
+        CREATE OR REPLACE TABLE {db}clean.staple_items AS
+        SELECT DISTINCT sp.staple, p.* FROM (SELECT DISTINCT staple, chain, product_id FROM {db}clean.staple_prices) sp
+        JOIN {db}clean.products p USING (chain, product_id)
+        ORDER BY sp.staple, p.chain, p.product_id""")
+    return con.execute(f"SELECT count(*) FROM {db}clean.staple_prices").fetchone()[0]
+
+
 # Cijena po jedinici usporedbe namirnice (aliasi: c = clean.prices, ps = clean.product_staples,
 # r = clean.staple_rules). Isti izraz koriste build (granice, statistika) i pretraga.
 STAPLE_PPU_SQL = """CASE

@@ -9,7 +9,7 @@ from pathlib import Path
 import duckdb
 
 from mealmeter.food import build_food
-from mealmeter.staples import build_staples, match_text
+from mealmeter.staples import build_staple_prices, build_staples, match_text
 from mealmeter.normalize import (
     CITY_ALIASES,
     analyze_pack,
@@ -227,6 +227,7 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
     stats = {"food": food_stats, "dummy_eans": stats_dummy, "ean_incoherent": stats_incoherent}
     stats["quality"] = chain_quality_report(con)
     stats["staples"] = build_staples(con)
+    stats["staple_prices"] = build_staple_prices(con)  # cijene po namirnici za brze kandidate (Korak 5P)
     stats["dedup"] = con.execute("""
         SELECT r.chain, r.n_raw, coalesce(c.n_clean, 0) AS n_clean, r.n_zero_price
         FROM (SELECT chain, count(*) n_raw, count(*) FILTER (WHERE price_eff IS NULL) n_zero_price

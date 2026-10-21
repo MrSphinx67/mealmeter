@@ -100,10 +100,16 @@ def _required_attrs_sql(staple, required: dict | None) -> str:
     return " AND ".join(parts)
 
 
+def has_staple_prices(con) -> bool:
+    """Ima li baza clean.staple_prices (build_staple_prices); starije baze je nemaju, pa vrijedi clean.prices."""
+    return bool(con.execute("""SELECT count(*) FROM duckdb_tables() WHERE schema_name = 'clean'
+                               AND table_name = 'staple_prices' AND database_name = current_database()""").fetchone()[0])
+
+
 def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | None,
                 include_clearance: bool, food_sql: str | None = None,
                 include_ambiguous: bool = False, include_wholesale: bool = False,
-                required: dict | None = None, weak: str = "all") -> tuple[str, list, str]:
+                required: dict | None = None, weak: str = "all", staple_prices: bool = False) -> tuple[str, list, str]:
     """SQL (CTE-ovi g, hit, x) za kandidate: jedan redak po (trgovina, proizvod).
 
     x sadrži sve proizvode iz grupa koje odgovaraju upitu/namirnici, s cijenom po jedinici u
@@ -200,9 +206,14 @@ def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | 
         suspect_sql, n_units_sql, assumed_sql, clearance_sql = "false", "NULL::DOUBLE", "NULL::DOUBLE", "TRUE"
 
     gkey_expr, gkey_join = _gkey_sql(staple)
+    # cijene namirnice iz clean.staple_prices (samo njezin dio, složen po namirnici) umjesto svih cijena
+    prices_sql = (f"(SELECT * EXCLUDE (staple) FROM clean.staple_prices WHERE staple = '{staple.key}')"
+                  if staple and staple_prices else "clean.prices")
+    products_sql = (f"(SELECT * EXCLUDE (staple) FROM clean.staple_items WHERE staple = '{staple.key}')"
+                    if staple and staple_prices else "clean.products")
     sql = f"""
         WITH g AS (
-          SELECT p.*, {gkey_expr} AS gkey, {BKEY_SQL} AS bkey FROM clean.products p {gkey_join}
+          SELECT p.*, {gkey_expr} AS gkey, {BKEY_SQL} AS bkey FROM {products_sql} p {gkey_join}
         ),
         hit AS ({hit_sql}),
         x AS (
@@ -219,7 +230,7 @@ def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | 
                  {unit_suspect_sql} AS unit_suspect
           FROM g p
           JOIN hit USING (bkey)
-          JOIN clean.prices c USING (chain, product_id)
+          JOIN {prices_sql} c USING (chain, product_id)
           JOIN clean.stores s USING (chain, store_id)
           JOIN clean.chains ch USING (chain)
           {rules_join}
@@ -303,7 +314,7 @@ def find_products(
     food_sql = _food_filter(include_nonfood, include_alcohol, "yes" if include_unverified else "no")
     cand_sql, cand_params, cov_col = _candidates(staple, tokens, attributes, city, include_clearance, food_sql,
                                                  include_ambiguous, include_wholesale, required,
-                                                 "all" if include_weak else "none")
+                                                 "all" if include_weak else "none", has_staple_prices(con))
     best = "x.unit_confidence = pick.conf AND x.per_unit = pick.per_unit AND NOT x.price_suspect"
     sql = f"""
         {cand_sql},

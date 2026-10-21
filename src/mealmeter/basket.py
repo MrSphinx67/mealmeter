@@ -14,7 +14,8 @@ from mealmeter import units
 from mealmeter.build import NATIONAL_NOTE
 from mealmeter.build import WHOLESALE_CHAINS
 from mealmeter.normalize import date_hr, norm_text, parse_multipack_unit
-from mealmeter.search import _candidates, _city_filter, _food_filter, connect, find_products, format_pack, resolve_city
+from mealmeter.search import (_candidates, _city_filter, _food_filter, connect, find_products, format_pack,
+                              has_staple_prices, resolve_city)
 from mealmeter.staples import Staple, extract_attributes_detail, load_staples, resolve_ingredient
 
 # jedinica u receptu -> (osnovna jedinica, faktor); kuhinjske mjere (žlica, šalica...) su u data/units.yaml
@@ -324,7 +325,8 @@ def _rows_for(con, staple: Staple, attributes: dict, city: str, wholesale: bool 
     # Plodine) samo za svježe voće i povrće, gdje naziv prolazi pravilo prve ili druge riječi.
     food_sql = _food_filter(unverified="staple" if staple.loose_produce else "no")
     sql, params, _ = _candidates(staple, [], attributes, city, include_clearance=True, food_sql=food_sql,
-                                 include_wholesale=wholesale, required=required, weak="early")
+                                 include_wholesale=wholesale, required=required, weak="early",
+                                 staple_prices=has_staple_prices(con))
     # redoslijed je zadan, da izbor pri jednakoj cijeni (min u choose_product) bude uvijek isti
     cur = con.execute(sql + " SELECT * FROM x ORDER BY chain, store_id, product_id", params)
     cols = [d[0] for d in cur.description]
