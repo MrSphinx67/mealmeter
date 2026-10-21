@@ -10,6 +10,6 @@
 | 6 veličina odgovora (sažete ostale trgovine, detail) | gotovo: 7 sastojaka ≈ 2,3 KB sažeto, ≈ 17 KB uz detail=true |
 | 7 dvosmislen sastojak: ask_user, "Bez graha" | gotovo (genitive u staples.yaml) |
 | 8 smoke_4c | - |
-| 9 Lidl sirovi retci (samo čitanje) | - |
+| 9 Lidl sirovi retci (samo čitanje) | gotovo: docs/lidl_raw_check.md; jedna greška parsera ("Suncokretovo ulje 20g Lidla" -> 20 g), nije ispravljena |
 
 Hosting: nije dirano.
