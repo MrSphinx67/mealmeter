@@ -95,3 +95,29 @@ def test_update_workflow():
         assert f"secrets.{secret}" in text
     assert "git commit" not in text and "git push" not in text  # baza se ne commita
     assert "nedostaje lanac" in runs and "exit 3" in runs  # pad lanca > 20 % prekida deploy
+
+
+def test_vercel_client_ip(monkeypatch):
+    from mealmeter.server import RateLimit
+
+    monkeypatch.setenv("TRUSTED_PROXY", "vercel")
+    rl = RateLimit(None, limit=2, session_limit=100, global_limit=100)
+    assert rl.trusted_proxy == "vercel"
+    scope = {"client": ("10.0.0.1", 1)}
+    # klijent pošalje lažni CF-Connecting-IP: na Vercelu se ne čita
+    assert rl.client_ip(scope, {b"cf-connecting-ip": b"1.1.1.1", b"x-vercel-forwarded-for": b"203.0.113.5",
+                                b"x-forwarded-for": b"203.0.113.5"}) == "203.0.113.5"
+    assert rl.client_ip(scope, {b"x-real-ip": b"203.0.113.6"}) == "203.0.113.6"
+    assert rl.client_ip(scope, {b"x-forwarded-for": b"203.0.113.7"}) == "203.0.113.7"
+    assert rl.client_ip(scope, {}) == "10.0.0.1"
+    monkeypatch.setenv("TRUSTED_PROXY", "1")
+    assert RateLimit(None).trusted_proxy is True
+    monkeypatch.delenv("TRUSTED_PROXY")
+    assert RateLimit(None).trusted_proxy is False
+
+
+def test_index_vercel_settings():
+    src = (ROOT / "api" / "index.py").read_text(encoding="utf-8")
+    for line in ('"MM_ALLOWED_HOSTS", "*.vercel.app"', '"TRUSTED_PROXY", "vercel"', '"MM_RATE_IP", "60"',
+                 '"MM_RATE_GLOBAL", "600"', '"MM_ALLOWED_ORIGINS"'):
+        assert line in src, line

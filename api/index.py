@@ -19,6 +19,13 @@ sys.path.insert(0, str(ROOT / "src"))  # paket mealmeter iz repozitorija, i kad 
 
 os.environ.setdefault("MM_DB", str(ROOT / "data" / "compact.duckdb"))
 os.environ.setdefault("MM_DUCKDB_TEMP", "/tmp")
+# Vercel (Korak 5V.4); svaka se može promijeniti u Project Settings -> Environment Variables (npr. vlastita domena)
+os.environ.setdefault("MM_ALLOWED_HOSTS", "*.vercel.app")
+os.environ.setdefault("MM_ALLOWED_ORIGINS", "https://claude.ai,https://*.claude.ai,https://*.vercel.app")
+os.environ.setdefault("TRUSTED_PROXY", "vercel")  # IP klijenta iz Vercelovih zaglavlja (x-vercel-forwarded-for)
+os.environ.setdefault("MM_RATE_IP", "60")  # po instanci funkcije: Fluid compute ih može imati više
+os.environ.setdefault("MM_RATE_SESSION", "30")
+os.environ.setdefault("MM_RATE_GLOBAL", "600")
 
 from mealmeter.asgi import LifespanOnDemand, inner_app  # noqa: E402
 from mealmeter.server import create_server, http_app  # noqa: E402

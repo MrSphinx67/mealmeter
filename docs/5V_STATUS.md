@@ -6,7 +6,7 @@
 | 1 api/index.py (ASGI, lifespan, compact) | gotovo: uvicorn s --lifespan off i on: /healthz 200, plan_basket 200 (~0,85 s) |
 | 2 vercel.json i veličina paketa | gotovo: procjena paketa ≈ 306 MB od 500 MB (vidi niže) |
 | 3 GitHub Actions (2x dnevno) | gotovo: .github/workflows/update.yml (nije pokrenuto) |
-| 4 postavke (hostovi, rate limit, IP zaglavlje) | - |
+| 4 postavke (hostovi, rate limit, IP zaglavlje) | gotovo: TRUSTED_PROXY=vercel (x-vercel-forwarded-for), zadane postavke u api/index.py |
 | 5 docs/DEPLOY.md | - |
 
 Ništa nije deployano.
@@ -54,3 +54,13 @@ U 13:30 i 21:30 UTC i ručno (workflow_dispatch, uz opciju force):
    pa se ne uspoređuje s jučerašnjim datotekama, nego potvrđuje da sažeta baza daje iste izlaze kao puna; zatim pytest.
 4. `vercel pull/build --prod` (paket > 490 MB prekida), `vercel deploy --prebuilt --prod`.
 Tajne: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID. Baze se ne commitaju (> 100 MB).
+
+## 4. Postavke na Vercelu (zadane u `api/index.py`, mogu se promijeniti u Project Settings -> Environment Variables)
+
+| varijabla | zadano | zašto |
+|---|---|---|
+| MM_ALLOWED_HOSTS | `*.vercel.app` | Host zaglavlje Vercelove domene; za vlastitu domenu dodaj je zarezom |
+| MM_ALLOWED_ORIGINS | `https://claude.ai,https://*.claude.ai,https://*.vercel.app` | preglednički klijenti; Claude konektor zove s poslužitelja, bez Origina |
+| TRUSTED_PROXY | `vercel` | IP iz `x-vercel-forwarded-for` (pa `x-real-ip`, `x-forwarded-for`). Vercel prepisuje `x-forwarded-for` i ne prosljeđuje vanjske IP-ove. `CF-Connecting-IP` se ne čita, jer bi ga klijent na Vercelu mogao sam poslati. |
+| MM_RATE_IP / MM_RATE_SESSION / MM_RATE_GLOBAL | 60 / 30 / 600 u minuti | brojači su u memoriji jedne instance; uz više instanci (Fluid compute) ograničenje je po instanci, a za strogo ograničenje treba Vercel Firewall |
+| MM_DB, MM_DUCKDB_TEMP | `data/compact.duckdb`, `/tmp` | sažeta baza samo za čitanje; jedino je /tmp zapisiv |

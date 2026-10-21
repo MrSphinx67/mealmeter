@@ -477,7 +477,8 @@ def _env_int(name: str, default: int) -> int:
 class RateLimit:
     """ASGI: ograničenja HTTP zahtjeva u `window` sekundi (429) i veličina tijela (413).
 
-    - po IP-u (`limit`, MM_RATE_IP): IP klijenta iz veze; samo uz TRUSTED_PROXY=1 (poslužitelj iza vlastitog
+    - po IP-u (`limit`, MM_RATE_IP): IP klijenta iz veze; uz TRUSTED_PROXY=vercel iz x-vercel-forwarded-for /
+      x-real-ip / x-forwarded-for (Vercel ih postavlja sam); samo uz TRUSTED_PROXY=1 (poslužitelj iza vlastitog
       proxyja) iz CF-Connecting-IP, inače iz zadnjeg unosa X-Forwarded-For (adresa koju je vidio naš proxy;
       raniji unosi dolaze od klijenta i mogu se krivotvoriti);
     - po MCP sesiji (`session_limit`, MM_RATE_SESSION), kad zahtjev nosi Mcp-Session-Id;
@@ -491,12 +492,21 @@ class RateLimit:
         self.limit = limit if limit is not None else _env_int("MM_RATE_IP", RATE_LIMIT)
         self.session_limit = session_limit if session_limit is not None else _env_int("MM_RATE_SESSION", RATE_SESSION)
         self.global_limit = global_limit if global_limit is not None else _env_int("MM_RATE_GLOBAL", RATE_GLOBAL)
-        self.trusted_proxy = (os.environ.get("TRUSTED_PROXY") == "1") if trusted_proxy is None else trusted_proxy
+        if trusted_proxy is None:  # "1": vlastiti proxy (CF-Connecting-IP / X-Forwarded-For); "vercel": Vercelova zaglavlja
+            env = os.environ.get("TRUSTED_PROXY", "")
+            trusted_proxy = "vercel" if env == "vercel" else env == "1"
+        self.trusted_proxy = trusted_proxy
         self.hits: dict[str, deque] = defaultdict(deque)  # "ip:..." / "session:..." / "global"
         self._last_prune = time.monotonic()
 
     def client_ip(self, scope, headers: dict[bytes, bytes]) -> str:
-        if self.trusted_proxy:
+        if self.trusted_proxy == "vercel":
+            # Vercel prepisuje X-Forwarded-For IP-om klijenta (ne prosljeđuje vanjske IP-ove); x-vercel-forwarded-for i
+            # x-real-ip su isti. CF-Connecting-IP bi klijent na Vercelu mogao sam poslati, pa se ne čita.
+            for name in (b"x-vercel-forwarded-for", b"x-real-ip", b"x-forwarded-for"):
+                if ip := headers.get(name, b"").decode("latin-1").split(",")[0].strip():
+                    return ip
+        elif self.trusted_proxy:
             if cf := headers.get(b"cf-connecting-ip", b"").decode("latin-1").strip():
                 return cf
             if xff := [p.strip() for p in headers.get(b"x-forwarded-for", b"").decode("latin-1").split(",") if p.strip()]:
