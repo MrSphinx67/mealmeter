@@ -696,8 +696,7 @@ def _apply_overrides(store: dict, overrides: list[dict], out: dict) -> None:
             it["cost_pack"] = round(price * n, 2)
             it["cost_used"] = round(it["cost_used"] * it["cost_pack"] / old, 2) if old else it["cost_pack"]
             it["user_provided"] = True
-    store["total_to_buy"] = round(sum(it["cost_pack"] for it in store["items"] if not it["have"]), 2)
-    store["total_used"] = round(sum(it["cost_used"] for it in store["items"]), 2)
+    set_totals(store, store["items"])
 
 
 def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
@@ -868,9 +867,7 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
         s["items"] = items
         s["n_matched"] = len(items)
         s["n_ingredients"] = n_needs
-        # za kupiti: cijela pakiranja svega što korisnik nema; utrošeno: razmjerno, za sve stavke
-        s["total_to_buy"] = round(sum(it["cost_pack"] for it in items if not it["have"]), 2)
-        s["total_used"] = round(sum(it["cost_used"] for it in items), 2)
+        set_totals(s, items)
         s["flagged_items"] = sum(1 for it in items if it["flags"])
         s["unit_confidence"] = "low" if any(it["unit_confidence"] != "high" for it in items) else "high"
         if s["scope"] == "national":
@@ -932,6 +929,16 @@ def _brand_substitutions(stores: dict, idx: int, need: Need, branded: set) -> No
                                 "pack_size": b["pack_size"], "n_packs": b["n_packs"], "price_eff": b["price_eff"],
                                 "cost_pack": b["cost_pack"], "cost_used": b["cost_used"], "brand": need.brand[0],
                                 "other_store": True, "chain": bs["chain"], "address": bs["address"]}
+
+
+def set_totals(store: dict, items: list[dict]) -> None:
+    """Zbrojevi trgovine iz prikazanih (na cent zaokruženih) iznosa stavki: total_to_buy (cijela pakiranja) i
+    total_used (utrošeni dio) samo za ono što korisnik nema; stavke iz already_have idu u from_stock_value
+    (informativno, vrijednost utroška iz zalihe), pa je total_used točno zbroj redaka za kupiti (Korak 5B)."""
+    buy = [it for it in items if not it["have"]]
+    store["total_to_buy"] = round(sum(it["cost_pack"] for it in buy), 2)
+    store["total_used"] = round(sum(it["cost_used"] for it in buy), 2)
+    store["from_stock_value"] = round(sum(it["cost_used"] for it in items if it["have"]), 2)
 
 
 def _add_item(stores: dict, key: tuple, rows: list[dict], need: Need, idx: int, pick: dict, chosen: dict,

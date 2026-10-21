@@ -229,4 +229,6 @@ def test_already_have_and_totals(con):
         have = {it["staple"]: it["have"] for it in s["items"]}
         assert have.get("mlijeko", True) and not have.get("brasno", False)
         assert s["total_to_buy"] == pytest.approx(sum(it["cost_pack"] for it in s["items"] if not it["have"]))
-        assert s["total_used"] == pytest.approx(sum(it["cost_used"] for it in s["items"]))
+        # Korak 5B: utrošak stavki iz already_have nije u total_used, nego u from_stock_value
+        assert s["total_used"] == pytest.approx(sum(it["cost_used"] for it in s["items"] if not it["have"]))
+        assert s["from_stock_value"] == pytest.approx(sum(it["cost_used"] for it in s["items"] if it["have"]))

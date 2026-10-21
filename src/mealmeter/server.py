@@ -279,7 +279,8 @@ def compact_basket(res: dict) -> dict:
     if best:
         out["best_store"] = {
             **{k: best[k] for k in ("chain", "address", "n_stores", "addresses", "total_to_buy", "total_used",
-                                    "n_matched", "n_ingredients", "missing", "date_hr", "stale_days") if k in best},
+                                    "from_stock_value", "n_matched", "n_ingredients", "missing", "date_hr",
+                                    "stale_days") if k in best},
             **({"note": best["note"]} if best.get("note") else {}),
             "items": [_compact_item(it) for it in best["items"]]}
     else:
