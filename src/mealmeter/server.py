@@ -116,8 +116,12 @@ def _open(path) -> duckdb.DuckDBPyConnection:
     čitao staru; ovako je svaka zamjena nova instanca. Kursori trebaju USE (vidi _con)."""
     # ograničenje memorije DuckDB-a (međuspremnik blokova); veći upiti se prelijevaju na disk (Korak 5P)
     # i broj dretvi (manje dretvi = manje alokatorskih arena po dretvi, manji RSS; upiti su mali)
-    con = duckdb.connect(":memory:", config={"memory_limit": os.environ.get("MM_DUCKDB_MEMORY", "300MB"),
-                                             "threads": int(os.environ.get("MM_DUCKDB_THREADS", "2"))})
+    config = {"memory_limit": os.environ.get("MM_DUCKDB_MEMORY", "300MB"),
+              "threads": int(os.environ.get("MM_DUCKDB_THREADS", "2"))}
+    # serverless (Vercel): samo /tmp je zapisiv, pa privremene datoteke i "home" DuckDB-a idu tamo
+    if tmp := os.environ.get("MM_DUCKDB_TEMP"):
+        config.update(temp_directory=tmp, home_directory=tmp)
+    con = duckdb.connect(":memory:", config=config)
     con.execute(f"ATTACH '{str(path).replace(chr(39), chr(39) * 2)}' AS {_DB_ALIAS} (READ_ONLY)")
     con.execute(f"USE {_DB_ALIAS}")
     return con

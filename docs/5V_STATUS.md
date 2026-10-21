@@ -3,7 +3,7 @@
 | točka | stanje |
 |---|---|
 | 0 ograničenja Vercela (službena dokumentacija) | gotovo |
-| 1 api/index.py (ASGI, lifespan, compact) | - |
+| 1 api/index.py (ASGI, lifespan, compact) | gotovo: uvicorn s --lifespan off i on: /healthz 200, plan_basket 200 (~0,85 s) |
 | 2 vercel.json i veličina paketa | - |
 | 3 GitHub Actions (2x dnevno) | - |
 | 4 postavke (hostovi, rate limit, IP zaglavlje) | - |
