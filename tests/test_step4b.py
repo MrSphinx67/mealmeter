@@ -308,3 +308,71 @@ def test_rules_4b(key, name, expected):
     from mealmeter.staples import load_staples, name_match
 
     assert name_match(load_staples()[key], name) == expected
+
+
+# --- 8. ograničenja upita: IP (uz povjerljiv proxy), MCP sesija, ukupno ----------------------------------
+
+def _rl_call(app, ip="10.0.0.1", headers=None):
+    import asyncio
+
+    sent = []
+
+    async def send(msg):
+        sent.append(msg)
+
+    async def receive():
+        return {"type": "http.request", "body": b""}
+
+    async def ok(scope, receive, send):
+        await send({"type": "http.response.start", "status": 200, "headers": []})
+        await send({"type": "http.response.body", "body": b"ok"})
+
+    app.app = ok
+    hdrs = [(k.encode(), v.encode()) for k, v in (headers or {}).items()]
+    asyncio.run(app(dict(type="http", client=(ip, 1), headers=hdrs), receive, send))
+    return sent[0]["status"]
+
+
+def test_rate_two_clients_behind_same_ip(monkeypatch):
+    from mealmeter.server import RateLimit
+
+    a, b = {"X-Forwarded-For": "203.0.113.1"}, {"X-Forwarded-For": "203.0.113.2"}
+    # bez povjerljivog proxyja X-Forwarded-For se ne gleda: oba klijenta dijele kvotu IP-a proxyja
+    monkeypatch.delenv("TRUSTED_PROXY", raising=False)
+    rl = RateLimit(None, limit=3, session_limit=100, global_limit=100)
+    assert [_rl_call(rl, headers=h) for h in (a, b, a, b)] == [200, 200, 200, 429]
+    # uz TRUSTED_PROXY=1 svaki klijent ima svoju kvotu
+    monkeypatch.setenv("TRUSTED_PROXY", "1")
+    rl = RateLimit(None, limit=3, session_limit=100, global_limit=100)
+    assert [_rl_call(rl, headers=a) for _ in range(3)] == [200, 200, 200]
+    assert [_rl_call(rl, headers=b) for _ in range(3)] == [200, 200, 200]
+    assert _rl_call(rl, headers=a) == 429 and _rl_call(rl, headers=b) == 429
+    # CF-Connecting-IP ima prednost; iz X-Forwarded-For vrijedi zadnji unos (koji je dodao naš proxy)
+    assert rl.client_ip({"client": ("10.0.0.1", 1)}, {b"cf-connecting-ip": b"198.51.100.7",
+                                                       b"x-forwarded-for": b"1.1.1.1"}) == "198.51.100.7"
+    assert rl.client_ip({"client": ("10.0.0.1", 1)}, {b"x-forwarded-for": b"6.6.6.6, 203.0.113.9"}) == "203.0.113.9"
+
+
+def test_rate_session_and_global(monkeypatch):
+    from mealmeter.server import RateLimit
+
+    monkeypatch.delenv("TRUSTED_PROXY", raising=False)
+    rl = RateLimit(None, limit=100, session_limit=2, global_limit=100)
+    s1, s2 = {"Mcp-Session-Id": "s1"}, {"Mcp-Session-Id": "s2"}
+    assert [_rl_call(rl, headers=s1) for _ in range(3)] == [200, 200, 429]
+    assert _rl_call(rl, headers=s2) == 200 and _rl_call(rl) == 200  # druga sesija i zahtjev bez sesije
+    rl = RateLimit(None, limit=100, session_limit=100, global_limit=4)
+    assert [_rl_call(rl, ip=f"10.0.0.{i}") for i in range(5)] == [200, 200, 200, 200, 429]
+
+
+def test_rate_env(monkeypatch):
+    from mealmeter.server import RATE_GLOBAL, RateLimit
+
+    monkeypatch.setenv("MM_RATE_IP", "7")
+    monkeypatch.setenv("MM_RATE_SESSION", "5")
+    monkeypatch.setenv("MM_RATE_GLOBAL", "900")
+    monkeypatch.delenv("TRUSTED_PROXY", raising=False)
+    rl = RateLimit(None)
+    assert (rl.limit, rl.session_limit, rl.global_limit, rl.trusted_proxy) == (7, 5, 900, False)
+    monkeypatch.setenv("MM_RATE_GLOBAL", "nije-broj")
+    assert RateLimit(None).global_limit == RATE_GLOBAL

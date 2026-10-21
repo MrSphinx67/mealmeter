@@ -4,8 +4,9 @@ Pokretanje:
     python -m mealmeter.server                    # stdio (Claude Desktop, lokalno)
     python -m mealmeter.server --http --port 8000 # streamable HTTP na /mcp
 
-Javni podaci samo za čitanje, bez prijave. HTTP ima ograničenje upita po IP-u (RATE_LIMIT u minuti) i
-veličine zahtjeva; svaki odgovor alata je najviše MAX_RESPONSE_BYTES (dulji popisi se skraćuju, uz
+Javni podaci samo za čitanje, bez prijave. HTTP ima ograničenja upita u minuti po IP-u, po MCP sesiji i
+ukupno (MM_RATE_IP, MM_RATE_SESSION, MM_RATE_GLOBAL; IP iz CF-Connecting-IP / X-Forwarded-For samo uz
+TRUSTED_PROXY=1) i veličine zahtjeva; svaki odgovor alata je najviše MAX_RESPONSE_BYTES (dulji popisi se skraćuju, uz
 truncated = true). Baza: MEALMETER_DB ili data/mealmeter.duckdb.
 """
 
@@ -29,7 +30,9 @@ from mealmeter.normalize import date_hr, norm_text
 from mealmeter.staples import load_staples
 
 MAX_RESPONSE_BYTES = 20_000
-RATE_LIMIT = 60  # upita po IP-u u minuti (HTTP)
+RATE_LIMIT = 60  # upita po IP-u u minuti (HTTP), MM_RATE_IP
+RATE_SESSION = 30  # upita po MCP sesiji (Mcp-Session-Id) u minuti, MM_RATE_SESSION
+RATE_GLOBAL = 1000  # upita ukupno u minuti, MM_RATE_GLOBAL
 MAX_REQUEST_BYTES = 64_000
 PRICE_NOTE = ("Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik "
               "nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists "
@@ -328,26 +331,75 @@ def create_server(con: duckdb.DuckDBPyConnection | None = None, db_path: str | N
     return server
 
 
-class RateLimit:
-    """ASGI: najviše `limit` HTTP zahtjeva po IP-u u `window` sekundi (429) i veličina tijela (413)."""
+def _env_int(name: str, default: int) -> int:
+    try:
+        return int(os.environ.get(name, default))
+    except ValueError:
+        return default
 
-    def __init__(self, app, limit: int = RATE_LIMIT, window: float = 60.0, max_body: int = MAX_REQUEST_BYTES):
-        self.app, self.limit, self.window, self.max_body = app, limit, window, max_body
-        self.hits: dict[str, deque] = defaultdict(deque)
+
+class RateLimit:
+    """ASGI: ograničenja HTTP zahtjeva u `window` sekundi (429) i veličina tijela (413).
+
+    - po IP-u (`limit`, MM_RATE_IP): IP klijenta iz veze; samo uz TRUSTED_PROXY=1 (poslužitelj iza vlastitog
+      proxyja) iz CF-Connecting-IP, inače iz zadnjeg unosa X-Forwarded-For (adresa koju je vidio naš proxy;
+      raniji unosi dolaze od klijenta i mogu se krivotvoriti);
+    - po MCP sesiji (`session_limit`, MM_RATE_SESSION), kad zahtjev nosi Mcp-Session-Id;
+    - ukupno (`global_limit`, MM_RATE_GLOBAL), visoko, kao zaštita poslužitelja.
+    """
+
+    def __init__(self, app, limit: int | None = None, window: float = 60.0, max_body: int = MAX_REQUEST_BYTES,
+                 session_limit: int | None = None, global_limit: int | None = None,
+                 trusted_proxy: bool | None = None):
+        self.app, self.window, self.max_body = app, window, max_body
+        self.limit = limit if limit is not None else _env_int("MM_RATE_IP", RATE_LIMIT)
+        self.session_limit = session_limit if session_limit is not None else _env_int("MM_RATE_SESSION", RATE_SESSION)
+        self.global_limit = global_limit if global_limit is not None else _env_int("MM_RATE_GLOBAL", RATE_GLOBAL)
+        self.trusted_proxy = (os.environ.get("TRUSTED_PROXY") == "1") if trusted_proxy is None else trusted_proxy
+        self.hits: dict[str, deque] = defaultdict(deque)  # "ip:..." / "session:..." / "global"
+        self._last_prune = time.monotonic()
+
+    def client_ip(self, scope, headers: dict[bytes, bytes]) -> str:
+        if self.trusted_proxy:
+            if cf := headers.get(b"cf-connecting-ip", b"").decode("latin-1").strip():
+                return cf
+            if xff := [p.strip() for p in headers.get(b"x-forwarded-for", b"").decode("latin-1").split(",") if p.strip()]:
+                return xff[-1]
+        return (scope.get("client") or ("?", 0))[0]
+
+    def _over(self, key: str, limit: int, now: float) -> bool:
+        q = self.hits[key]
+        while q and now - q[0] > self.window:
+            q.popleft()
+        return len(q) >= limit
+
+    def _prune(self, now: float) -> None:
+        """Ključevi bez zahtjeva u prozoru se brišu (sesije i IP-ovi ne rastu bez granice)."""
+        if now - self._last_prune < self.window:
+            return
+        self._last_prune = now
+        for key in [k for k, q in self.hits.items() if not q or now - q[-1] > self.window]:
+            del self.hits[key]
 
     async def __call__(self, scope, receive, send):
         if scope["type"] != "http":
             return await self.app(scope, receive, send)
-        ip = (scope.get("client") or ("?", 0))[0]
-        now, q = time.monotonic(), self.hits[ip]
-        while q and now - q[0] > self.window:
-            q.popleft()
-        length = dict(scope.get("headers") or []).get(b"content-length")
+        headers = {k.lower(): v for k, v in scope.get("headers") or []}
+        length = headers.get(b"content-length")
         if length and int(length) > self.max_body:
             return await self._reply(send, 413, "zahtjev je prevelik / request too large")
-        if len(q) >= self.limit:
-            return await self._reply(send, 429, "previše upita, pokušaj za minutu / too many requests, retry in a minute")
-        q.append(now)
+        now = time.monotonic()
+        self._prune(now)
+        keys = [("global", self.global_limit, "poslužitelj je zauzet / server is busy"),
+                ("ip:" + self.client_ip(scope, headers), self.limit, "previše upita s ove adrese / too many requests")]
+        if session := headers.get(b"mcp-session-id", b"").decode("latin-1").strip():
+            keys.append(("session:" + session[:128], self.session_limit,
+                         "previše upita u ovoj sesiji / too many requests in this session"))
+        for key, limit, text in keys:
+            if self._over(key, limit, now):
+                return await self._reply(send, 429, f"{text}, pokušaj za minutu / retry in a minute")
+        for key, _, _ in keys:
+            self.hits[key].append(now)
         return await self.app(scope, receive, send)
 
     @staticmethod
