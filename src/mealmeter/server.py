@@ -17,11 +17,12 @@ import os
 import threading
 import time
 from collections import defaultdict, deque
-from typing import Any
+from typing import Annotated, Any
 
 import duckdb
 from mcp.server.mcpserver import MCPServer
 from mcp.types import CallToolResult, TextContent, ToolAnnotations
+from pydantic import Field
 
 from mealmeter import basket, search
 from mealmeter.normalize import date_hr, norm_text
@@ -117,10 +118,20 @@ def _error(e: Exception) -> dict:
     return {"error": str(e)}
 
 
+# --- opisi parametara (JSON shema alata) ---
+City = Annotated[str | None, Field(description="Grad, npr. 'Osijek' (uz nacionalne cijene) / city, e.g. 'Osijek'")]
+Ingredient = Annotated[str | None, Field(description="Namirnica: ključ ili sinonim iz list_staples / staple key or synonym")]
+Attributes = Annotated[dict[str, str] | None, Field(
+    description='Atributi namirnice, npr. {"tip": "glatko"} (list_staples) / staple attributes')]
+
 # --- alati --------------------------------------------------------------------------------------------
 
-def find_products(query: str | None = None, city: str | None = None, ingredient: str | None = None,
-                  attributes: dict[str, str] | None = None, include_weak: bool = False, limit: int = 10) -> dict:
+def find_products(
+    query: Annotated[str | None, Field(description="Slobodan tekst naziva / free-text product name")] = None,
+    city: City = None, ingredient: Ingredient = None, attributes: Attributes = None,
+    include_weak: Annotated[bool, Field(description="Uključi slabija podudaranja / include weaker matches")] = False,
+    limit: Annotated[int, Field(ge=1, le=30, description="Najviše grupa (1-30) / max groups")] = 10,
+) -> dict:
     con = _con()
     try:
         rows = search.find_products(query, city=city, limit=max(1, min(limit, 30)), con=con,
@@ -132,7 +143,10 @@ def find_products(query: str | None = None, city: str | None = None, ingredient:
     return _fit(out, ("results",))
 
 
-def get_prices(product_id: str, city: str | None = None) -> dict:
+def get_prices(
+    product_id: Annotated[str, Field(description='EAN, "lanac:product_id" ili id klase ("jaja:m") iz find_products')],
+    city: City = None,
+) -> dict:
     con = _con()
     try:
         rows = search.get_prices(product_id, city=city, limit=50, con=con)
@@ -142,9 +156,19 @@ def get_prices(product_id: str, city: str | None = None) -> dict:
     return _fit(out, ("stores",))
 
 
-def plan_basket(ingredients: list[dict[str, Any]], city: str, store: dict[str, str] | None = None,
-                already_have: list[str] | None = None, price_overrides: list[dict[str, Any]] | None = None,
-                alternatives: bool = True) -> dict:
+def plan_basket(
+    ingredients: Annotated[list[dict[str, Any]], Field(
+        description='[{"name": "brašno glatko", "amount": 250, "unit": "g"|"ml"|"kom", "form"?: "...", '
+                    '"attributes"?: {...}}]; mjere pretvori u g/ml/kom ili convert_units')],
+    city: Annotated[str, Field(description="Grad / city, npr. 'Osijek'")],
+    store: Annotated[dict[str, str] | None, Field(
+        description='Jedna trgovina / one store: {"chain": "konzum", "address_contains": "Starčevića"} (list_stores)')] = None,
+    already_have: Annotated[list[str] | None, Field(
+        description='Što korisnik već ima / what the user already has: ["sol", "papar"]')] = None,
+    price_overrides: Annotated[list[dict[str, Any]] | None, Field(
+        description='Stvarne cijene pakiranja / real pack prices: [{"name": "brašno", "cost_pack": 1.2}]')] = None,
+    alternatives: Annotated[bool, Field(description="Do 2 druga proizvoda po stavci / up to 2 alternatives per item")] = True,
+) -> dict:
     con = _con()
     try:
         res = basket.plan_basket(ingredients, city, con=con, max_stores=3, already_have=already_have,
@@ -161,7 +185,10 @@ def plan_basket(ingredients: list[dict[str, Any]], city: str, store: dict[str, s
     return _fit(res, ("stores", "best_store.items"))
 
 
-def list_stores(city: str, chain: str | None = None) -> dict:
+def list_stores(
+    city: Annotated[str, Field(description="Grad / city")],
+    chain: Annotated[str | None, Field(description="Lanac, npr. 'konzum', 'lidl' / chain")] = None,
+) -> dict:
     con = _con()
     resolved = search.resolve_city(city, con=con)
     if not resolved:
@@ -182,7 +209,11 @@ def list_stores(city: str, chain: str | None = None) -> dict:
     return _fit({**_price_list_date(con), "city": resolved, "stores": stores}, ("stores",))
 
 
-def convert_units(amount: float, unit: str, staple: str) -> dict:
+def convert_units(
+    amount: Annotated[float, Field(description="Količina / amount")],
+    unit: Annotated[str, Field(description="Mjera: žlica, žličica, šalica, prstohvat, kom, češanj, g, ml... / unit")],
+    staple: Annotated[str, Field(description="Namirnica (ključ ili sinonim) / staple")],
+) -> dict:
     con = _con()
     try:
         st, _ = basket.resolve_name(staple)

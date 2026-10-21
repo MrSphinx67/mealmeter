@@ -4,7 +4,8 @@
 |---|---|
 | 0.1 | gotovo |
 | 0.2 | gotovo |
-| 1 | gotovo (server.py, alati, plan_basket store/alternatives/price_overrides) |
-| 2 | u radu |
+| 1 | gotovo |
+| 2 | gotovo (opisi hr/en, opisi parametara u shemi, instructions) |
+| 3 | u radu |
 
-Sljedeća točka: 2 (opisi alata i instructions).
+Sljedeća točka: 3 (stdio i HTTP, ograničenja).
