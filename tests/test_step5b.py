@@ -166,6 +166,7 @@ def test_new_staples_match(key, name, attrs):
 
 
 @pytest.mark.parametrize("key,name", [
+    ("papar", "Mljeveni kajenski papar / Chili"), ("papar", "PAPAR LJUTI CHILI 50 g"),
     ("kobasica", "GRAH S KOBASICAMA 400 g"), ("kobasica", "PIZZA S KOBASICOM"), ("bosiljak", "PESTO BOSILJAK 190 g"),
     ("origano", "UMAK ZA PIZZU S ORIGANOM"), ("lovorov_list", "ULJE LOVOR 50 ml"),
 ])

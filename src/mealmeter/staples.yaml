@@ -1401,7 +1401,9 @@ papar:
   default_attributes: {oblik: mljeveni}
   must_match: [papar\b]
   must_not_match: [sol\b, mlinac set, set\b, kobas, salam, sir\b, umak, chips, cips, pastrm, odrez, file,
-                   zacin za, mix\b, kreker, slanina, pancet, steak, tuna, tunj\b]
+                   zacin za, mix\b, kreker, slanina, pancet, steak, tuna, tunj\b,
+                   # Korak 5B (smoke): kajenski papar i čili nisu papar
+                   kajensk, cayenn, chili, cili\b, ljuti papar]
   unit: kg
   pantry: true
   max_pack: 500

@@ -1,7 +1,8 @@
 """Smoke test (Korak 4B, 4C): scenariji kroz MCP klijent u procesu nad stvarnom bazom; sažeci u docs/.
 
-Upotreba: python scripts/smoke_4b.py [db_path] [--out docs/smoke_4c.md]   (zadano: data/mealmeter.duckdb,
-docs/smoke_4b.md). Svaki scenarij ide sažeto (zadani odgovor) i s detail=true, radi veličine odgovora.
+Upotreba: python scripts/smoke_4b.py [db_path] [--out docs/smoke_4c.md] [--set 5b]   (zadano:
+data/mealmeter.duckdb, docs/smoke_4b.md; --set 5b: palačinke, bolonjez i varivo od graška u Osijeku, Zagrebu i
+Slavonskom Brodu uz "imam sol, papar, ulje"). Svaki scenarij ide sažeto (zadani odgovor) i s detail=true, radi veličine odgovora.
 Uz to stvara data/eval/shelf_check.csv (ako ne postoji): stavke najboljih trgovina za provjeru na polici.
 """
 
@@ -18,7 +19,8 @@ from mealmeter import server as srv
 ROOT = Path(__file__).resolve().parents[1]
 _args = sys.argv[1:]
 OUT = ROOT / (_args.pop(_args.index("--out") + 1) if "--out" in _args else "docs/smoke_4b.md")
-_args = [a for a in _args if a != "--out"]
+SET = _args.pop(_args.index("--set") + 1) if "--set" in _args else "4b"
+_args = [a for a in _args if a not in ("--out", "--set")]
 DB = _args[0] if _args else str(ROOT / "data" / "mealmeter.duckdb")
 SHELF = ROOT / "data" / "eval" / "shelf_check.csv"
 SHELF_HEADER = ["recept", "trgovina", "sastojak", "alat_proizvod", "alat_cijena", "polica_proizvod", "polica_cijena",
@@ -62,27 +64,63 @@ SCENARIOS = [
 ]
 
 
+# Korak 5B: tri recepta u tri grada; bolonjez bez količine parmezana i soli (pretpostavke)
+BOLONJEZ_5B = [
+    {"name": "špageti", "amount": 400, "unit": "g"}, {"name": "mljeveno meso", "amount": 500, "unit": "g"},
+    {"name": "rajčica", "amount": 700, "unit": "g", "form": "pasirana"}, {"name": "luk", "amount": 1, "unit": "kom"},
+    {"name": "maslinovo ulje", "amount": 30, "unit": "ml"}, {"name": "parmezan"}, {"name": "sol"},
+    {"name": "lovorov list", "amount": 2, "unit": "list"}, {"name": "origano"},
+]
+VARIVO = [
+    {"name": "grašak", "amount": 800, "unit": "g", "form": "smrznuto"}, {"name": "luk", "amount": 1, "unit": "kom"},
+    {"name": "mrkva", "amount": 2, "unit": "kom"}, {"name": "krumpir", "amount": 2, "unit": "kom"},
+    {"name": "brašno glatko", "amount": 20, "unit": "g"}, {"name": "mljevena paprika", "amount": 5, "unit": "g"},
+    {"name": "dimljena kobasica", "amount": 400, "unit": "g"}, {"name": "ulje", "amount": 30, "unit": "ml"},
+    {"name": "sol", "amount": 5, "unit": "g"}, {"name": "papar", "amount": 1, "unit": "g"},
+]
+HAVE = ["sol", "papar", "ulje"]
+SCENARIOS_5B = [
+    (f"{title}, {city}", recipe, "plan_basket", {"ingredients": ing, "city": city, "already_have": HAVE})
+    for city in ("Osijek", "Zagreb", "Slavonski Brod")
+    for title, recipe, ing in (("Palačinke", "palacinke", PALACINKE), ("Bolonjez", "bolonjez", BOLONJEZ_5B),
+                               ("Varivo od graška", "varivo", VARIVO))
+] + [("Varivo od graška bez oblika graška, Slavonski Brod", None, "plan_basket",
+      {"ingredients": [{"name": "grašak", "amount": 800, "unit": "g"}] + VARIVO[1:], "city": "Slavonski Brod",
+       "already_have": HAVE})]
+if SET == "5b":
+    SCENARIOS = SCENARIOS_5B
+
+
 def eur(x) -> str:
     return "-" if x is None else f"{x:.2f}".replace(".", ",")
 
 
 def store_line(s: dict) -> str:
-    where = f"{s['chain']}, {s['address'] or 'nacionalno'}"
-    if (s.get("n_stores") or 1) > 1:
-        where += f" (+{s['n_stores'] - 1} istog lanca)"
-    return f"{where}: za kupiti {eur(s['total_to_buy'])} €, utrošeno {eur(s['total_used'])} €, {s['n_matched']} sastojaka"
+    if "addresses" in s and "n_stores_city" in s:  # redak usporedbe (comparison)
+        where = f"{s['chain']} ({s['n_stores_city']} trg.; {'; '.join(s['addresses']) or 'nacionalno'})"
+    else:
+        where = f"{s['chain']}, {s.get('address') or 'nacionalno'}"
+        if (s.get("n_stores") or 1) > 1:
+            where += f" (+{s['n_stores'] - 1} istog lanca)"
+    extra = f", iz zalihe {eur(s['from_stock_value'])} €" if s.get("from_stock_value") else ""
+    return (f"{where}: za kupiti {eur(s['total_to_buy'])} €, utrošeno {eur(s['total_used'])} €{extra}, "
+            f"{s['n_matched']}/{s.get('n_ingredients', '?')}")
 
 
 def item_line(it: dict) -> str:
     extra = [x for x in ("imam" if it.get("have") else "", it.get("match_quality") or "",
                          "korisnik" if it.get("user_provided") else "", ",".join(it.get("flags") or []),
-                         f"zamjena za {it['substitution']['requested']}" if it.get("substitution") else "",
+                         (f"zamjena za {it['substitution']['requested']}"
+                          + (f": {it['substitution']['note']}" if it['substitution'].get('note') else ""))
+                         if it.get("substitution") else "",
+                         "POTVRDA" if it.get("needs_confirmation") else "",
                          "; ".join(it.get("notes") or [])) if x]
     line = (f"{it['ingredient']}: {it['name']} ({it['pack_size'] or '-'}"
             f"{' x' + str(it['n_packs']) if (it.get('n_packs') or 1) > 1 else ''}) {eur(it['cost_pack'])} / "
             f"{eur(it['cost_used'])} €" + (f" [{'; '.join(extra)}]" if extra else ""))
     alts = [f"{a['name']} {eur(a['cost_pack'])} € ({eur(a['delta_eur'])}"
-            + (f", {a['note']}" if a.get("note") else "") + (f", {a['chain']}" if a.get("other_store") else "") + ")"
+            + (f", {a['note']}" if a.get("note") else "") + (f", {a['chain']}" if a.get("other_store") else "")
+            + (f"; {a['size_note']}" if a.get("size_note") else "") + ")"
             for a in it.get("alternatives") or []]
     if alts:
         line += " — alternative: " + "; ".join(alts)
@@ -97,11 +135,19 @@ def summarize(title: str, size: int, detail_size: int, out: dict) -> list[str]:
     best = out.get("best_store")
     if best:
         lines += ["", f"Najbolja: {store_line(best)}", ""] + [f"- {item_line(it)}" for it in best["items"]]
-    if out.get("other_stores"):
-        lines += ["", "Ostale: " + " | ".join(store_line(s) for s in out["other_stores"])]
+    if out.get("comparison"):
+        lines += ["", "Usporedba: " + " | ".join(store_line(s) for s in out["comparison"])]
+    if out.get("more_chains"):
+        lines += ["", "Još lanaca s >= 80 % sastojaka: " + ", ".join(
+            f"{m['chain']} {eur(m['total_to_buy'])} € ({m['n_matched']})" for m in out["more_chains"])]
+    if out.get("incomplete"):
+        lines += ["", "Nepotpuni: " + "; ".join(f"{i['chain']} ({i['note']})" for i in out["incomplete"])]
+    if out.get("assumptions"):
+        lines += ["", "Pretpostavke: " + "; ".join(f"{a['ingredient']}: {a['text']}" for a in out["assumptions"])]
     for q in out.get("ask_user") or []:
         lines += ["", f"Pitanje: {q['question']} " + ", ".join(
-            f"{o['form']} {eur(o['price_eur'])} € ({o['price_note']})" for o in q["options"])]
+            f"{o['form']} {o.get('amount', '?'):g} {o.get('unit', '')} {eur(o['price_eur'])} €" for o in q["options"])
+            + f" ({q['options'][0]['price_note']})"]
     for u in out.get("unmatched") or []:
         lines += ["", f"Nije pronađeno: {u['name']}: {u['reason']}; prijedlozi: {', '.join(u.get('suggestions') or []) or '-'}"]
     if out.get("warnings"):
