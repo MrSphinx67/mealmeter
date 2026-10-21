@@ -107,3 +107,42 @@ def test_merge_same_chain(con4b):
     res = plan_basket(PANCAKES, "Osijek", con=con4b)
     assert all(s["n_stores"] >= 1 and len(s["addresses"]) <= 3 for s in res["stores"])
     assert sum(1 for s in res["stores"] if s["chain"] == "konzum" and s["scope"] == "local") <= 1
+
+
+# --- 3. nove namirnice: čokoladni namaz i džem ----------------------------------------------------------
+
+@pytest.mark.parametrize("key,name,expected", [
+    ("cokoladni_namaz", "NUTELLA 750 g", "match"),
+    ("cokoladni_namaz", "NAMAZ NUTELLA 750 g", "match"),
+    ("cokoladni_namaz", "Krema od lješnjaka 150g Zigante", "match"),
+    ("cokoladni_namaz", "NAMAZ OD LJEŠNJAKA NUTRITELLA ORGANSKI 400 g", "match"),
+    ("cokoladni_namaz", "LINO LADA GOLD 350g", "match"),
+    ("cokoladni_namaz", "NUTELLA BISCUITS 304g", "excluded"),
+    ("cokoladni_namaz", "NAPITAK NUTELLA 250 ml", "excluded"),
+    ("cokoladni_namaz", "TORTA NUTELLA 500 g", "excluded"),
+    ("cokoladni_namaz", "SLADOLED NUTELLA CUP 470ml", "excluded"),
+    ("dzem", "DŽEM MARELICA 670 g PODRAVKA", "match"),
+    ("dzem", "PEKMEZ OD ŠLJIVA 350g PODRAVKA", "match"),
+    ("dzem", "MARMELADA NARANČA 450 g", "match"),
+    ("dzem", "KRAFNA S DŽEMOM 80 g RADNIK", None),
+    ("dzem", "KEKSI S DŽEMOM 200 g", None),
+])
+def test_new_staples_rules(key, name, expected):
+    from mealmeter.staples import load_staples, name_match
+
+    assert name_match(load_staples()[key], name) == expected
+
+
+def test_new_staples_resolve_and_density():
+    from mealmeter import units
+    from mealmeter.basket import resolve_name, to_base
+
+    assert resolve_name("nutella")[0].key == "cokoladni_namaz"
+    assert resolve_name("namaz od lješnjaka")[0].key == "cokoladni_namaz"
+    assert resolve_name("pekmez")[0].key == "dzem" and resolve_name("marmelada")[0].key == "dzem"
+    dens = units.load_units().densities
+    assert dens["cokoladni_namaz"] == 1.2 and dens["dzem"] == 1.3
+    raw = __import__("yaml").safe_load(units.UNITS_PATH.read_text(encoding="utf-8"))["densities"]
+    assert raw["cokoladni_namaz"]["estimate"] is True and raw["dzem"]["estimate"] is True
+    g, unit, warn = to_base(2, "žlica", resolve_name("džem")[0])
+    assert unit == "g" and g == pytest.approx(39) and "procjena" in warn[0]

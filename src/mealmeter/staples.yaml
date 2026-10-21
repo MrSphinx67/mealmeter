@@ -1503,3 +1503,40 @@ voda:
   unit: l
   disabled: true
   loose_produce: false
+
+# Korak 4B: namazi za palačinke i kruh
+cokoladni_namaz:
+  name: čokoladni namaz (lješnjak i kakao)
+  synonyms: [čokoladni namaz, cokoladni namaz, nutella, nutela, lijeska krema, lješnjak krema, namaz od lješnjaka,
+             krema od lješnjaka, lino lada]
+  # Lino Lada je najčešći domaći čokoladni namaz (uz Nutellu)
+  must_match: [nutell, cokoladni namaz, namaz od ljesnjak, krema od ljesnjak, lijeska krema, ljesnjak krema,
+               lino lada, linolada]
+  must_not_match: [napitak, keks, torta, sladoled, biscuit, biscu\b, b ready, croissant, kroasan, muffin, vafel,
+                   punjen, krafn, pillows, cokolada\b, rolic, go\b, go t, cup\b, kolac, pecivo]
+  unit: kg
+  min_pack: 150
+  max_pack: 1500
+  loose_produce: false
+
+dzem:
+  name: džem / marmelada / pekmez
+  synonyms: [džem, dzem, marmelada, pekmez]
+  must_match: [dzem\b, marmelad, pekmez]
+  must_not_match: [krafn, dzemom, dzemfix, punjen, kroasan, croissant, keks, vafel, torta, palacink, sladoled,
+                   jogurt, rolat, napitak, pecivo, kolac, strudl, stapic]
+  unit: kg
+  min_pack: 150
+  max_pack: 1000
+  attributes:
+    vrsta:
+      marelica: '\bmarelic'
+      sipak: '\bsipak'
+      jagoda: '\bjagod'
+      visnja: '\bvisnj'
+      sljiva: '\bsljiv'
+      malina: '\bmalin'
+      borovnica: '\bborovnic'
+      smokva: '\bsmokv'
+      mijesano: '\bmijesan|\bsumsko'
+  loose_produce: false

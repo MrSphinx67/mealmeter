@@ -54,6 +54,9 @@ densities:  # g/ml; u komentaru: 1 žlica (15 ml) / 1 žličica (5 ml) / 1 šali
   dodatak_jelima: {g_per_ml: 0.90, estimate: true}    # Vegeta; žličica ≈ 4,5 g
   zobene_pahuljice: {g_per_ml: 0.36, estimate: true}  # šalica ≈ 90 g
   persin: {g_per_ml: 0.25, estimate: true}            # sjeckani list; žlica ≈ 4 g
+  # Korak 4B, procjene (nisu izmjerene)
+  cokoladni_namaz: {g_per_ml: 1.20, estimate: true}   # žlica ≈ 18 g
+  dzem: {g_per_ml: 1.30, estimate: true}              # žlica ≈ 20 g
 
 pieces:  # g po komadu (srednje veliki, neočišćen, kakav se kupuje)
   persin: {g: 50, piece: vezica, estimate: true}  # vezica peršina bez težine
