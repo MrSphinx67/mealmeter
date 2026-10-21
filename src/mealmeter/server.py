@@ -114,7 +114,10 @@ def _open(path) -> duckdb.DuckDBPyConnection:
     """Read-only baza kao ATTACH u novoj instanci u memoriji. duckdb.connect(putanja) bi vratio već otvorenu
     instancu iste putanje (predmemorija instanci po procesu), pa bi poslužitelj nakon zamjene datoteke i dalje
     čitao staru; ovako je svaka zamjena nova instanca. Kursori trebaju USE (vidi _con)."""
-    con = duckdb.connect(":memory:")
+    # ograničenje memorije DuckDB-a (međuspremnik blokova); veći upiti se prelijevaju na disk (Korak 5P)
+    # i broj dretvi (manje dretvi = manje alokatorskih arena po dretvi, manji RSS; upiti su mali)
+    con = duckdb.connect(":memory:", config={"memory_limit": os.environ.get("MM_DUCKDB_MEMORY", "300MB"),
+                                             "threads": int(os.environ.get("MM_DUCKDB_THREADS", "2"))})
     con.execute(f"ATTACH '{str(path).replace(chr(39), chr(39) * 2)}' AS {_DB_ALIAS} (READ_ONLY)")
     con.execute(f"USE {_DB_ALIAS}")
     return con
@@ -146,9 +149,18 @@ def _con() -> duckdb.DuckDBPyConnection:
     return _local.cur
 
 
+_date_cache: dict = {"owner": None, "value": None}
+
+
 def _price_list_date(con) -> dict:
-    d = con.execute("SELECT max(date) FROM clean.prices").fetchone()[0]
-    return {"date": d.isoformat(), "date_hr": date_hr(d)} if d else {"date": None, "date_hr": None}
+    """Datum cjenika (max date). Pamti se po vezi baze: mijenja se tek kad se datoteka zamijeni (nova veza), a
+    na sažetoj bazi max(date) preko view-a clean.prices traje ~0,3 s (Korak 5P)."""
+    owner = getattr(_local, "owner", None) if getattr(_local, "cur", None) is con else con
+    if _date_cache["owner"] is not owner or owner is None:
+        d = con.execute("SELECT max(date) FROM clean.prices").fetchone()[0]
+        _date_cache.update(owner=owner, value={"date": d.isoformat(), "date_hr": date_hr(d)} if d
+                           else {"date": None, "date_hr": None})
+    return dict(_date_cache["value"])
 
 
 def _dumps(obj) -> str:
@@ -614,7 +626,7 @@ def health() -> tuple[int, dict]:
 
     try:
         con = _con()
-        db_date = con.execute("SELECT max(date) FROM clean.prices").fetchone()[0]
+        db_date = _price_list_date(con)["date"]
         ts = None
         try:
             updated, loaded = con.execute(
@@ -626,7 +638,7 @@ def health() -> tuple[int, dict]:
     except Exception:  # noqa: BLE001
         return 503, {"status": "error", "db_date": None, "db_age_hours": None, "version": version()}
     status = "ok" if age is None or age <= HEALTH_MAX_AGE_HOURS else "stale"
-    return 200, {"status": status, "db_date": db_date.isoformat() if db_date else None, "db_age_hours": age,
+    return 200, {"status": status, "db_date": db_date, "db_age_hours": age,
                  "version": version()}
 
 
