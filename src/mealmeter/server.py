@@ -15,6 +15,7 @@ import functools
 import inspect
 import json
 import os
+import re
 import threading
 import time
 from collections import defaultdict, deque
@@ -22,6 +23,7 @@ from typing import Annotated, Any
 
 import duckdb
 from mcp.server.mcpserver import MCPServer
+from mcp.server.transport_security import TransportSecuritySettings
 from mcp.types import CallToolResult, TextContent, ToolAnnotations
 from pydantic import Field
 
@@ -501,10 +503,85 @@ class RateLimit:
         await send({"type": "http.response.body", "body": body})
 
 
+# --- HTTP: Host/Origin (DNS rebinding) ----------------------------------------------------------------------
+
+LOCAL_HOSTS = ("127.0.0.1", "localhost", "[::1]", "::1")
+LOCAL_ORIGINS = ("http://127.0.0.1:*", "http://localhost:*", "http://[::1]:*")
+
+
+def _match(value: str, pattern: str) -> bool:
+    """Obrazac s * (bilo koji niz znakova); sve ostalo doslovno ("[::1]" nije skup znakova kao u fnmatch)."""
+    return re.fullmatch(".*".join(re.escape(part) for part in pattern.split("*")), value) is not None
+
+
+def _split_env(name: str) -> list[str]:
+    return [p.strip() for p in os.environ.get(name, "").split(",") if p.strip()]
+
+
+class HostGuard:
+    """ASGI: zaštita od DNS rebindinga s obrascima hostova. SDK (TransportSecuritySettings) zna samo točne
+    vrijednosti i "host:*" (bilo koji port), pa za tunel ("*.trycloudflare.com") njegovu provjeru gasimo i
+    provjeravamo ovdje: Host bez porta mora pogoditi lokalni host ili obrazac iz MM_ALLOWED_HOSTS (* je bilo koji
+    niz, "*.trycloudflare.com"), inače 421; Origin, ako ga ima, lokalni ili iz MM_ALLOWED_ORIGINS, inače 403."""
+
+    def __init__(self, app, allowed_hosts: list[str] | None = None, allowed_origins: list[str] | None = None):
+        self.app = app
+        hosts = allowed_hosts if allowed_hosts is not None else _split_env("MM_ALLOWED_HOSTS")
+        origins = allowed_origins if allowed_origins is not None else _split_env("MM_ALLOWED_ORIGINS")
+        self.hosts = [h.lower() for h in (*LOCAL_HOSTS, *hosts)]
+        self.origins = [o.lower().rstrip("/") for o in (*LOCAL_ORIGINS, *origins)]
+
+    @staticmethod
+    def _hostname(host: str) -> str:
+        host = host.strip().lower()
+        if host.startswith("["):  # [::1]:8000
+            return host.split("]")[0] + "]"
+        return host.rsplit(":", 1)[0] if host.count(":") == 1 else host
+
+    def host_ok(self, host: str | None) -> bool:
+        if not host:
+            return False
+        name = self._hostname(host)
+        return any(_match(name, p) or _match(host.strip().lower(), p) for p in self.hosts)
+
+    def origin_ok(self, origin: str | None) -> bool:
+        if not origin:  # klijenti izvan preglednika ne šalju Origin
+            return True
+        origin = origin.lower().rstrip("/")
+        return any(_match(origin, p) or (p.endswith(":*") and _match(origin, p[:-2])) for p in self.origins)
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            return await self.app(scope, receive, send)
+        headers = {k.lower(): v.decode("latin-1") for k, v in scope.get("headers") or []}
+        if not self.host_ok(headers.get(b"host")):
+            return await _text(send, 421, "Invalid Host header (MM_ALLOWED_HOSTS)")
+        if not self.origin_ok(headers.get(b"origin")):
+            return await _text(send, 403, "Invalid Origin header (MM_ALLOWED_ORIGINS)")
+        return await self.app(scope, receive, send)
+
+
+async def _text(send, status: int, text: str, content_type: bytes = b"text/plain; charset=utf-8"):
+    body = text.encode("utf-8")
+    await send({"type": "http.response.start", "status": status,
+                "headers": [(b"content-type", content_type), (b"content-length", str(len(body)).encode())]})
+    await send({"type": "http.response.body", "body": body})
+
+
+def http_app(server: MCPServer, host: str = "127.0.0.1", allowed_hosts: list[str] | None = None,
+             allowed_origins: list[str] | None = None):
+    """ASGI aplikacija za HTTP način: MCP na /mcp (streamable HTTP, bez sesija, JSON odgovori), zatim
+    HostGuard (Host/Origin) i RateLimit. SDK-ova provjera Hosta je ugašena jer je zamjenjuje HostGuard."""
+    app = server.streamable_http_app(
+        stateless_http=True, json_response=True, max_request_body_size=MAX_REQUEST_BYTES, host=host,
+        transport_security=TransportSecuritySettings(enable_dns_rebinding_protection=False))
+    return HostGuard(RateLimit(app), allowed_hosts, allowed_origins)
+
+
 def main(argv: list[str] | None = None) -> None:
     ap = argparse.ArgumentParser(description="Mealmeter MCP poslužitelj")
     ap.add_argument("--http", action="store_true", help="streamable HTTP umjesto stdio")
-    ap.add_argument("--host", default="127.0.0.1")
+    ap.add_argument("--host", default="127.0.0.1", help="adresa slušanja (zadano 127.0.0.1; tunel spaja lokalno)")
     ap.add_argument("--port", type=int, default=8000)
     ap.add_argument("--db", default=None, help="putanja baze (inače MEALMETER_DB ili data/mealmeter.duckdb)")
     args = ap.parse_args(argv)
@@ -514,9 +591,7 @@ def main(argv: list[str] | None = None) -> None:
         return
     import uvicorn
 
-    app = server.streamable_http_app(stateless_http=True, json_response=True, max_request_body_size=MAX_REQUEST_BYTES,
-                                     host=args.host)
-    uvicorn.run(RateLimit(app), host=args.host, port=args.port, log_level="info")
+    uvicorn.run(http_app(server, args.host), host=args.host, port=args.port, log_level="info")
 
 
 if __name__ == "__main__":

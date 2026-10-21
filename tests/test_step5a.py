@@ -44,3 +44,97 @@ def test_egg_size_in_quotes(name, size):
 
 def test_milk_lower_bound():
     assert load_staples()["mlijeko"].plausible_per_unit == (0.3, 4)
+
+
+# --- 1. HTTP: Host zaglavlje tunela -------------------------------------------------------------------------
+
+import asyncio  # noqa: E402
+import json  # noqa: E402
+
+INIT = {"jsonrpc": "2.0", "id": 1, "method": "initialize",
+        "params": {"protocolVersion": "2025-06-18", "capabilities": {},
+                   "clientInfo": {"name": "test", "version": "0"}}}
+
+
+async def _request(app, method, path, host, body=None, origin=None, client=("10.0.0.1", 1)):
+    headers = [(b"host", host.encode())]
+    if body is not None:
+        headers += [(b"content-type", b"application/json"), (b"accept", b"application/json, text/event-stream")]
+    if origin:
+        headers.append((b"origin", origin.encode()))
+    data = json.dumps(body).encode() if body is not None else b""
+    headers.append((b"content-length", str(len(data)).encode()))
+    sent, done = [], False
+
+    async def receive():
+        nonlocal done
+        if done:
+            await asyncio.sleep(3600)
+        done = True
+        return {"type": "http.request", "body": data, "more_body": False}
+
+    async def send(msg):
+        sent.append(msg)
+
+    scope = {"type": "http", "method": method, "path": path, "raw_path": path.encode(), "query_string": b"",
+             "headers": headers, "client": client, "server": ("127.0.0.1", 8000), "scheme": "http",
+             "http_version": "1.1", "root_path": ""}
+    await app(scope, receive, send)
+    start = next(m for m in sent if m["type"] == "http.response.start")
+    body_bytes = b"".join(m.get("body", b"") for m in sent if m["type"] == "http.response.body")
+    return start["status"], body_bytes
+
+
+def _inner(app):
+    while hasattr(app, "app"):
+        app = app.app
+    return app
+
+
+def run_http(app, calls):
+    async def go():
+        starlette_app = _inner(app)
+        async with starlette_app.router.lifespan_context(starlette_app):
+            return [await _request(app, *c) for c in calls]
+    return asyncio.run(go())
+
+
+def test_tunnel_host_accepted(con):
+    from mealmeter import server as srv
+
+    app = srv.http_app(srv.create_server(con=con), allowed_hosts=["*.trycloudflare.com"], allowed_origins=[])
+    out = run_http(app, [
+        ("POST", "/mcp", "example.trycloudflare.com", INIT),
+        ("POST", "/mcp", "example.trycloudflare.com", {"jsonrpc": "2.0", "id": 2, "method": "tools/list"}),
+        ("POST", "/mcp", "evil.example.com", INIT),
+        ("POST", "/mcp", "127.0.0.1:8000", INIT),
+        ("POST", "/mcp", "example.trycloudflare.com", INIT, "https://evil.example.com"),
+    ])
+    assert out[0][0] == 200 and json.loads(out[0][1])["result"]["serverInfo"]["name"] == "mealmeter"
+    assert out[1][0] == 200 and len(json.loads(out[1][1])["result"]["tools"]) == 6
+    assert out[2] == (421, b"Invalid Host header (MM_ALLOWED_HOSTS)")
+    assert out[3][0] == 200  # lokalno uvijek
+    assert out[4][0] == 403
+
+
+def test_sdk_default_would_reject_tunnel(con):
+    """Zašto HostGuard: SDK uz host=127.0.0.1 sam uključi zaštitu i pušta samo localhost (421)."""
+    from mealmeter import server as srv
+
+    server = srv.create_server(con=con)
+    app = server.streamable_http_app(stateless_http=True, json_response=True, host="127.0.0.1")
+    status, body = run_http(app, [("POST", "/mcp", "example.trycloudflare.com", INIT)])[0]
+    assert status == 421 and b"Invalid Host header" in body
+
+
+def test_host_guard_patterns(monkeypatch):
+    from mealmeter.server import HostGuard
+
+    monkeypatch.setenv("MM_ALLOWED_HOSTS", "mealmeter.example.hr, *.trycloudflare.com")
+    monkeypatch.setenv("MM_ALLOWED_ORIGINS", "https://claude.ai")
+    g = HostGuard(None)
+    assert g.host_ok("abc-def.trycloudflare.com") and g.host_ok("abc.trycloudflare.com:443")
+    assert g.host_ok("mealmeter.example.hr") and g.host_ok("localhost:8000") and g.host_ok("[::1]:8000")
+    assert not g.host_ok("trycloudflare.com.evil.net") and not g.host_ok("evil.com") and not g.host_ok(None)
+    assert g.origin_ok(None) and g.origin_ok("https://claude.ai") and g.origin_ok("http://localhost:6274")
+    assert not g.origin_ok("https://evil.example.com")
