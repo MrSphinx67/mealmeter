@@ -8,7 +8,7 @@
 | 2 | gotovo |
 | 3 | gotovo |
 | 4 | gotovo |
-| 5 | gotovo (README hr/en, docs/claude_desktop_config.json) |
-| REVIEW_4 | u radu |
+| 5 | gotovo |
+| REVIEW_4 | gotovo (docs/REVIEW_4.md, 76 redaka) |
 
-Sljedeće: docs/REVIEW_4.md, zatim stop (bez hostinga).
+Korak 4 je završen. Sljedeće: hosting (nije započeto, čeka upute).
