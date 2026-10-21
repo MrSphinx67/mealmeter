@@ -492,9 +492,10 @@ jaja:
                    krem\b, sendvic, salata, pasteta, namaz, jaja s\b, sa jajima, s jajima,
                    obuc, folij, termoskup, stolic, glazben, igr]
   unit: kom
-  # granice po uzgoju (Korak 2D, vlasnik): bio 0,30-1,00 €/kom, ostali 0,15-0,55 €/kom
+  # granice po uzgoju (Korak 2D, vlasnik): bio 0,30-1,00 €/kom; ostali 0,10-0,55 €/kom (Korak 4B: Lidlova
+  # jaja S i kavezna po 0,10-0,14 €/kom su stvarne cijene, ne greška gramature)
   plausible_by:
-    uzgoj: {bio: [0.30, 1.00], _other: [0.15, 0.55]}
+    uzgoj: {bio: [0.30, 1.00], _other: [0.10, 0.55]}
   max_pack: 30
   min_pack: 4
   group_by: [velicina, uzgoj]

@@ -193,3 +193,30 @@ def test_lidl_multipack_in_build(tmp_path):
     assert not c.execute("""SELECT bool_or(unit_suspect) FROM clean.product_staples
                             WHERE chain = 'lidl' AND product_id IN ('D1', 'D2')""").fetchone()[0]
     c.close()
+
+
+# --- 5. jaja: granice cijene ---------------------------------------------------------------------------
+
+def test_egg_bounds():
+    from mealmeter.staples import load_staples
+
+    st = load_staples()["jaja"]
+    assert st.plausible_by == {"uzgoj": {"bio": (0.30, 1.00), "_other": (0.10, 0.55)}}
+
+
+def test_cheap_eggs_not_suspect(tmp_path):
+    """Lidl "Jaja iz kaveznog uzgoja, razred S" 10 kom za 0,99 € (1,19 € je u granicama, 0,89 € nije)."""
+    c = duckdb.connect(str(tmp_path / "e.duckdb"))
+    load_raw(c, FIXTURE, "2026-10-19")
+    c.execute("""INSERT INTO products (chain, product_id, barcode, name, category, unit) VALUES
+                 ('lidl', 'E1', '4056489000011', 'Jaja iz kaveznog uzgoja, razred "S"', 'Jaja', '10komad'),
+                 ('lidl', 'E2', '4056489000012', 'Jaja iz kaveznog uzgoja, razred M', 'Jaja', '10komad'),
+                 ('lidl', 'E3', '4056489000013', 'BIO jaja razred M', 'Jaja', '10komad')""")
+    c.execute("""INSERT INTO prices (chain, store_id, product_id, price, date) VALUES
+                 ('lidl', '105', 'E1', 1.19, DATE '2026-10-19'), ('lidl', '105', 'E2', 0.89, DATE '2026-10-19'),
+                 ('lidl', '105', 'E3', 1.19, DATE '2026-10-19')""")
+    build_clean(c)
+    flags = dict(c.execute("""SELECT product_id, unit_suspect FROM clean.product_staples
+                              WHERE chain = 'lidl' AND product_id IN ('E1', 'E2', 'E3') AND staple = 'jaja'""").fetchall())
+    assert flags == {"E1": False, "E2": True, "E3": True}  # 0,119 u granicama; 0,089 ispod 0,10; bio 0,119 < 0,30
+    c.close()
