@@ -16,3 +16,6 @@ __pycache__/
 .venv/
 .pytest_cache/
 .vercel/
+.vercel
+.env*
+_uv/
