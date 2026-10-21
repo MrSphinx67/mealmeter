@@ -157,3 +157,35 @@ def test_healthz_and_home(con):
     for word in ("cijene.dev", "DobarKod", "Privatnost", "Privacy", "nije zaliha", "not stock", "Konektori"):
         assert word in page, word
     assert bs == 421
+
+
+# --- 4. logiranje bez sadržaja upita i punih IP adresa ---------------------------------------------------
+
+def test_logs_without_content_or_ip(con, caplog):
+    import logging
+
+    from mealmeter import server as srv
+
+    caplog.set_level(logging.DEBUG)
+    app = srv.http_app(srv.create_server(con=con), allowed_hosts=["*.trycloudflare.com"], allowed_origins=[])
+    call = {"jsonrpc": "2.0", "id": 3, "method": "tools/call",
+            "params": {"name": "plan_basket", "arguments": {
+                "ingredients": [{"name": "TAJNISASTOJAK", "amount": 1, "unit": "g"}], "city": "Osijek"}}}
+    before = srv.TOOL_CALLS[("plan_basket", "ok")]
+    out = run_http(app, [("POST", "/mcp", "example.trycloudflare.com", INIT, None, ("203.0.113.77", 5)),
+                         ("POST", "/mcp", "example.trycloudflare.com", call, None, ("203.0.113.77", 5))])
+    assert [s for s, _ in out] == [200, 200]
+    text = "\n".join(r.getMessage() for r in caplog.records)
+    assert "TAJNISASTOJAK" not in text and "Osijek" not in text and "203.0.113.77" not in text
+    assert "tool=plan_basket status=ok" in text and "ip=203.0.113.x" in text and "http POST /mcp status=200" in text
+    assert srv.TOOL_CALLS[("plan_basket", "ok")] == before + 1
+
+
+def test_anon_ip_and_no_access_log():
+    import inspect
+
+    from mealmeter import server as srv
+
+    assert srv.anon_ip("203.0.113.77") == "203.0.113.x" and srv.anon_ip("2001:db8:1:2::5") == "2001:db8:1::x"
+    assert srv.anon_ip(None) == "?"
+    assert "access_log=False" in inspect.getsource(srv.main)

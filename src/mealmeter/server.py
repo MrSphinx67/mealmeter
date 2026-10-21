@@ -14,11 +14,12 @@ import argparse
 import functools
 import inspect
 import json
+import logging
 import os
 import re
 import threading
 import time
-from collections import defaultdict, deque
+from collections import Counter, defaultdict, deque
 from typing import Annotated, Any
 
 import duckdb
@@ -396,13 +397,27 @@ Primjer / example: {}""",
 TOOLS = (find_products, get_prices, plan_basket, list_stores, convert_units, list_staples)
 
 
+log = logging.getLogger("mealmeter")
+# broj poziva po alatu i statusu ("ok" | "error" | "exception"), od pokretanja procesa
+TOOL_CALLS: Counter = Counter()
+
+
 def _as_result(fn):
     """Alat vraća CallToolResult sa sažetim JSON-om (bez uvlačenja i bez dvostrukog structured_content),
-    tako da je ograničenje MAX_RESPONSE_BYTES stvarna veličina odgovora; {"error": ...} je isError."""
+    tako da je ograničenje MAX_RESPONSE_BYTES stvarna veličina odgovora; {"error": ...} je isError.
+    Zapisuje samo naziv alata, status, trajanje i veličinu odgovora, nikad argumente (sadržaj upita)."""
     @functools.wraps(fn)
     def wrapper(*args, **kwargs) -> CallToolResult:
-        out = fn(*args, **kwargs)
-        return CallToolResult(content=[TextContent(type="text", text=_dumps(out))], is_error="error" in out)
+        start, status = time.perf_counter(), "exception"
+        try:
+            out = fn(*args, **kwargs)
+            status = "error" if "error" in out else "ok"
+            text = _dumps(out)
+            return CallToolResult(content=[TextContent(type="text", text=text)], is_error="error" in out)
+        finally:
+            TOOL_CALLS[(fn.__name__, status)] += 1
+            log.info("tool=%s status=%s ms=%d calls=%d", fn.__name__, status, (time.perf_counter() - start) * 1000,
+                     sum(n for (t, _), n in TOOL_CALLS.items() if t == fn.__name__))
 
     wrapper.__signature__ = inspect.signature(fn).replace(return_annotation=CallToolResult)
     wrapper.__annotations__ = {**fn.__annotations__, "return": CallToolResult}
@@ -646,6 +661,43 @@ def home(host: str | None, proto: str | None = None) -> str:
                             version=html.escape(h["version"]))
 
 
+def anon_ip(ip: str | None) -> str:
+    """IP bez zadnjeg dijela: IPv4 /24 ("203.0.113.x"), IPv6 /48 ("2001:db8:1::x")."""
+    if not ip:
+        return "?"
+    if ":" in ip:
+        return ":".join(ip.split(":")[:3]) + "::x"
+    parts = ip.split(".")
+    return ".".join(parts[:3]) + ".x" if len(parts) == 4 else "?"
+
+
+class RequestLog:
+    """ASGI: jedan redak po HTTP zahtjevu (metoda, putanja bez upita, status, trajanje, skraćeni IP).
+    Tijelo zahtjeva (sadržaj upita) i query string se ne zapisuju; zamjenjuje uvicornov access log."""
+
+    def __init__(self, app, trusted_proxy: bool | None = None):
+        self.app = app
+        self.ip = RateLimit(None, trusted_proxy=trusted_proxy).client_ip
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] != "http":
+            return await self.app(scope, receive, send)
+        start, status = time.perf_counter(), 500
+
+        async def send_status(msg):
+            nonlocal status
+            if msg["type"] == "http.response.start":
+                status = msg["status"]
+            await send(msg)
+
+        try:
+            await self.app(scope, receive, send_status)
+        finally:
+            headers = {k.lower(): v for k, v in scope.get("headers") or []}
+            log.info("http %s %s status=%d ms=%d ip=%s", scope.get("method"), scope.get("path"), status,
+                     (time.perf_counter() - start) * 1000, anon_ip(self.ip(scope, headers)))
+
+
 def http_app(server: MCPServer, host: str = "127.0.0.1", allowed_hosts: list[str] | None = None,
              allowed_origins: list[str] | None = None):
     """ASGI aplikacija za HTTP način: MCP na /mcp (streamable HTTP, bez sesija, JSON odgovori), zatim
@@ -666,7 +718,7 @@ def http_app(server: MCPServer, host: str = "127.0.0.1", allowed_hosts: list[str
         return HTMLResponse(home(request.headers.get("host"), request.headers.get("x-forwarded-proto")))
 
     app.router.routes[:0] = [Route("/healthz", healthz, methods=["GET"]), Route("/", index, methods=["GET"])]
-    return HostGuard(RateLimit(app), allowed_hosts, allowed_origins)
+    return RequestLog(HostGuard(RateLimit(app), allowed_hosts, allowed_origins))
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -682,7 +734,9 @@ def main(argv: list[str] | None = None) -> None:
         return
     import uvicorn
 
-    uvicorn.run(http_app(server, args.host), host=args.host, port=args.port, log_level="info")
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
+    # access_log=False: uvicornov access log zapisuje punu IP adresu i query string; zamjenjuje ga RequestLog
+    uvicorn.run(http_app(server, args.host), host=args.host, port=args.port, log_level="info", access_log=False)
 
 
 if __name__ == "__main__":
