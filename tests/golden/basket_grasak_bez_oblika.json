@@ -1,0 +1,112 @@
+{
+ "already_have": [],
+ "ambiguous": [
+  {
+   "ambiguity": {
+    "amounts": {
+     "konzerva": 800.0,
+     "smrznuto": 800.0,
+     "suho": 320.0
+    },
+    "form": [
+     "suho",
+     "konzerva",
+     "smrznuto"
+    ],
+    "prices": {
+     "konzerva": 1.58,
+     "smrznuto": 1.59,
+     "suho": 0.64
+    },
+    "question": "suho ili konzerva ili smrznuto?",
+    "unit": "g"
+   },
+   "amount": 800.0,
+   "name": "grašak",
+   "staple": "grasak",
+   "unit": "g"
+  }
+ ],
+ "ask_user": [
+  {
+   "ingredient": "grašak",
+   "options": [
+    {
+     "amount": 320.0,
+     "form": "suho",
+     "price_eur": 0.64,
+     "price_note": "najjeftinije u gradu, za traženu količinu gotovog proizvoda",
+     "unit": "g"
+    },
+    {
+     "amount": 800.0,
+     "form": "konzerva",
+     "price_eur": 1.58,
+     "price_note": "najjeftinije u gradu, za traženu količinu gotovog proizvoda",
+     "unit": "g"
+    },
+    {
+     "amount": 800.0,
+     "form": "smrznuto",
+     "price_eur": 1.59,
+     "price_note": "najjeftinije u gradu, za traženu količinu gotovog proizvoda",
+     "unit": "g"
+    }
+   ],
+   "question": "grašak: suho ili konzerva ili smrznuto?"
+  }
+ ],
+ "assumptions": [],
+ "best_store": null,
+ "city": "Osijek",
+ "comparison": [],
+ "date": "2026-10-20",
+ "incomplete": [
+  {
+   "chain": "eurospin",
+   "missing": [],
+   "n_matched": 0,
+   "note": "nedostaje: "
+  },
+  {
+   "chain": "kaufland",
+   "missing": [],
+   "n_matched": 0,
+   "note": "nedostaje: "
+  },
+  {
+   "chain": "konzum",
+   "missing": [],
+   "n_matched": 0,
+   "note": "nedostaje: "
+  },
+  {
+   "chain": "lidl",
+   "missing": [],
+   "n_matched": 0,
+   "note": "nedostaje: "
+  },
+  {
+   "chain": "plodine",
+   "missing": [],
+   "n_matched": 0,
+   "note": "nedostaje: "
+  },
+  {
+   "chain": "spar",
+   "missing": [],
+   "n_matched": 0,
+   "note": "nedostaje: "
+  }
+ ],
+ "ingredients": [],
+ "mode": "single_store",
+ "more_chains": [],
+ "note": "Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists (cijene.dev); in-store prices may differ, a price list is not stock, and promotions change.",
+ "stores": [],
+ "summary_hr": "Prije izračuna treba odgovor: grašak: suho ili konzerva ili smrznuto?",
+ "unmatched": [],
+ "warnings": [
+  "'grašak': suho ili konzerva ili smrznuto? (zadaj 'form'; nije uračunato)"
+ ]
+}

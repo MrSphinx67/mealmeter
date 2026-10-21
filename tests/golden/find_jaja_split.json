@@ -1,0 +1,480 @@
+{
+ "date": "2026-10-20",
+ "date_hr": "20.10.2026.",
+ "note": "Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists (cijene.dev); in-store prices may differ, a price list is not stock, and promotions change.",
+ "results": [
+  {
+   "any_special": true,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "uzgoj": {
+     "how": "default",
+     "name": "-*JAJA RAZRED M 10/1"
+    },
+    "velicina": {
+     "how": "name",
+     "name": "-*JAJA RAZRED M 10/1"
+    }
+   },
+   "attributes": {
+    "uzgoj": "nepoznato",
+    "velicina": "m"
+   },
+   "brand": "NADALINA",
+   "chains": "eurospin, kaufland, konzum, lidl, lorenco, plodine, ribola, roto, spar, tommy",
+   "compare_by": "count",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "3850334114655",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "jaja:m:nepoznato",
+   "ingredient": "jaja",
+   "match_quality": "strong",
+   "n_chains": 10,
+   "n_price_suspect": 0,
+   "n_stores": 47,
+   "name": "JAJA SVJEŽA RIAL M 10/1 AGROKOKA PULA (18)",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "10 kom",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "kom",
+   "price_max": 6.99,
+   "price_min": 0.24,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 0.4083,
+   "price_per_unit_min": 0.145,
+   "stale_days": 0,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "uzgoj": {
+     "how": "name",
+     "name": "15/1 MC JAJA PODNI UZGOJ L"
+    },
+    "velicina": {
+     "how": "name",
+     "name": "15/1 MC JAJA PODNI UZGOJ L"
+    }
+   },
+   "attributes": {
+    "uzgoj": "podni",
+    "velicina": "l"
+   },
+   "brand": "GALA",
+   "chains": "eurospin, kaufland, konzum, lidl, plodine, ribola, spar, tommy",
+   "compare_by": "count",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "3850334421173",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": false,
+   "id": "jaja:l:podni",
+   "ingredient": "jaja",
+   "match_quality": "strong",
+   "n_chains": 8,
+   "n_price_suspect": 0,
+   "n_stores": 42,
+   "name": "Perfa Sretna Jaja podni uzgoj L raz.10/1",
+   "pack": "10 kom",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "kom",
+   "price_max": 4.19,
+   "price_min": 2.79,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 0.419,
+   "price_per_unit_min": 0.186,
+   "stale_days": 0,
+   "suspect_chains": null,
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": true,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "uzgoj": {
+     "how": "name",
+     "name": "15/1 MC JAJA PODNI UZGOJ M"
+    },
+    "velicina": {
+     "how": "name",
+     "name": "15/1 MC JAJA PODNI UZGOJ M"
+    }
+   },
+   "attributes": {
+    "uzgoj": "podni",
+    "velicina": "m"
+   },
+   "brand": "GALA",
+   "chains": "eurospin, kaufland, konzum, lidl, plodine, ribola, spar, tommy",
+   "compare_by": "count",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "3850334421111",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": false,
+   "id": "jaja:m:podni",
+   "ingredient": "jaja",
+   "match_quality": "strong",
+   "n_chains": 8,
+   "n_price_suspect": 0,
+   "n_stores": 40,
+   "name": "Perfa Sretna Jaja podni uzgoj M raz.10/1",
+   "pack": "10 kom",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "kom",
+   "price_max": 5.19,
+   "price_min": 1.89,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 0.4817,
+   "price_per_unit_min": 0.15,
+   "stale_days": 0,
+   "suspect_chains": null,
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "uzgoj": {
+     "how": "default",
+     "name": "10/1 ARO JAJA A KL L"
+    },
+    "velicina": {
+     "how": "name",
+     "name": "10/1 ARO JAJA A KL L"
+    }
+   },
+   "attributes": {
+    "uzgoj": "nepoznato",
+    "velicina": "l"
+   },
+   "brand": "GALA",
+   "chains": "konzum, lidl, lorenco, plodine, ribola, roto, tommy",
+   "compare_by": "count",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "3850334114211",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "jaja:l:nepoznato",
+   "ingredient": "jaja",
+   "match_quality": "strong",
+   "n_chains": 7,
+   "n_price_suspect": 0,
+   "n_stores": 37,
+   "name": "JAJA SVJ L 10/1 SL UZGOJ AGRO-KLASTER",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "10 kom",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "kom",
+   "price_max": 3.98,
+   "price_min": 1.35,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 0.398,
+   "price_per_unit_min": 0.219,
+   "stale_days": 0,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "uzgoj": {
+     "how": "name",
+     "name": "JAJA M RAZ 10/1 SLOBODNI UZGOJ"
+    },
+    "velicina": {
+     "how": "name",
+     "name": "JAJA M RAZ 10/1 SLOBODNI UZGOJ"
+    }
+   },
+   "attributes": {
+    "uzgoj": "slobodni",
+    "velicina": "m"
+   },
+   "brand": "AGRO-KLASTER D.O.O.",
+   "chains": "eurospin, konzum, tommy",
+   "compare_by": "count",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "3857500091703",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": false,
+   "id": "jaja:m:slobodni",
+   "ingredient": "jaja",
+   "match_quality": "strong",
+   "n_chains": 3,
+   "n_price_suspect": 0,
+   "n_stores": 11,
+   "name": "JAJA SVJ M 10/1 SLOBODNI UZGOJ TOMAŽIN",
+   "pack": null,
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "kom",
+   "price_max": 3.69,
+   "price_min": 3.29,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 0.369,
+   "price_per_unit_min": 0.329,
+   "stale_days": 0,
+   "suspect_chains": null,
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "uzgoj": {
+     "how": "name",
+     "name": "JAJA M 10/1 KAVEZ BALTICOVO"
+    },
+    "velicina": {
+     "how": "name",
+     "name": "JAJA M 10/1 KAVEZ BALTICOVO"
+    }
+   },
+   "attributes": {
+    "uzgoj": "kavezni",
+    "velicina": "m"
+   },
+   "brand": "NADALINA",
+   "chains": "konzum, ribola",
+   "compare_by": "count",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "3859891701209",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": false,
+   "id": "jaja:m:kavezni",
+   "ingredient": "jaja",
+   "match_quality": "strong",
+   "n_chains": 2,
+   "n_price_suspect": 0,
+   "n_stores": 20,
+   "name": "JAJA SVJEŽA KAVEZ M 10/1 BALTICOVO",
+   "pack": null,
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "kom",
+   "price_max": 2.45,
+   "price_min": 1.99,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 0.245,
+   "price_per_unit_min": 0.199,
+   "stale_days": 0,
+   "suspect_chains": null,
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "uzgoj": {
+     "how": "default",
+     "name": "10/1 PERFA JAJA JUMBO XL"
+    },
+    "velicina": {
+     "how": "name",
+     "name": "10/1 PERFA JAJA JUMBO XL"
+    }
+   },
+   "attributes": {
+    "uzgoj": "nepoznato",
+    "velicina": "xl"
+   },
+   "brand": "AGROKOKA",
+   "chains": "plodine, tommy",
+   "compare_by": "count",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "3859889056632",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": false,
+   "id": "jaja:xl:nepoznato",
+   "ingredient": "jaja",
+   "match_quality": "strong",
+   "n_chains": 2,
+   "n_price_suspect": 0,
+   "n_stores": 10,
+   "name": "SVJEZA JAJA KLASA A RAZRED XL 10/1",
+   "pack": null,
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "kom",
+   "price_max": 3.89,
+   "price_min": 3.09,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 0.389,
+   "price_per_unit_min": 0.309,
+   "stale_days": 0,
+   "suspect_chains": null,
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "uzgoj": {
+     "how": "name",
+     "name": "Gala Jaja iz podnog uzgoja"
+    }
+   },
+   "attributes": {
+    "uzgoj": "podni"
+   },
+   "brand": "Gala",
+   "chains": "kaufland, lidl",
+   "compare_by": "count",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "3858895340025",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": false,
+   "id": "3858895340025",
+   "ingredient": "jaja",
+   "match_quality": "strong",
+   "n_chains": 2,
+   "n_price_suspect": 0,
+   "n_stores": 7,
+   "name": "Gala Jaja svj.Aklas.Mraz.podni uzgoj10/1",
+   "pack": "10 kom",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "kom",
+   "price_max": 2.99,
+   "price_min": 1.85,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 0.299,
+   "price_per_unit_min": 0.185,
+   "stale_days": 0,
+   "suspect_chains": null,
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "uzgoj": {
+     "how": "name",
+     "name": "JAJA BIO 6/1 VITA-E"
+    }
+   },
+   "attributes": {
+    "uzgoj": "bio"
+   },
+   "brand": "OPG CVETIĆ",
+   "chains": "eurospin, konzum",
+   "compare_by": "count",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "3857500131508",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": false,
+   "id": "3857500131508",
+   "ingredient": "jaja",
+   "match_quality": "strong",
+   "n_chains": 2,
+   "n_price_suspect": 0,
+   "n_stores": 3,
+   "name": "SVJEŽA JAJA RAZL. VEL. BIO 6/1",
+   "pack": null,
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "kom",
+   "price_max": 2.99,
+   "price_min": 2.79,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 0.4983,
+   "price_per_unit_min": 0.465,
+   "stale_days": 0,
+   "suspect_chains": null,
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "uzgoj": {
+     "how": "name",
+     "name": "JAJA XL RAZRED 10/1 PODNI UZGOJ T!"
+    },
+    "velicina": {
+     "how": "name",
+     "name": "JAJA XL RAZRED 10/1 PODNI UZGOJ T!"
+    }
+   },
+   "attributes": {
+    "uzgoj": "podni",
+    "velicina": "xl"
+   },
+   "brand": "T!",
+   "chains": "tommy",
+   "compare_by": "count",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "3858892944264",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": false,
+   "id": "jaja:xl:podni",
+   "ingredient": "jaja",
+   "match_quality": "strong",
+   "n_chains": 1,
+   "n_price_suspect": 0,
+   "n_stores": 8,
+   "name": "JAJA XL RAZRED 10/1 PODNI UZGOJ VRANA",
+   "pack": null,
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "kom",
+   "price_max": 4.59,
+   "price_min": 3.79,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 0.459,
+   "price_per_unit_min": 0.379,
+   "stale_days": 0,
+   "suspect_chains": null,
+   "unit_confidence": "high",
+   "unit_suspect": false
+  }
+ ],
+ "stale_days": 0
+}

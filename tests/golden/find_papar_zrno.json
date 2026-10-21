@@ -1,0 +1,478 @@
+{
+ "date": "2026-10-20",
+ "date_hr": "20.10.2026.",
+ "note": "Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists (cijene.dev); in-store prices may differ, a price list is not stock, and promotions change.",
+ "results": [
+  {
+   "any_special": true,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "oblik": {
+     "how": "name",
+     "name": "KOTANYI 50G PAPAR CRNI ZRNO -25/1-"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "KOTANYI 50G PAPAR CRNI ZRNO -25/1-"
+    }
+   },
+   "attributes": {
+    "oblik": "zrno",
+    "vrsta": "crni"
+   },
+   "brand": "Kotanyi",
+   "chains": "kaufland, konzum, lorenco, plodine, spar, tommy",
+   "compare_by": "unit",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "9001414707364",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "9001414707364",
+   "ingredient": "papar",
+   "match_quality": "strong",
+   "n_chains": 6,
+   "n_price_suspect": 0,
+   "n_stores": 14,
+   "name": "PAPAR CRNI ZRNO 50 G KOTANYI D.O.O",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "50 g",
+   "pack_source": "name",
+   "pantry": true,
+   "per_unit": "kg",
+   "price_max": 2.35,
+   "price_min": 1.39,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 47.0,
+   "price_per_unit_min": 27.8,
+   "stale_days": 0,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "oblik": {
+     "how": "name",
+     "name": "PAPAR CRNI 10 g ZRNOVREĆ. VEGETA MAESTR"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "PAPAR CRNI 10 g ZRNOVREĆ. VEGETA MAESTR"
+    }
+   },
+   "attributes": {
+    "oblik": "zrno",
+    "vrsta": "crni"
+   },
+   "brand": "VEGETA MAESTRO",
+   "chains": "kaufland, konzum, plodine, spar, tommy",
+   "compare_by": "unit",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "3850104294419",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": false,
+   "id": "3850104294419",
+   "ingredient": "papar",
+   "match_quality": "strong",
+   "n_chains": 5,
+   "n_price_suspect": 0,
+   "n_stores": 17,
+   "name": "PAPAR CRNI ZRNO 15 G VRECICA MAESTRO VEGETA PODRAVKA",
+   "pack": "15 g",
+   "pack_source": "name",
+   "pantry": true,
+   "per_unit": "kg",
+   "price_max": 1.59,
+   "price_min": 1.49,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 106.0,
+   "price_per_unit_min": 99.33,
+   "stale_days": 0,
+   "suspect_chains": null,
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "oblik": {
+     "how": "name",
+     "name": "KOTANYI PAPAR ZELENI ZRNO 12g"
+    }
+   },
+   "attributes": {
+    "oblik": "zrno"
+   },
+   "brand": "KOTANYI ZACINI",
+   "chains": "kaufland, konzum, lorenco, plodine",
+   "compare_by": "unit",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "9001414010075",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "9001414010075",
+   "ingredient": "papar",
+   "match_quality": "strong",
+   "n_chains": 4,
+   "n_price_suspect": 0,
+   "n_stores": 14,
+   "name": "PAPAR ZELENI ZRNO 12 G VRECICA KOTANYI",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "12 g",
+   "pack_source": "name",
+   "pantry": true,
+   "per_unit": "kg",
+   "price_max": 1.52,
+   "price_min": 0.91,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 126.67,
+   "price_per_unit_min": 75.83,
+   "stale_days": 0,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "oblik": {
+     "how": "name",
+     "name": "Kotanyi crveni papar zrno 25 g"
+    }
+   },
+   "attributes": {
+    "oblik": "zrno"
+   },
+   "brand": "KOTANYI ZACINI",
+   "chains": "kaufland, lorenco, plodine, spar",
+   "compare_by": "unit",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "9001414240830",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "9001414240830",
+   "ingredient": "papar",
+   "match_quality": "strong",
+   "n_chains": 4,
+   "n_price_suspect": 0,
+   "n_stores": 11,
+   "name": "PAPAR CRVENI ZRNO 25 G KOTANY STAKLO",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "25 g",
+   "pack_source": "name",
+   "pantry": true,
+   "per_unit": "kg",
+   "price_max": 3.7,
+   "price_min": 2.59,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 147.6,
+   "price_per_unit_min": 103.6,
+   "stale_days": 0,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "oblik": {
+     "how": "name",
+     "name": "70G KOTANYI PAPAR CRNI ZRNO"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "70G KOTANYI PAPAR CRNI ZRNO"
+    }
+   },
+   "attributes": {
+    "oblik": "zrno",
+    "vrsta": "crni"
+   },
+   "brand": "KOTANYI ZACINI",
+   "chains": "kaufland, plodine, tommy",
+   "compare_by": "unit",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "9001414509630",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": false,
+   "id": "9001414509630",
+   "ingredient": "papar",
+   "match_quality": "strong",
+   "n_chains": 3,
+   "n_price_suspect": 0,
+   "n_stores": 17,
+   "name": "ZAČIN PAPAR CRNO ZRNO 70 g KOT",
+   "pack": "70 g",
+   "pack_source": "name",
+   "pantry": true,
+   "per_unit": "kg",
+   "price_max": 2.75,
+   "price_min": 2.49,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 39.29,
+   "price_per_unit_min": 35.57,
+   "stale_days": 0,
+   "suspect_chains": null,
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "oblik": {
+     "how": "name",
+     "name": "70G KOTANYI PAPAR SARENI ZRNO"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "70G KOTANYI PAPAR SARENI ZRNO"
+    }
+   },
+   "attributes": {
+    "oblik": "zrno",
+    "vrsta": "sareni"
+   },
+   "brand": "KOTANYI ZACINI",
+   "chains": "kaufland, plodine, tommy",
+   "compare_by": "unit",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "9001414709603",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": false,
+   "id": "9001414709603",
+   "ingredient": "papar",
+   "match_quality": "strong",
+   "n_chains": 3,
+   "n_price_suspect": 0,
+   "n_stores": 16,
+   "name": "PAPAR SARENI ZRNO 70 G KOTANYI",
+   "pack": "70 g",
+   "pack_source": "name",
+   "pantry": true,
+   "per_unit": "kg",
+   "price_max": 3.29,
+   "price_min": 2.35,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 47.0,
+   "price_per_unit_min": 33.57,
+   "stale_days": 0,
+   "suspect_chains": null,
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "oblik": {
+     "how": "name",
+     "name": "*NE*PAPAR ZRNO MLINAC KOTANYI 36 G"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "36G KOTANYI MLINAC PAPAR CRNI"
+    }
+   },
+   "attributes": {
+    "oblik": "zrno",
+    "vrsta": "crni"
+   },
+   "brand": "KOTANYI ZACINI",
+   "chains": "kaufland, konzum, plodine",
+   "compare_by": "unit",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "9001414041116",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": false,
+   "id": "9001414041116",
+   "ingredient": "papar",
+   "match_quality": "strong",
+   "n_chains": 3,
+   "n_price_suspect": 0,
+   "n_stores": 15,
+   "name": "Kotanyi mlinac papar u zrnu crni 36 g",
+   "pack": "36 g",
+   "pack_source": "name",
+   "pantry": true,
+   "per_unit": "kg",
+   "price_max": 4.39,
+   "price_min": 4.29,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 121.94,
+   "price_per_unit_min": 119.17,
+   "stale_days": 0,
+   "suspect_chains": null,
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "oblik": {
+     "how": "name",
+     "name": "KOTANYI 50G PAPAR CRNI U ZRNU -4/1-"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "KOTANYI 50G PAPAR CRNI U ZRNU -4/1-"
+    }
+   },
+   "attributes": {
+    "oblik": "zrno",
+    "vrsta": "crni"
+   },
+   "brand": "KOTANYI ZACINI",
+   "chains": "lorenco, plodine, spar",
+   "compare_by": "unit",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "9001414040393",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "9001414040393",
+   "ingredient": "papar",
+   "match_quality": "strong",
+   "n_chains": 3,
+   "n_price_suspect": 0,
+   "n_stores": 12,
+   "name": "ZAČIN PAPAR CRNI U ZRNU 49 g KO",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "50 g",
+   "pack_source": "name",
+   "pantry": true,
+   "per_unit": "kg",
+   "price_max": 3.99,
+   "price_min": 3.69,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 79.8,
+   "price_per_unit_min": 73.8,
+   "stale_days": 0,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "oblik": {
+     "how": "name",
+     "name": "Kotanyi mlinac papar zeleni zrno 29 g"
+    }
+   },
+   "attributes": {
+    "oblik": "zrno"
+   },
+   "brand": "KOTANYI ZACINI",
+   "chains": "kaufland, konzum, plodine",
+   "compare_by": "unit",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "9001414441664",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": false,
+   "id": "9001414441664",
+   "ingredient": "papar",
+   "match_quality": "strong",
+   "n_chains": 3,
+   "n_price_suspect": 0,
+   "n_stores": 11,
+   "name": "PAPAR U ZRNU ZELENI MLINAC 29g KOTANYI",
+   "pack": "29 g",
+   "pack_source": "name",
+   "pantry": true,
+   "per_unit": "kg",
+   "price_max": 4.39,
+   "price_min": 2.57,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 151.38,
+   "price_per_unit_min": 88.62,
+   "stale_days": 0,
+   "suspect_chains": null,
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "oblik": {
+     "how": "name",
+     "name": "KOTANYI 20G PAPAR CRNI ZRNO -25/1-"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "KOTANYI 20G PAPAR CRNI ZRNO -25/1-"
+    }
+   },
+   "attributes": {
+    "oblik": "zrno",
+    "vrsta": "crni"
+   },
+   "brand": "KOTANYI ZACINI",
+   "chains": "konzum, lorenco, plodine",
+   "compare_by": "unit",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "9001414015452",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "9001414015452",
+   "ingredient": "papar",
+   "match_quality": "strong",
+   "n_chains": 3,
+   "n_price_suspect": 0,
+   "n_stores": 10,
+   "name": "PAPAR CRNI ZRNO 17 G VRECICA KOTANYI",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "17 g",
+   "pack_source": "name",
+   "pantry": true,
+   "per_unit": "kg",
+   "price_max": 1.52,
+   "price_min": 0.91,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 89.41,
+   "price_per_unit_min": 53.53,
+   "stale_days": 0,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  }
+ ],
+ "stale_days": 0
+}

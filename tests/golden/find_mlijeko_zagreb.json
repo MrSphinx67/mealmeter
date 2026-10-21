@@ -1,0 +1,742 @@
+{
+ "date": "2026-10-20",
+ "date_hr": "20.10.2026.",
+ "note": "Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists (cijene.dev); in-store prices may differ, a price list is not stock, and promotions change.",
+ "results": [
+  {
+   "any_special": true,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "mast": {
+     "how": "name",
+     "name": "1L DUKAT TRAJNO MLIJEKO 2,8%"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "1L DUKAT TRAJNO MLIJEKO 2,8%"
+    }
+   },
+   "attributes": {
+    "mast": "2.8",
+    "vrsta": "trajno"
+   },
+   "brand": "DUKAT",
+   "chains": "dukat, gavranovic, kaufland, konzum, lorenco, ntl, plodine, roto, spar, stanic, stridon, tommy, vrutak, zabac",
+   "compare_by": "unit",
+   "date": "2026-10-19",
+   "date_hr": "19.10.2026.",
+   "ean": "3850354016830",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "3850354016830",
+   "ingredient": "mlijeko",
+   "match_quality": "strong",
+   "n_chains": 14,
+   "n_price_suspect": 0,
+   "n_stores": 159,
+   "name": "N-MLIJEKO DUKAT 1.00L 2.8%MM EDGE -12/1- 11214",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "1 l",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "l",
+   "price_max": 1.03,
+   "price_min": 0.78,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 1.03,
+   "price_per_unit_min": 0.78,
+   "stale_days": 1,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": true,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "mast": {
+     "how": "name",
+     "name": "Dukat Mlijeko trajno 2,8%mm 1 L HDPE_OC"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "Dukat Mlijeko trajno 2,8%mm 1 L HDPE_OC"
+    }
+   },
+   "attributes": {
+    "mast": "2.8",
+    "vrsta": "trajno"
+   },
+   "brand": "Dukat",
+   "chains": "gavranovic, kaufland, konzum, lidl, lorenco, ntl, plodine, roto, spar, stridon, tommy, vrutak",
+   "compare_by": "unit",
+   "date": "2026-10-19",
+   "date_hr": "19.10.2026.",
+   "ean": "3850354006053",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "3850354006053",
+   "ingredient": "mlijeko",
+   "match_quality": "strong",
+   "n_chains": 12,
+   "n_price_suspect": 0,
+   "n_stores": 162,
+   "name": "MLIJEKO TRAJNO 2.8% MM 1 L DUKAT BOCA ( 6 )",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "1 l",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "l",
+   "price_max": 1.19,
+   "price_min": 0.85,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 1.19,
+   "price_per_unit_min": 0.85,
+   "stale_days": 1,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": true,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "mast": {
+     "how": "name",
+     "name": "2L Z'BREGOV TR MLIJEKO 2,8%"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "2L Z'BREGOV TR MLIJEKO 2,8%"
+    }
+   },
+   "attributes": {
+    "mast": "2.8",
+    "vrsta": "trajno"
+   },
+   "brand": "Vindija",
+   "chains": "gavranovic, kaufland, konzum, lorenco, ntl, plodine, roto, spar, stanic, stridon, tommy, vrutak",
+   "compare_by": "unit",
+   "date": "2026-10-19",
+   "date_hr": "19.10.2026.",
+   "ean": "3850108020656",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "3850108020656",
+   "ingredient": "mlijeko",
+   "match_quality": "strong",
+   "n_chains": 12,
+   "n_price_suspect": 0,
+   "n_stores": 149,
+   "name": "N-MLIJEKO Z BREGOV 2.00L 2.80%MM -6/1- ČEP VINDIJA 2065",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "2 l",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "l",
+   "price_max": 2.43,
+   "price_min": 1.61,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 1.22,
+   "price_per_unit_min": 0.81,
+   "stale_days": 1,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "mast": {
+     "how": "name",
+     "name": "MLIJ.2,8%MM 1 l TE V INDIJA"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "MLIJ.UHT 2,8% Z BREG.ČEP 1 L"
+    }
+   },
+   "attributes": {
+    "mast": "2.8",
+    "vrsta": "trajno"
+   },
+   "brand": "Z Bregov",
+   "chains": "gavranovic, kaufland, konzum, lorenco, ntl, plodine, roto, spar, stridon, tommy, vrutak, zabac",
+   "compare_by": "unit",
+   "date": "2026-10-19",
+   "date_hr": "19.10.2026.",
+   "ean": "3850108020908",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "3850108020908",
+   "ingredient": "mlijeko",
+   "match_quality": "strong",
+   "n_chains": 12,
+   "n_price_suspect": 0,
+   "n_stores": 149,
+   "name": "MLIJEKO 2.8%MM 1 L NAV. ČEP UHT TE VINDIJA (12)",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "1 l",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "l",
+   "price_max": 1.03,
+   "price_min": 0.85,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 1.03,
+   "price_per_unit_min": 0.85,
+   "stale_days": 1,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "mast": {
+     "how": "name",
+     "name": "0,5L DUKAT TRAJNO MLIJEKO 2,8%"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "0,5L DUKAT TRAJNO MLIJEKO 2,8%"
+    }
+   },
+   "attributes": {
+    "mast": "2.8",
+    "vrsta": "trajno"
+   },
+   "brand": "Dukat",
+   "chains": "dukat, gavranovic, kaufland, konzum, lorenco, ntl, plodine, roto, spar, stridon, tommy, vrutak",
+   "compare_by": "unit",
+   "date": "2026-10-19",
+   "date_hr": "19.10.2026.",
+   "ean": "3850354016878",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "3850354016878",
+   "ingredient": "mlijeko",
+   "match_quality": "strong",
+   "n_chains": 12,
+   "n_price_suspect": 0,
+   "n_stores": 138,
+   "name": "Dukat trajno mlijeko 2,8% 0,5 l EDGE",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "500 ml",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "l",
+   "price_max": 1.29,
+   "price_min": 0.68,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 2.58,
+   "price_per_unit_min": 1.36,
+   "stale_days": 1,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "mast": {
+     "how": "name",
+     "name": "DUKAT TRAJNO MLIJEKO 3,8% 0,5L BOCA"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "DUKAT TRAJNO MLIJEKO 3,8% 0,5L BOCA"
+    }
+   },
+   "attributes": {
+    "mast": "3.8",
+    "vrsta": "trajno"
+   },
+   "brand": "Dukat",
+   "chains": "dukat, gavranovic, kaufland, konzum, lorenco, ntl, plodine, spar, stridon, tommy, vrutak",
+   "compare_by": "unit",
+   "date": "2026-10-19",
+   "date_hr": "19.10.2026.",
+   "ean": "3850354006831",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "3850354006831",
+   "ingredient": "mlijeko",
+   "match_quality": "strong",
+   "n_chains": 11,
+   "n_price_suspect": 0,
+   "n_stores": 140,
+   "name": "MLIJEKO DUKAT 0.50L 3.8%MM TRAJNO BOCA -8/1-",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "500 ml",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "l",
+   "price_max": 1.29,
+   "price_min": 0.79,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 2.58,
+   "price_per_unit_min": 1.58,
+   "stale_days": 1,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "mast": {
+     "how": "name",
+     "name": "ALPSKO MLIJEKO 3,5% M.M. 1L DUKAT"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "MLIJEKO 3,5% 1L ALPSKO MLEKO TRAJNO"
+    }
+   },
+   "attributes": {
+    "mast": "3.5",
+    "vrsta": "trajno"
+   },
+   "brand": "Ljubljanske Mlekarne",
+   "chains": "dukat, gavranovic, kaufland, konzum, lorenco, plodine, roto, spar, stridon, tommy, vrutak",
+   "compare_by": "unit",
+   "date": "2026-10-19",
+   "date_hr": "19.10.2026.",
+   "ean": "3838800040578",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "3838800040578",
+   "ingredient": "mlijeko",
+   "match_quality": "strong",
+   "n_chains": 11,
+   "n_price_suspect": 0,
+   "n_stores": 139,
+   "name": "MLIJEKO ALPSKO 3,5% 1 L LJUBLJANSKE MLEKARNE(780/PAL)",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "1 l",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "l",
+   "price_max": 1.93,
+   "price_min": 1.39,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 1.93,
+   "price_per_unit_min": 1.39,
+   "stale_days": 1,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "mast": {
+     "how": "name",
+     "name": "0,5L 'Z BREGOV TR MLIJEKO 2,8%"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "0,5L 'Z BREGOV TR MLIJEKO 2,8%"
+    }
+   },
+   "attributes": {
+    "mast": "2.8",
+    "vrsta": "trajno"
+   },
+   "brand": "Vindija",
+   "chains": "gavranovic, kaufland, konzum, lorenco, ntl, plodine, roto, spar, stridon, tommy, vrutak",
+   "compare_by": "unit",
+   "date": "2026-10-19",
+   "date_hr": "19.10.2026.",
+   "ean": "3850108020557",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "3850108020557",
+   "ingredient": "mlijeko",
+   "match_quality": "strong",
+   "n_chains": 11,
+   "n_price_suspect": 0,
+   "n_stores": 139,
+   "name": "N-MLIJEKO Z BREGOV 0.50L 2,8%MM -12/1-",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "500 ml",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "l",
+   "price_max": 1.25,
+   "price_min": 0.85,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 2.5,
+   "price_per_unit_min": 1.7,
+   "stale_days": 1,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "mast": {
+     "how": "name",
+     "name": "1L DUKAT TR.MLIJ. 3.8% BOCA VI"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "1L DUKAT TR.MLIJ. 3.8% BOCA VI"
+    }
+   },
+   "attributes": {
+    "mast": "3.8",
+    "vrsta": "trajno"
+   },
+   "brand": "Dukat",
+   "chains": "dukat, gavranovic, kaufland, konzum, lorenco, plodine, roto, spar, stridon, tommy, vrutak",
+   "compare_by": "unit",
+   "date": "2026-10-19",
+   "date_hr": "19.10.2026.",
+   "ean": "3850354006091",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "3850354006091",
+   "ingredient": "mlijeko",
+   "match_quality": "strong",
+   "n_chains": 11,
+   "n_price_suspect": 0,
+   "n_stores": 131,
+   "name": "MLIJEKO DUKAT 3.8% 1 L BOCA DUKAT (660KOM/PAL)",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "1 l",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "l",
+   "price_max": 1.89,
+   "price_min": 1.31,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 1.89,
+   "price_per_unit_min": 1.31,
+   "stale_days": 1,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "mast": {
+     "how": "name",
+     "name": "MLIJEKO 2,8% VITAMIN D 1 L VINDIJA"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "MLIJEKO TRAJNO 2,8 % mm L + D VITAMIN VINDIJA"
+    }
+   },
+   "attributes": {
+    "mast": "2.8",
+    "vrsta": "trajno"
+   },
+   "brand": "VINDIJA",
+   "chains": "kaufland, konzum, lorenco, ntl, plodine, spar, stridon, tommy, vrutak",
+   "compare_by": "unit",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "3850108021295",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "3850108021295",
+   "ingredient": "mlijeko",
+   "match_quality": "strong",
+   "n_chains": 9,
+   "n_price_suspect": 0,
+   "n_stores": 95,
+   "name": "N-MLIJEKO Z BREGOV 1.00L VITAMIN D 2,80%MM ČEP UHT",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "1 l",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "l",
+   "price_max": 1.17,
+   "price_min": 0.89,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 1.17,
+   "price_per_unit_min": 0.89,
+   "stale_days": 0,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "mast": {
+     "how": "name",
+     "name": "DUKAT TR MLIJEKO 3,8% 1 l EDGE"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "DUKAT TR MLIJEKO 3,8% 1 l EDGE"
+    }
+   },
+   "attributes": {
+    "mast": "3.8",
+    "vrsta": "trajno"
+   },
+   "brand": "Dukat",
+   "chains": "dukat, gavranovic, kaufland, lorenco, plodine, roto, spar, tommy, vrutak",
+   "compare_by": "unit",
+   "date": "2026-10-19",
+   "date_hr": "19.10.2026.",
+   "ean": "3850354016854",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "3850354016854",
+   "ingredient": "mlijeko",
+   "match_quality": "strong",
+   "n_chains": 9,
+   "n_price_suspect": 0,
+   "n_stores": 76,
+   "name": "N-MLIJEKO DUKAT 1.00L 3,8%MM EDGE -12/1- 11217",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "1 l",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "l",
+   "price_max": 1.89,
+   "price_min": 1.39,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 1.89,
+   "price_per_unit_min": 1.39,
+   "stale_days": 1,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "mast": {
+     "how": "name",
+     "name": "'z bregov Trajno mlijeko 2,8% m.m."
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "'z bregov Trajno mlijeko 2,8% m.m."
+    }
+   },
+   "attributes": {
+    "mast": "2.8",
+    "vrsta": "trajno"
+   },
+   "brand": "Vindija",
+   "chains": "lidl, ntl, plodine, roto, spar, stridon, tommy, vrutak",
+   "compare_by": "unit",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "3850108020502",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": false,
+   "id": "3850108020502",
+   "ingredient": "mlijeko",
+   "match_quality": "strong",
+   "n_chains": 8,
+   "n_price_suspect": 0,
+   "n_stores": 93,
+   "name": "*MLIJEKO ZBREGOV 1 L 2,8% ČEP KLI-KLA (12) VINDIJA",
+   "pack": "1 l",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "l",
+   "price_max": 1.03,
+   "price_min": 0.85,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 1.03,
+   "price_per_unit_min": 0.85,
+   "stale_days": 0,
+   "suspect_chains": null,
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "mast": {
+     "how": "name",
+     "name": "DUKAT T. MLIJEKO 2,8% 0,5L U BOCI (8)"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "DUKAT TRAJNO MLIJ.U BOCI 2,8% 0,5L"
+    }
+   },
+   "attributes": {
+    "mast": "2.8",
+    "vrsta": "trajno"
+   },
+   "brand": "Dukat",
+   "chains": "dukat, kaufland, lorenco, plodine, spar, stridon, tommy, vrutak",
+   "compare_by": "unit",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "3850354006817",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "3850354006817",
+   "ingredient": "mlijeko",
+   "match_quality": "strong",
+   "n_chains": 8,
+   "n_price_suspect": 0,
+   "n_stores": 79,
+   "name": "MLIJEKO DUKAT 0.50L 2.8%MM TRAJNO BOCA -8/1- 36296",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "500 ml",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "l",
+   "price_max": 1.35,
+   "price_min": 0.66,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 2.7,
+   "price_per_unit_min": 1.32,
+   "stale_days": 0,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "mast": {
+     "how": "name",
+     "name": "MLIJ.3,5%MM 1 l TE V INDIJA"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "MLIJEKO 3.5%mm 1L TE TRAJNO Z'BREGOV"
+    }
+   },
+   "attributes": {
+    "mast": "3.5",
+    "vrsta": "trajno"
+   },
+   "brand": "Vindija",
+   "chains": "kaufland, lorenco, ntl, plodine, spar, tommy, vrutak",
+   "compare_by": "unit",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "3850108020762",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "3850108020762",
+   "ingredient": "mlijeko",
+   "match_quality": "strong",
+   "n_chains": 7,
+   "n_price_suspect": 0,
+   "n_stores": 43,
+   "name": "N-MLIJEKO Z BREGOV 1.00L 3,50%MM TRAJNO -12/1- TE",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "1 l",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "l",
+   "price_max": 1.98,
+   "price_min": 1.69,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 1.98,
+   "price_per_unit_min": 1.69,
+   "stale_days": 0,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "mast": {
+     "how": "name",
+     "name": "MLIJ.TR.2,8% 1 l VIN DIJA"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "MLIJ.TR.2,8% 1 l VIN DIJA"
+    }
+   },
+   "attributes": {
+    "mast": "2.8",
+    "vrsta": "trajno"
+   },
+   "brand": "Z'BREGOV",
+   "chains": "lorenco, ntl, plodine, stridon, tommy, vrutak",
+   "compare_by": "unit",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "3850108020007",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "3850108020007",
+   "ingredient": "mlijeko",
+   "match_quality": "strong",
+   "n_chains": 6,
+   "n_price_suspect": 0,
+   "n_stores": 23,
+   "name": "N-MLIJEKO Z BREGOV 1.00L 2.80%MM BČ -12/1- 2000",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "1 l",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "l",
+   "price_max": 1.21,
+   "price_min": 0.93,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 1.21,
+   "price_per_unit_min": 0.93,
+   "stale_days": 0,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  }
+ ],
+ "stale_days": 1
+}

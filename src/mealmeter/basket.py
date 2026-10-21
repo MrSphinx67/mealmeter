@@ -325,7 +325,8 @@ def _rows_for(con, staple: Staple, attributes: dict, city: str, wholesale: bool 
     food_sql = _food_filter(unverified="staple" if staple.loose_produce else "no")
     sql, params, _ = _candidates(staple, [], attributes, city, include_clearance=True, food_sql=food_sql,
                                  include_wholesale=wholesale, required=required, weak="early")
-    cur = con.execute(sql + " SELECT * FROM x", params)
+    # redoslijed je zadan, da izbor pri jednakoj cijeni (min u choose_product) bude uvijek isti
+    cur = con.execute(sql + " SELECT * FROM x ORDER BY chain, store_id, product_id", params)
     cols = [d[0] for d in cur.description]
     return [dict(zip(cols, r)) for r in cur.fetchall()]
 
@@ -339,7 +340,7 @@ def _product_attrs(con, staple: Staple) -> tuple[dict[tuple, dict], dict[str, di
         by_product.setdefault((chain, pid), {})[attr] = (value, how)
     by_ean: dict[str, dict] = {}
     for ean, attr, value in con.execute("""
-            SELECT p.ean_norm, a.attr, mode(a.value) FROM clean.product_attrs a JOIN clean.products p USING (chain, product_id)
+            SELECT p.ean_norm, a.attr, mode(a.value ORDER BY a.value) FROM clean.product_attrs a JOIN clean.products p USING (chain, product_id)
             WHERE a.staple = ? AND p.ean_global AND a.how = 'name' GROUP BY ALL""", [staple.key]).fetchall():
         by_ean.setdefault(ean, {})[attr] = value
     return by_product, by_ean
@@ -700,7 +701,7 @@ def _free_rows(con, need: "Need", city: str, wholesale: bool = False) -> dict[tu
     sql, params, _ = _candidates(None, tokens, None, city, include_clearance=False, food_sql=_food_filter(),
                                  include_wholesale=wholesale)
     early = " AND ".join("regexp_matches(name_norm, ?)" for _ in tokens)
-    cur = con.execute(sql + f" SELECT * FROM x WHERE {early}",
+    cur = con.execute(sql + f" SELECT * FROM x WHERE {early} ORDER BY chain, store_id, product_id",
                       params + ["^(?:[^ ]+ ){0,2}" + re.escape(t) for t in tokens])
     cols = [d[0] for d in cur.description]
     rows = []
@@ -1013,7 +1014,8 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
     # preporuka: najviše povezanih sastojaka, zatim najmanji total_to_buy (total_used je samo informativan);
     # stavke sa zastavicama tek pri jednakoj cijeni
     ranked = sorted(merged, key=lambda s: (-s["n_matched"], s["data_quality"] == "suspect",
-                                           s["total_to_buy"], s["flagged_items"]))
+                                           s["total_to_buy"], s["flagged_items"], s["chain"], s["address"] or "",
+                                           s["store_id"]))
     out["stores"] = ranked[:max_stores] if max_stores else ranked
     city_sql, city_params = _city_filter(city)
     city_chains = {r[0] for r in con.execute(

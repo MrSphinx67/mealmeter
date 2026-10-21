@@ -33,7 +33,7 @@ def resolve_city(city: str, con: duckdb.DuckDBPyConnection | None = None) -> str
     con = con or connect()
     sql, params = _city_filter(city)
     row = con.execute(
-        f"SELECT any_value(s.city_canonical) FROM clean.stores s WHERE s.scope = 'local' AND {sql}", params
+        f"SELECT min(s.city_canonical) FROM clean.stores s WHERE s.scope = 'local' AND {sql}", params
     ).fetchone()
     return row[0] if row else None
 
@@ -324,14 +324,16 @@ def find_products(
         SELECT
           x.gkey AS _gkey,
           CASE WHEN x.gkey LIKE '{staple.key if staple and staple.group_by else "-"}:%' THEN x.gkey
-               WHEN bool_or(x.ean_global) THEN any_value(x.ean_norm) FILTER (WHERE x.ean_global)
+               WHEN bool_or(x.ean_global) THEN min(x.ean_norm) FILTER (WHERE x.ean_global)
                ELSE min(x.chain || ':' || x.product_id) END AS id,
-          any_value(x.ean_norm) FILTER (WHERE x.ean_global) AS ean,
+          min(x.ean_norm) FILTER (WHERE x.ean_global) AS ean,
           -- naziv koji odgovara upitu i sam nosi gramaturu; od takvih najduži (najmanje kratica)
+          -- pri jednakoj ocjeni i jednakom broju abecedno prvi (Korak 5P: isti izlaz pri svakom pozivu)
           arg_max(x.name, x.name_hit::INT * 1000
-                          + coalesce(x.pack_source = 'name', false)::INT * 500 + length(x.name)) AS name,
-          mode(x.brand) AS brand,
-          mode(CASE WHEN x.pack_unit IS NOT NULL THEN x.pack_amount::VARCHAR || '|' || x.pack_unit END) AS pack,
+                          + coalesce(x.pack_source = 'name', false)::INT * 500 + length(x.name) ORDER BY x.name) AS name,
+          mode(x.brand ORDER BY x.brand) AS brand,
+          mode(CASE WHEN x.pack_unit IS NOT NULL THEN x.pack_amount::VARCHAR || '|' || x.pack_unit END
+               ORDER BY x.pack_amount, x.pack_unit) AS pack,
           count(DISTINCT x.chain) AS n_chains,
           count(DISTINCT x.chain || '/' || x.store_id) AS n_stores,
           string_agg(DISTINCT x.chain, ', ' ORDER BY x.chain) AS chains,
@@ -342,7 +344,7 @@ def find_products(
           pick.per_unit,
           pick.conf AS unit_confidence,
           -- izvor gramature za odabrani raspon: name / unit / ean, ili unit_price kad je confidence low
-          mode(x.pack_source) FILTER (WHERE {best}) AS pack_source,
+          mode(x.pack_source ORDER BY x.pack_source) FILTER (WHERE {best}) AS pack_source,
           string_agg(DISTINCT x.chain, ', ' ORDER BY x.chain) FILTER (WHERE x.data_quality = 'suspect') AS suspect_chains,
           count(*) FILTER (WHERE x.price_suspect) AS n_price_suspect,
           min(x.price_per_kg_drained) AS price_per_kg_drained_min,
@@ -350,9 +352,9 @@ def find_products(
           bool_or(x.variable_weight) AS any_variable_weight,
           bool_or(x.is_special) AS any_special,
           bool_or(x.scope = 'national') AS has_national,
-          mode(x.food_group) AS food_group,
+          mode(x.food_group ORDER BY x.food_group) AS food_group,
           -- pripadnost namirnici (clean.staple_groups): strong / weak (rangira se ispod snažnih)
-          any_value(x.match_quality) AS match_quality,
+          min(x.match_quality) AS match_quality,
           -- gramatura iz stupca unit izgleda krivo (staples.flag_unit_suspects): rangira se niže
           bool_and(x.unit_suspect) AS unit_suspect,
           bool_and(x.is_food IS NULL) AS food_unverified,
@@ -363,7 +365,7 @@ def find_products(
           CASE WHEN any_value({cov_col}) >= 0.5 THEN 0 WHEN any_value({cov_col}) >= 0.25 THEN 1 ELSE 2 END AS _tier
         FROM x LEFT JOIN pick USING (gkey) JOIN cov USING (gkey)
         GROUP BY x.gkey, pick.per_unit, pick.conf
-        ORDER BY coalesce(any_value(x.match_quality) = 'weak', false), bool_and(x.unit_suspect), _tier, _starts DESC, n_chains DESC, n_stores DESC, price_per_unit_min NULLS LAST, name
+        ORDER BY coalesce(min(x.match_quality) = 'weak', false), bool_and(x.unit_suspect), _tier, _starts DESC, n_chains DESC, n_stores DESC, price_per_unit_min NULLS LAST, name, x.gkey
         LIMIT ?
     """
     params = cand_params + [staple.compare_unit if staple else None, tokens[0] if tokens else "", limit]
@@ -428,6 +430,7 @@ def _attach_attributes(con: duckdb.DuckDBPyConnection, staple, rows: list[dict])
           JOIN clean.product_attrs pa ON pa.chain = p.chain AND pa.product_id = p.product_id
           WHERE pa.staple = ?
         ) WHERE gkey IN ({placeholders})
+        ORDER BY gkey, attr, value, name
         """,
         [staple.key, *keys],
     ).fetchall()

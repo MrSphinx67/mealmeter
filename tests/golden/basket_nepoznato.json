@@ -1,0 +1,94 @@
+{
+ "already_have": [],
+ "ambiguous": [],
+ "assumptions": [],
+ "best_store": null,
+ "city": "Osijek",
+ "comparison": [],
+ "date": "2026-10-20",
+ "incomplete": [
+  {
+   "chain": "eurospin",
+   "missing": [],
+   "n_matched": 0,
+   "note": "nedostaje: "
+  },
+  {
+   "chain": "kaufland",
+   "missing": [],
+   "n_matched": 0,
+   "note": "nedostaje: "
+  },
+  {
+   "chain": "konzum",
+   "missing": [],
+   "n_matched": 0,
+   "note": "nedostaje: "
+  },
+  {
+   "chain": "lidl",
+   "missing": [],
+   "n_matched": 0,
+   "note": "nedostaje: "
+  },
+  {
+   "chain": "plodine",
+   "missing": [],
+   "n_matched": 0,
+   "note": "nedostaje: "
+  },
+  {
+   "chain": "spar",
+   "missing": [],
+   "n_matched": 0,
+   "note": "nedostaje: "
+  }
+ ],
+ "ingredients": [],
+ "mode": "single_store",
+ "more_chains": [],
+ "note": "Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists (cijene.dev); in-store prices may differ, a price list is not stock, and promotions change.",
+ "stores": [],
+ "summary_hr": "Nijedna trgovina u gradu nema ove sastojke.",
+ "unmatched": [
+  {
+   "hint": "pošalji s \"free_text\": true za pretragu po nazivu proizvoda",
+   "name": "šafran",
+   "reason": "nepoznata namirnica 'šafran' (nema je u staples.yaml)",
+   "suggestions": [
+    "SAFRAN 0.12 G VRECICA KOTANYI",
+    "ZAČIN ŠAFRAN KUT.NADAL. 0,1g",
+    "ŠAFRAN 0.125 g VEGETA MAESTRO"
+   ]
+  },
+  {
+   "candidates": [
+    {
+     "name": "Voće za smoothie",
+     "price_min": 2.4,
+     "reason": "ima: voce; nema: zmajevo"
+    },
+    {
+     "name": "Klementina s voćem",
+     "price_min": 4.64,
+     "reason": "ima: voce; nema: zmajevo"
+    },
+    {
+     "name": "Mandarina s voćem",
+     "price_min": 4.79,
+     "reason": "ima: voce; nema: zmajevo"
+    }
+   ],
+   "free_text": true,
+   "name": "zmajevo voće",
+   "reason": "nijedan prehrambeni proizvod s nazivom 'zmajevo voće' u gradu",
+   "suggestions": [
+    "Voće za smoothie",
+    "Klementina s voćem",
+    "Mandarina s voćem"
+   ],
+   "tried_synonyms": []
+  }
+ ],
+ "warnings": []
+}

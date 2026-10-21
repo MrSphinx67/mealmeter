@@ -1,0 +1,525 @@
+{
+ "date": "2026-10-20",
+ "date_hr": "20.10.2026.",
+ "note": "Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists (cijene.dev); in-store prices may differ, a price list is not stock, and promotions change.",
+ "results": [
+  {
+   "any_special": true,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "oznaka": {
+     "how": "name",
+     "name": "1KG ČM BRAŠ.OŠTR KOLAČ T-400"
+    },
+    "tip": {
+     "how": "name",
+     "name": "1KG ČM BRAŠ.OŠTR KOLAČ T-400"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "BRAŠNO OŠTRO PŠENIČNO ZA KOLAČE T-400 1KG (10)"
+    }
+   },
+   "attributes": {
+    "oznaka": "t400",
+    "tip": "ostro",
+    "vrsta": "psenicno"
+   },
+   "brand": "ČAKOVEČKI MLINOVI D.D",
+   "chains": "kaufland, konzum, lorenco, ntl, plodine, roto, spar",
+   "compare_by": "unit",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "3858884172637",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "3858884172637",
+   "ingredient": "brasno",
+   "match_quality": "strong",
+   "n_chains": 7,
+   "n_price_suspect": 1,
+   "n_stores": 34,
+   "name": "BRASNO T-400 1 KG CAKOVECKI MLINOVI - OSTRO ZA KOLACE",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "1 kg",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "kg",
+   "price_max": 8.11,
+   "price_min": 0.82,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 0.83,
+   "price_per_unit_min": 0.82,
+   "stale_days": 0,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": true,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "oznaka": {
+     "how": "name",
+     "name": "BRASNO T-550 GLATKO 1 KG PODRAVKA"
+    },
+    "tip": {
+     "how": "name",
+     "name": "BRASNO T-550 GLATKO 1 KG PODRAVKA"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "BRAŠNO PŠEN.T-550 GLATKO 1 kg PODRAVKA (10)"
+    }
+   },
+   "attributes": {
+    "oznaka": "t550",
+    "tip": "glatko",
+    "vrsta": "psenicno"
+   },
+   "brand": "PODRAVKA D.D.",
+   "chains": "konzum, lorenco, ntl, plodine, roto, spar",
+   "compare_by": "unit",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "3850104223624",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "3850104223624",
+   "ingredient": "brasno",
+   "match_quality": "strong",
+   "n_chains": 6,
+   "n_price_suspect": 0,
+   "n_stores": 47,
+   "name": "BRAŠNO PŠENIČNO T-550 GLATKO 1 kg PODRAVKA",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "1 kg",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "kg",
+   "price_max": 0.8,
+   "price_min": 0.69,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 0.8,
+   "price_per_unit_min": 0.69,
+   "stale_days": 0,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": true,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "oznaka": {
+     "how": "name",
+     "name": "1KG ČM BRAŠ.PŠEN. GLATKO T-550"
+    },
+    "tip": {
+     "how": "name",
+     "name": "1KG ČM BRAŠ.PŠEN. GLATKO T-550"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "1KG ČM BRAŠ.PŠEN. GLATKO T-550"
+    }
+   },
+   "attributes": {
+    "oznaka": "t550",
+    "tip": "glatko",
+    "vrsta": "psenicno"
+   },
+   "brand": "ČAK MLINOVI",
+   "chains": "kaufland, konzum, lorenco, plodine, roto, spar",
+   "compare_by": "unit",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "3858884172569",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "3858884172569",
+   "ingredient": "brasno",
+   "match_quality": "strong",
+   "n_chains": 6,
+   "n_price_suspect": 0,
+   "n_stores": 18,
+   "name": "BRASNO T-550 1 KG GLATKO CAKOVECKI MLINOVI",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "1 kg",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "kg",
+   "price_max": 0.8,
+   "price_min": 0.77,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 0.8,
+   "price_per_unit_min": 0.77,
+   "stale_days": 0,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "oznaka": {
+     "how": "name",
+     "name": "5KG ČM BRAŠNO PŠENIČ.T-550"
+    },
+    "tip": {
+     "how": "name",
+     "name": "BRASNO T-550 5 KG GLATKO CAKOVECKI MLINOVI"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "5KG ČM BRAŠNO PŠENIČ.T-550"
+    }
+   },
+   "attributes": {
+    "oznaka": "t550",
+    "tip": "glatko",
+    "vrsta": "psenicno"
+   },
+   "brand": "ČAKOVEČKI MLINOVI D.D",
+   "chains": "kaufland, ntl, plodine, roto, spar",
+   "compare_by": "unit",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "3858884172521",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": false,
+   "id": "3858884172521",
+   "ingredient": "brasno",
+   "match_quality": "strong",
+   "n_chains": 5,
+   "n_price_suspect": 0,
+   "n_stores": 25,
+   "name": "BRAŠNO GLATKO T-550 5KG ČAKOVEČKI MLINOVI (1)",
+   "pack": "5 kg",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "kg",
+   "price_max": 4.0,
+   "price_min": 3.59,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 0.8,
+   "price_per_unit_min": 0.72,
+   "stale_days": 0,
+   "suspect_chains": null,
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": true,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "oznaka": {
+     "how": "name",
+     "name": "1KG ČM BRAŠ.NAMJ.DIZANA T-400"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "BRAŠNO PŠENIČNO T-400 ZA DIZANA TIJESTA 1KG ČAKOVEČKI MLINOV"
+    }
+   },
+   "attributes": {
+    "oznaka": "t400",
+    "vrsta": "psenicno"
+   },
+   "brand": "ČAK MLINOVI",
+   "chains": "konzum, lorenco, plodine, roto, spar",
+   "compare_by": "unit",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "3858884172583",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "3858884172583",
+   "ingredient": "brasno",
+   "match_quality": "strong",
+   "n_chains": 5,
+   "n_price_suspect": 0,
+   "n_stores": 16,
+   "name": "BRASNO T-400 1 KG DIZANA TIJESTA CAKOVECKI MLINOVI",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "1 kg",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "kg",
+   "price_max": 1.49,
+   "price_min": 1.09,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 1.49,
+   "price_per_unit_min": 1.09,
+   "stale_days": 0,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": true,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "oznaka": {
+     "how": "name",
+     "name": "BRAŠNO BIJELO TIP 00 1kg FARINA"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "BRAŠNO FARINA SPECIALE PŠENIČNO TIP 00 1kg (10)"
+    }
+   },
+   "attributes": {
+    "oznaka": "00",
+    "vrsta": "psenicno"
+   },
+   "brand": "FARINA",
+   "chains": "kaufland, konzum, plodine, roto, spar",
+   "compare_by": "unit",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "3858887101009",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": false,
+   "id": "3858887101009",
+   "ingredient": "brasno",
+   "match_quality": "strong",
+   "n_chains": 5,
+   "n_price_suspect": 0,
+   "n_stores": 14,
+   "name": "BRAŠNO FARINA SPECIALE PŠENIČNO TIP 00 1kg (10)",
+   "pack": "1 kg",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "kg",
+   "price_max": 1.31,
+   "price_min": 0.99,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 1.31,
+   "price_per_unit_min": 0.99,
+   "stale_days": 0,
+   "suspect_chains": null,
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": true,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "oznaka": {
+     "how": "name",
+     "name": "BRASNO T-400 OSTRO 1 KG PODRAVKA"
+    },
+    "tip": {
+     "how": "name",
+     "name": "BRASNO T-400 OSTRO 1 KG PODRAVKA"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "BRAŠNO PŠEN. T-400 OŠTRO 1 KG (10) (PAL60) PODRAVKA"
+    }
+   },
+   "attributes": {
+    "oznaka": "t400",
+    "tip": "ostro",
+    "vrsta": "psenicno"
+   },
+   "brand": "PODRAVKA",
+   "chains": "konzum, lorenco, plodine, spar",
+   "compare_by": "unit",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "3850104223631",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "3850104223631",
+   "ingredient": "brasno",
+   "match_quality": "strong",
+   "n_chains": 4,
+   "n_price_suspect": 0,
+   "n_stores": 15,
+   "name": "BRASNO T-400 OSTRO 1 KG PODRAVKA",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "1 kg",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "kg",
+   "price_max": 0.83,
+   "price_min": 0.69,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 0.83,
+   "price_per_unit_min": 0.69,
+   "stale_days": 0,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "oznaka": {
+     "how": "name",
+     "name": "2KG PODRAVKA BRAŠ.GLATKO T-550"
+    },
+    "tip": {
+     "how": "name",
+     "name": "2KG PODRAVKA BRAŠ.GLATKO T-550"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "BRAŠNO PŠENIČNO T-550 2/1 GLATKO PODRAVK"
+    }
+   },
+   "attributes": {
+    "oznaka": "t550",
+    "tip": "glatko",
+    "vrsta": "psenicno"
+   },
+   "brand": "PODRAVKA",
+   "chains": "konzum, lorenco, plodine, spar",
+   "compare_by": "unit",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "3850104223617",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "3850104223617",
+   "ingredient": "brasno",
+   "match_quality": "strong",
+   "n_chains": 4,
+   "n_price_suspect": 0,
+   "n_stores": 15,
+   "name": "BRASNO T-550 GLATKO 2 KG PODRAVKA",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "2 kg",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "kg",
+   "price_max": 1.6,
+   "price_min": 1.49,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 0.8,
+   "price_per_unit_min": 0.75,
+   "stale_days": 0,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": true,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "vrsta": {
+     "how": "default",
+     "name": "1KG ČM BRAŠ.NAMJ.TANKA T T-700"
+    }
+   },
+   "attributes": {
+    "vrsta": "psenicno"
+   },
+   "brand": "ČAK MLINOVI",
+   "chains": "konzum, plodine, roto, spar",
+   "compare_by": "unit",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "3858884172576",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": false,
+   "id": "3858884172576",
+   "ingredient": "brasno",
+   "match_quality": "strong",
+   "n_chains": 4,
+   "n_price_suspect": 0,
+   "n_stores": 15,
+   "name": "BRAŠNO NAMJ TANKA TIJ T-700 1KG ČAK (10)",
+   "pack": "1 kg",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "kg",
+   "price_max": 1.52,
+   "price_min": 1.09,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 1.52,
+   "price_per_unit_min": 1.09,
+   "stale_days": 0,
+   "suspect_chains": null,
+   "unit_confidence": "high",
+   "unit_suspect": false
+  },
+  {
+   "any_special": false,
+   "any_variable_weight": false,
+   "attribute_sources": {
+    "oznaka": {
+     "how": "name",
+     "name": "BRASNO T-400 OSTRO 2 KG PODRAVKA"
+    },
+    "tip": {
+     "how": "name",
+     "name": "BRASNO T-400 OSTRO 2 KG PODRAVKA"
+    },
+    "vrsta": {
+     "how": "name",
+     "name": "BRAŠNO PŠEN. T-400 2KG PODRAVKA"
+    }
+   },
+   "attributes": {
+    "oznaka": "t400",
+    "tip": "ostro",
+    "vrsta": "psenicno"
+   },
+   "brand": "PODRAVKA",
+   "chains": "konzum, lorenco, plodine, spar",
+   "compare_by": "unit",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "ean": "3850104223648",
+   "food_group": "hrana",
+   "food_unverified": false,
+   "has_national": true,
+   "id": "3850104223648",
+   "ingredient": "brasno",
+   "match_quality": "strong",
+   "n_chains": 4,
+   "n_price_suspect": 0,
+   "n_stores": 14,
+   "name": "BRASNO T-400 OSTRO 2 KG PODRAVKA",
+   "note": "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu.",
+   "pack": "2 kg",
+   "pack_source": "name",
+   "pantry": false,
+   "per_unit": "kg",
+   "price_max": 1.66,
+   "price_min": 1.56,
+   "price_per_kg_drained_max": null,
+   "price_per_kg_drained_min": null,
+   "price_per_unit_max": 0.83,
+   "price_per_unit_min": 0.78,
+   "stale_days": 0,
+   "suspect_chains": "lorenco",
+   "unit_confidence": "high",
+   "unit_suspect": false
+  }
+ ],
+ "stale_days": 0
+}
