@@ -80,6 +80,9 @@ class Staple:
     # redoslijed kvalitete vrijednosti atributa, od najbolje (jaja: uzgoj bio > slobodni > podni > kavezni):
     # pri jednakoj cijeni bolja ima prednost, a alternativa iste cijene i bolje kvalitete se prikazuje
     quality_rank: dict[str, tuple[str, ...]] = field(default_factory=dict, hash=False, compare=False)
+    # razine zadanog izbora [{atribut: [vrijednosti]}] (jaja: M ili L i uzgoj bolji od kaveznog), redom; proizvod
+    # izvan prve razine bira se samo kad trgovina nema ništa unutar razine, i označen je ("kavezni, S")
+    preferred_tiers: tuple = field(default=(), hash=False, compare=False)
 
     def defaults(self) -> dict:
         """Zadani filtri atributa: vrijednost (default_attributes) ili n-torka redoslijeda (default_preference)."""
@@ -250,6 +253,8 @@ def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> d
             default_preference={a: tuple(str(v) for v in vals)
                                 for a, vals in (d.get("default_preference") or {}).items()},
             quality_rank={a: tuple(str(v) for v in vals) for a, vals in (d.get("quality_rank") or {}).items()},
+            preferred_tiers=tuple({a: tuple(str(v) for v in vals) for a, vals in t.items()}
+                                  for t in d.get("preferred_tiers") or []),
         )
         for a, vals in st.default_preference.items():
             if any(v not in attrs.get(a, {}) for v in vals) or a in st.default_attributes:
@@ -697,7 +702,7 @@ def build_staple_groups(con: duckdb.DuckDBPyConnection) -> list[tuple]:
 # Cijena po jedinici usporedbe namirnice (aliasi: c = clean.prices, ps = clean.product_staples,
 # r = clean.staple_rules). Isti izraz koriste build (granice, statistika) i pretraga.
 STAPLE_PPU_SQL = """CASE
-    WHEN r.compare_by IN ('pack', 'count') THEN round(c.price_eff / nullif(ps.n_units, 0), 2)
+    WHEN r.compare_by IN ('pack', 'count') THEN round(c.price_eff / nullif(ps.n_units, 0), 4)
     WHEN ps.assumed_g > 0 THEN round(c.price_eff / ps.assumed_g * 1000, 2)
     WHEN c.per_unit = r.unit THEN c.price_per_unit END"""
 AUTO_RANGE = (0.25, 4.0)  # automatske granice: 0.25x do 4x medijana namirnice

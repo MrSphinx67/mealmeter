@@ -3,7 +3,7 @@
 | točka | stanje |
 |---|---|
 | 1 alternative po pravilima glavnog izbora, samo jeftinije | gotovo |
-| 2 jaja (M/L, bolji od kaveznog, bez zaokruživanja, [0.08, 0.55]) | - |
+| 2 jaja (M/L, bolji od kaveznog, bez zaokruživanja, [0.08, 0.55]) | gotovo (preferred_tiers, quality_rank; cijena po komadu na 4 decimale) |
 | 3 marka u nazivu sastojka (data/brands) | - |
 | 4 free_text (okusi, grickalice, prve tri riječi, needs_confirmation) | - |
 | 5 vrećice iz rinfuze (udio gramaže) | - |

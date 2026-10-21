@@ -207,7 +207,7 @@ def test_onion_rukavac_assumed_500g():
 # --- 6. jaja i veleprodaja ------------------------------------------------------------------
 
 def test_egg_ranges_by_uzgoj():
-    assert S["jaja"].plausible_by == {"uzgoj": {"bio": (0.30, 1.00), "_other": (0.10, 0.55)}}  # Korak 4B: 0,10
+    assert S["jaja"].plausible_by == {"uzgoj": {"bio": (0.30, 1.00), "_other": (0.08, 0.55)}}  # Korak 4C: 0,08
     assert S["jaja"].plausible_per_unit is None
 
 

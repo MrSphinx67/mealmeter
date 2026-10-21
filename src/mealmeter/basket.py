@@ -302,12 +302,45 @@ def _choose_preferred(rows: list[dict], need: "Need", prefs: dict, group_values:
     """choose_product uz zadani redoslijed vrijednosti (default_preference): prva vrijednost koja u
     trgovini daje proizvod bez zastavica; inače najbolji izbor među svim kandidatima."""
     args = (need.amount, need.unit, _by_weight_unit(need.staple), _by_weight_primary(need.staple))
+    if need.staple.quality_rank and need.attr_fn:
+        rows = sorted(rows, key=lambda r: quality_key(need.staple, need.attr_fn(r)))  # jednaka cijena: bolji prvi
+    for tier in tiers_for(need):
+        sub = [r for r in rows if in_tier(need.attr_fn(r), tier)]
+        if sub and (pick := choose_product(sub, *args)) and not pick["fallback"]:
+            return pick
     for attr, order in prefs.items():
         for value in order:
             sub = [r for r in rows if group_values[attr].get(r["bkey"]) == value]
             if sub and (pick := choose_product(sub, *args)) and not pick["fallback"]:
                 return pick
     return choose_product(rows, *args)
+
+
+def tiers_for(need: "Need") -> list[dict]:
+    """Razine zadanog izbora (preferred_tiers) bez atributa koje je korisnik sam zadao."""
+    if need.free_text or not need.attr_fn:
+        return []
+    tiers = [{a: v for a, v in t.items() if a not in need.attributes} for t in need.staple.preferred_tiers]
+    return [t for t in tiers if t]
+
+
+def in_tier(attrs: dict, tier: dict) -> bool:
+    """Atributi proizvoda unutar razine; "_none" znači da atribut nije poznat."""
+    return all(attrs.get(a, "_none") in values for a, values in tier.items())
+
+
+def quality_key(staple: Staple, attrs: dict) -> tuple:
+    return tuple(order.index(attrs[a]) if attrs.get(a) in order else len(order) for a, order in staple.quality_rank.items())
+
+
+def tier_note(need: "Need", attrs: dict) -> str | None:
+    """Napomena za proizvod izvan prve razine zadanog izbora: vrijednosti izvan nje ("kavezni, S")."""
+    tiers = tiers_for(need)
+    if not tiers or in_tier(attrs, tiers[0]):
+        return None
+    order = sorted(tiers[0], key=lambda a: a not in need.staple.quality_rank)  # najprije uzgoj, pa veličina
+    out = [attrs.get(a, "nepoznato") for a in order if attrs.get(a, "_none") not in tiers[0][a]]
+    return ", ".join(v.upper() if len(v) <= 2 else v for v in out) or None
 
 
 def _num(v):
@@ -706,6 +739,7 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
         })
         attrs_of, attrs_of_ean = _product_attrs(con, need.staple)
         need.attr_fn = lambda p, a=attrs_of, e=attrs_of_ean: chosen_attributes(p, a, e)
+        need.note_fn = lambda attrs, n=need: tier_note(n, attrs)
         prefs = {a: v for a, v in need.staple.default_preference.items() if a not in need.attributes}
         group_values = _group_values(con, need.staple, prefs)
         for key, rows in _prepare(con, need, city, include_wholesale).items():
@@ -720,6 +754,8 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
                      and chosen[a] in need.staple.accepted_values(a, v)]
             subst += [f"{a}={chosen[a]}: prva dostupna po zadanom redoslijedu ({', '.join(v)})"
                       for a, v in wanted.items() if isinstance(v, tuple) and chosen.get(a) not in (None, v[0])]
+            if note := tier_note(need, chosen):
+                subst.append(f"izvan zadanog izbora: {note}")
             _add_item(stores, key, rows, need, idx, pick, chosen, subst,
                       need.staple.key in have or need.input_staple in have)
 

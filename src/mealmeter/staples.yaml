@@ -498,16 +498,22 @@ jaja:
                    krem\b, sendvic, salata, pasteta, namaz, jaja s\b, sa jajima, s jajima,
                    obuc, folij, termoskup, stolic, glazben, igr]
   unit: kom
-  # granice po uzgoju (Korak 2D, vlasnik): bio 0,30-1,00 €/kom; ostali 0,10-0,55 €/kom (Korak 4B: Lidlova
-  # jaja S i kavezna po 0,10-0,14 €/kom su stvarne cijene, ne greška gramature)
+  # granice po uzgoju (Korak 2D, vlasnik): bio 0,30-1,00 €/kom; ostali 0,08-0,55 €/kom (Korak 4B/4C: Lidlova
+  # jaja S i kavezna po 0,09-0,14 €/kom su stvarne cijene; cijena po komadu se ne zaokružuje na cent)
   plausible_by:
-    uzgoj: {bio: [0.30, 1.00], _other: [0.10, 0.55]}
+    uzgoj: {bio: [0.30, 1.00], _other: [0.08, 0.55]}
   max_pack: 30
   min_pack: 4
   group_by: [velicina, uzgoj]
   # Korak 4C: pri jednakoj cijeni bolji uzgoj; alternativa iste cijene samo uz bolji uzgoj
   quality_rank:
     uzgoj: [bio, slobodni, podni, kavezni, nepoznato]
+  # zadano M ili L i uzgoj bolji od kaveznog; zatim M/L ili nepoznata veličina uz nepoznat uzgoj; kavezna i S
+  # samo kad trgovina nema drugo (i kao jeftinije alternative, s napomenom)
+  preferred_tiers:
+    - {velicina: [m, l], uzgoj: [podni, slobodni, bio]}
+    - {velicina: [m, l, _none], uzgoj: [podni, slobodni, bio, nepoznato]}
+    - {velicina: [m, l, xl, _none]}
   # broj komada: "10/1", "10 KOM" (ne "-18/1-", to je broj pakiranja u kartonu)
   count_regex: '(?<![\d-])(\d+)\s*/\s*1\b(?!\s*-)|(\d+)\s*kom'
   compare_by: count

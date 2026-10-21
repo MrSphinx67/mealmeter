@@ -25,6 +25,13 @@ def con4c(tmp_path_factory):
         ("konzum", "M1", "MIJEŠANO MLJEVENO MESO 500 g PIK", "HRANA", "ko", 4.99),
         ("konzum", "M2", "SVINJSKO MLJEVENO MESO 500 g PIK", "HRANA", "ko", 3.99),
         ("konzum", "M3", "JUNEĆE MLJEVENO MESO 500 g PIK", "HRANA", "ko", 5.49),
+        # jaja: kavezna i podna M iste cijene, jeftinija kavezna S, skuplja slobodna L
+        ("konzum", "E1", "JAJA SVJEŽA KAVEZNI UZGOJ M 10/1", "HRANA", "ko", 1.99),
+        ("konzum", "E2", "JAJA SVJEŽA PODNI UZGOJ M 10/1", "HRANA", "ko", 1.99),
+        ("konzum", "E3", "JAJA KAVEZNI UZGOJ RAZRED S 10/1", "HRANA", "ko", 1.29),
+        ("konzum", "E4", "JAJA SLOBODNI UZGOJ L 10/1", "HRANA", "ko", 2.49),
+        ("lidl", "E5", "Jaja iz kaveznog uzgoja, razred M", "HRANA", "10komad", 0.89),
+        ("lidl", "E6", "Jaja iz kaveznog uzgoja, razred S", "HRANA", "10komad", 0.79),
     ]
     c.executemany("INSERT INTO products (chain, product_id, barcode, name, category, unit) VALUES (?, ?, ?, ?, ?, ?)",
                   [(ch, pid, f"{ch}:{pid}", n, cat, u) for ch, pid, n, cat, u, _ in products])
@@ -70,3 +77,35 @@ def test_alternatives_only_cheaper_and_eligible(con4c):
     meat = items["mljeveno_meso"]
     assert meat["product_id"] == "M1" and [a["product_id"] for a in meat["alternatives"]] == ["M2"]
     assert meat["alternatives"][0]["delta_eur"] == -1.0
+
+
+# --- 2. jaja ----------------------------------------------------------------------------------------------
+
+EGGS = [{"name": "jaja", "amount": 3, "unit": "kom"}]
+
+
+def test_eggs_default_m_l_better_than_cage(con4c):
+    res = plan_basket(EGGS, "Osijek", con=con4c, store=KONZUM, alternatives=True)
+    eggs = res["best_store"]["items"][0]
+    # podna M i kavezna M su iste cijene: bira se bolji uzgoj; kavezna S je samo jeftinija alternativa
+    assert eggs["product_id"] == "E2" and eggs["attributes"]["uzgoj"] == "podni"
+    assert [(a["product_id"], a["note"]) for a in eggs["alternatives"]] == [("E3", "kavezni, S")]
+    assert eggs["alternatives"][0]["cheaper"]
+
+
+def test_eggs_only_cage_marked(con4c):
+    lidl = {"chain": "lidl", "address_contains": ""}
+    eggs = plan_basket(EGGS, "Osijek", con=con4c, store=lidl)["best_store"]["items"]
+    # Lidl (fixture) nema jaja izvan kaveza: kavezna M je izbor (S tek kad nema ni M/L), uz napomenu
+    assert eggs[0]["product_id"] == "E5" and "izvan zadanog izbora: kavezni" in eggs[0]["notes"]
+
+
+def test_egg_price_per_piece_not_rounded(con4c):
+    rows = dict(con4c.execute("""
+        SELECT ps.product_id, c.price_eff / ps.n_units FROM clean.product_staples ps JOIN clean.prices c
+        USING (chain, product_id) WHERE ps.staple = 'jaja' AND ps.product_id IN ('E5', 'E6')""").fetchall())
+    assert float(rows["E5"]) == pytest.approx(0.089) and float(rows["E6"]) == pytest.approx(0.079)
+    suspect = dict(con4c.execute("""SELECT product_id, unit_suspect FROM clean.product_staples
+                                    WHERE staple = 'jaja' AND product_id IN ('E5', 'E6')""").fetchall())
+    assert suspect == {"E5": False, "E6": True}  # 0,089 u granicama [0,08, 0,55], 0,079 ispod
+    assert load_staples()["jaja"].plausible_by == {"uzgoj": {"bio": (0.30, 1.00), "_other": (0.08, 0.55)}}
