@@ -41,6 +41,8 @@ PRODUCTS = [
     # Korak 5B.7: alternative na istu količinu
     ("P26", "NUTELLA 400 g", "ko", {K: 4.49}),
     ("P27", "LINO LADA GOLD 350 g", "ko", {K: 3.49}),
+    # Korak 5P.0: jeftinija kobasica druge vrste
+    ("P28", "PILEĆA POSEBNA KOBASICA 400 g", "ko", {K: 1.59}),
 ]
 
 

@@ -39,7 +39,9 @@ def test_descriptions_bilingual():
                  "cijene iz cjenika od 20.10.2026.", "veličina pakiranja", "akcije se mijenjaju",
                  # Korak 5B: preporuka po total_to_buy, pretpostavke, ne nakon jedne pretrage, pitaj, 2 adrese, lanci
                  "najmanjim total_to_buy", "informativni", "assumptions", "nakon\n   jedne pretrage",
-                 "nesigurnog izbora pitaj", "najviše 2 adrese", "Studenac, Eurospin", "incomplete"):
+                 "nesigurnog izbora pitaj", "najviše 2 adrese", "Studenac, Eurospin", "incomplete",
+                 # Korak 5P: oblik količine iz recepta
+                 "(suho, kuhano, smrznuto)", "(dry, cooked, frozen)"):
         assert word in instructions, word
     plan = next(t for t in tools if t.name == "plan_basket").description
     for word in ("free_text", "summary_hr", "cheaper", "delta_eur", "n_stores", "pack_size"):

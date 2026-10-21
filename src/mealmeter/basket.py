@@ -623,10 +623,22 @@ def _alternatives(rows: list[dict], need: "Need", item: dict, n: int = 2) -> lis
                **alt_delta(p["cost_used"], p.get("pack_size") or pack_size(p, need.unit), item),
                "price_per_unit": p["price_per_unit"], "per_unit": p["per_unit"],
                "match_quality": "free_text" if need.free_text else p.get("match_quality")}
-        if note := need.note_fn(attrs(p)) if need.note_fn else None:
-            alt["note"] = note
+        notes = [n for n in (need.note_fn(attrs(p)) if need.note_fn else None,
+                             kind_note(item.get("attributes") or {}, attrs(p))) if n]
+        if notes:
+            alt["note"] = "; ".join(notes)
         out.append(alt)
     return out
+
+
+def kind_note(chosen: dict, alt: dict, attr: str = "vrsta") -> str | None:
+    """Napomena kad alternativa nije iste vrste kao odabrani proizvod (Korak 5P): "nije dimljena (posebna)",
+    ili "nije označeno kao dimljena" kad vrsta alternative nije poznata. Bez poznate vrste odabranog nema."""
+    want = chosen.get(attr)
+    if not want or want == "nepoznato" or alt.get(attr) == want:
+        return None
+    got = alt.get(attr)
+    return f"nije {want} ({got})" if got and got != "nepoznato" else f"nije označeno kao {want}"
 
 
 def alt_delta(alt_used: float, alt_size: str | None, item: dict) -> dict:
