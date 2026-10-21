@@ -14,7 +14,7 @@ from mealmeter import units
 from mealmeter.build import NATIONAL_NOTE
 from mealmeter.build import WHOLESALE_CHAINS
 from mealmeter.normalize import date_hr, norm_text, parse_multipack_unit
-from mealmeter.search import _candidates, _food_filter, connect, find_products, format_pack, resolve_city
+from mealmeter.search import _candidates, _city_filter, _food_filter, connect, find_products, format_pack, resolve_city
 from mealmeter.staples import Staple, extract_attributes_detail, load_staples, resolve_ingredient
 
 # jedinica u receptu -> (osnovna jedinica, faktor); kuhinjske mjere (žlica, šalica...) su u data/units.yaml
@@ -1003,7 +1003,11 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
     ranked = sorted(merged, key=lambda s: (-s["n_matched"], s["data_quality"] == "suspect",
                                            s["total_to_buy"], s["flagged_items"]))
     out["stores"] = ranked[:max_stores] if max_stores else ranked
-    out["comparison"], out["incomplete"] = compare_chains(ranked, in_city, n_needs)
+    city_sql, city_params = _city_filter(city)
+    city_chains = {r[0] for r in con.execute(
+        f"SELECT DISTINCT s.chain FROM clean.stores s WHERE s.scope = 'local' AND {city_sql}", city_params).fetchall()}
+    out["comparison"], out["incomplete"], out["more_chains"] = compare_chains(
+        ranked, in_city, n_needs, needs, city_chains if not store_spec else set())
     eligible = [s for s in ranked if s["data_quality"] != "suspect"] or ranked
     if eligible:
         out["best_store"] = eligible[0]
@@ -1113,18 +1117,26 @@ MAX_ADDRESSES = 3
 
 
 COMPARE_MIN_SHARE, COMPARE_ROWS, COMPARE_ADDRESSES = 0.8, 6, 2
+# veći lanci: u usporedbi su uvijek, i kad u gradu nemaju nijedan sastojak (tada incomplete)
+MAJOR_CHAINS = ("konzum", "lidl", "kaufland", "spar", "plodine", "tommy", "studenac", "eurospin")
 
 
-def compare_chains(ranked: list[dict], in_city: Counter, n_needs: int) -> tuple[list[dict], list[dict]]:
+def compare_chains(ranked: list[dict], in_city: Counter, n_needs: int, needs: list | None = None,
+                   city_chains: set | None = None) -> tuple[list[dict], list[dict], list[dict]]:
     """Usporedba lanaca: po jedan redak (najjeftinija trgovina lanca s najviše sastojaka) za lance s >= 80 %
     povezanih sastojaka, od najmanjeg total_to_buy, najviše COMPARE_ROWS redaka i COMPARE_ADDRESSES adrese;
-    ostali lanci idu u incomplete s popisom onoga što nedostaje ("nedostaje: X, Y")."""
+    takvi lanci iza COMPARE_ROWS idu u more (lanac i total_to_buy). Lanci ispod 80 % i veći lanci (MAJOR_CHAINS)
+    koji u gradu imaju trgovinu, a nijedan sastojak, idu u incomplete ("nedostaje: X, Y")."""
     best: dict[str, dict] = {}
     for s in ranked:  # ranked: najviše sastojaka, pa najmanji total_to_buy
         best.setdefault(s["chain"], s)
-    rows, incomplete = [], []
+    rows, incomplete, more = [], [], []
     for s in sorted(best.values(), key=lambda s: (-s["n_matched"], s["total_to_buy"])):
-        if n_needs and s["n_matched"] / n_needs >= COMPARE_MIN_SHARE and len(rows) < COMPARE_ROWS:
+        enough = n_needs and s["n_matched"] / n_needs >= COMPARE_MIN_SHARE
+        if enough and len(rows) >= COMPARE_ROWS:
+            more.append({"chain": s["chain"], "total_to_buy": s["total_to_buy"], "n_matched": s["n_matched"]})
+            continue
+        if enough:
             addresses = [a for a in (s.get("addresses") or [s["address"]]) if a][:COMPARE_ADDRESSES]
             rows.append({"chain": s["chain"], "addresses": addresses,
                          "n_stores_city": in_city.get(s["chain"], 1), "total_to_buy": s["total_to_buy"],
@@ -1133,7 +1145,10 @@ def compare_chains(ranked: list[dict], in_city: Counter, n_needs: int) -> tuple[
         else:
             incomplete.append({"chain": s["chain"], "n_matched": s["n_matched"], "missing": s["missing"],
                                "note": "nedostaje: " + ", ".join(s["missing"])})
-    return rows, incomplete
+    names = [n.input.get("name") for n in needs or []]
+    for chain in sorted((city_chains or set()) & set(MAJOR_CHAINS) - set(best)):
+        incomplete.append({"chain": chain, "n_matched": 0, "missing": names, "note": "nedostaje: " + ", ".join(names)})
+    return rows, incomplete, more
 
 
 def merge_same_chain(stores: list[dict]) -> list[dict]:

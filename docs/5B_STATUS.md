@@ -9,7 +9,7 @@
 | 5 free_text sinonimi (data/synonyms.yaml) | gotovo (12 unosa; bez pogotka: candidates s razlogom) |
 | 6 pretpostavke (assumptions) | gotovo (data/assumptions.yaml, 14 namirnica) |
 | 7 alternative na istu količinu | gotovo (delta_eur iz cost_used, size_note) |
-| 8 upute poslužitelja | - |
+| 8 upute poslužitelja | gotovo (12 pravila; usporedba: more_chains i veći lanci bez sastojaka u incomplete) |
 | 9 smoke_5b | - |
 
 **Točka 1, uzrok razlike od 0,07 €:** zaokruživanje nije uzrok, jer se zbrajaju već zaokruženi iznosi. total_used je

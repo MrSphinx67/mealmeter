@@ -36,7 +36,10 @@ def test_descriptions_bilingual():
                  "zaliha", "stock", "izmišljaj",
                  # Korak 4B: jedna poruka pitanja, potvrđeni sastojci, free_text, cheaper, summary_hr, tablica
                  "JEDNOJ", "nadjev", "nije potvrdio", "free_text", "cheaper = true", "summary_hr",
-                 "cijene iz cjenika od 20.10.2026.", "veličina pakiranja", "akcije se mijenjaju"):
+                 "cijene iz cjenika od 20.10.2026.", "veličina pakiranja", "akcije se mijenjaju",
+                 # Korak 5B: preporuka po total_to_buy, pretpostavke, ne nakon jedne pretrage, pitaj, 2 adrese, lanci
+                 "najmanjim total_to_buy", "informativni", "assumptions", "nakon\n   jedne pretrage",
+                 "nesigurnog izbora pitaj", "najviše 2 adrese", "Studenac, Eurospin", "incomplete"):
         assert word in instructions, word
     plan = next(t for t in tools if t.name == "plan_basket").description
     for word in ("free_text", "summary_hr", "cheaper", "delta_eur", "n_stores", "pack_size"):

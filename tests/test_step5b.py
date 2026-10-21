@@ -262,3 +262,18 @@ def test_alternative_delta_on_needed_amount(con5b):
     # cijela pakiranja: 3,49 - 4,49 = -1,00; za potrebnih 300 g: 2,99 - 3,37 = -0,38
     assert lino["cost_used"] == round(3.49 / 350 * 300, 2) and lino["delta_eur"] == -0.38 and lino["cheaper"]
     assert lino["size_note"] == "usporedba za 300 g: pakiranje 350 g, odabrano 400 g"
+
+
+def test_compare_chains_overflow_and_major_without_items():
+    from collections import Counter
+
+    from mealmeter.basket import compare_chains
+
+    def store(chain, total, n=2, missing=()):
+        return {"chain": chain, "total_to_buy": total, "total_used": total / 2, "n_matched": n, "missing": list(missing),
+                "address": f"{chain} 1", "addresses": [f"{chain} 1", f"{chain} 2", f"{chain} 3"]}
+    ranked = [store(c, i + 1.0) for i, c in enumerate(["a", "b", "c", "d", "e", "f", "g"])] + [store("h", 9, 1, ["x"])]
+    rows, incomplete, more = compare_chains(ranked, Counter(), 2, city_chains={"studenac", "a"})
+    assert [r["chain"] for r in rows] == ["a", "b", "c", "d", "e", "f"] and all(len(r["addresses"]) == 2 for r in rows)
+    assert more == [{"chain": "g", "total_to_buy": 7.0, "n_matched": 2}]
+    assert [(i["chain"], i["note"]) for i in incomplete] == [("h", "nedostaje: x"), ("studenac", "nedostaje: ")]
