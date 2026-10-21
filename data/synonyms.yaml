@@ -1,0 +1,15 @@
+# Sinonimi za slobodnu pretragu (free_text), Korak 5B: ako naziv sastojka ne pronađe proizvod, plan_basket
+# redom pokuša do 3 ovdje navedena naziva prije zaključka da proizvoda nema. Ključ i nazivi pišu se kako bi ih
+# korisnik napisao (velika slova i dijakritika nisu bitni).
+dimljena kobasica: [slavonska kobasica, kulen, suha kobasica]
+domaća kobasica: [slavonska kobasica, kulen, suha kobasica]
+suha kobasica: [slavonska kobasica, kulen, čajna kobasica]
+kikiriki maslac: [maslac od kikirikija, kikiriki krema, peanut butter]
+tahini: [sezamova pasta, tahin, sezam pasta]
+kokosovo mlijeko: [kokos mlijeko, coconut milk, kokosov napitak]
+sojin umak: [soja umak, soy sauce, umak od soje]
+pšenični griz: [griz, krupica]
+kvasac: [svježi kvasac, suhi kvasac, germa]
+puding od vanilije: [puding vanilija, vanilin puding, puding vanilin]
+šlag: [vrhnje za šlag, slatko vrhnje, šlag pjena]
+čokolada za kuhanje: [čokolada za kolače, tamna čokolada, kuhinjska čokolada]

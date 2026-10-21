@@ -51,3 +51,48 @@ def test_golden_files_present():
     assert len(files) == 20
     kinds = {f.name.split("_")[0] for f in files}
     assert kinds == {"find", "prices", "basket"}
+
+
+# --- 2. sažeta baza: isti izlazi kao puna (fixture baza) ---------------------------------------------------
+
+def test_compact_db_same_outputs(tmp_path):
+    import importlib.util
+    import json
+    from pathlib import Path
+
+    import duckdb
+
+    from mealmeter import server as srv
+    from mealmeter.build import build_clean, load_raw
+    from tests.conftest import FIXTURE
+
+    full = tmp_path / "full.duckdb"
+    c = duckdb.connect(str(full))
+    load_raw(c, FIXTURE, "2026-10-19")
+    # dvije Konzumove trgovine u Osijeku: ista cijena (osnovni redak) i druga cijena (iznimka)
+    c.execute("""INSERT INTO stores SELECT chain, '0908', type, 'Vukovarska 1', city, zipcode FROM stores
+                 WHERE chain = 'konzum' AND store_id = '0907'""")
+    c.execute("""INSERT INTO prices SELECT chain, '0908', product_id, price + 0.10, unit_price, best_price_30,
+                 anchor_price, special_price, date FROM prices WHERE chain = 'konzum' AND store_id = '0907'""")
+    build_clean(c)
+    c.close()
+    spec = importlib.util.spec_from_file_location("bc", Path(__file__).parents[1] / "scripts" / "build_compact.py")
+    bc = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(bc)
+    counts = bc.build(full, tmp_path / "compact.duckdb")
+    assert counts["price_exceptions"] > 0 and counts["store_products"] > 0
+
+    pancakes = [{"name": "brašno glatko", "amount": 250, "unit": "g"}, {"name": "mlijeko", "amount": 500, "unit": "ml"},
+                {"name": "jaja", "amount": 3, "unit": "kom"}]
+    calls = [("plan_basket", dict(ingredients=pancakes, city="Osijek", detail=True)),
+             ("find_products", dict(ingredient="brašno", city="Osijek")),
+             ("get_prices", dict(product_id="3850104223624")), ("list_stores", dict(city="Osijek"))]
+    state = (srv._shared_con, srv._fixed_con, srv._db_path, srv._db_key)
+    try:
+        outs = []
+        for db in (full, tmp_path / "compact.duckdb"):
+            srv.create_server(db_path=str(db))
+            outs.append([json.loads(srv._dumps(getattr(srv, name)(**args))) for name, args in calls])
+    finally:
+        srv._shared_con, srv._fixed_con, srv._db_path, srv._db_key = state
+    assert outs[0] == outs[1]

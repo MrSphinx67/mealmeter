@@ -7,7 +7,7 @@ Pokretanje:
 Javni podaci samo za čitanje, bez prijave. HTTP ima ograničenja upita u minuti po IP-u, po MCP sesiji i
 ukupno (MM_RATE_IP, MM_RATE_SESSION, MM_RATE_GLOBAL; IP iz CF-Connecting-IP / X-Forwarded-For samo uz
 TRUSTED_PROXY=1) i veličine zahtjeva; svaki odgovor alata je najviše MAX_RESPONSE_BYTES (dulji popisi se skraćuju, uz
-truncated = true). Baza: MEALMETER_DB ili data/mealmeter.duckdb.
+truncated = true). Baza: MM_DB (npr. data/compact.duckdb), MEALMETER_DB ili data/mealmeter.duckdb.
 """
 
 import argparse
@@ -738,7 +738,7 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument("--http", action="store_true", help="streamable HTTP umjesto stdio")
     ap.add_argument("--host", default="127.0.0.1", help="adresa slušanja (zadano 127.0.0.1; tunel spaja lokalno)")
     ap.add_argument("--port", type=int, default=8000)
-    ap.add_argument("--db", default=None, help="putanja baze (inače MEALMETER_DB ili data/mealmeter.duckdb)")
+    ap.add_argument("--db", default=None, help="putanja baze (inače MM_DB, MEALMETER_DB ili data/mealmeter.duckdb)")
     args = ap.parse_args(argv)
     server = create_server(db_path=args.db)
     if not args.http:

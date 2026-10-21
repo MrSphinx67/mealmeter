@@ -1,0 +1,8 @@
+# Prinos oblika mahunarki (Korak 5B): koliko grama gotovog (kuhanog) proizvoda daje 1 g u obliku.
+# SVE VRIJEDNOSTI SU PROCJENE (estimate: true). Količina u receptu je količina gotovog proizvoda; pri usporedbi
+# i izračunu oblik "suho" traži amount / faktor (grašak 800 g gotov ≈ 320 g suhog). Konzerva se računa po
+# ocijeđenoj masi (drained_amount iz naziva, inače bruto), smrznuto i svježe 1:1.
+grah: {suho: {factor: 2.5, estimate: true}}
+leca: {suho: {factor: 2.5, estimate: true}}
+slanutak: {suho: {factor: 2.5, estimate: true}}
+grasak: {suho: {factor: 2.5, estimate: true}}

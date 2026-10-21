@@ -1,0 +1,17 @@
+# Pretpostavljene količine kad recept ne navodi količinu (Korak 5B): sastojak bez amount (ili s "po ukusu").
+# plan_basket ih koristi i vraća u assumptions[] s tekstom, da ih AI navede korisniku. PROCJENE za 4 osobe.
+# namirnica: {amount, unit (g | ml | kom), text}
+tvrdi_sir_talijanski: {amount: 40, unit: g, text: "40 g za posipanje"}
+tvrdi_sir: {amount: 40, unit: g, text: "40 g za posipanje"}
+sol: {amount: 5, unit: g, text: "5 g (žličica) po ukusu"}
+papar: {amount: 1, unit: g, text: "1 g (pola žličice) po ukusu"}
+mljevena_paprika: {amount: 5, unit: g, text: "5 g (žličica)"}
+origano: {amount: 2, unit: g, text: "2 g (žličica suhog)"}
+bosiljak: {amount: 2, unit: g, text: "2 g (žličica suhog)"}
+lovorov_list: {amount: 2, unit: kom, text: "2 lista"}
+dodatak_jelima: {amount: 5, unit: g, text: "5 g (žličica)"}
+ulje: {amount: 30, unit: ml, text: "30 ml (2 žlice) za prženje"}
+maslinovo_ulje: {amount: 30, unit: ml, text: "30 ml (2 žlice)"}
+secer: {amount: 10, unit: g, text: "10 g (žlica)"}
+persin: {amount: 1, unit: kom, text: "1 vezica"}
+cesnjak: {amount: 2, unit: kom, text: "2 češnja"}
