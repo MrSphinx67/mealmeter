@@ -195,12 +195,7 @@ def plan_basket(
     except ValueError as e:
         return _error(e)
     res.setdefault("date", _price_list_date(con)["date"])
-    res["note"] = PRICE_NOTE
-    # ostale trgovine bez alternativa (alternative nosi best_store), da odgovor ostane kratak
-    for s in res["stores"]:
-        if s is not res["best_store"]:
-            for it in s["items"]:
-                it.pop("alternatives", None)
+    res["note"] = PRICE_NOTE  # alternative nosi samo best_store (basket.plan_basket)
     return _fit(res, ("stores", "best_store.items"))
 
 

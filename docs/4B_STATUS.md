@@ -3,7 +3,7 @@
 | točka | stanje |
 |---|---|
 | 1 upute i opisi alata | gotovo |
-| 2 plan_basket (summary_hr, alternative, free_text, spajanje trgovina) | - |
+| 2 plan_basket (summary_hr, alternative, free_text, spajanje trgovina) | gotovo |
 | 3 nove namirnice (čokoladni namaz, džem) | - |
 | 4 višestruka pakiranja iz stupca unit | - |
 | 5 jaja plausible_by | - |

@@ -120,7 +120,9 @@ BASIC = [
 def test_plan_basket_osijek(con):
     res = plan_basket(BASIC, "osijek", con=con)
     assert res["city"] == "Osijek" and res["date"] == "2026-10-19" and res["date_hr"] == "19.10.2026."
-    assert res["unmatched"] == [{"name": "šafran", "reason": "nepoznata namirnica 'šafran' (nema je u staples.yaml)"}]
+    assert [(u["name"], u["reason"]) for u in res["unmatched"]] == [
+        ("šafran", "nepoznata namirnica 'šafran' (nema je u staples.yaml)")]
+    assert "free_text" in res["unmatched"][0]["hint"] and len(res["unmatched"][0]["suggestions"]) <= 3
     assert [i["staple"] for i in res["ingredients"]] == ["brasno", "mlijeko", "banana"]
     best = res["best_store"]
     assert best["n_matched"] == 2 and best["n_ingredients"] == 3 and len(best["missing"]) == 1

@@ -2,6 +2,7 @@
 
 import difflib
 import math
+import re
 from dataclasses import dataclass, field
 
 import duckdb
@@ -9,7 +10,7 @@ import duckdb
 from mealmeter import units
 from mealmeter.build import NATIONAL_NOTE
 from mealmeter.normalize import date_hr, norm_text
-from mealmeter.search import _candidates, _food_filter, connect, resolve_city
+from mealmeter.search import _candidates, _food_filter, connect, find_products, format_pack, resolve_city
 from mealmeter.staples import Staple, load_staples, resolve_ingredient
 
 # jedinica u receptu -> (osnovna jedinica, faktor); kuhinjske mjere (žlica, šalica...) su u data/units.yaml
@@ -50,9 +51,10 @@ FORM_ORDER = ("suho", "konzerva", "smrznuto", "svjeze")
 
 @dataclass
 class Need:
-    """Sastojak recepta preveden u namirnicu i količinu u njezinoj osnovnoj jedinici."""
+    """Sastojak recepta preveden u namirnicu i količinu u njezinoj osnovnoj jedinici. Sastojak izvan
+    rječnika (free_text) nema namirnicu (staple None) i nosi kandidate po trgovini iz pretrage po nazivu."""
     input: dict
-    staple: Staple
+    staple: Staple | None
     amount: float  # u `unit`
     unit: str  # g | ml | kom | vrecica
     attributes: dict = field(default_factory=dict)
@@ -60,6 +62,8 @@ class Need:
     assumed_form: bool = False
     input_staple: str | None = None
     warnings: list = field(default_factory=list)
+    free_text: bool = False
+    free_rows: dict = field(default_factory=dict)
 
 
 def resolve_name(name: str) -> tuple[Staple, dict]:
@@ -406,22 +410,111 @@ def _filter_store(stores: dict[tuple, dict], spec: dict, out: dict) -> dict[tupl
     return local
 
 
+def _choose_args(need: "Need") -> tuple:
+    """Argumenti choose_product za sastojak: količina, jedinica, kupnja na vagu."""
+    if need.free_text:
+        # slobodan naziv: na vagu samo roba promjenjive težine i samo bez pakiranog proizvoda
+        return need.amount, need.unit, {"g": "kg", "ml": "l"}.get(need.unit), False
+    return need.amount, need.unit, _by_weight_unit(need.staple), _by_weight_primary(need.staple)
+
+
+def pack_size(pick: dict, need_unit: str) -> str | None:
+    """Veličina jednog pakiranja za prikaz ("500 g", "1 l", "6 vrećica, 72 g", "na vagu")."""
+    if pick.get("by_weight"):
+        return "na vagu"
+    if pick.get("assumed_g"):
+        return "≈ " + format_pack(pick["assumed_g"], "g")
+    size = format_pack(pick.get("pack_amount"), pick.get("pack_unit"))
+    if need_unit == "vrecica" and (pick.get("n_units") or 0) > 1:
+        return f"{pick['n_units']:g} vrećica" + (f", {size}" if size else "")
+    return size or format_pack(pick.get("qty"), need_unit)
+
+
+ALT_POOL = 6  # koliko sljedećih najboljih izbora se gleda prije sortiranja alternativa po cijeni
+
+
 def _alternatives(rows: list[dict], need: "Need", item: dict, n: int = 2) -> list[dict]:
-    """Do n drugih proizvoda u istoj trgovini (najbolji izbor bez već odabranih), s cijenom."""
-    args = (need.amount, need.unit, _by_weight_unit(need.staple), _by_weight_primary(need.staple))
-    taken, names, alts = {item["product_id"]}, {item["name"]}, []
-    while len(alts) < n:
+    """Do n drugih proizvoda u istoj trgovini, od najjeftinijeg pakiranja (cost_pack), s razlikom prema
+    odabranom (delta_eur = alternativa minus odabrano) i cheaper (je li alternativa jeftinija). Gleda se
+    ALT_POOL sljedećih najboljih izbora (choose_product); oni bez zastavica i snažni idu ispred ostalih."""
+    args = _choose_args(need)
+    taken, names, picks = {item["product_id"]}, {item["name"]}, []
+    while len(picks) < ALT_POOL:
         rest = [r for r in rows if r["product_id"] not in taken and r["name"] not in names]
         pick = choose_product(rest, *args) if rest else None
         if pick is None:
             break
         taken.add(pick["product_id"])
         names.add(pick["name"])
-        alts.append({"product_id": pick["product_id"], "ean": pick["ean_norm"], "name": pick["name"],
-                     "n_packs": pick["n_packs"], "price_eff": pick["price_eff"], "cost_pack": pick["cost_pack"],
-                     "cost_used": pick["cost_used"], "price_per_unit": pick["price_per_unit"],
-                     "per_unit": pick["per_unit"], "flags": pick["flags"], "match_quality": pick.get("match_quality")})
-    return alts
+        picks.append(pick)
+    weaker = lambda p: p["fallback"] or p.get("match_quality") == "weak"  # noqa: E731
+    chosen = sorted(sorted(picks, key=lambda p: (weaker(p), p["cost_pack"]))[:n], key=lambda p: p["cost_pack"])
+    return [{"product_id": p["product_id"], "ean": p["ean_norm"], "name": p["name"],
+             "pack_size": pack_size(p, need.unit), "n_packs": p["n_packs"], "price_eff": p["price_eff"],
+             "cost_pack": p["cost_pack"], "cost_used": p["cost_used"],
+             "delta_eur": round(p["cost_pack"] - item["cost_pack"], 2), "cheaper": p["cost_pack"] < item["cost_pack"],
+             "price_per_unit": p["price_per_unit"], "per_unit": p["per_unit"], "flags": p["flags"],
+             "match_quality": "free_text" if need.free_text else p.get("match_quality")} for p in chosen]
+
+
+# --- sastojak izvan rječnika (free_text) ---------------------------------------------
+
+def _free_tokens(name: str) -> list[str]:
+    """Riječi naziva za pretragu: bez brojeva i riječi kraćih od 2 slova."""
+    return [w for w in (norm_text(name) or "").split() if len(w) >= 2 and not w[0].isdigit()]
+
+
+def _free_need(item: dict) -> "Need":
+    """Sastojak bez namirnice: količina u g, ml ili kom (žlice preko 1 g/ml, uz upozorenje)."""
+    amount, unit = _input_amount(item)
+    if amount <= 0:
+        raise IngredientError("količina mora biti pozitivna")
+    if not _free_tokens(item.get("name") or ""):
+        raise IngredientError(f"'{item.get('name')}': nema riječi za pretragu")
+    key = norm_text(unit) or ""
+    if units.is_measure(unit):
+        qty, base, warnings = units.convert(amount, unit, norm_text(item.get("name") or ""))
+    elif key in _UNIT_ALIASES and _UNIT_ALIASES[key][0] in ("g", "ml", "kom"):
+        base, factor = _UNIT_ALIASES[key]
+        qty, warnings = amount * factor, []
+    else:
+        raise IngredientError(f"nepoznata jedinica '{unit}' (free_text: g, ml ili kom)")
+    return Need(item, None, qty, base, free_text=True,
+                warnings=warnings + [f"'{item.get('name')}': slobodna pretraga po nazivu (nije u rječniku); provjeri proizvod"])
+
+
+def _free_rows(con, need: "Need", city: str, wholesale: bool = False) -> dict[tuple, list[dict]]:
+    """Kandidati po trgovini za slobodan naziv, kao find_products: samo provjerena hrana bez alkohola, sve
+    riječi naziva u nazivu proizvoda, a barem jedna među prve tri riječi proizvoda ("NUTELLA 400 g", a ne
+    "KEKSI S NUTELLOM"). Bez namirnice nema slabih članova (match_quality je 'free_text')."""
+    tokens = _free_tokens(need.input.get("name") or "")
+    sql, params, _ = _candidates(None, tokens, None, city, include_clearance=False, food_sql=_food_filter(),
+                                 include_wholesale=wholesale)
+    early = "^(?:[^ ]+ ){0,2}(?:" + "|".join(re.escape(t) for t in tokens) + ")"
+    cur = con.execute(sql + " SELECT * FROM x WHERE regexp_matches(name_norm, ?)", params + [early])
+    cols = [d[0] for d in cur.description]
+    by_store: dict[tuple, list[dict]] = {}
+    for r in (dict(zip(cols, row)) for row in cur.fetchall()):
+        for k in ("price_eff", "price_per_unit", "pack_amount", "drained_amount", "n_units", "assumed_g"):
+            r[k] = _num(r.get(k))
+        by_store.setdefault((r["chain"], r["store_id"]), []).append(r)
+    return by_store
+
+
+def suggestions(con, name: str, city: str | None, n: int = 3) -> list[str]:
+    """Do n prijedloga za sastojak bez pogotka: slične namirnice iz rječnika, zatim proizvodi koji imaju
+    barem jednu riječ naziva (najdulja riječ prva)."""
+    q = norm_text(name) or ""
+    synonyms = {syn: st.name for st in load_staples().values() for syn in st.synonyms}
+    out = [synonyms[h] for h in difflib.get_close_matches(q, list(synonyms), n=n, cutoff=0.75)]
+    for token in sorted(_free_tokens(name), key=len, reverse=True):
+        if len(out) >= n:
+            break
+        try:
+            out += [r["name"] for r in find_products(token, city=city, limit=n, con=con)]
+        except ValueError:
+            continue
+    return list(dict.fromkeys(out))[:n]
 
 
 def _apply_overrides(store: dict, overrides: list[dict], out: dict) -> None:
@@ -439,7 +532,8 @@ def _apply_overrides(store: dict, overrides: list[dict], out: dict) -> None:
         except IngredientError:
             staple_key = None
         hits = [it for it in store["items"] if key and (
-            norm_text(it["ingredient"] or "") == key or it["staple"] == staple_key or key in norm_text(it["name"]))]
+            norm_text(it["ingredient"] or "") == key or (staple_key and it["staple"] == staple_key)
+            or key in norm_text(it["name"]))]
         if not hits:
             out["warnings"].append(f"price_overrides: '{ov.get('name')}' nije stavka košarice")
             continue
@@ -486,20 +580,40 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
         out["city_suggestions"] = city_suggestions(con, city or "")
         out["warnings"].append(f"nepoznat grad '{city}'" + (
             f"; možda: {', '.join(out['city_suggestions'])}" if out["city_suggestions"] else ""))
+        out["summary_hr"] = f"Nepoznat grad '{city}'."
         return out
     out["city"] = resolved_city
     have = set()
+    free_names = {norm_text(i.get("name") or "") for i in ingredients if i.get("free_text")}
+    have_text = set()  # already_have po nazivu, za sastojke izvan rječnika (free_text)
     for name in already_have or []:
+        have_text.add(norm_text(name))
         try:
             have.add(resolve_name(name)[0].key)
         except IngredientError:
-            out["warnings"].append(f"already_have: nepoznata namirnica '{name}'")
-    out["already_have"] = sorted(have)
+            if norm_text(name) not in free_names:
+                out["warnings"].append(f"already_have: nepoznata namirnica '{name}'")
+    out["already_have"] = sorted(have | (have_text & free_names))
 
     needs = []
     for item in ingredients:
         try:
-            staple, attrs = resolve_name(item.get("name", ""))
+            try:
+                staple, attrs = resolve_name(item.get("name", ""))
+            except IngredientError:
+                if not item.get("free_text"):
+                    raise
+                # izvan rječnika: pretraga po nazivu u svakoj trgovini; bez pogotka ide u unmatched
+                need = _free_need(item)
+                need.free_rows = _free_rows(con, need, city, include_wholesale)
+                if not need.free_rows:
+                    out["unmatched"].append({
+                        "name": item.get("name"), "free_text": True,
+                        "reason": f"nijedan prehrambeni proizvod s nazivom '{item.get('name')}' u gradu",
+                        "suggestions": suggestions(con, item.get("name") or "", city)})
+                    continue
+                needs.append(need)
+                continue
             attrs.update(item.get("attributes") or {})
             for a, v in attrs.items():
                 if v not in staple.attributes.get(a, {}):
@@ -513,7 +627,11 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
                 need.warnings += more
             needs.append(need)
         except IngredientError as e:
-            out["unmatched"].append({"name": item.get("name"), "reason": str(e)})
+            entry = {"name": item.get("name"), "reason": str(e)}
+            if str(e).startswith("nepoznata namirnica"):
+                entry["suggestions"] = suggestions(con, item.get("name") or "", city)
+                entry["hint"] = 'pošalji s "free_text": true za pretragu po nazivu proizvoda'
+            out["unmatched"].append(entry)
         except FormAmbiguity as e:
             # bez oblika se ne računa: korisnik bira oblik ("form") i ponovi upit
             out["ambiguous"].append({"name": item.get("name"), "staple": staple.key, "amount": amount, "unit": unit,
@@ -523,6 +641,17 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
     stores: dict[tuple, dict] = {}
     store_rows: dict[tuple, list] = {}  # (trgovina, sastojak) -> kandidati, za alternative
     for idx, need in enumerate(needs):
+        out["warnings"] += need.warnings
+        if need.free_text:
+            out["ingredients"].append({
+                "name": need.input.get("name"), "staple": None, "free_text": True, "amount": round(need.amount, 3),
+                "unit": need.unit, "attributes": {}, "form": None, "assumed_form": None, "pantry": False,
+                "warnings": need.warnings})
+            for key, rows in need.free_rows.items():
+                if pick := choose_product(rows, *_choose_args(need)):
+                    store_rows[(key, idx)] = rows
+                    _add_item(stores, key, rows, need, idx, pick, {}, [], norm_text(need.input.get("name") or "") in have_text)
+            continue
         out["ingredients"].append({
             "name": need.input.get("name"), "staple": need.staple.key, "amount": round(need.amount, 3),
             "unit": need.unit, "attributes": need.attributes, "form": need.form,
@@ -535,7 +664,6 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
             "assumed_form": need.form if need.assumed_form else None, "pantry": need.staple.pantry,
             "warnings": need.warnings,
         })
-        out["warnings"] += need.warnings
         attrs_of, attrs_of_ean = _product_attrs(con, need.staple)
         prefs = {a: v for a, v in need.staple.default_preference.items() if a not in need.attributes}
         group_values = _group_values(con, need.staple, prefs)
@@ -544,12 +672,6 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
             if pick is None:
                 continue
             store_rows[(key, idx)] = rows
-            first = rows[0]
-            store = stores.setdefault(key, {
-                "chain": first["chain"], "store_id": first["store_id"], "address": first["address"],
-                "city": first["city"], "scope": first["scope"], "data_quality": first["data_quality"],
-                "items": {}, "date": first["date"],
-            })
             chosen = chosen_attributes(pick, attrs_of, attrs_of_ean)
             wanted = {**need.staple.defaults(), **need.attributes}
             subst = [f"{a}={chosen[a]} umjesto {v} (zamjenjivo)" for a, v in wanted.items()
@@ -557,21 +679,8 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
                      and chosen[a] in need.staple.accepted_values(a, v)]
             subst += [f"{a}={chosen[a]}: prva dostupna po zadanom redoslijedu ({', '.join(v)})"
                       for a, v in wanted.items() if isinstance(v, tuple) and chosen.get(a) not in (None, v[0])]
-            store["items"][idx] = {
-                "ingredient": need.input.get("name"), "staple": need.staple.key, "need": round(need.amount, 3),
-                "need_unit": need.unit, "product_id": pick["product_id"], "ean": pick["ean_norm"],
-                "name": pick["name"], "attributes": chosen,
-                "pack_qty": pick["qty"], "n_packs": pick["n_packs"],
-                "price_eff": pick["price_eff"], "cost_pack": pick["cost_pack"], "cost_used": pick["cost_used"],
-                "have": need.staple.key in have or need.input_staple in have,
-                "pantry": need.staple.pantry, "price_per_unit": pick["price_per_unit"], "per_unit": pick["per_unit"],
-                "unit_confidence": pick["unit_confidence"], "pack_source": pick["pack_source"],
-                "is_special": pick["is_special"], "flags": pick["flags"], "notes": pick["notes"] + subst,
-                "fallback": pick["fallback"], "food_unverified": pick["is_food"] is None,
-                "date": pick["date"].isoformat(), "date_hr": date_hr(pick["date"]), "stale_days": pick["stale_days"],
-                "match_quality": pick.get("match_quality"), "by_weight_fallback": pick["by_weight_fallback"],
-                "_idx": idx,
-            }
+            _add_item(stores, key, rows, need, idx, pick, chosen, subst,
+                      need.staple.key in have or need.input_staple in have)
 
     if store_spec:
         stores = _filter_store(stores, store_spec, out)
@@ -594,27 +703,88 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
         oldest = min(items, key=lambda it: it["date"]) if items else None
         s["date"], s["date_hr"] = (oldest["date"], oldest["date_hr"]) if oldest else (None, None)
         s["stale_days"] = max((it["stale_days"] or 0 for it in items), default=0)
-    ranked = sorted(stores.values(), key=lambda s: (-s["n_matched"], s["data_quality"] == "suspect",
-                                                    s["flagged_items"], s["total_to_buy"]))
+    merged = merge_same_chain(list(stores.values()))
+    ranked = sorted(merged, key=lambda s: (-s["n_matched"], s["data_quality"] == "suspect",
+                                           s["flagged_items"], s["total_to_buy"]))
     out["stores"] = ranked[:max_stores] if max_stores else ranked
     eligible = [s for s in ranked if s["data_quality"] != "suspect"] or ranked
     if eligible:
         out["best_store"] = eligible[0]
         if eligible[0]["data_quality"] == "suspect":
             out["warnings"].append("najbolja trgovina je lanac sa sumnjivim podacima (nema druge)")
-    if alternatives:
-        for s in out["stores"]:
-            for it in s["items"]:
-                rows = store_rows.get(((s["chain"], it.pop("_from_store", s["store_id"])), it["_idx"]), [])
-                it["alternatives"] = _alternatives(rows, needs[it["_idx"]], it)
+    if alternatives and out["best_store"]:
+        # alternative samo za trgovinu iz `store` (filtrirane su) ili najbolju
+        s = out["best_store"]
+        for it in s["items"]:
+            rows = store_rows.get(((s["chain"], it.get("_from_store", s["store_id"])), it["_idx"]), [])
+            it["alternatives"] = _alternatives(rows, needs[it["_idx"]], it)
     for s in ranked:
         for it in s["items"]:
             it.pop("_idx", None)
             it.pop("_from_store", None)
     if price_overrides and out["best_store"]:
         _apply_overrides(out["best_store"], price_overrides, out)
+    out["summary_hr"] = summary_hr(out["best_store"])
     dates = [s["date"] for s in ranked]
     if dates:
         out["date"] = max(dates)
         out["date_hr"] = next(s["date_hr"] for s in ranked if s["date"] == out["date"])
     return out
+
+
+def _add_item(stores: dict, key: tuple, rows: list[dict], need: Need, idx: int, pick: dict, chosen: dict,
+              notes: list[str], have: bool) -> None:
+    """Odabrani proizvod kao stavka trgovine `key` (trgovina se stvara pri prvoj stavci)."""
+    first = rows[0]
+    store = stores.setdefault(key, {
+        "chain": first["chain"], "store_id": first["store_id"], "address": first["address"],
+        "city": first["city"], "scope": first["scope"], "data_quality": first["data_quality"],
+        "items": {}, "date": first["date"],
+    })
+    store["items"][idx] = {
+        "ingredient": need.input.get("name"), "staple": need.staple.key if need.staple else None,
+        "need": round(need.amount, 3), "need_unit": need.unit, "product_id": pick["product_id"],
+        "ean": pick["ean_norm"], "name": pick["name"], "attributes": chosen,
+        "pack_size": pack_size(pick, need.unit), "pack_qty": pick["qty"], "n_packs": pick["n_packs"],
+        "price_eff": pick["price_eff"], "cost_pack": pick["cost_pack"], "cost_used": pick["cost_used"],
+        "have": have, "pantry": bool(need.staple and need.staple.pantry),
+        "price_per_unit": pick["price_per_unit"], "per_unit": pick["per_unit"],
+        "unit_confidence": pick["unit_confidence"], "pack_source": pick["pack_source"],
+        "is_special": pick["is_special"], "flags": pick["flags"], "notes": pick["notes"] + notes,
+        "fallback": pick["fallback"], "food_unverified": pick["is_food"] is None,
+        "date": pick["date"].isoformat(), "date_hr": date_hr(pick["date"]), "stale_days": pick["stale_days"],
+        "match_quality": "free_text" if need.free_text else pick.get("match_quality"),
+        "by_weight_fallback": pick["by_weight_fallback"], "_idx": idx,
+    }
+
+
+MAX_ADDRESSES = 3
+
+
+def merge_same_chain(stores: list[dict]) -> list[dict]:
+    """Trgovine istog lanca (i opsega) s istim proizvodima, količinama, zbrojevima i datumom postaju jedan
+    unos: prva po adresi, uz n_stores i addresses (prve MAX_ADDRESSES adrese)."""
+    groups: dict[tuple, list[dict]] = {}
+    for s in stores:
+        key = (s["chain"], s["scope"], s["total_to_buy"], s["total_used"], s["date"], tuple(s["missing"]),
+               tuple((it["product_id"], it["n_packs"], it["cost_pack"], it["have"]) for it in s["items"]))
+        groups.setdefault(key, []).append(s)
+    out = []
+    for group in groups.values():
+        group.sort(key=lambda s: (s["address"] or "", s["store_id"]))
+        rep = group[0]
+        rep["n_stores"] = len(group)
+        rep["addresses"] = [s["address"] for s in group[:MAX_ADDRESSES] if s["address"]]
+        out.append(rep)
+    return out
+
+
+def _eur(x: float) -> str:
+    return f"{x:.2f}".replace(".", ",") + " €"
+
+
+def summary_hr(best: dict | None) -> str:
+    """Dvije rečenice za korisnika: cijena cijelih pakiranja i stvarno utrošenog dijela."""
+    if not best:
+        return "Nijedna trgovina u gradu nema ove sastojke."
+    return f"Za kupiti: {_eur(best['total_to_buy'])}. Stvarno utrošeno: {_eur(best['total_used'])}."
