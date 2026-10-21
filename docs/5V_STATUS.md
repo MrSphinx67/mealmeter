@@ -7,7 +7,7 @@
 | 2 vercel.json i veličina paketa | gotovo: procjena paketa ≈ 306 MB od 500 MB (vidi niže) |
 | 3 GitHub Actions (2x dnevno) | gotovo: .github/workflows/update.yml (nije pokrenuto) |
 | 4 postavke (hostovi, rate limit, IP zaglavlje) | gotovo: TRUSTED_PROXY=vercel (x-vercel-forwarded-for), zadane postavke u api/index.py |
-| 5 docs/DEPLOY.md | - |
+| 5 docs/DEPLOY.md | gotovo; uz to Git auto-deploy isključen (git.deploymentEnabled: false) i .vercel/ u .gitignore |
 
 Ništa nije deployano.
 

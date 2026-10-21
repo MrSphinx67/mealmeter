@@ -44,6 +44,8 @@ Poslužitelj sam primijeti kad `scripts/update.py` zamijeni datoteku baze i otvo
 
 ### Dodavanje u Claude
 
+**Vercel:** koraci za deploy (projekt, tajne, dnevno ažuriranje) su u [docs/DEPLOY.md](docs/DEPLOY.md).
+
 **Claude Desktop (lokalno, stdio):** u `claude_desktop_config.json` dodaj sadržaj datoteke
 [docs/claude_desktop_config.json](docs/claude_desktop_config.json). Putanju zamijeni stvarnom putanjom do
 repozitorija. Ako `uv` nije u PATH-u, upiši punu putanju do `uv`. Zatim ponovno pokreni Claude Desktop.
@@ -133,6 +135,8 @@ The HTTP server needs no login, because the data is public and read-only. Limits
 The server notices when `scripts/update.py` replaces the database file and reopens it without a restart.
 
 ### Adding to Claude
+
+**Vercel:** deployment steps (project, secrets, daily updates) are in [docs/DEPLOY.md](docs/DEPLOY.md) (Croatian).
 
 **Claude Desktop (local, stdio):** add the contents of
 [docs/claude_desktop_config.json](docs/claude_desktop_config.json) to `claude_desktop_config.json` and

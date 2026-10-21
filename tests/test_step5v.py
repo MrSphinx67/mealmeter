@@ -75,6 +75,7 @@ def test_vercel_config():
     for excluded in ("data/mealmeter.duckdb", "data/raw/**", "tests/**", "docs/**"):
         assert excluded in fn["excludeFiles"]
     assert cfg["rewrites"] == [{"source": "/(.*)", "destination": "/api/index"}]
+    assert cfg["git"] == {"deploymentEnabled": False}  # baza nije u Gitu: deploy samo preko CLI-ja / workflowa
     ignore = (ROOT / ".vercelignore").read_text(encoding="utf-8").splitlines()
     assert "data/mealmeter.duckdb" in ignore and not any("compact" in line and not line.startswith("#")
                                                           for line in ignore if "compact_tmp" not in line)
