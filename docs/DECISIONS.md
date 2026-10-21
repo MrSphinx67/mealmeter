@@ -733,3 +733,16 @@ Sažetak: [REVIEW_2F.md](REVIEW_2F.md) (`scripts/review_2f.py`).
     - Na 20.10.: 433 slaba, 406 s `early_name`. U uzorku od 40 (REVIEW_4.md) i dalje ima krivih koje test riječi
       propušta: KIBLA kao jogurt, „MED.“ (mediteransko ulje) kao med, AGAPANTHUS kao tjestenina, EAN s
       mrkvom i jabukom kao kukuruz. Nije popravljeno, čeka pregled.
+90. **MCP poslužitelj (`src/mealmeter/server.py`, Korak 4.1).**
+    - Službeni SDK `mcp` 2.x: `MCPServer`, nekadašnji FastMCP, preimenovan u 2.0; ovisnost `mcp>=2.3,<3`.
+    - Alati: find_products, get_prices, plan_basket, list_stores, convert_units, list_staples. Vraćaju sažeti
+      JSON (`CallToolResult` s jednim tekstnim blokom, bez dvostrukog `structured_content`), najviše 20 KB:
+      dulji popisi se skraćuju uz `truncated`.
+    - Svaki izlaz nosi datum cjenika (`date`, `date_hr`); stavke i trgovine nose i `stale_days`.
+    - plan_basket dobiva tri parametra:
+      - `store` {chain, address_contains}: nacionalne cijene lanca popunjavaju ono što lokalna trgovina
+        nema; bez pogotka upozorenje i adrese lanca.
+      - `alternatives`: do 2 druga proizvoda u istoj trgovini, preko `choose_product` bez već odabranih.
+      - `price_overrides` [{name, cost_pack}]: cijena jednog pakiranja, primjenjuje se samo na trgovinu iz
+        `store`, inače na best_store; `user_provided`, zbrojevi se preračunavaju, poredak ne.
+    - Server vraća najviše 3 trgovine; alternative nosi samo best_store.
