@@ -35,3 +35,44 @@ def test_descriptions_bilingual():
                  "warnings", "ambiguity", "assumed_form", "match_quality", "alternatives", "price_overrides",
                  "zaliha", "stock", "izmišljaj"):
         assert word in instructions, word
+
+
+# --- 3. ograničenja (HTTP po IP-u, veličina zahtjeva i odgovora) -------------------------------------
+
+def _asgi_call(app, ip="1.2.3.4", length=None):
+    sent = []
+
+    async def send(msg):
+        sent.append(msg)
+
+    async def receive():
+        return {"type": "http.request", "body": b""}
+
+    headers = [(b"content-length", str(length).encode())] if length else []
+    _run(app(dict(type="http", client=(ip, 1), headers=headers), receive, send))
+    return sent[0]["status"]
+
+
+def test_rate_limit_per_ip():
+    app = srv.RateLimit(None, limit=3, window=60)
+    app.app = lambda scope, receive, send: _inner_ok(send)
+    assert [_asgi_call(app) for _ in range(4)] == [200, 200, 200, 429]
+    assert _asgi_call(app, ip="5.6.7.8") == 200  # drugi IP ima svoju kvotu
+    assert _asgi_call(app, ip="9.9.9.9", length=10**6) == 413
+
+
+async def _inner_ok(send):
+    await send({"type": "http.response.start", "status": 200, "headers": []})
+    await send({"type": "http.response.body", "body": b"ok"})
+
+
+def test_fit_truncates():
+    out = srv._fit({"date": "x", "results": [{"name": "a" * 1000} for _ in range(50)]}, ("results",))
+    assert out["truncated"] and srv._size(out) <= srv.MAX_RESPONSE_BYTES and len(out["results"]) < 50
+
+
+def test_cli_args():
+    import inspect
+
+    src = inspect.getsource(srv.main)
+    assert '"--http"' in src and '"--port"' in src and 'server.run("stdio")' in src

@@ -5,7 +5,8 @@
 | 0.1 | gotovo |
 | 0.2 | gotovo |
 | 1 | gotovo |
-| 2 | gotovo (opisi hr/en, opisi parametara u shemi, instructions) |
-| 3 | u radu |
+| 2 | gotovo |
+| 3 | gotovo (stdio, HTTP, 60/min po IP-u, 64 KB zahtjev, 20 KB odgovor) |
+| 4 | u radu |
 
-Sljedeća točka: 3 (stdio i HTTP, ograničenja).
+Sljedeća točka: 4 (testovi svih alata kroz MCP klijent).

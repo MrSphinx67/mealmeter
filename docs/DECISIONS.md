@@ -746,3 +746,11 @@ Sažetak: [REVIEW_2F.md](REVIEW_2F.md) (`scripts/review_2f.py`).
       - `price_overrides` [{name, cost_pack}]: cijena jednog pakiranja, primjenjuje se samo na trgovinu iz
         `store`, inače na best_store; `user_provided`, zbrojevi se preračunavaju, poredak ne.
     - Server vraća najviše 3 trgovine; alternative nosi samo best_store.
+91. **Pokretanje i ograničenja (Korak 4.3).**
+    - stdio: `python -m mealmeter.server`. HTTP: `--http --port 8000 [--host]`, streamable HTTP na `/mcp`,
+      bez stanja (`stateless_http`) i s JSON odgovorima.
+    - Bez prijave. `RateLimit` (ASGI) dopušta 60 zahtjeva po IP-u u minuti (429) i tijelo do 64 KB (413).
+      Odgovor alata je najviše 20 KB.
+    - Provjereno uživo 21.10.: stdio i HTTP poziv alata, 429 nakon 60 zahtjeva, 413 za 70 KB.
+    - Iza obrnutog proxyja IP je proxyjev. `X-Forwarded-For` se namjerno ne čita, jer ga klijent može lažirati;
+      to je pitanje hostinga.
