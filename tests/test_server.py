@@ -33,8 +33,15 @@ def test_descriptions_bilingual():
         assert t.annotations.read_only_hint
     for word in ("convert_units", "already_have", "store", "date_hr", "stale_days", "total_to_buy", "total_used",
                  "warnings", "ambiguity", "assumed_form", "match_quality", "alternatives", "price_overrides",
-                 "zaliha", "stock", "izmišljaj"):
+                 "zaliha", "stock", "izmišljaj",
+                 # Korak 4B: jedna poruka pitanja, potvrđeni sastojci, free_text, cheaper, summary_hr, tablica
+                 "JEDNOJ", "nadjev", "nije potvrdio", "free_text", "cheaper = true", "summary_hr",
+                 "cijene iz cjenika od 20.10.2026.", "veličina pakiranja", "akcije se mijenjaju"):
         assert word in instructions, word
+    plan = next(t for t in tools if t.name == "plan_basket").description
+    for word in ("free_text", "summary_hr", "cheaper", "delta_eur", "n_stores", "pack_size"):
+        assert word in plan, word
+    assert "akcije se mijenjaju" in srv.PRICE_NOTE and "promotions change" in srv.PRICE_NOTE
 
 
 # --- 3. ograničenja (HTTP po IP-u, veličina zahtjeva i odgovora) -------------------------------------
