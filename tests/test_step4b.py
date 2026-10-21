@@ -303,6 +303,11 @@ def test_incoherent_eans_in_build(tmp_path):
     ("krastavac", "KRASTAVCI OCJ. 360 g", "excluded"),
     ("krastavac", "KRASTAVCI 720 ml", "excluded"),
     ("krastavac", "KRASTAVAC SALATAR", "match"),
+    # smoke_4b: tost s maslinovim uljem i brezov šećer
+    ("maslinovo_ulje", "TOST S MASL.ULJEM 400 g ORVA", "excluded"),
+    ("maslinovo_ulje", "MASL.ULJE EKSTRA DJEVIČANSKO 1 l", "match"),
+    ("secer", "ŠEĆER BREZIN-XYLITOL 350g GREEN LAB", "excluded"),
+    ("secer", "ŠEĆER KRISTAL 1kg VIROVITICA", "match"),
 ])
 def test_rules_4b(key, name, expected):
     from mealmeter.staples import load_staples, name_match
@@ -406,3 +411,13 @@ def test_server_reopens_replaced_db(tmp_path):
         assert srv._shared_con is not first
     finally:
         srv._shared_con, srv._fixed_con, srv._db_path, srv._db_key = old_state
+
+
+def test_summary_hr_ambiguous(con4b):
+    res = plan_basket([{"name": "grah", "amount": 500, "unit": "g"}], "Osijek", con=con4b)
+    if res["ambiguous"]:  # fixture ima oba oblika graha u Osijeku
+        assert res["summary_hr"].startswith("Prije izračuna treba odgovor: grah:")
+    from mealmeter.basket import summary_hr
+    amb = [{"name": "grah", "ambiguity": {"question": "suho ili konzerva?"}}]
+    assert summary_hr(None, amb) == "Prije izračuna treba odgovor: grah: suho ili konzerva?"
+    assert summary_hr(None) == "Nijedna trgovina u gradu nema ove sastojke."

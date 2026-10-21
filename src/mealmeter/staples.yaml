@@ -194,7 +194,9 @@ secer:
   must_match: [secer\b]
   must_not_match: [naranc, kokos, kukur, natreen, nescafe, 3u1, sladil, bez\b, vanilin, manje\b, dodan,
                    napitak, keks, bombon, vata, sirup, sok\b, cola, pepsi, cokolad, kukuruz, bonduelle,
-                   cimet, rum\b, limun, aroma]
+                   cimet, rum\b, limun, aroma,
+                   # Korak 4B (smoke): brezov šećer (ksilitol) i eritritol nisu šećer
+                   brezin, brezov, xylit, ksilit, eritrit, erythrit]
   unit: kg
   default_exclude_variants: [vrsta=smedi, vrsta=u_prahu, vrsta=kocke]
   max_pack: 5000
@@ -274,7 +276,9 @@ maslinovo_ulje:
   must_match: [maslinovo ulje, ulje maslinovo, masl ulje, ulje masl, ekstra devicansko, extra devicansko,
                extra virgin]
   must_not_match: [grissin, okus, tartuf, umak, kruh, pecivo, kreker, tuna, sardin, fileti, skus, inci, masline\b, rajcic, ocat, set\b, sapun, krema,
-                   kupus, kis, salat, tarall, focacc]
+                   kupus, kis, salat, tarall, focacc,
+                   # Korak 4B (smoke): "TOST S MASL.ULJEM" je kruh s maslinovim uljem
+                   tost, uljem]
   unit: l
   max_pack: 5000
   min_pack: 250

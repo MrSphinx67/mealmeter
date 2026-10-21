@@ -724,7 +724,7 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
             it.pop("_from_store", None)
     if price_overrides and out["best_store"]:
         _apply_overrides(out["best_store"], price_overrides, out)
-    out["summary_hr"] = summary_hr(out["best_store"])
+    out["summary_hr"] = summary_hr(out["best_store"], out["ambiguous"])
     dates = [s["date"] for s in ranked]
     if dates:
         out["date"] = max(dates)
@@ -783,8 +783,12 @@ def _eur(x: float) -> str:
     return f"{x:.2f}".replace(".", ",") + " €"
 
 
-def summary_hr(best: dict | None) -> str:
-    """Dvije rečenice za korisnika: cijena cijelih pakiranja i stvarno utrošenog dijela."""
+def summary_hr(best: dict | None, ambiguous: list[dict] | None = None) -> str:
+    """Dvije rečenice za korisnika: cijena cijelih pakiranja i stvarno utrošenog dijela. Bez košarice: pitanje
+    o obliku (ambiguous) ako ga ima, inače da nijedna trgovina nema sastojke."""
     if not best:
+        if ambiguous:
+            return "Prije izračuna treba odgovor: " + "; ".join(
+                f"{a['name']}: {a['ambiguity']['question']}" for a in ambiguous)
         return "Nijedna trgovina u gradu nema ove sastojke."
     return f"Za kupiti: {_eur(best['total_to_buy'])}. Stvarno utrošeno: {_eur(best['total_used'])}."
