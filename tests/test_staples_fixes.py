@@ -238,7 +238,7 @@ def test_sachet_units(key, name, amount, expected):
 
 
 def test_new_staple_fields():
-    assert S["mlijeko"].plausible_per_unit == (0.5, 4)
+    assert S["mlijeko"].plausible_per_unit == (0.3, 4)  # Korak 5A
     assert S["maslac"].plausible_per_unit == (6, 40) and S["maslinovo_ulje"].plausible_per_unit == (4, 60)
     assert S["kvasac"].compare_unit == "vrecica" and S["brasno"].compare_unit == "kg"
     assert all(S[k].pantry for k in ("papar", "sol", "mljevena_paprika", "ocat", "dodatak_jelima"))

@@ -130,6 +130,10 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
             # promjenjiva težina: nema pakiranja ni iz stupca unit (cijena je po kg od lanca)
             if pack is None and not variable and (pack := parse_pack_unit_field(unit)):
                 source, confidence = "unit", "high"
+            elif pack and pack[1] == "g" and (by_unit := parse_pack_unit_field(unit)) and by_unit[1] == "ml":
+                # tekućina: stupac unit kaže l/ml, a naziv daje grame ("Suncokretovo ulje 20g Lidla", unit 1l):
+                # vrijedi unit (Korak 5A, docs/lidl_raw_check.md)
+                pack, source, confidence = by_unit, "unit", "high"
             amount, pack_unit = pack or (None, None)
             yield (chain, pid, ean, valid, glob, norm_text(name), match_text(name), amount, pack_unit,
                    source if pack else None, unit_hint(unit, quantity),

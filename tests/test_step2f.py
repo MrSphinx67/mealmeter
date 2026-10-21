@@ -196,12 +196,12 @@ def test_unit_suspect(tmp_path):
                  ('lidl', 'B1', '3850104223624', 'Brašno glatko Podravka', 'Hrana', '1kg')""")
     c.execute("""INSERT INTO prices (chain, store_id, product_id, price, date) VALUES
                  ('lidl', '105', 'L1', 0.69, DATE '2026-10-19'), ('lidl', '105', 'L2', 3.50, DATE '2026-10-19'),
-                 ('lidl', '105', 'M1', 0.52, DATE '2026-10-19'), ('lidl', '105', 'M2', 0.39, DATE '2026-10-19'),
+                 ('lidl', '105', 'M1', 0.52, DATE '2026-10-19'), ('lidl', '105', 'M2', 0.25, DATE '2026-10-19'),
                  ('lidl', '105', 'B1', 0.75, DATE '2026-10-19')""")
     build_clean(c)
     got = dict(c.execute("""SELECT product_id, unit_suspect FROM clean.product_staples
                             WHERE product_id IN ('L1', 'L2', 'M1', 'M2', 'B1') AND NOT excluded""").fetchall())
-    # L2: 7 €/kg > 6 (plausible); M1: 0,52 €/l u granicama; M2: 0,39 < 0,5; B1: isti EAN kao Podravka 1 kg
+    # L2: 7 €/kg > 6 (plausible); M1: 0,52 €/l u granicama; M2: 0,25 < 0,3 (Korak 5A; stvarna Milkland 0,39 je u granicama); B1: isti EAN kao Podravka 1 kg
     # u 5 lanaca (~0,79 €/kg), 0,75 €/kg -> omjer 0,95, nije označen
     assert got == {"L1": False, "L2": True, "M1": False, "M2": True, "B1": False}
     assert c.execute("SELECT count(*) FROM clean.product_staples WHERE unit_suspect AND drop_reason IS NOT NULL").fetchone()[0] == 0
