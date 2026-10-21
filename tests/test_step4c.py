@@ -216,7 +216,7 @@ def test_ambiguous_ask_user(con4c):
         pytest.skip("fixture nema oba oblika graha u Osijeku")
     ask = res["ask_user"][0]
     assert ask["ingredient"] == "grah" and ask["question"].startswith("grah: ") and ask["question"].endswith("?")
-    assert all(o["price_note"].endswith("za traženu količinu") and o["price_eur"] > 0 for o in ask["options"])
+    assert all(o["price_note"].startswith("najjeftinije u gradu, za traženu količinu") and o["price_eur"] > 0 for o in ask["options"])
     best = res["best_store"]
     assert [it["staple"] for it in best["items"]] == ["secer"]  # ostali sastojci su izračunati
     assert res["summary_hr"].startswith("Bez graha: za kupiti ")

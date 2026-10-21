@@ -246,4 +246,4 @@ def test_plan_basket_compact_ask_user(con):
     _, _, out = call(con, "plan_basket", {"ingredients": ing, "city": "Osijek"})
     if "ask_user" in out:
         assert "ambiguous" not in out and out["summary_hr"].startswith("Bez graha:")
-        assert out["ask_user"][0]["options"][0]["price_note"].endswith("za traženu količinu")
+        assert out["ask_user"][0]["options"][0]["price_note"].startswith("najjeftinije u gradu, za traženu količinu")

@@ -420,7 +420,7 @@ def _resolve_form(con, need: Need, city: str, wholesale: bool = False) -> list[s
         if st.form_staples:
             need.staple = options[need.form]
         return []
-    prices = {}
+    prices, amounts = {}, {}
     for form, fst in options.items():
         probe = Need(need.input, fst, need.amount, need.unit, dict(need.attributes),
                      form=form if fst is st else None)
@@ -428,19 +428,21 @@ def _resolve_form(con, need: Need, city: str, wholesale: bool = False) -> list[s
             probe.amount, probe.unit, _ = to_base(*_input_amount(need.input), fst)
         except IngredientError:
             continue
+        apply_yield(probe, form)  # usporedba na istu količinu gotovog proizvoda (suho / 2,5)
         unit_costs = []
         for rows in _prepare(con, probe, city, wholesale).values():
             pick = choose_product(rows, probe.amount, probe.unit, _by_weight_unit(fst), _by_weight_primary(fst))
             if pick and not pick["fallback"]:
                 unit_costs.append(pick["cost_used"])
         if unit_costs:
-            prices[form] = min(unit_costs)
+            prices[form], amounts[form] = min(unit_costs), round(probe.amount, 1)
     if not prices:
         return [f"'{st.name}': nijedan oblik nije dostupan u gradu"]
     if st.ambiguous_form:
         forms = sorted(prices, key=lambda f: FORM_ORDER.index(f) if f in FORM_ORDER else len(FORM_ORDER))
         raise FormAmbiguity({"form": forms, "question": " ili ".join(forms) + "?",
-                             "prices": {f: round(prices[f], 2) for f in forms}})
+                             "prices": {f: round(prices[f], 2) for f in forms},
+                             "amounts": {f: amounts[f] for f in forms}, "unit": need.unit})
     form = min(prices, key=prices.get)
     need.form, need.assumed_form = form, True
     if st.form_staples:
@@ -448,6 +450,16 @@ def _resolve_form(con, need: Need, city: str, wholesale: bool = False) -> list[s
     others = ", ".join(f"{f} {prices[f]:.2f} €" for f in sorted(prices, key=prices.get) if f != form)
     return [f"'{need.input.get('name')}' bez oblika: pretpostavljen '{form}' (najjeftiniji za ovu količinu: "
             f"{prices[form]:.2f} €{'; ostali: ' + others if others else ''}). Zadaj 'form' za drugi oblik."]
+
+
+def apply_yield(need: "Need", form: str | None) -> list[str]:
+    """Količina gotovog proizvoda -> količina u obliku (suho: / faktor iz data/yields.yaml, procjena)."""
+    factor = units.yield_factor(need.staple.key, form)
+    if not factor or need.unit != "g":
+        return []
+    ready = need.amount
+    need.amount = ready / factor
+    return [f"{ready:g} g gotovog ≈ {need.amount:g} g u obliku '{form}' (procjena, prinos {factor:g}x)"]
 
 
 def _input_amount(item: dict) -> tuple[float, str]:
@@ -778,6 +790,7 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
             if need.staple is not staple:  # oblik je druga namirnica: količina u njezinoj jedinici
                 need.amount, need.unit, more = to_base(*_input_amount(item), need.staple)
                 need.warnings += more
+            need.warnings += apply_yield(need, need.form)
             needs.append(need)
         except IngredientError as e:
             entry = {"name": item.get("name"), "reason": str(e)}
@@ -793,7 +806,9 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
             out.setdefault("ask_user", []).append({
                 "ingredient": item.get("name"), "question": f"{item.get('name')}: {e.ambiguity['question']}",
                 "options": [{"form": f, "price_eur": e.ambiguity["prices"][f],
-                             "price_note": "najjeftinije u gradu, za traženu količinu"} for f in e.ambiguity["form"]],
+                             "amount": e.ambiguity["amounts"][f], "unit": e.ambiguity["unit"],
+                             "price_note": "najjeftinije u gradu, za traženu količinu gotovog proizvoda"}
+                            for f in e.ambiguity["form"]],
                 "genitive": staple.genitive or item.get("name")})
             out["warnings"].append(f"'{item.get('name')}': {e.ambiguity['question']} (zadaj 'form'; nije uračunato)")
 

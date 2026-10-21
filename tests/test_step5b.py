@@ -25,6 +25,7 @@ PRODUCTS = [
     ("P11", "MLIJEKO TRAJNO 2,8% 1 L", "ko", {K: 0.99, KZ: 0.99, L: 0.52, SP: 1.09}),
     ("P12", "JAJA SVJEŽA PODNI UZGOJ M 10/1", "ko", {K: 1.99, KZ: 1.99, L: 1.85, SP: 2.19}),
     ("P13", "ŠEĆER KRISTAL 1 kg", "ko", {K: 0.99, KZ: 0.99, L: 0.75, SP: 1.09}),
+    ("P14", "GRAŠAK SUHI ZELENI 500 g", "ko", {K: 1.49}),
 ]
 
 
@@ -96,3 +97,27 @@ def test_incomplete_chain_listed(con5b):
     spar = [i for i in res["incomplete"] if i["chain"] == "spar"]
     assert spar and "špageti" in spar[0]["missing"] and spar[0]["note"].startswith("nedostaje: ")
     assert "spar" not in {r["chain"] for r in res["comparison"]}
+
+
+# --- 3. prinos oblika -------------------------------------------------------------------------------------
+
+def test_yields_data():
+    from mealmeter import units
+
+    for key in ("grah", "leca", "slanutak", "grasak"):
+        assert units.yield_factor(key, "suho") == 2.5
+    assert units.yield_factor("grasak", "smrznuto") is None and units.yield_factor("grasak", "konzerva") is None
+    raw = __import__("yaml").safe_load(units.YIELDS_PATH.read_text(encoding="utf-8"))
+    assert all(v["suho"]["estimate"] is True for v in raw.values())
+
+
+def test_peas_ready_to_dry(con5b):
+    res = plan_basket([{"name": "grašak", "amount": 800, "unit": "g"}], "Osijek", con=con5b)
+    opts = {o["form"]: o for o in res["ask_user"][0]["options"]}
+    assert opts["suho"]["amount"] == pytest.approx(320) and opts["smrznuto"]["amount"] == pytest.approx(800)
+    assert all(o["price_note"].endswith("za traženu količinu gotovog proizvoda") for o in opts.values())
+    res = plan_basket([{"name": "grašak", "amount": 800, "unit": "g", "form": "suho"}], "Osijek", con=con5b)
+    ing = res["ingredients"][0]
+    assert ing["amount"] == pytest.approx(320) and any("prinos 2.5x" in w for w in ing["warnings"])
+    res = plan_basket([{"name": "grašak", "amount": 800, "unit": "g", "form": "smrznuto"}], "Osijek", con=con5b)
+    assert res["ingredients"][0]["amount"] == pytest.approx(800)

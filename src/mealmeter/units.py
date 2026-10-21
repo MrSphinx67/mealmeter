@@ -12,6 +12,7 @@ import yaml
 from mealmeter.normalize import norm_text
 
 UNITS_PATH = Path(__file__).resolve().parents[2] / "data" / "units.yaml"
+YIELDS_PATH = Path(__file__).resolve().parents[2] / "data" / "yields.yaml"
 
 
 @dataclass(frozen=True)
@@ -33,6 +34,20 @@ def load_units(path: Path = UNITS_PATH) -> Units:
     densities = {k: float(v["g_per_ml"]) for k, v in (raw.get("densities") or {}).items()}
     pieces = {k: float(v["g"]) for k, v in (raw.get("pieces") or {}).items()}
     return Units(measures, names, densities, pieces)
+
+
+@lru_cache(maxsize=2)
+def load_yields(path: Path = YIELDS_PATH) -> dict[str, dict[str, float]]:
+    """Prinos oblika (data/yields.yaml, procjene): {namirnica: {oblik: g gotovog po g u obliku}}."""
+    if not Path(path).exists():
+        return {}
+    raw = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+    return {k: {f: float(v["factor"]) for f, v in forms.items()} for k, forms in raw.items()}
+
+
+def yield_factor(staple_key: str, form: str | None) -> float | None:
+    """Faktor gotovo/oblik (suhi grah 2,5), ili None (1:1 ili nepoznato)."""
+    return load_yields().get(staple_key, {}).get(form or "")
 
 
 def piece_weight(staple_key: str) -> float | None:
