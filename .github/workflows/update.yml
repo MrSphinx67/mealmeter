@@ -1,0 +1,109 @@
+# Dnevno ažuriranje cijena i deploy na Vercel (Korak 5V).
+#
+# update.py -> build_compact.py -> zlatni izlazi (puna == sažeta baza) -> vercel build -> vercel deploy --prebuilt --prod
+# Baze se NE commitaju (GitHub odbija datoteke > 100 MB). Prethodna puna baza čuva se u Actions cacheu, da update.py
+# ima s čime usporediti (pad > 20 % prekida) i odakle prenijeti cijene trgovina koje nedostaju (carry-forward).
+#
+# Tajne (Settings -> Secrets and variables -> Actions): VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID.
+
+name: update
+
+on:
+  schedule:
+    - cron: "30 13,21 * * *"  # 15:30 i 23:30 po ljetnom vremenu (14:30 i 22:30 po zimskom), kao update.py SCHEDULE
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Ponovno učitaj i deployaj i kad je arhiva već učitana"
+        type: boolean
+        default: false
+
+concurrency:
+  group: update
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+
+      - name: Ovisnosti
+        run: uv sync --frozen
+
+      - name: Prethodna puna baza (cache)
+        uses: actions/cache/restore@v4
+        with:
+          path: data/mealmeter.duckdb
+          key: mealmeter-db-${{ github.run_id }}
+          restore-keys: mealmeter-db-
+
+      - name: Ažuriranje baze (update.py)
+        id: update
+        run: |
+          set -o pipefail
+          uv run python scripts/update.py ${{ inputs.force && '--force' || '' }} 2>&1 | tee update.log
+          if grep -q "ništa za napraviti" update.log; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+          # pad pojedinog lanca > 20 % ili nestali lanac je upozorenje u update.py; ovdje prekida deploy
+          if grep -E "^  ! (.*->|nedostaje lanac)" update.log; then
+            echo "::error::update.py: pad lanca > 20 % ili nestali lanac; ne deployam"
+            exit 3
+          fi
+
+      - name: Spremi punu bazu (cache)
+        if: steps.update.outputs.changed == 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: data/mealmeter.duckdb
+          key: mealmeter-db-${{ github.run_id }}
+
+      - name: Sažeta baza (build_compact.py)
+        if: steps.update.outputs.changed == 'true'
+        run: uv run python scripts/build_compact.py
+
+      - name: Zlatni izlazi (puna == sažeta baza)
+        if: steps.update.outputs.changed == 'true'
+        env:
+          MM_GOLDEN: "1"
+        run: |
+          uv run python scripts/golden.py --write --db data/mealmeter.duckdb
+          MM_DB=data/compact.duckdb uv run python scripts/golden.py --check --db data/compact.duckdb
+
+      - name: Testovi
+        if: steps.update.outputs.changed == 'true'
+        run: uv run pytest -q
+
+      - name: Vercel CLI
+        if: steps.update.outputs.changed == 'true'
+        run: npm install --global vercel@latest
+
+      - name: vercel build
+        if: steps.update.outputs.changed == 'true'
+        run: |
+          vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+          vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          size=$(du -sm .vercel/output/functions | cut -f1)
+          echo "veličina funkcija: ${size} MB"
+          if [ "$size" -gt 490 ]; then
+            echo "::error::paket ${size} MB je preblizu granici od 500 MB; ne deployam"
+            exit 4
+          fi
+
+      - name: vercel deploy --prebuilt --prod
+        if: steps.update.outputs.changed == 'true'
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}

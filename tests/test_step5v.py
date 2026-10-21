@@ -78,3 +78,20 @@ def test_vercel_config():
     ignore = (ROOT / ".vercelignore").read_text(encoding="utf-8").splitlines()
     assert "data/mealmeter.duckdb" in ignore and not any("compact" in line and not line.startswith("#")
                                                           for line in ignore if "compact_tmp" not in line)
+
+
+def test_update_workflow():
+    import yaml
+
+    text = (ROOT / ".github" / "workflows" / "update.yml").read_text(encoding="utf-8")
+    wf = yaml.safe_load(text)
+    on = wf[True] if True in wf else wf["on"]  # PyYAML čita ključ "on" kao True
+    assert len(on["schedule"]) == 1 and len(on["schedule"][0]["cron"].split()[1].split(",")) == 2  # 2x dnevno
+    runs = "\n".join(s.get("run", "") for s in wf["jobs"]["update"]["steps"])
+    order = ["scripts/update.py", "scripts/build_compact.py", "golden.py --check", "vercel build",
+             "vercel deploy --prebuilt --prod"]
+    assert [runs.index(x) for x in order] == sorted(runs.index(x) for x in order)
+    for secret in ("VERCEL_TOKEN", "VERCEL_ORG_ID", "VERCEL_PROJECT_ID"):
+        assert f"secrets.{secret}" in text
+    assert "git commit" not in text and "git push" not in text  # baza se ne commita
+    assert "nedostaje lanac" in runs and "exit 3" in runs  # pad lanca > 20 % prekida deploy

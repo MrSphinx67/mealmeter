@@ -5,7 +5,7 @@
 | 0 ograničenja Vercela (službena dokumentacija) | gotovo |
 | 1 api/index.py (ASGI, lifespan, compact) | gotovo: uvicorn s --lifespan off i on: /healthz 200, plan_basket 200 (~0,85 s) |
 | 2 vercel.json i veličina paketa | gotovo: procjena paketa ≈ 306 MB od 500 MB (vidi niže) |
-| 3 GitHub Actions (2x dnevno) | - |
+| 3 GitHub Actions (2x dnevno) | gotovo: .github/workflows/update.yml (nije pokrenuto) |
 | 4 postavke (hostovi, rate limit, IP zaglavlje) | - |
 | 5 docs/DEPLOY.md | - |
 
@@ -43,3 +43,14 @@ isključuje punu bazu, `data/raw`, testove, dokumente i skripte; `maxDuration` 6
 | **ukupno (procjena)** | **≈ 306 od 500** |
 
 Rezerva je ~190 MB; sažeta baza raste s brojem proizvoda i trgovina, pa CI provjerava veličinu (točka 3).
+
+## 3. GitHub Actions (`.github/workflows/update.yml`)
+
+U 13:30 i 21:30 UTC i ručno (workflow_dispatch, uz opciju force):
+1. Prethodna puna baza vraća se iz Actions cachea, da update.py ima s čime usporediti i odakle prenositi cijene.
+2. `update.py`: pad ukupnih redaka ili lanaca > 20 % → izlazni kod 2 i kraj. Pad pojedinog lanca > 20 % ili nestali
+   lanac (u update.py samo upozorenje) ovdje također prekida deploy. Arhiva koja je već učitana → ništa dalje.
+3. `build_compact.py`, zatim zlatni izlazi: `--write` na punoj bazi i `--check` na sažetoj. Dnevni podaci se mijenjaju,
+   pa se ne uspoređuje s jučerašnjim datotekama, nego potvrđuje da sažeta baza daje iste izlaze kao puna; zatim pytest.
+4. `vercel pull/build --prod` (paket > 490 MB prekida), `vercel deploy --prebuilt --prod`.
+Tajne: VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID. Baze se ne commitaju (> 100 MB).
