@@ -568,13 +568,104 @@ async def _text(send, status: int, text: str, content_type: bytes = b"text/plain
     await send({"type": "http.response.body", "body": body})
 
 
+HEALTH_MAX_AGE_HOURS = 48  # starija baza: status "stale" (ažuriranje dvaput dnevno, vidi update.py)
+
+
+def version() -> str:
+    try:
+        from importlib.metadata import version as _v
+        return _v("mealmeter")
+    except Exception:  # noqa: BLE001
+        return "dev"
+
+
+def health() -> tuple[int, dict]:
+    """GET /healthz: {status, db_date, db_age_hours, version}. Starost je od objave učitanog cjenika
+    (clean.archive_info.updated), inače od izgradnje baze; "stale" iznad HEALTH_MAX_AGE_HOURS, "error" (503)
+    kad baza nije čitljiva."""
+    import datetime as dt
+
+    try:
+        con = _con()
+        db_date = con.execute("SELECT max(date) FROM clean.prices").fetchone()[0]
+        ts = None
+        try:
+            updated, loaded = con.execute(
+                "SELECT updated, loaded_at FROM clean.archive_info ORDER BY date DESC LIMIT 1").fetchone()
+            ts = dt.datetime.fromisoformat(updated) if updated else loaded.astimezone()
+        except Exception:  # noqa: BLE001  (baza bez archive_info, npr. testovi)
+            pass
+        age = round((dt.datetime.now(dt.timezone.utc) - ts).total_seconds() / 3600, 1) if ts else None
+    except Exception:  # noqa: BLE001
+        return 503, {"status": "error", "db_date": None, "db_age_hours": None, "version": version()}
+    status = "ok" if age is None or age <= HEALTH_MAX_AGE_HOURS else "stale"
+    return 200, {"status": status, "db_date": db_date.isoformat() if db_date else None, "db_age_hours": age,
+                 "version": version()}
+
+
+HOME_HTML = """<!doctype html>
+<html lang="hr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mealmeter</title>
+<style>body{{font-family:system-ui,sans-serif;max-width:42rem;margin:2rem auto;padding:0 1rem;line-height:1.5}}
+code{{background:#eee;padding:.1rem .3rem;border-radius:3px}}</style></head><body>
+<h1>Mealmeter</h1>
+<p><strong>Hrvatski.</strong> MCP konektor koji za jelo ili popis namirnica i grad pronalazi cijene u hrvatskim
+trgovinama i najjeftiniju trgovinu. Besplatan, otvorenog koda, bez prijave.</p>
+<p><strong>Dodavanje u Claude:</strong> Postavke &rarr; Konektori &rarr; Dodaj prilagođeni konektor, URL
+<code>{url}</code>.</p>
+<p><strong>Izvor podataka:</strong> službeni dnevni cjenici trgovina, preuzeti s
+<a href="https://cijene.dev">cijene.dev</a> (DobarKod). Učitani cjenik: {db_date}.</p>
+<p><strong>Napomena:</strong> cijene su iz cjenika; u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se
+mijenjaju.</p>
+<p><strong>Privatnost:</strong> nema računa ni kolačića. Sadržaj upita se ne sprema; zapisuje se samo broj poziva
+po alatu, status i trajanje, bez punih IP adresa.</p>
+<hr>
+<p><strong>English.</strong> An MCP connector that finds grocery prices in Croatian stores for a dish or a shopping
+list in a given city, and the cheapest store. Free, open source, no login.</p>
+<p><strong>Add to Claude:</strong> Settings &rarr; Connectors &rarr; Add custom connector, URL <code>{url}</code>.</p>
+<p><strong>Data source:</strong> the stores' official daily price lists via <a href="https://cijene.dev">cijene.dev</a>
+(DobarKod). Loaded price list: {db_date}.</p>
+<p><strong>Note:</strong> prices come from price lists; in-store prices may differ, a price list is not stock, and
+promotions change.</p>
+<p><strong>Privacy:</strong> no accounts or cookies. Query content is not stored; only the number of calls per tool,
+status and duration are logged, without full IP addresses.</p>
+<p><small>Mealmeter {version} · <a href="/healthz">/healthz</a></small></p>
+</body></html>
+"""
+
+
+def home(host: str | None, proto: str | None = None) -> str:
+    """GET /: kratka stranica (hr i en) s URL-om MCP endpointa za ovaj Host."""
+    import html
+
+    host = host or "localhost:8000"
+    local = HostGuard._hostname(host) in LOCAL_HOSTS
+    scheme = proto or ("http" if local else "https")
+    _, h = health()
+    return HOME_HTML.format(url=html.escape(f"{scheme}://{host}/mcp"), db_date=html.escape(h["db_date"] or "-"),
+                            version=html.escape(h["version"]))
+
+
 def http_app(server: MCPServer, host: str = "127.0.0.1", allowed_hosts: list[str] | None = None,
              allowed_origins: list[str] | None = None):
     """ASGI aplikacija za HTTP način: MCP na /mcp (streamable HTTP, bez sesija, JSON odgovori), zatim
     HostGuard (Host/Origin) i RateLimit. SDK-ova provjera Hosta je ugašena jer je zamjenjuje HostGuard."""
+    from starlette.requests import Request
+    from starlette.responses import HTMLResponse, JSONResponse
+    from starlette.routing import Route
+
     app = server.streamable_http_app(
         stateless_http=True, json_response=True, max_request_body_size=MAX_REQUEST_BYTES, host=host,
         transport_security=TransportSecuritySettings(enable_dns_rebinding_protection=False))
+
+    async def healthz(request: Request):
+        status, body = health()
+        return JSONResponse(body, status_code=status, headers={"cache-control": "no-store"})
+
+    async def index(request: Request):
+        return HTMLResponse(home(request.headers.get("host"), request.headers.get("x-forwarded-proto")))
+
+    app.router.routes[:0] = [Route("/healthz", healthz, methods=["GET"]), Route("/", index, methods=["GET"])]
     return HostGuard(RateLimit(app), allowed_hosts, allowed_origins)
 
 

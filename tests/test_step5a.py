@@ -138,3 +138,22 @@ def test_host_guard_patterns(monkeypatch):
     assert not g.host_ok("trycloudflare.com.evil.net") and not g.host_ok("evil.com") and not g.host_ok(None)
     assert g.origin_ok(None) and g.origin_ok("https://claude.ai") and g.origin_ok("http://localhost:6274")
     assert not g.origin_ok("https://evil.example.com")
+
+
+# --- 2. /healthz i / ----------------------------------------------------------------------------------------
+
+def test_healthz_and_home(con):
+    from mealmeter import server as srv
+
+    app = srv.http_app(srv.create_server(con=con), allowed_hosts=["*.trycloudflare.com"], allowed_origins=[])
+    (hs, hb), (ps, pb), (bs, _) = run_http(app, [("GET", "/healthz", "example.trycloudflare.com"),
+                                                 ("GET", "/", "example.trycloudflare.com"),
+                                                 ("GET", "/healthz", "evil.example.com")])
+    h = json.loads(hb)
+    assert hs == 200 and set(h) == {"status", "db_date", "db_age_hours", "version"}
+    assert h["status"] in ("ok", "stale") and h["db_date"] == "2026-10-19" and h["version"]
+    page = pb.decode()
+    assert ps == 200 and "https://example.trycloudflare.com/mcp" in page
+    for word in ("cijene.dev", "DobarKod", "Privatnost", "Privacy", "nije zaliha", "not stock", "Konektori"):
+        assert word in page, word
+    assert bs == 421
