@@ -83,6 +83,7 @@ class Staple:
     # razine zadanog izbora [{atribut: [vrijednosti]}] (jaja: M ili L i uzgoj bolji od kaveznog), redom; proizvod
     # izvan prve razine bira se samo kad trgovina nema ništa unutar razine, i označen je ("kavezni, S")
     preferred_tiers: tuple = field(default=(), hash=False, compare=False)
+    genitive: str | None = None  # "graha" za summary_hr ("Bez graha: ...")
 
     def defaults(self) -> dict:
         """Zadani filtri atributa: vrijednost (default_attributes) ili n-torka redoslijeda (default_preference)."""
@@ -253,6 +254,7 @@ def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> d
             default_preference={a: tuple(str(v) for v in vals)
                                 for a, vals in (d.get("default_preference") or {}).items()},
             quality_rank={a: tuple(str(v) for v in vals) for a, vals in (d.get("quality_rank") or {}).items()},
+            genitive=d.get("genitive"),
             preferred_tiers=tuple({a: tuple(str(v) for v in vals) for a, vals in t.items()}
                                   for t in d.get("preferred_tiers") or []),
         )

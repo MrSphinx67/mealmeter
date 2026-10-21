@@ -205,3 +205,31 @@ def test_bulk_sachet_share(con4c, capsys):
     bulk_sachets(r, load_staples()["vanilin_secer"])
     assert r["n_units"] == 6.0 and "bulk_sachet_g" not in r
     assert "Vanilin šećer | 80 g" in capsys.readouterr().out
+
+
+# --- 7. dvosmislen sastojak: ask_user ------------------------------------------------------------------------
+
+def test_ambiguous_ask_user(con4c):
+    ing = [{"name": "grah", "amount": 500, "unit": "g"}, {"name": "šećer", "amount": 100, "unit": "g"}]
+    res = plan_basket(ing, "Osijek", con=con4c, store=KONZUM)
+    if not res["ambiguous"]:
+        pytest.skip("fixture nema oba oblika graha u Osijeku")
+    ask = res["ask_user"][0]
+    assert ask["ingredient"] == "grah" and ask["question"].startswith("grah: ") and ask["question"].endswith("?")
+    assert all(o["price_note"].endswith("za traženu količinu") and o["price_eur"] > 0 for o in ask["options"])
+    best = res["best_store"]
+    assert [it["staple"] for it in best["items"]] == ["secer"]  # ostali sastojci su izračunati
+    assert res["summary_hr"].startswith("Bez graha: za kupiti ")
+    assert f"{best['total_to_buy']:.2f}".replace(".", ",") in res["summary_hr"]
+
+
+def test_summary_hr_without():
+    from mealmeter.basket import summary_hr
+
+    best = {"total_to_buy": 5.2, "total_used": 1.19}
+    assert summary_hr(best, [], [{"ingredient": "grah", "genitive": "graha"}]) == \
+        "Bez graha: za kupiti 5,20 €, stvarno utrošeno 1,19 €."
+    assert summary_hr(best, [], [{"ingredient": "grah", "genitive": "graha"}, {"ingredient": "leća", "genitive": "leće"}]
+                      ).startswith("Bez graha i leće:")
+    assert summary_hr(best) == "Za kupiti: 5,20 €. Stvarno utrošeno: 1,19 €."
+    assert load_staples()["grah"].genitive == "graha" and load_staples()["slanutak"].genitive == "slanutka"

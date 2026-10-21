@@ -71,9 +71,10 @@ Pravila / rules:
    Kad proizvoda nema na polici, ponudi alternatives iz iste trgovine. / Call an alternative "cheaper" only
    when cheaper = true, otherwise "another option" with the price difference. If a product is not on the
    shelf, offer the item's alternatives from the same store.
-8. Prenesi warnings, ambiguity (pitaj o obliku, zadaj form i ponovi), assumed_form, slabije podudaranje
+8. Prenesi warnings, ask_user (pitaj o obliku, zadaj form i ponovi; cijene po obliku su za traženu količinu),
+   assumed_form, slabije podudaranje
    (match_quality = 'weak') i stavke nađene slobodnom pretragom (match_quality = 'free_text': neka korisnik
-   provjeri proizvod), sve običnim riječima. / Pass on warnings, ambiguity (ask, then retry with form),
+   provjeri proizvod), sve običnim riječima. / Pass on warnings, ask_user / ambiguity (ask, then retry with form),
    assumed_form, weaker matches and free-text matches (ask the user to check the product), in plain words.
 9. Kad korisnik kaže stvarnu cijenu, ponovno pozovi plan_basket s price_overrides; ne zbrajaj sam.
    / When the user reports a real price, call plan_basket again with price_overrides; do not add up
@@ -283,8 +284,7 @@ def compact_basket(res: dict) -> dict:
     out["other_stores"] = [{k: s.get(k) for k in ("chain", "address", "n_stores", "total_to_buy", "total_used",
                                                   "n_matched")}
                            for s in res.get("stores", []) if s is not best][:OTHER_STORES]
-    for k in ("ask_user", "ambiguous", "unmatched", "warnings", "store_suggestions", "city_suggestions",
-              "already_have"):
+    for k in ("ask_user", "unmatched", "warnings", "store_suggestions", "city_suggestions", "already_have"):
         if res.get(k):
             out[k] = res[k]
     out["note"] = res["note"]

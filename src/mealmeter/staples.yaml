@@ -823,6 +823,7 @@ gljive:
                    staklo, konzerv, susen, tortelin, tortellin, burek, pita, salata, kocka, zacin]
   unit: kg
   ambiguous_form: true
+  genitive: gljiva  # "Bez gljiva: ..." (summary_hr)
   attributes:
     oblik:
       konzerva: '\blim\.|\blimenk|\blim\b|\bkonz|\bocij|\bocj|\boc\.|\boc\.?\s?masa|\bo\.m\.|\bstaklo|\bstaklenk|\btetra|\bkuhan|\bvakum|\bvak\b|\bnaljev|netto|neto|\d+\s*(?:g|gr)\.?\s*/\s*\d+'
@@ -1210,6 +1211,7 @@ grah:
                    kob\b, sipa, brudet, orzo]
   unit: kg
   ambiguous_form: true
+  genitive: graha  # "Bez graha: ..." (summary_hr)
   # bez oznake u nazivu: suho ako je pakiranje 400-1000 g, nema oznake konzerve ni smrznutog, a unit je
   # rinfuza ili naziv ima vrećicu/PVC ili marku suhih mahunarki (Korak 2C, točka 11)
   dry_rule: {pack_g: [400, 1000], unit: [rinf], words: [pvc, vrecic, natura, vedrini, primavita, advent]}
@@ -1239,6 +1241,7 @@ leca:
                    kob\b, sipa, brudet, orzo]
   unit: kg
   ambiguous_form: true
+  genitive: leće  # "Bez leće: ..." (summary_hr)
   # bez oznake u nazivu: suho ako je pakiranje 400-1000 g, nema oznake konzerve ni smrznutog, a unit je
   # rinfuza ili naziv ima vrećicu/PVC ili marku suhih mahunarki (Korak 2C, točka 11)
   dry_rule: {pack_g: [400, 1000], unit: [rinf], words: [pvc, vrecic, natura, vedrini, primavita, advent]}
@@ -1266,6 +1269,7 @@ slanutak:
                    kob\b, sipa, brudet, orzo]
   unit: kg
   ambiguous_form: true
+  genitive: slanutka  # "Bez slanutka: ..." (summary_hr)
   # bez oznake u nazivu: suho ako je pakiranje 400-1000 g, nema oznake konzerve ni smrznutog, a unit je
   # rinfuza ili naziv ima vrećicu/PVC ili marku suhih mahunarki (Korak 2C, točka 11)
   dry_rule: {pack_g: [400, 1000], unit: [rinf], words: [pvc, vrecic, natura, vedrini, primavita, advent]}
@@ -1289,6 +1293,7 @@ kukuruz:
                    pecivo, tortilj, nachos, klip na zaru, kukuruzni, kukuruzno]
   unit: kg
   ambiguous_form: true
+  genitive: kukuruza  # "Bez kukuruza: ..." (summary_hr)
   # bez oznake u nazivu: suho ako je pakiranje 400-1000 g, nema oznake konzerve ni smrznutog, a unit je
   # rinfuza ili naziv ima vrećicu/PVC ili marku suhih mahunarki (Korak 2C, točka 11)
   dry_rule: {pack_g: [400, 1000], unit: [rinf], words: [pvc, vrecic, natura, vedrini, primavita, advent]}
@@ -1313,6 +1318,7 @@ grasak:
                    poli\b, salam]
   unit: kg
   ambiguous_form: true
+  genitive: graška  # "Bez graška: ..." (summary_hr)
   # bez oznake u nazivu: suho ako je pakiranje 400-1000 g, nema oznake konzerve ni smrznutog, a unit je
   # rinfuza ili naziv ima vrećicu/PVC ili marku suhih mahunarki (Korak 2C, točka 11)
   dry_rule: {pack_g: [400, 1000], unit: [rinf], words: [pvc, vrecic, natura, vedrini, primavita, advent]}

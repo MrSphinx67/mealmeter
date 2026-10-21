@@ -238,3 +238,11 @@ def test_plan_basket_compact(con):
     _, full_size, full = call(con, "plan_basket", {"ingredients": SEVEN, "city": "Osijek", "detail": True})
     assert "stores" in full and full_size > size
     assert full["best_store"]["total_to_buy"] == out["best_store"]["total_to_buy"]
+
+
+def test_plan_basket_compact_ask_user(con):
+    ing = PANCAKES + [{"name": "grah", "amount": 500, "unit": "g"}]
+    _, _, out = call(con, "plan_basket", {"ingredients": ing, "city": "Osijek"})
+    if "ask_user" in out:
+        assert "ambiguous" not in out and out["summary_hr"].startswith("Bez graha:")
+        assert out["ask_user"][0]["options"][0]["price_note"].endswith("za traženu količinu")

@@ -789,6 +789,12 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
             # bez oblika se ne računa: korisnik bira oblik ("form") i ponovi upit
             out["ambiguous"].append({"name": item.get("name"), "staple": staple.key, "amount": amount, "unit": unit,
                                      "ambiguity": e.ambiguity})
+            # pitanje za korisnika; ostali sastojci se računaju bez ovoga
+            out.setdefault("ask_user", []).append({
+                "ingredient": item.get("name"), "question": f"{item.get('name')}: {e.ambiguity['question']}",
+                "options": [{"form": f, "price_eur": e.ambiguity["prices"][f],
+                             "price_note": "najjeftinije u gradu, za traženu količinu"} for f in e.ambiguity["form"]],
+                "genitive": staple.genitive or item.get("name")})
             out["warnings"].append(f"'{item.get('name')}': {e.ambiguity['question']} (zadaj 'form'; nije uračunato)")
 
     stores: dict[tuple, dict] = {}
@@ -900,7 +906,9 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
             it.pop("_brand_alt", None)
     if price_overrides and out["best_store"]:
         _apply_overrides(out["best_store"], price_overrides, out)
-    out["summary_hr"] = summary_hr(out["best_store"], out["ambiguous"])
+    out["summary_hr"] = summary_hr(out["best_store"], out["ambiguous"], out.get("ask_user"))
+    for q in out.get("ask_user", []):
+        q.pop("genitive", None)
     dates = [s["date"] for s in ranked]
     if dates:
         out["date"] = max(dates)
@@ -979,12 +987,18 @@ def _eur(x: float) -> str:
     return f"{x:.2f}".replace(".", ",") + " €"
 
 
-def summary_hr(best: dict | None, ambiguous: list[dict] | None = None) -> str:
-    """Dvije rečenice za korisnika: cijena cijelih pakiranja i stvarno utrošenog dijela. Bez košarice: pitanje
-    o obliku (ambiguous) ako ga ima, inače da nijedna trgovina nema sastojke."""
+def summary_hr(best: dict | None, ambiguous: list[dict] | None = None, ask: list[dict] | None = None) -> str:
+    """Dvije rečenice za korisnika: cijena cijelih pakiranja i stvarno utrošenog dijela. Uz dvosmislen sastojak
+    (ask_user) košarica je bez njega: "Bez graha: za kupiti X €, stvarno utrošeno Y €." Bez košarice: pitanje
+    o obliku ako ga ima, inače da nijedna trgovina nema sastojke."""
     if not best:
         if ambiguous:
             return "Prije izračuna treba odgovor: " + "; ".join(
                 f"{a['name']}: {a['ambiguity']['question']}" for a in ambiguous)
         return "Nijedna trgovina u gradu nema ove sastojke."
+    if ask:
+        names = [q.get("genitive") or q["ingredient"] for q in ask]
+        joined = names[0] if len(names) == 1 else ", ".join(names[:-1]) + " i " + names[-1]
+        return (f"Bez {joined}: za kupiti {_eur(best['total_to_buy'])}, stvarno utrošeno "
+                f"{_eur(best['total_used'])}.")
     return f"Za kupiti: {_eur(best['total_to_buy'])}. Stvarno utrošeno: {_eur(best['total_used'])}."
