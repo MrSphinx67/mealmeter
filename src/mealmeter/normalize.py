@@ -260,6 +260,18 @@ def parse_pack_unit_field(unit: str | None) -> tuple[float, str] | None:
     return parse_pack(unit)
 
 
+def parse_multipack_unit(unit: str | None) -> tuple[int, float, str] | None:
+    """Višestruko pakiranje iz stupca `unit` (Lidl: "6x12g", "6x8g", "4x0,5l", "30G*20"): (broj komada,
+    količina jednog komada, 'g' | 'ml' | 'kom'), inače None."""
+    if not unit:
+        return None
+    if (m := _MULTI.search(unit)) and int(m.group(1)) > 0 and _num(m.group(2)) > 0:
+        return int(m.group(1)), *_to_base(m.group(2), m.group(3))
+    if (m := _MULTI_REV.search(unit)) and int(m.group(3)) > 0 and _num(m.group(1)) > 0:
+        return int(m.group(3)), *_to_base(m.group(1), m.group(2))
+    return None
+
+
 def unit_hint(unit: str | None, quantity: str | None) -> str | None:
     """Na koju jedinicu se (vjerojatno) odnosi unit_price lanca: 'kg', 'l' ili None.
 

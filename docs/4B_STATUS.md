@@ -5,7 +5,7 @@
 | 1 upute i opisi alata | gotovo |
 | 2 plan_basket (summary_hr, alternative, free_text, spajanje trgovina) | gotovo |
 | 3 nove namirnice (čokoladni namaz, džem) | gotovo (uz Lino Ladu kao sinonim) |
-| 4 višestruka pakiranja iz stupca unit | - |
+| 4 višestruka pakiranja iz stupca unit | gotovo |
 | 5 jaja plausible_by | - |
 | 6 koherentnost EAN grupe | - |
 | 7 pravila (tjestenina, med, mlijeko, slanina, krastavac) | - |

@@ -146,3 +146,50 @@ def test_new_staples_resolve_and_density():
     assert raw["cokoladni_namaz"]["estimate"] is True and raw["dzem"]["estimate"] is True
     g, unit, warn = to_base(2, "žlica", resolve_name("džem")[0])
     assert unit == "g" and g == pytest.approx(39) and "procjena" in warn[0]
+
+
+# --- 4. višestruka pakiranja iz stupca unit -----------------------------------------------------------
+
+def test_parse_multipack_unit():
+    from mealmeter.normalize import parse_multipack_unit
+
+    assert parse_multipack_unit("6x12g") == (6, 12.0, "g")
+    assert parse_multipack_unit("6x8g") == (6, 8.0, "g")
+    assert parse_multipack_unit("4x0,5l") == (4, 500.0, "ml")
+    assert parse_multipack_unit("30G*20") == (20, 30.0, "g")
+    assert parse_multipack_unit("80g") is None and parse_multipack_unit("10komad") is None
+    assert parse_multipack_unit(None) is None
+
+
+@pytest.mark.parametrize("key,name,unit,n", [
+    ("prasak_za_pecivo", "Dolcela Prašak za pecivo", "6x12g", 6),
+    ("vanilin_secer", "Dolcela Vanilin šećer", "6x8g", 6),
+    ("vanilin_secer", "Vanilin šećer", "80g", 1),  # rinfuza: jedno pakiranje
+    ("prasak_za_pecivo", "Prašak za pecivo 10kom.", "150g", 10),  # naziv ima prednost
+])
+def test_units_in_pack_from_unit_field(key, name, unit, n):
+    from mealmeter.normalize import parse_pack_unit_field
+    from mealmeter.staples import load_staples
+
+    st = load_staples()[key]
+    amount, pack_unit = parse_pack_unit_field(unit)
+    assert st.units_in_pack(name, amount, pack_unit, {}, unit_field=unit) == n
+
+
+def test_lidl_multipack_in_build(tmp_path):
+    """Lidlova Dolcela vrećica 6x12g u bazi: 6 vrećica, cijena po vrećici 0,99 / 6, bez unit_suspect."""
+    c = duckdb.connect(str(tmp_path / "m.duckdb"))
+    load_raw(c, FIXTURE, "2026-10-19")
+    c.execute("""INSERT INTO products (chain, product_id, barcode, name, category, unit) VALUES
+                 ('lidl', 'D1', '4056489000001', 'Dolcela Prašak za pecivo', 'Pečenje', '6x12g'),
+                 ('lidl', 'D2', '4056489000002', 'Dolcela Vanilin šećer', 'Pečenje', '6x8g')""")
+    c.execute("""INSERT INTO prices (chain, store_id, product_id, price, date) VALUES
+                 ('lidl', '105', 'D1', 0.99, DATE '2026-10-19'), ('lidl', '105', 'D2', 0.99, DATE '2026-10-19')""")
+    build_clean(c)
+    rows = dict(c.execute("""SELECT product_id, n_units FROM clean.product_staples
+                             WHERE chain = 'lidl' AND product_id IN ('D1', 'D2') AND drop_reason IS NULL""").fetchall())
+    assert rows == {"D1": 6.0, "D2": 6.0}
+    assert c.execute("""SELECT pack_amount FROM clean.products WHERE chain = 'lidl' AND product_id = 'D1'""").fetchone()[0] == 72
+    assert not c.execute("""SELECT bool_or(unit_suspect) FROM clean.product_staples
+                            WHERE chain = 'lidl' AND product_id IN ('D1', 'D2')""").fetchone()[0]
+    c.close()

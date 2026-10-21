@@ -9,7 +9,7 @@ from pathlib import Path
 import duckdb
 import yaml
 
-from mealmeter.normalize import norm_text
+from mealmeter.normalize import norm_text, parse_multipack_unit
 from mealmeter.units import piece_weight
 
 STAPLES_PATH = Path(__file__).with_name("staples.yaml")
@@ -102,11 +102,12 @@ class Staple:
 
     def units_in_pack(
         self, name: str, pack_amount: float | None, pack_unit: str | None, attrs: dict[str, str],
-        wholesale: bool = False,
+        wholesale: bool = False, unit_field: str | None = None,
     ) -> float | None:
         """Broj jedinica usporedbe u pakiranju kad to nije kg/l: vrećice od sachet_g grama
         (compare_by: pack) ili komadi iz naziva po count_regex, npr. "10/1", "10 KOM" (count).
-        Kod veleprodaje (wholesale) "10/1" je broj kutija, pa vrijedi samo "10 KOM" (zadnja grupa regexa)."""
+        Kod veleprodaje (wholesale) "10/1" je broj kutija, pa vrijedi samo "10 KOM" (zadnja grupa regexa).
+        Vrećice: kad naziv ne kaže broj, vrijedi višestruko pakiranje iz stupca unit (Lidl "6x12g" -> 6)."""
         if self.compare_by == "count":
             for m in re.finditer(self.count_regex or r"(?!)", attr_text(name)):
                 groups = m.groups()[-1:] if wholesale else m.groups()
@@ -117,7 +118,10 @@ class Staple:
             return None
         # vrećica = proizvod kakav se prodaje: broj vrećica iz naziva ("5+1", "3 PAK", "6x8g"), inače 1;
         # gramatura se ne dijeli veličinom vrećice (rinfuza od 500 g je jedno pakiranje)
-        return float(sachet_count(name))
+        n = sachet_count(name)
+        if n == 1 and (multi := parse_multipack_unit(unit_field)):
+            n = multi[0]
+        return float(n)
 
     @property
     def match_regex(self) -> str:
@@ -490,7 +494,7 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
                 detail["oblik"] = (form, "heuristic")
         attrs = {a: v for a, (v, _) in detail.items()}
         attr_rows += [(chain, pid, key, a, v, how) for a, (v, how) in detail.items()]
-        n = st.units_in_pack(name, amount, pack_unit, attrs, wholesale=chain in WHOLESALE_CHAINS)
+        n = st.units_in_pack(name, amount, pack_unit, attrs, wholesale=chain in WHOLESALE_CHAINS, unit_field=unit)
         assumed = None
         if st.assumed_pack_regex and amount is None and re.search(st.assumed_pack_regex, norm_text(name) or ""):
             assumed = st.assumed_pack_g
