@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/index.py": {
+      "includeFiles": "{src/**,data/compact.duckdb,data/*.yaml}",
+      "excludeFiles": "{data/mealmeter.duckdb,data/mealmeter.duckdb.*,data/*.tmp*,data/raw/**,data/compact_tmp/**,data/eval/**,data/recipes/**,tests/**,docs/**,scripts/**,.venv/**,.github/**,**/__pycache__/**}",
+      "maxDuration": 60
+    }
+  },
+  "rewrites": [{ "source": "/(.*)", "destination": "/api/index" }]
+}

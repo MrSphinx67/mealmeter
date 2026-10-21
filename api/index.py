@@ -1,6 +1,7 @@
 """Vercel ulazna točka (Korak 5V): ASGI aplikacija `app` oko HTTP poslužitelja (/mcp, /healthz, /).
 
-Vercel učitava varijablu `app` (pyproject.toml: [tool.vercel] entrypoint = "api.index:app"). Dokumentacija ne kaže
+Vercel učitava varijablu `app` iz api/index.py (Python funkcije u /api); vercel.json prepisuje sve putanje na
+/api/index, a omotač "/api/index/..." vraća na izvornu putanju. Dokumentacija ne kaže
 šalje li Python runtime ASGI lifespan, a MCP session manager bez njega pada ("Task group is not initialized"),
 pa ga omotač pokreće sam: pri prvom zahtjevu u zasebnom dugotrajnom zadatku (ne u zadatku zahtjeva). Ako
 platforma ipak pošalje lifespan, omotač ga obrađuje isto.

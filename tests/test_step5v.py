@@ -66,3 +66,15 @@ def test_index_defaults():
     src = (ROOT / "api" / "index.py").read_text(encoding="utf-8")
     assert 'os.environ.setdefault("MM_DB", str(ROOT / "data" / "compact.duckdb"))' in src
     assert 'os.environ.setdefault("MM_DUCKDB_TEMP", "/tmp")' in src and "\napp = " in src
+
+
+def test_vercel_config():
+    cfg = json.loads((ROOT / "vercel.json").read_text(encoding="utf-8"))
+    fn = cfg["functions"]["api/index.py"]
+    assert "data/compact.duckdb" in fn["includeFiles"] and "data/*.yaml" in fn["includeFiles"]
+    for excluded in ("data/mealmeter.duckdb", "data/raw/**", "tests/**", "docs/**"):
+        assert excluded in fn["excludeFiles"]
+    assert cfg["rewrites"] == [{"source": "/(.*)", "destination": "/api/index"}]
+    ignore = (ROOT / ".vercelignore").read_text(encoding="utf-8").splitlines()
+    assert "data/mealmeter.duckdb" in ignore and not any("compact" in line and not line.startswith("#")
+                                                          for line in ignore if "compact_tmp" not in line)

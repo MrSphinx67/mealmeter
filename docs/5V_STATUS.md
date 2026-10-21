@@ -4,7 +4,7 @@
 |---|---|
 | 0 ograničenja Vercela (službena dokumentacija) | gotovo |
 | 1 api/index.py (ASGI, lifespan, compact) | gotovo: uvicorn s --lifespan off i on: /healthz 200, plan_basket 200 (~0,85 s) |
-| 2 vercel.json i veličina paketa | - |
+| 2 vercel.json i veličina paketa | gotovo: procjena paketa ≈ 306 MB od 500 MB (vidi niže) |
 | 3 GitHub Actions (2x dnevno) | - |
 | 4 postavke (hostovi, rate limit, IP zaglavlje) | - |
 | 5 docs/DEPLOY.md | - |
@@ -28,3 +28,18 @@ Ništa nije deployano.
 Posljedice za Mealmeter: sažeta baza (212 MB) i ovisnosti (oko 100 MB) stanu u 500 MB, a puna baza (1,1 GB) mora biti
 isključena iz paketa. plan_basket (~0,9 s) je daleko ispod 300 s, a RSS (~370 MB) daleko ispod 2 GB. Dokumentacija ne
 navodi šalje li Python runtime ASGI lifespan, pa ga omotač pokreće sam (5-0).
+
+## 2. Paket (lokalna procjena; Vercel CLI nije instaliran, a `vercel build` traži povezan projekt)
+
+`vercel.json`: funkcija `api/index.py`, `includeFiles` = `src/**`, `data/compact.duckdb`, `data/*.yaml`; `excludeFiles`
+isključuje punu bazu, `data/raw`, testove, dokumente i skripte; `maxDuration` 60 s; sve putanje se prepisuju na
+`/api/index`. `.vercelignore` sprječava slanje pune baze i arhiva pri `vercel deploy` bez `--prebuilt`.
+
+| dio | MB |
+|---|---|
+| ovisnosti bez razvojnih (`uv export --no-dev`, cp312 manylinux; duckdb .so 58 MB) | 93 |
+| data/compact.duckdb (20.10.2026.) | 213 |
+| src/ i data/*.yaml | 0,4 |
+| **ukupno (procjena)** | **≈ 306 od 500** |
+
+Rezerva je ~190 MB; sažeta baza raste s brojem proizvoda i trgovina, pa CI provjerava veličinu (točka 3).

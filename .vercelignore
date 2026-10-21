@@ -1,0 +1,12 @@
+# Ne šalje se na Vercel (vercel deploy bez --prebuilt); sažeta baza data/compact.duckdb SE šalje
+data/mealmeter.duckdb
+data/mealmeter.duckdb.*
+data/*.tmp*
+data/raw/
+data/compact_tmp/
+data/update.log
+.venv/
+tests/
+docs/
+scripts/
+**/__pycache__/
