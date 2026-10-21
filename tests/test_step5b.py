@@ -26,6 +26,18 @@ PRODUCTS = [
     ("P12", "JAJA SVJEŽA PODNI UZGOJ M 10/1", "ko", {K: 1.99, KZ: 1.99, L: 1.85, SP: 2.19}),
     ("P13", "ŠEĆER KRISTAL 1 kg", "ko", {K: 0.99, KZ: 0.99, L: 0.75, SP: 1.09}),
     ("P14", "GRAŠAK SUHI ZELENI 500 g", "ko", {K: 1.49}),
+    # Korak 5B.4: nove namirnice
+    ("P15", "PAPAR CRNI U ZRNU 50 g", "ko", {K: 0.89}),
+    ("P16", "PAPRIKA SLATKA MLJEVENA 100 g", "ko", {K: 1.29}),
+    ("P17", "PAPRIKA LJUTA MLJEVENA 100 g", "ko", {K: 1.09}),
+    ("P18", "ORIGANO 10 g KOTANYI", "ko", {K: 0.99, L: 0.79}),
+    ("P19", "BOSILJAK SUŠENI 10 g", "ko", {K: 0.99}),
+    ("P20", "LOVOROV LIST 5 g", "ko", {K: 0.69, L: 0.59}),
+    ("P21", "KOBASICA SLAVONSKA DIMLJENA 400 g", "ko", {K: 3.99}),
+    ("P22", "KOBASICA SVJEŽA ZA ROŠTILJ 400 g", "ko", {K: 2.99, L: 2.49}),
+    ("P23", "PANCETA DIMLJENA NAREZANA 100 g", "ko", {K: 1.79, L: 1.49}),
+    ("P24", "SIR PARMIGIANO REGGIANO 200 g", "ko", {K: 4.99}),
+    ("P25", "SIR GRANA PADANO 200 g", "ko", {L: 3.49}),
 ]
 
 
@@ -121,3 +133,78 @@ def test_peas_ready_to_dry(con5b):
     assert ing["amount"] == pytest.approx(320) and any("prinos 2.5x" in w for w in ing["warnings"])
     res = plan_basket([{"name": "grašak", "amount": 800, "unit": "g", "form": "smrznuto"}], "Osijek", con=con5b)
     assert res["ingredients"][0]["amount"] == pytest.approx(800)
+
+
+# --- 4. nove namirnice -----------------------------------------------------------------------------------
+
+@pytest.mark.parametrize("key,name,attrs", [
+    ("origano", "ORIGANO 10 g KOTANYI", {}),
+    ("bosiljak", "BOSILJAK SUŠENI 10 g", {"oblik": "suhi"}),
+    ("lovorov_list", "LOVOROV LIST 5 g", {}),
+    ("papar", "PAPAR CRNI 50 g", {"oblik": "mljeveni", "vrsta": "crni"}),
+    ("papar", "PAPAR CRNI U ZRNU 50 g", {"oblik": "zrno"}),
+    ("mljevena_paprika", "PAPRIKA MLJEVENA 100 g", {"vrsta": "slatka"}),
+    ("mljevena_paprika", "PAPRIKA DIMLJENA SLATKA MLJEVENA 70 g", {"vrsta": "dimljena"}),
+    ("kobasica", "KOBASICA SLAVONSKA DIMLJENA 400 g", {"vrsta": "dimljena"}),
+    ("kobasica", "KULEN SLAVONSKI 400 g", {"vrsta": "kulen"}),
+    ("kobasica", "PARIZER 500 g", {"vrsta": "posebna"}),
+    ("kobasica", "KOBASICA SVJEŽA ZA ROŠTILJ 400 g", {"vrsta": "svjeza"}),
+    ("slanina", "PANCETA DIMLJENA NAREZANA 100 g", {"oblik": "narezana"}),
+    ("tvrdi_sir_talijanski", "SIR GRANA PADANO 200 g", {"vrsta": "grana_padano"}),
+    ("tvrdi_sir_talijanski", "SIR PARMIGIANO REGGIANO 200 g", {"vrsta": "parmigiano_reggiano"}),
+])
+def test_new_staples_match(key, name, attrs):
+    from mealmeter.staples import extract_attributes, load_staples, name_match
+
+    st = load_staples()[key]
+    assert name_match(st, name) == "match"
+    got = extract_attributes(st, name)
+    assert {a: got.get(a) for a in attrs} == attrs
+
+
+@pytest.mark.parametrize("key,name", [
+    ("kobasica", "GRAH S KOBASICAMA 400 g"), ("kobasica", "PIZZA S KOBASICOM"), ("bosiljak", "PESTO BOSILJAK 190 g"),
+    ("origano", "UMAK ZA PIZZU S ORIGANOM"), ("lovorov_list", "ULJE LOVOR 50 ml"),
+])
+def test_new_staples_excluded(key, name):
+    from mealmeter.staples import load_staples, name_match
+
+    assert name_match(load_staples()[key], name) in ("excluded", None)
+
+
+def _item(con, name, amount, unit, chain, **extra):
+    store = {"chain": chain, "address_contains": ""}
+    res = plan_basket([{"name": name, "amount": amount, "unit": unit, **extra}], "Osijek", con=con, store=store)
+    return res["best_store"]["items"][0]
+
+
+def test_new_staples_in_basket(con5b):
+    assert _item(con5b, "papar", 2, "g", "konzum")["product_id"] == "P7"  # mljeveni zadano, iako je zrno jeftiniji
+    assert _item(con5b, "papar", 2, "g", "konzum", attributes={"oblik": "zrno"})["product_id"] == "P15"
+    assert _item(con5b, "mljevena paprika", 5, "g", "konzum")["product_id"] == "P16"  # slatka zadano
+    assert _item(con5b, "ljuta paprika", 5, "g", "konzum")["product_id"] == "P17"
+    lovor = _item(con5b, "lovorov list", 2, "list", "konzum")
+    assert lovor["product_id"] == "P20" and lovor["need"] == pytest.approx(0.4)
+    assert _item(con5b, "origano", 2, "g", "lidl")["product_id"] == "P18"
+    assert _item(con5b, "panceta", 100, "g", "lidl")["product_id"] == "P23"
+    for key in ("origano", "bosiljak", "lovorov_list"):
+        assert load_staples()[key].pantry
+
+
+def test_sausage_default_smoked_or_confirm(con5b):
+    k = _item(con5b, "kobasica", 400, "g", "konzum")
+    assert k["product_id"] == "P21" and not k.get("needs_confirmation")
+    lidl = _item(con5b, "kobasica", 400, "g", "lidl")
+    assert lidl["product_id"] == "P22" and lidl["needs_confirmation"] and "dimljena" in lidl["confirm_note"]
+
+
+def test_italian_cheese_substitution(con5b):
+    k = _item(con5b, "parmezan", 40, "g", "konzum")
+    assert k["product_id"] == "P24" and "substitution" not in k
+    lidl = _item(con5b, "parmezan", 40, "g", "lidl")
+    assert lidl["product_id"] == "P25" and lidl["substitution"]["chosen"] == "SIR GRANA PADANO 200 g"
+    assert "Grana Padano" in lidl["substitution"]["note"]
+    assert "substitution" not in _item(con5b, "grana padano", 40, "g", "lidl")
+
+
+from mealmeter.staples import load_staples  # noqa: E402

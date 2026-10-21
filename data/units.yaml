@@ -76,3 +76,4 @@ pieces:  # g po komadu (srednje veliki, neočišćen, kakav se kupuje)
   zelena_salata: {g: 400, piece: glavica, estimate: true}
   endivija: {g: 300, piece: glavica, estimate: true}
   jaja: {g: 60, estimate: true}  # jaje M
+  lovorov_list: {g: 0.2, piece: list, estimate: true}  # Korak 5B: jedan suhi list

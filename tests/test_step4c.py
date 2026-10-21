@@ -63,7 +63,7 @@ KONZUM = {"chain": "konzum", "address_contains": ""}
 
 def test_alt_eligible_rules():
     st = load_staples()
-    sugar, cheese = st["secer"], st["parmezan"]
+    sugar, cheese = st["secer"], st["tvrdi_sir_talijanski"]
     base = {"chain": "konzum", "name": "ŠEĆER KRISTAL 1 kg", "variable_weight": False}
     assert alt_eligible(base, sugar)
     assert portion_pack({"name": "ŠEĆER MINUTE BIJELI 1000X4g"}, sugar)

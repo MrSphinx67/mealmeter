@@ -172,7 +172,7 @@ def test_parmezan_packed_before_weight():
 def test_fresh_meat_by_weight_primary():
     from mealmeter.basket import _by_weight_primary, choose_product
 
-    assert _by_weight_primary(S["svinjetina"]) and _by_weight_primary(S["luk"]) and not _by_weight_primary(S["parmezan"])
+    assert _by_weight_primary(S["svinjetina"]) and _by_weight_primary(S["luk"]) and not _by_weight_primary(S["tvrdi_sir_talijanski"])
     counter = _w("vaga", 6.0)  # bez pakiranja i bez "cca": vaga u mesnici
     pick = choose_product([counter, _row("pak", 4.50, "strong", grams=500)], 500, "g", "kg", loose=True)
     assert pick["product_id"] == "vaga" and not pick["by_weight_fallback"]  # 3,00 € < 4,50 €

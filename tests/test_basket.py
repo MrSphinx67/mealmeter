@@ -27,7 +27,7 @@ def test_resolve_name(name, key, attrs):
     assert st.key == key and got == attrs
 
 
-@pytest.mark.parametrize("name", ["šafran", "lovorov list", "brašno mekano", ""])
+@pytest.mark.parametrize("name", ["šafran", "kardamom", "brašno mekano", ""])
 def test_resolve_name_unknown(name):
     with pytest.raises(IngredientError):
         resolve_name(name)

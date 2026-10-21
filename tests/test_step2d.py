@@ -78,7 +78,7 @@ def test_group_attrs_prefer_name(con):
 @pytest.mark.parametrize("key,name", [
     ("maslinovo_ulje", "KUPUS KIS MASL ULJE ČEŠNJAK 250g"),
     ("maslinovo_ulje", "PREMIUM SAL. KIS.KUPUS S EX.DJE. MASL. ULJEM I CES. 250G"),
-    ("parmezan", "RIBAN.PARMEZAN GREEN VIE 100 g"),
+    ("tvrdi_sir_talijanski", "RIBAN.PARMEZAN GREEN VIE 100 g"),
     ("mozzarella", "MOZZARELLA VEGAN 200 g"),
     ("tvrdi_sir", "SIR TVRDI BILJNI 200 g"),
     ("maslac", "BILJNA ZAMJENA ZA MASLAC 250 g"),

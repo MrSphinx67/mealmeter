@@ -471,9 +471,10 @@ mozzarella:
       kuglica: '\bmini|\bkuglic|\bperle'
   loose_produce: false
 
-parmezan:
-  name: parmezan
-  synonyms: [parmezan, parmigiano, grana padano]
+tvrdi_sir_talijanski:
+  # Korak 5B: bivši ključ "parmezan"; Parmigiano Reggiano ili Grana Padano (Grana nosi substitution)
+  name: tvrdi talijanski sir (parmezan / Grana Padano)
+  synonyms: [parmezan, parmigiano, parmigiano reggiano, grana padano, tvrdi talijanski sir]
   must_match: [parmezan, parmigian, grana padano]
   must_not_match: [rizot, salama, ribez, cips, kreker, umak, pesto,
                    biljn, vegan, greenvie, green vie, zamjen]
@@ -483,6 +484,13 @@ parmezan:
   attributes:
     oblik:
       ribani: '\bribani|\bgrated|\brib\.'
+    vrsta:
+      grana_padano: '\bgrana'
+      parmigiano_reggiano: '\bparmigian|\breggian|\bparmezan'
+  # Grana Padano je sličan, ali nije Parmigiano Reggiano: stavka dobiva substitution, osim ako je tražena
+  substitution_values:
+    vrsta:
+      grana_padano: {unless: grana, note: "Grana Padano (sličan tvrdi sir), ne Parmigiano Reggiano"}
   loose_produce: false
 
 jaja:
@@ -1389,7 +1397,8 @@ naranca:
 
 papar:
   name: papar
-  synonyms: [papar, crni papar]
+  synonyms: [papar, crni papar, mljeveni papar]
+  default_attributes: {oblik: mljeveni}
   must_match: [papar\b]
   must_not_match: [sol\b, mlinac set, set\b, kobas, salam, sir\b, umak, chips, cips, pastrm, odrez, file,
                    zacin za, mix\b, kreker, slanina, pancet, steak, tuna, tunj\b]
@@ -1398,10 +1407,12 @@ papar:
   max_pack: 500
   min_pack: 10
   attributes:
+    # Korak 5B: zadano mljeveni (i bez oznake u nazivu); u zrnu i mlinac samo na zahtjev
     oblik:
-      mljeveni: '\bmljeven|\bmlj\.'
       zrno: '\bzrn|\bcijeli'
       mlinac: '\bmlinac|\bmlin\b'
+      mljeveni: '\bmljeven|\bmlj\.'
+      _default: mljeveni
     vrsta:
       crni: '\bcrn'
       bijeli: '\bbijel'
@@ -1411,8 +1422,10 @@ papar:
 mljevena_paprika:
   name: mljevena paprika (začin)
   synonyms: [mljevena paprika, slatka paprika, ljuta paprika, aleva paprika]
+  default_attributes: {vrsta: slatka}
   must_match: [paprika mljevena, mljevena paprika, paprika slatka mlj, paprika ljuta mlj, paprika mlj,
-               mlj paprika, aleva paprika, paprika slatka, paprika ljuta, slatka paprika, ljuta paprika]
+               mlj paprika, aleva paprika, paprika slatka, paprika ljuta, slatka paprika, ljuta paprika,
+               paprika dimljena, dimljena paprika]
   must_not_match: [chips, cips, kobas, salam, sir\b, ajvar, krem\b, namaz, filet, punjen, pecen, babur,
                    svjez, kom\b, rog\b, masline]
   unit: kg
@@ -1420,10 +1433,12 @@ mljevena_paprika:
   max_pack: 500
   min_pack: 20
   attributes:
+    # Korak 5B: zadano slatka (i bez oznake); ljuta i dimljena samo na zahtjev
     vrsta:
-      slatka: '\bslatk'
-      ljuta: '\bljut'
       dimljena: '\bdimljen'
+      ljuta: '\bljut'
+      slatka: '\bslatk'
+      _default: slatka
   loose_produce: false
 
 dodatak_jelima:
@@ -1570,4 +1585,66 @@ dzem:
       borovnica: '\bborovnic'
       smokva: '\bsmokv'
       mijesano: '\bmijesan|\bsumsko'
+  loose_produce: false
+
+# Korak 5B: začinsko bilje i kobasica
+origano:
+  name: origano
+  synonyms: [origano, mravinac]
+  must_match: [origano, origan\b, mravinac]
+  must_not_match: [pizza, umak, ulje, mix\b, zacin za, sir\b, kreker, cips, chips, salam, kobas]
+  unit: kg
+  pantry: true
+  min_pack: 3
+  max_pack: 500
+  loose_produce: false
+
+bosiljak:
+  name: bosiljak
+  synonyms: [bosiljak]
+  must_match: [bosilj]
+  must_not_match: [pesto, umak, ulje, pizza, sjeme, presad, rajcic, sir\b, cips, chips, kreker, tjesten,
+                   caj\b, sapun, salam, namaz]
+  unit: kg
+  pantry: true
+  min_pack: 3
+  max_pack: 500
+  attributes:
+    oblik:
+      svjezi: '\bsvjez|\bvezic|\blonc|\bteglic'
+      suhi: '\bsuh|\bsusen|\bmlj'
+  loose_produce: false
+
+lovorov_list:
+  name: lovorov list
+  synonyms: [lovorov list, lovor, lovorovo lišće, lovorov listić]
+  must_match: [lovor]
+  must_not_match: [ulje, sapun, sampon, krem, vijenac, biljka, lonc]
+  unit: kg
+  pantry: true
+  min_pack: 2
+  max_pack: 500
+  loose_produce: false
+
+kobasica:
+  name: kobasica
+  synonyms: [kobasica, kobasice, dimljena kobasica, slavonska kobasica, kulen, parizer, posebna kobasica,
+             svježa kobasica]
+  must_match: [kobasic, kobas\b, kulen, parizer, posebna salam]
+  must_not_match: [grah s, grah sa, pizza, sendvic, juha, umak, gotov, kroasan, pasteta, namaz, cips, chips,
+                   tost\b, burek, hrenovk, vegan, biljn, zacin, gulas, varivo, lecu, leca, kupus, sarma,
+                   kiseli, pas\b, pse, mack, poslastic]
+  unit: kg
+  min_pack: 80
+  max_pack: 3000
+  attributes:
+    vrsta:
+      kulen: '\bkulen'
+      posebna: '\bposebn|\bpariz'
+      svjeza: '\bsvjez|\bsvj\.|\bza rostilj|\bcevap|\bfresh'
+      dimljena: '\bdimljen|\bdim\.|\bslavonsk|\bsuh|\bcajn|\bdomac|\bzimsk'
+      _default: nepoznato
+  # zadano dimljena; ako je trgovina nema, druga vrsta uz needs_confirmation
+  default_preference: {vrsta: [dimljena, kulen, posebna, svjeza, nepoznato]}
+  confirm_unless: {vrsta: dimljena}
   loose_produce: false

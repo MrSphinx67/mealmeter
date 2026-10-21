@@ -84,6 +84,10 @@ class Staple:
     # izvan prve razine bira se samo kad trgovina nema ništa unutar razine, i označen je ("kavezni, S")
     preferred_tiers: tuple = field(default=(), hash=False, compare=False)
     genitive: str | None = None  # "graha" za summary_hr ("Bez graha: ...")
+    # odabrana vrijednost atributa različita od ove traži potvrdu korisnika (kobasica: vrsta=dimljena)
+    confirm_unless: dict[str, str] = field(default_factory=dict, hash=False, compare=False)
+    # odabrana vrijednost koja je zamjena: {atribut: {vrijednost: {unless: riječ u nazivu sastojka, note}}}
+    substitution_values: dict = field(default_factory=dict, hash=False, compare=False)
 
     def defaults(self) -> dict:
         """Zadani filtri atributa: vrijednost (default_attributes) ili n-torka redoslijeda (default_preference)."""
@@ -255,6 +259,8 @@ def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> d
                                 for a, vals in (d.get("default_preference") or {}).items()},
             quality_rank={a: tuple(str(v) for v in vals) for a, vals in (d.get("quality_rank") or {}).items()},
             genitive=d.get("genitive"),
+            confirm_unless={a: str(v) for a, v in (d.get("confirm_unless") or {}).items()},
+            substitution_values=d.get("substitution_values") or {},
             preferred_tiers=tuple({a: tuple(str(v) for v in vals) for a, vals in t.items()}
                                   for t in d.get("preferred_tiers") or []),
         )

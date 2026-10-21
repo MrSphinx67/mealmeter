@@ -61,7 +61,7 @@ def is_measure(unit: str | None) -> bool:
 
 # komad u receptu: masa iz pieces (luk, češanj češnjaka, vezica peršina...)
 PIECE_UNITS = {"kom", "komad", "komada", "komadi", "kos", "glavica", "glavice", "cesanj", "cesnja", "cesnjeva",
-               "rezanj", "rezanja", "vezica", "vezice"}
+               "rezanj", "rezanja", "vezica", "vezice", "list", "lista", "listova", "listic"}
 
 
 def is_piece(unit: str | None) -> bool:

@@ -15,7 +15,7 @@ from mealmeter.build import NATIONAL_NOTE
 from mealmeter.build import WHOLESALE_CHAINS
 from mealmeter.normalize import date_hr, norm_text, parse_multipack_unit
 from mealmeter.search import _candidates, _food_filter, connect, find_products, format_pack, resolve_city
-from mealmeter.staples import Staple, load_staples, resolve_ingredient
+from mealmeter.staples import Staple, extract_attributes_detail, load_staples, resolve_ingredient
 
 # jedinica u receptu -> (osnovna jedinica, faktor); kuhinjske mjere (žlica, šalica...) su u data/units.yaml
 _UNIT_ALIASES = {
@@ -24,6 +24,7 @@ _UNIT_ALIASES = {
     "ml": ("ml", 1), "cl": ("ml", 10), "dl": ("ml", 100), "l": ("ml", 1000), "lit": ("ml", 1000), "litra": ("ml", 1000),
     "kom": ("kom", 1), "komad": ("kom", 1), "komada": ("kom", 1), "kos": ("kom", 1), "glavica": ("kom", 1),
     "rezanj": ("kom", 1), "rezanja": ("kom", 1), "cesanj": ("kom", 1), "cesnja": ("kom", 1),
+    "list": ("kom", 1), "lista": ("kom", 1), "listova": ("kom", 1), "listic": ("kom", 1),
     # vezica (svježe bilje) je komad bez mase: pretvara se samo uz piece_g, a peršin ga namjerno nema
     "vezica": ("kom", 1), "vezice": ("kom", 1),
     "vrecica": ("vrecica", 1), "vrecice": ("vrecica", 1), "paket": ("vrecica", 1), "paketic": ("vrecica", 1),
@@ -101,7 +102,13 @@ def resolve_name(name: str) -> tuple[Staple, dict]:
         # sinonim koji je i vrijednost atributa ("špageti" -> tjestenina, oblik=spageti)
         q = norm_text(name)
         hit = [(a, v) for a, vals in st.attributes.items() for v in vals if norm_text(v.replace("_", " ")) == q]
-        return st, dict(hit[:1])
+        attrs = dict(hit[:1])
+        # riječi sinonima zamjenjuju zadanu vrijednost atributa ("ljuta paprika": vrsta=ljuta, ne zadana slatka)
+        detail = extract_attributes_detail(st, name)
+        for a in st.default_attributes:
+            if a in detail and detail[a][1] == "name":
+                attrs.setdefault(a, detail[a][0])
+        return st, attrs
     words = (norm_text(name) or "").split()
     for st in load_staples().values():
         for syn in sorted(st.synonyms, key=len, reverse=True):
@@ -871,6 +878,7 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
                 subst.append(f"izvan zadanog izbora: {note}")
             _add_item(stores, key, rows, need, idx, pick, chosen, subst,
                       need.staple.key in have or need.input_staple in have)
+            stores[key]["items"][idx].update(confirm_and_substitution(need, chosen, pick["name"]))
         if need.brand:
             _brand_substitutions(stores, idx, need, branded)
 
@@ -949,6 +957,24 @@ def _brand_substitutions(stores: dict, idx: int, need: Need, branded: set) -> No
                                 "pack_size": b["pack_size"], "n_packs": b["n_packs"], "price_eff": b["price_eff"],
                                 "cost_pack": b["cost_pack"], "cost_used": b["cost_used"], "brand": need.brand[0],
                                 "other_store": True, "chain": bs["chain"], "address": bs["address"]}
+
+
+def confirm_and_substitution(need: Need, chosen: dict, product: str) -> dict:
+    """Polja stavke iz pravila namirnice: needs_confirmation kad odabrana vrijednost nije zadana
+    (confirm_unless; kobasica bez dimljene u trgovini) i substitution kad je odabrana vrijednost zamjena
+    (substitution_values; Grana Padano umjesto Parmigiano Reggiana), osim ako je tražena imenom."""
+    out = {}
+    for attr, value in need.staple.confirm_unless.items():
+        if attr not in need.attributes and chosen.get(attr) != value:
+            out["needs_confirmation"] = True
+            out["confirm_note"] = (f"{need.staple.name}: odabrano {attr}={chosen.get(attr, 'nepoznato')}, jer "
+                                   f"{value} nema u trgovini; potvrdi s korisnikom")
+    name = norm_text(need.input.get("name") or "") or ""
+    for attr, by_value in need.staple.substitution_values.items():
+        rule = by_value.get(chosen.get(attr))
+        if rule and not re.search(r"(^| )" + rule["unless"], name):
+            out["substitution"] = {"requested": need.input.get("name"), "chosen": product, "note": rule["note"]}
+    return out
 
 
 def set_totals(store: dict, items: list[dict]) -> None:
