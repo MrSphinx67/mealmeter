@@ -3,7 +3,7 @@
 | točka | stanje |
 |---|---|
 | 1 zbrojevi (total_used = zbroj redaka, from_stock_value) | gotovo |
-| 2 preporuka po total_to_buy, usporedba lanaca | - |
+| 2 preporuka po total_to_buy, usporedba lanaca | gotovo (comparison do 6 redaka, incomplete s "nedostaje: …") |
 | 3 prinos oblika mahunarki (data/yields.yaml) | - |
 | 4 nove namirnice | - |
 | 5 free_text sinonimi (data/synonyms.yaml) | - |

@@ -3,6 +3,7 @@
 import difflib
 import math
 import re
+from collections import Counter
 from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
@@ -877,10 +878,14 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
         oldest = min(items, key=lambda it: it["date"]) if items else None
         s["date"], s["date_hr"] = (oldest["date"], oldest["date_hr"]) if oldest else (None, None)
         s["stale_days"] = max((it["stale_days"] or 0 for it in items), default=0)
+    in_city = Counter(s["chain"] for s in stores.values())  # trgovine lanca u gradu s barem jednim sastojkom
     merged = merge_same_chain(list(stores.values()))
+    # preporuka: najviše povezanih sastojaka, zatim najmanji total_to_buy (total_used je samo informativan);
+    # stavke sa zastavicama tek pri jednakoj cijeni
     ranked = sorted(merged, key=lambda s: (-s["n_matched"], s["data_quality"] == "suspect",
-                                           s["flagged_items"], s["total_to_buy"]))
+                                           s["total_to_buy"], s["flagged_items"]))
     out["stores"] = ranked[:max_stores] if max_stores else ranked
+    out["comparison"], out["incomplete"] = compare_chains(ranked, in_city, n_needs)
     eligible = [s for s in ranked if s["data_quality"] != "suspect"] or ranked
     if eligible:
         out["best_store"] = eligible[0]
@@ -970,6 +975,30 @@ def _add_item(stores: dict, key: tuple, rows: list[dict], need: Need, idx: int, 
 
 
 MAX_ADDRESSES = 3
+
+
+COMPARE_MIN_SHARE, COMPARE_ROWS, COMPARE_ADDRESSES = 0.8, 6, 2
+
+
+def compare_chains(ranked: list[dict], in_city: Counter, n_needs: int) -> tuple[list[dict], list[dict]]:
+    """Usporedba lanaca: po jedan redak (najjeftinija trgovina lanca s najviše sastojaka) za lance s >= 80 %
+    povezanih sastojaka, od najmanjeg total_to_buy, najviše COMPARE_ROWS redaka i COMPARE_ADDRESSES adrese;
+    ostali lanci idu u incomplete s popisom onoga što nedostaje ("nedostaje: X, Y")."""
+    best: dict[str, dict] = {}
+    for s in ranked:  # ranked: najviše sastojaka, pa najmanji total_to_buy
+        best.setdefault(s["chain"], s)
+    rows, incomplete = [], []
+    for s in sorted(best.values(), key=lambda s: (-s["n_matched"], s["total_to_buy"])):
+        if n_needs and s["n_matched"] / n_needs >= COMPARE_MIN_SHARE and len(rows) < COMPARE_ROWS:
+            addresses = [a for a in (s.get("addresses") or [s["address"]]) if a][:COMPARE_ADDRESSES]
+            rows.append({"chain": s["chain"], "addresses": addresses,
+                         "n_stores_city": in_city.get(s["chain"], 1), "total_to_buy": s["total_to_buy"],
+                         "total_used": s["total_used"], "n_matched": s["n_matched"], "n_ingredients": n_needs,
+                         "complete": not s["missing"], **({"missing": s["missing"]} if s["missing"] else {})})
+        else:
+            incomplete.append({"chain": s["chain"], "n_matched": s["n_matched"], "missing": s["missing"],
+                               "note": "nedostaje: " + ", ".join(s["missing"])})
+    return rows, incomplete
 
 
 def merge_same_chain(stores: list[dict]) -> list[dict]:

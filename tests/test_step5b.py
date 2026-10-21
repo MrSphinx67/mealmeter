@@ -70,3 +70,29 @@ def test_row_sums_equal_totals(con5b, recipe, city):
         assert s["total_to_buy"] == round(sum(it["cost_pack"] for it in buy), 2)
         assert s["from_stock_value"] == round(sum(it["cost_used"] for it in s["items"] if it["have"]), 2)
     assert any(it["have"] for s in res["stores"] for it in s["items"])
+
+
+# --- 2. preporuka i usporedba lanaca ----------------------------------------------------------------------
+
+def test_best_by_total_to_buy_and_comparison(con5b):
+    res = plan_basket(PALACINKE, "Osijek", con=con5b)
+    complete = [s for s in res["stores"] if not s["missing"]]
+    assert res["best_store"]["total_to_buy"] == min(s["total_to_buy"] for s in complete)
+    rows = res["comparison"]
+    assert 1 <= len(rows) <= 6 and len({r["chain"] for r in rows}) == len(rows)
+    assert [r["total_to_buy"] for r in rows if r["complete"]] == sorted(r["total_to_buy"] for r in rows if r["complete"])
+    assert all(r["n_matched"] / r["n_ingredients"] >= 0.8 and len(r["addresses"]) <= 2 and r["n_stores_city"] >= 1
+               for r in rows)
+    assert {"lidl", "konzum", "spar"} <= {r["chain"] for r in rows}
+    lidl = next(r for r in rows if r["chain"] == "lidl")
+    assert lidl["total_to_buy"] == res["best_store"]["total_to_buy"]  # Lidl je najjeftiniji (fixture)
+    for inc in res["incomplete"]:
+        assert inc["note"].startswith("nedostaje: ") and inc["missing"]
+
+
+def test_incomplete_chain_listed(con5b):
+    # Spar (fixture) nema špagete, meso ni rajčicu: bolonjez u Osijeku ima Spar samo kao nepotpun
+    res = plan_basket(BOLONJEZ, "Osijek", con=con5b)
+    spar = [i for i in res["incomplete"] if i["chain"] == "spar"]
+    assert spar and "špageti" in spar[0]["missing"] and spar[0]["note"].startswith("nedostaje: ")
+    assert "spar" not in {r["chain"] for r in res["comparison"]}

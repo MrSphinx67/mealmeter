@@ -244,10 +244,9 @@ def plan_basket(
     res["note"] = PRICE_NOTE  # alternative nosi samo best_store (basket.plan_basket)
     if detail:
         return _fit(res, ("stores", "best_store.items"))
-    return _fit(compact_basket(res), ("other_stores", "best_store.items"))
+    return _fit(compact_basket(res), ("incomplete", "comparison", "best_store.items"))
 
 
-OTHER_STORES = 2
 _ITEM_KEYS = ("ingredient", "staple", "name", "pack_size", "n_packs", "cost_pack", "cost_used")
 _ITEM_OPTIONAL = ("have", "user_provided", "computed_cost_pack", "substitution", "needs_confirmation", "candidates")
 _ALT_KEYS = ("name", "pack_size", "cost_pack", "delta_eur", "cheaper", "note", "brand", "other_store", "chain",
@@ -272,8 +271,9 @@ def _compact_item(it: dict) -> dict:
 
 
 def compact_basket(res: dict) -> dict:
-    """Sažet odgovor plan_basket (zadano): najbolja trgovina sa stavkama i najviše OTHER_STORES drugih trgovina
-    kao jedan redak (lanac, adresa, za kupiti, utrošeno, n_matched). Puni odgovor daje detail=true."""
+    """Sažet odgovor plan_basket (zadano): najbolja trgovina (najmanji total_to_buy) sa stavkama i usporedba
+    lanaca (comparison: jedan redak po lancu, najviše 6; incomplete: lanci bez dovoljno sastojaka). Puni
+    odgovor daje detail=true."""
     best = res.get("best_store")
     out = {k: res[k] for k in ("city", "date", "date_hr", "summary_hr") if k in res}
     if best:
@@ -285,10 +285,10 @@ def compact_basket(res: dict) -> dict:
             "items": [_compact_item(it) for it in best["items"]]}
     else:
         out["best_store"] = None
-    out["other_stores"] = [{k: s.get(k) for k in ("chain", "address", "n_stores", "total_to_buy", "total_used",
-                                                  "n_matched")}
-                           for s in res.get("stores", []) if s is not best][:OTHER_STORES]
-    for k in ("ask_user", "unmatched", "warnings", "store_suggestions", "city_suggestions", "already_have"):
+    # usporedba lanaca (basket.compare_chains): najviše 6 redaka s >= 80 % sastojaka, ostali kao incomplete
+    out["comparison"] = res.get("comparison", [])
+    for k in ("incomplete", "ask_user", "unmatched", "warnings", "store_suggestions", "city_suggestions",
+              "already_have"):
         if res.get(k):
             out[k] = res[k]
     out["note"] = res["note"]
@@ -371,7 +371,8 @@ alternatives (zadano true: do 2 druga proizvoda po stavci s delta_eur i cheaper 
 per item with delta_eur and cheaper).
 Vraća / returns (sažeto / compact): summary_hr (počni njime / start with it), best_store (items s pack_size,
 cost_pack, cost_used, alternatives; trgovine istog lanca s istim proizvodima spojene: n_stores, addresses),
-other_stores (do 2 retka / up to 2 rows: chain, address, total_to_buy, total_used, n_matched), ask_user,
+comparison (po lancu do 6 redaka / one row per chain, up to 6: chain, addresses, n_stores_city, total_to_buy,
+total_used, n_matched), incomplete (lanci bez >= 80 % sastojaka: missing / chains missing ingredients), ask_user,
 warnings, unmatched (s prijedlozima / with suggestions), date_hr. detail=true: sve trgovine i sva polja /
 all stores and fields.
 Primjer / example: {"ingredients": [{"name": "brašno glatko", "amount": 250, "unit": "g"},

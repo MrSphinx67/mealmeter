@@ -161,10 +161,10 @@ def test_errors_are_tool_errors(con):
 def test_store(con):
     _, _, out = call(con, "plan_basket", {"ingredients": PANCAKES, "city": "Osijek",
                                           "store": {"chain": "spar", "address_contains": ""}})
-    assert {s["chain"] for s in out["other_stores"]} <= {"spar"} and out["best_store"]["chain"] == "spar"
+    assert {s["chain"] for s in out["comparison"]} <= {"spar"} and out["best_store"]["chain"] == "spar"
     _, _, out = call(con, "plan_basket", {"ingredients": PANCAKES, "city": "Osijek",
                                           "store": {"chain": "konzum", "address_contains": "nema-te-ulice"}})
-    assert out["other_stores"] == [] and out["best_store"] is None
+    assert out["comparison"] == [] and out["best_store"] is None
     assert any("nema trgovine" in w for w in out["warnings"]) and out["store_suggestions"]
 
 
@@ -228,10 +228,11 @@ SEVEN = PANCAKES + [{"name": "šećer", "amount": 15, "unit": "g"}, {"name": "so
 def test_plan_basket_compact(con):
     err, size, out = call(con, "plan_basket", {"ingredients": SEVEN, "city": "Osijek"})
     assert not err and size <= 6000
-    assert set(out) >= {"summary_hr", "best_store", "other_stores", "date_hr", "note"} and "stores" not in out
-    assert len(out["other_stores"]) <= 2
-    for s in out["other_stores"]:
-        assert set(s) == {"chain", "address", "n_stores", "total_to_buy", "total_used", "n_matched"}
+    assert set(out) >= {"summary_hr", "best_store", "comparison", "date_hr", "note"} and "stores" not in out
+    assert len(out["comparison"]) <= 6
+    for s in out["comparison"]:
+        assert {"chain", "addresses", "n_stores_city", "total_to_buy", "total_used", "n_matched"} <= set(s)
+        assert len(s["addresses"]) <= 2
     for it in out["best_store"]["items"]:
         assert {"ingredient", "name", "pack_size", "cost_pack", "cost_used"} <= set(it)
         assert "price_per_unit" not in it and "ean" not in it
