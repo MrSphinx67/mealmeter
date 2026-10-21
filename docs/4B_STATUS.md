@@ -7,7 +7,7 @@
 | 3 nove namirnice (čokoladni namaz, džem) | gotovo (uz Lino Ladu kao sinonim) |
 | 4 višestruka pakiranja iz stupca unit | gotovo |
 | 5 jaja plausible_by | gotovo |
-| 6 koherentnost EAN grupe | - |
+| 6 koherentnost EAN grupe | kod i testovi gotovi; docs/ean_incoherent.md nakon ponovne izgradnje baze |
 | 7 pravila (tjestenina, med, mlijeko, slanina, krastavac) | - |
 | 8 rate limit (IP, sesija, globalno) | - |
 | 9 zamjena datoteke baze bez restarta | - |

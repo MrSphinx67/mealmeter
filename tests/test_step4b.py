@@ -220,3 +220,61 @@ def test_cheap_eggs_not_suspect(tmp_path):
                               WHERE chain = 'lidl' AND product_id IN ('E1', 'E2', 'E3') AND staple = 'jaja'""").fetchall())
     assert flags == {"E1": False, "E2": True, "E3": True}  # 0,119 u granicama; 0,089 ispod 0,10; bio 0,119 < 0,30
     c.close()
+
+
+# --- 6. koherentnost EAN grupe ---------------------------------------------------------------------------
+
+def _chains(names: dict[str, tuple[str, str | None]]):
+    from mealmeter.build import _ean_tokens, _ean_words
+    from mealmeter.staples import match_text
+
+    return {c: (_ean_tokens(match_text(n), b), _ean_words(match_text(n))) for c, (n, b) in names.items()}
+
+
+def test_ean_coherence_rules():
+    from mealmeter.build import ean_coherence
+
+    assert ean_coherence(_chains({"roto": ("KIBLA ZA VINO 3,5 l ZLATNA", None),
+                                  "spar": ("JOGURT TEK.3,2% S BUDGET 180 g", None)})) == (False, set())
+    assert ean_coherence(_chains({"plodine": ("MRKVA 500 G", None), "metro": ("6/1 JABUKA CRIPS PINK KOM PD", None),
+                                  "spar": ("KUKURUZ ŠEĆERAC 3/1", None)})) == (False, set())
+    # isti proizvod: kratice i marka ("PIVAC DIM.SVINJ REB" / "REBRA DIMLJENA ... PIVAC")
+    assert ean_coherence(_chains({"konzum": ("REBRA DIMLJENA VP PIVAC", "PIVAC"),
+                                  "metro": ("CCA1KG PIVAC DIM.SVINJ REB VP", "PIVAC")})) == (True, set())
+    assert ean_coherence(_chains({"ribola": ("BEBIMIL 1 600 g", "BEBIMIL"), "tommy": ("BEBIMIL 1 600 g", "BEBIMIL")}))[0]
+    # lanac bez ijedne zajedničke riječi ispada iz koherentne grupe
+    assert ean_coherence(_chains({"bure": ("KIBLA ZA VINO 3,5 l ZLATNA", None), "roto": ("KIBLA PVC ZLATNA 3,5L", None),
+                                  "spar": ("JOGURT TEK.3,2% S BUDGET 180 g", None)})) == (True, {"spar"})
+    # lanac bez riječi ne glasa
+    assert ean_coherence(_chains({"a": ("12 x 3", None), "b": ("MRKVA 1 kg", None)})) == (True, set())
+
+
+def _ean13(body12: str) -> str:
+    s = sum(int(d) * (3 if i % 2 else 1) for i, d in enumerate(body12))
+    return body12 + str((10 - s % 10) % 10)
+
+
+def test_incoherent_eans_in_build(tmp_path):
+    c = duckdb.connect(str(tmp_path / "i.duckdb"))
+    load_raw(c, FIXTURE, "2026-10-19")
+    kibla, mix, ok, out = _ean13("385999000001"), _ean13("385999000002"), _ean13("385999000003"), _ean13("385999000004")
+    c.executemany("INSERT INTO products (chain, product_id, barcode, name, category, unit) VALUES (?, ?, ?, ?, 'HRANA', 'KOM')", [
+        ("roto", "K1", kibla, "KIBLA ZA VINO 3,5 l ZLATNA"), ("spar", "K2", kibla, "JOGURT TEK.3,2% S BUDGET 180 g"),
+        ("plodine", "M1", mix, "MRKVA 500 G"), ("metro", "M2", mix, "6/1 JABUKA CRIPS PINK KOM PD"),
+        ("spar", "M3", mix, "KUKURUZ ŠEĆERAC 3/1"),
+        ("konzum", "O1", ok, "MLIJEKO TRAJNO 2,8% 1 l DUKAT"), ("spar", "O2", ok, "DUKAT TRAJNO MLIJEKO 2.8% 1L"),
+        ("plodine", "X1", out, "KIBLA ZA VINO 3,5 l ZLATNA"), ("roto", "X2", out, "KIBLA PVC ZLATNA 3,5L"),
+        ("spar", "X3", out, "JOGURT TEK.3,2% S BUDGET 180 g")])
+    stats = build_clean(c)
+    got = dict(c.execute("""SELECT product_id, ean_incoherent AND NOT ean_global FROM clean.products
+                            WHERE product_id IN ('K1', 'K2', 'M1', 'M2', 'M3', 'O1', 'O2', 'X1', 'X2', 'X3')""").fetchall())
+    assert got == {"K1": True, "K2": True, "M1": True, "M2": True, "M3": True, "O1": False, "O2": False,
+                   "X1": False, "X2": False, "X3": True}
+    reasons = dict(c.execute("SELECT product_id, reason FROM clean.ean_incoherent").fetchall())
+    assert reasons["K1"] == "group" and reasons["X3"] == "outlier"
+    assert stats["ean_incoherent"]
+    # razdvojena grupa: lanac + name_norm (bkey), pa jogurt više nije u grupi s kiblom
+    from mealmeter.staples import BKEY_SQL
+    bkeys = dict(c.execute(f"SELECT product_id, {BKEY_SQL} FROM clean.products p WHERE product_id IN ('K1', 'K2')").fetchall())
+    assert bkeys["K1"] != bkeys["K2"] and bkeys["K2"].startswith("spar:")
+    c.close()

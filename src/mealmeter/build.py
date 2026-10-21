@@ -1,6 +1,7 @@
 """Učitavanje dnevne arhive cijene.dev u DuckDB i izgradnja čistih tablica (schema `clean`)."""
 
 import csv
+import difflib
 import os
 import tempfile
 from pathlib import Path
@@ -151,6 +152,7 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
     """)
 
     stats_dummy = flag_dummy_eans(con)
+    stats_incoherent = flag_incoherent_eans(con)
 
     # Isti globalni EAN = isti proizvod: gramaturu bez naziva ("BRAŠNO GLATKO 1/1") naslijedi od
     # drugih lanaca, ali samo ako se svi parsirani nazivi za taj EAN slažu.
@@ -218,7 +220,7 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
         FROM clean.stores s GROUP BY s.chain
     """)
 
-    stats = {"food": food_stats, "dummy_eans": stats_dummy}
+    stats = {"food": food_stats, "dummy_eans": stats_dummy, "ean_incoherent": stats_incoherent}
     stats["quality"] = chain_quality_report(con)
     stats["staples"] = build_staples(con)
     stats["dedup"] = con.execute("""
@@ -279,6 +281,100 @@ def flag_dummy_eans(con: duckdb.DuckDBPyConnection) -> list[tuple]:
     """)
     return con.execute("""SELECT chain, ean_note, count(DISTINCT ean_norm), count(*) FROM clean.products
                           WHERE ean_note IS NOT NULL GROUP BY ALL ORDER BY 4 DESC""").fetchall()
+
+
+# Koherentnost EAN grupe (Korak 4B): značajne riječi naziva su bez brojeva, riječi kraćih od 4 slova, marke
+# i ovih riječi (jedinice, pakiranje, akcije)
+EAN_STOPWORDS = frozenset("""
+    komad komada komadi kom. grama gram litra litre pakiranje pakiranja paket pack gratis akcija cijena super
+    novo novi nova extra plus mini maxi ultra classic original""".split())
+EAN_COHERENT_SHARE = 0.5
+
+
+def _ean_tokens(text: str | None, brand: str | None) -> set[str]:
+    """Značajne riječi naziva (match_norm): samo slova, >= 4 slova, bez marke i EAN_STOPWORDS."""
+    brand_words = set((norm_text(brand) or "").split())
+    return {w for w in _ean_words(text) if len(w) >= 4 and w not in brand_words}
+
+
+def _ean_words(text: str | None) -> set[str]:
+    """Sve riječi naziva kao dokaz prisutnosti: samo slova, >= 3 slova (kratice "reb", "dim"), s markom."""
+    return {w for w in (text or "").split() if len(w) >= 3 and w.isalpha() and w not in EAN_STOPWORDS}
+
+
+def _shares(a: str, b: str) -> bool:
+    """Ista riječ, jedna je početak druge (kratice: "reb" / "rebra") ili se razlikuju u slovu-dva
+    ("ementaler" / "emmentaler")."""
+    if a.startswith(b) or b.startswith(a):
+        return True
+    m = difflib.SequenceMatcher(None, a, b)
+    return m.real_quick_ratio() >= 0.8 and m.ratio() >= 0.8
+
+
+def ean_coherence(chains: dict[str, tuple[set[str], set[str]]]) -> tuple[bool, set[str]]:
+    """(koherentna, lanci izvan grupe) za EAN grupu {lanac: (značajne riječi, sve riječi)} svih njegovih naziva.
+
+    Značajna riječ (_ean_tokens) je "u nazivima lanca" ako je lanac ima ili ima njezinu kraticu ili
+    marku-riječ koja je pokriva (_ean_words, _shares): nazivi lanaca su jako skraćeni ("PIVAC DIM.SVINJ REB").
+    Koherentna je grupa u kojoj je barem jedna značajna riječ u nazivima >= 50 % lanaca i barem dva lanca
+    (kod dva lanca riječ jednog lanca inače uvijek pokriva 50 %). Lanci bez ijedne riječi ne glasaju.
+    U koherentnoj grupi s >= 3 lanca ispada lanac koji ne dijeli nijednu riječ ni s jednim drugim lancem
+    (KIBLA ZA VINO, KIBLA PVC / JOGURT TEK.)."""
+    voting = {c: tw for c, tw in chains.items() if tw[1]}
+    if len(voting) < 2:
+        return True, set()
+    need = max(2, EAN_COHERENT_SHARE * len(voting))
+
+    def has(words: set[str], token: str) -> bool:
+        return any(_shares(token, w) for w in words)
+
+    # kandidati: značajne riječi i, jer su nazivi često samo marka i kratice ("BEBIMIL 1 600 g", "SIR ABC
+    # 200G"), sve riječi od >= 3 slova s markom; strogo pravilo (samo značajne riječi) označilo je ~1 550
+    # grupa, uglavnom isti proizvod (pregled Korak 4B)
+    candidates = {t for sig, words in voting.values() for t in sig | words}
+    if not any(sum(has(words, t) for _, words in voting.values()) >= need for t in candidates):
+        return False, set()
+    if len(voting) < 3:
+        return True, set()
+    outliers = {c for c, (_, words) in voting.items()
+                if not any(has(other, w) for w in words for d, (_, other) in voting.items() if d != c)}
+    return True, outliers
+
+
+def flag_incoherent_eans(con: duckdb.DuckDBPyConnection) -> list[tuple]:
+    """Globalni EAN koji u različitim lancima nosi nespojive nazive (isti barkod za "MRKVA 500 G" i
+    "KUKURUZ ŠEĆERAC 3/1") nije isti proizvod: grupa se razdvaja po lancu + name_norm (ean_global = false,
+    ean_incoherent = true); kod koherentne grupe ispada samo lanac bez zajedničkih riječi (ean_coherence).
+    Detalji su u clean.ean_incoherent (ean, lanac, naziv, razlog 'group' | 'outlier').
+    Vraća (lanac, grupa, proizvoda) za izvještaj."""
+    con.execute("ALTER TABLE clean.products ADD COLUMN ean_incoherent BOOLEAN DEFAULT false")
+    rows = con.execute("""
+        SELECT ean_norm, chain, product_id, name, match_norm, brand FROM clean.products
+        WHERE ean_global AND ean_norm IN (
+          SELECT ean_norm FROM clean.products WHERE ean_global GROUP BY ALL HAVING count(DISTINCT chain) >= 2)
+        ORDER BY ean_norm, chain, product_id""").fetchall()
+    groups: dict[str, list[tuple]] = {}
+    for r in rows:
+        groups.setdefault(r[0], []).append(r)
+    flagged = []
+    for ean, members in groups.items():
+        by_chain: dict[str, tuple[set[str], set[str]]] = {}
+        for _, chain, _, _, text, brand in members:
+            sig, words = by_chain.setdefault(chain, (set(), set()))
+            sig.update(_ean_tokens(text, brand))
+            words.update(_ean_words(text))
+        ok, outliers = ean_coherence(by_chain)
+        for _, chain, pid, name, _, _ in members:
+            if not ok or chain in outliers:
+                flagged.append((ean, chain, pid, name, "group" if not ok else "outlier"))
+    _temp_table(con, "incoherent_tmp", {"ean_norm": "VARCHAR", "chain": "VARCHAR", "product_id": "VARCHAR",
+                                        "name": "VARCHAR", "reason": "VARCHAR"}, flagged)
+    con.execute("CREATE OR REPLACE TABLE clean.ean_incoherent AS SELECT * FROM incoherent_tmp")
+    con.execute("""
+        UPDATE clean.products p SET ean_global = false, ean_incoherent = true
+        FROM clean.ean_incoherent i WHERE p.chain = i.chain AND p.product_id = i.product_id""")
+    return con.execute("""SELECT chain, reason, count(DISTINCT ean_norm), count(*) FROM clean.ean_incoherent
+                          GROUP BY ALL ORDER BY 3 DESC""").fetchall()
 
 
 def chain_quality_report(con: duckdb.DuckDBPyConnection) -> list[tuple]:
