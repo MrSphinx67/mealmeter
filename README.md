@@ -33,10 +33,14 @@ uv run python -m mealmeter.server        # stdio (Claude Desktop)
 uv run python -m mealmeter.server --http --port 8000   # streamable HTTP na http://127.0.0.1:8000/mcp
 ```
 
-HTTP poslužitelj je bez prijave, jer su podaci javni i samo za čitanje. Ograničenja:
-- 60 upita po IP-u u minuti;
+HTTP poslužitelj je bez prijave, jer su podaci javni i samo za čitanje. Ograničenja (u minuti, env varijable):
+- 60 upita po IP-u (`MM_RATE_IP`), 30 po MCP sesiji (`MM_RATE_SESSION`), 1000 ukupno (`MM_RATE_GLOBAL`);
+  IP iz `CF-Connecting-IP` / `X-Forwarded-For` samo uz `TRUSTED_PROXY=1`;
 - zahtjev do 64 KB;
-- odgovor alata do 20 KB.
+- odgovor alata do 20 KB. `plan_basket` zadano vraća sažet odgovor (oko 2-3 KB za 7 sastojaka): najbolju
+  trgovinu sa stavkama i najviše 2 druge trgovine kao jedan redak; `detail: true` vraća sve trgovine i polja.
+
+Poslužitelj sam primijeti kad `scripts/update.py` zamijeni datoteku baze i otvori novu, bez restarta.
 
 ### Dodavanje u Claude
 
@@ -108,10 +112,15 @@ uv run python -m mealmeter.server        # stdio (Claude Desktop)
 uv run python -m mealmeter.server --http --port 8000   # streamable HTTP at http://127.0.0.1:8000/mcp
 ```
 
-The HTTP server needs no login, because the data is public and read-only. Limits:
-- 60 requests per IP per minute;
+The HTTP server needs no login, because the data is public and read-only. Limits (per minute, env variables):
+- 60 requests per IP (`MM_RATE_IP`), 30 per MCP session (`MM_RATE_SESSION`), 1000 in total (`MM_RATE_GLOBAL`);
+  the IP comes from `CF-Connecting-IP` / `X-Forwarded-For` only with `TRUSTED_PROXY=1`;
 - requests up to 64 KB;
-- tool responses up to 20 KB.
+- tool responses up to 20 KB. `plan_basket` returns a compact response by default (about 2-3 KB for 7
+  ingredients): the best store with its items and at most 2 other stores as one row each; `detail: true`
+  returns all stores and fields.
+
+The server notices when `scripts/update.py` replaces the database file and reopens it without a restart.
 
 ### Adding to Claude
 

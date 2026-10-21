@@ -91,7 +91,7 @@ SCHEMA = {  # alat -> (obavezni parametri, svi parametri)
     "find_products": (set(), {"query", "city", "ingredient", "attributes", "include_weak", "limit"}),
     "get_prices": ({"product_id"}, {"product_id", "city"}),
     "plan_basket": ({"ingredients", "city"}, {"ingredients", "city", "store", "already_have", "price_overrides",
-                                              "alternatives"}),
+                                              "alternatives", "detail"}),
     "list_stores": ({"city"}, {"city", "chain"}),
     "convert_units": ({"amount", "unit", "staple"}, {"amount", "unit", "staple"}),
     "list_staples": (set(), set()),
@@ -141,7 +141,7 @@ def test_all_tools_small_and_dated(con, name, args):
 
 
 def test_dates_per_store(con):
-    _, _, out = call(con, "plan_basket", {"ingredients": PANCAKES, "city": "Osijek"})
+    _, _, out = call(con, "plan_basket", {"ingredients": PANCAKES, "city": "Osijek", "detail": True})
     for s in out["stores"]:
         assert s["date_hr"] and "stale_days" in s
     assert "total_to_buy" in out["best_store"] and "total_used" in out["best_store"]
@@ -161,10 +161,10 @@ def test_errors_are_tool_errors(con):
 def test_store(con):
     _, _, out = call(con, "plan_basket", {"ingredients": PANCAKES, "city": "Osijek",
                                           "store": {"chain": "spar", "address_contains": ""}})
-    assert {s["chain"] for s in out["stores"]} == {"spar"} and out["best_store"]["chain"] == "spar"
+    assert {s["chain"] for s in out["other_stores"]} <= {"spar"} and out["best_store"]["chain"] == "spar"
     _, _, out = call(con, "plan_basket", {"ingredients": PANCAKES, "city": "Osijek",
                                           "store": {"chain": "konzum", "address_contains": "nema-te-ulice"}})
-    assert out["stores"] == [] and out["best_store"] is None
+    assert out["other_stores"] == [] and out["best_store"] is None
     assert any("nema trgovine" in w for w in out["warnings"]) and out["store_suggestions"]
 
 
@@ -217,3 +217,24 @@ def test_price_overrides(con):
     _, _, out = call(con, "plan_basket", {"ingredients": PANCAKES, "city": "Osijek",
                                           "price_overrides": [{"name": "kavijar", "cost_pack": 1}]})
     assert any("price_overrides" in w for w in out["warnings"])
+
+
+# --- Korak 4C.6: sažet odgovor plan_basket -----------------------------------------------------------------
+
+SEVEN = PANCAKES + [{"name": "šećer", "amount": 15, "unit": "g"}, {"name": "sol", "amount": 1, "unit": "g"},
+                    {"name": "ulje", "amount": 30, "unit": "ml"}, {"name": "vanilin šećer", "amount": 1, "unit": "kom"}]
+
+
+def test_plan_basket_compact(con):
+    err, size, out = call(con, "plan_basket", {"ingredients": SEVEN, "city": "Osijek"})
+    assert not err and size <= 6000
+    assert set(out) >= {"summary_hr", "best_store", "other_stores", "date_hr", "note"} and "stores" not in out
+    assert len(out["other_stores"]) <= 2
+    for s in out["other_stores"]:
+        assert set(s) == {"chain", "address", "n_stores", "total_to_buy", "total_used", "n_matched"}
+    for it in out["best_store"]["items"]:
+        assert {"ingredient", "name", "pack_size", "cost_pack", "cost_used"} <= set(it)
+        assert "price_per_unit" not in it and "ean" not in it
+    _, full_size, full = call(con, "plan_basket", {"ingredients": SEVEN, "city": "Osijek", "detail": True})
+    assert "stores" in full and full_size > size
+    assert full["best_store"]["total_to_buy"] == out["best_store"]["total_to_buy"]

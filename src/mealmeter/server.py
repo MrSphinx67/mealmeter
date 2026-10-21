@@ -224,8 +224,11 @@ def plan_basket(
     price_overrides: Annotated[list[dict[str, Any]] | None, Field(
         description='Stvarne cijene pakiranja / real pack prices: [{"name": "brašno", "cost_pack": 1.2}]')] = None,
     alternatives: Annotated[bool, Field(
-        description="Do 2 druga proizvoda po stavci, s delta_eur i cheaper / up to 2 alternatives per item, with "
-                    "delta_eur and cheaper")] = True,
+        description="Do 2 jeftinije alternative po stavci, s delta_eur i cheaper / up to 2 cheaper alternatives per "
+                    "item, with delta_eur and cheaper")] = True,
+    detail: Annotated[bool, Field(
+        description="Puni odgovor (sve trgovine i sva polja) umjesto sažetog / full response instead of the compact "
+                    "one")] = False,
 ) -> dict:
     con = _con()
     try:
@@ -235,7 +238,57 @@ def plan_basket(
         return _error(e)
     res.setdefault("date", _price_list_date(con)["date"])
     res["note"] = PRICE_NOTE  # alternative nosi samo best_store (basket.plan_basket)
-    return _fit(res, ("stores", "best_store.items"))
+    if detail:
+        return _fit(res, ("stores", "best_store.items"))
+    return _fit(compact_basket(res), ("other_stores", "best_store.items"))
+
+
+OTHER_STORES = 2
+_ITEM_KEYS = ("ingredient", "staple", "name", "pack_size", "n_packs", "cost_pack", "cost_used")
+_ITEM_OPTIONAL = ("have", "user_provided", "computed_cost_pack", "substitution", "needs_confirmation", "candidates")
+_ALT_KEYS = ("name", "pack_size", "cost_pack", "delta_eur", "cheaper", "note", "brand", "other_store", "chain",
+             "address")
+
+
+def _compact_item(it: dict) -> dict:
+    out = {k: it[k] for k in _ITEM_KEYS}
+    out.update({k: it[k] for k in _ITEM_OPTIONAL if it.get(k)})
+    if it.get("match_quality") in ("weak", "free_text"):
+        out["match_quality"] = it["match_quality"]
+    if it.get("flags"):
+        out["flags"] = it["flags"]
+    if it.get("stale_days"):
+        out["date_hr"], out["stale_days"] = it["date_hr"], it["stale_days"]
+    notes = [n for n in it.get("notes") or [] if n.startswith(("izvan zadanog", "rinfuza", "nacionalna", "na vagu"))]
+    if notes:
+        out["notes"] = notes
+    if "alternatives" in it:
+        out["alternatives"] = [{k: a[k] for k in _ALT_KEYS if a.get(k) is not None} for a in it["alternatives"]]
+    return out
+
+
+def compact_basket(res: dict) -> dict:
+    """Sažet odgovor plan_basket (zadano): najbolja trgovina sa stavkama i najviše OTHER_STORES drugih trgovina
+    kao jedan redak (lanac, adresa, za kupiti, utrošeno, n_matched). Puni odgovor daje detail=true."""
+    best = res.get("best_store")
+    out = {k: res[k] for k in ("city", "date", "date_hr", "summary_hr") if k in res}
+    if best:
+        out["best_store"] = {
+            **{k: best[k] for k in ("chain", "address", "n_stores", "addresses", "total_to_buy", "total_used",
+                                    "n_matched", "n_ingredients", "missing", "date_hr", "stale_days") if k in best},
+            **({"note": best["note"]} if best.get("note") else {}),
+            "items": [_compact_item(it) for it in best["items"]]}
+    else:
+        out["best_store"] = None
+    out["other_stores"] = [{k: s.get(k) for k in ("chain", "address", "n_stores", "total_to_buy", "total_used",
+                                                  "n_matched")}
+                           for s in res.get("stores", []) if s is not best][:OTHER_STORES]
+    for k in ("ask_user", "ambiguous", "unmatched", "warnings", "store_suggestions", "city_suggestions",
+              "already_have"):
+        if res.get(k):
+            out[k] = res[k]
+    out["note"] = res["note"]
+    return out
 
 
 def list_stores(
@@ -312,9 +365,11 @@ one store; the chain's national prices still apply), already_have? ["sol", "papa
 [{"name", "cost_pack"}] (stvarna cijena pakiranja, samo za ovaj poziv / real pack price, this call only),
 alternatives (zadano true: do 2 druga proizvoda po stavci s delta_eur i cheaper / up to 2 other products
 per item with delta_eur and cheaper).
-Vraća / returns: summary_hr (počni njime / start with it), best_store (items s pack_size, cost_pack,
-cost_used), stores (do 3; trgovine istog lanca s istim proizvodima spojene: n_stores, addresses), warnings,
-ambiguous, unmatched (s prijedlozima / with suggestions), date_hr.
+Vraća / returns (sažeto / compact): summary_hr (počni njime / start with it), best_store (items s pack_size,
+cost_pack, cost_used, alternatives; trgovine istog lanca s istim proizvodima spojene: n_stores, addresses),
+other_stores (do 2 retka / up to 2 rows: chain, address, total_to_buy, total_used, n_matched), ask_user,
+warnings, unmatched (s prijedlozima / with suggestions), date_hr. detail=true: sve trgovine i sva polja /
+all stores and fields.
 Primjer / example: {"ingredients": [{"name": "brašno glatko", "amount": 250, "unit": "g"},
 {"name": "mlijeko", "amount": 500, "unit": "ml"}, {"name": "jaja", "amount": 3, "unit": "kom"},
 {"name": "nutella", "amount": 300, "unit": "g", "free_text": true}], "city": "Osijek", "already_have": ["sol"]}""",
