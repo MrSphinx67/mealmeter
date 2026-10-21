@@ -366,6 +366,20 @@ def tier_note(need: "Need", attrs: dict) -> str | None:
     return ", ".join(v.upper() if len(v) <= 2 else v for v in out) or None
 
 
+BULK_MIN_SACHETS = 3
+
+
+def bulk_sachets(row: dict, staple: Staple) -> None:
+    """Rinfuza namirnice u vrećicama (compare_by: pack): pakiranje od >= 3 vrećice (pack_amount >= 3 *
+    sachet_g, npr. Lidlov "Vanilin šećer" 80 g) računa se kao pack_amount / sachet_g vrećica, pa je utrošak
+    za n vrećica (n * sachet_g / pack_amount) * cijena, a ne cijelo pakiranje."""
+    if (staple.compare_by != "pack" or not staple.sachet_g or row.get("pack_unit") != "g"
+            or (row.get("n_units") or 1) > 1 or (row.get("pack_amount") or 0) < BULK_MIN_SACHETS * staple.sachet_g):
+        return
+    row["n_units"] = row["pack_amount"] / staple.sachet_g
+    row["bulk_sachet_g"] = staple.sachet_g
+
+
 def _num(v):
     return float(v) if v is not None else None
 
@@ -383,6 +397,7 @@ def _prepare(con, need: Need, city: str, wholesale: bool = False) -> dict[tuple,
         for k in ("price_eff", "price_per_unit", "pack_amount", "drained_amount", "n_units", "assumed_g"):
             r[k] = _num(r.get(k))
         r["portion_pack"] = portion_pack(r, need.staple)
+        bulk_sachets(r, need.staple)
         by_store.setdefault((r["chain"], r["store_id"]), []).append(r)
     return by_store
 
@@ -500,6 +515,8 @@ def pack_size(pick: dict, need_unit: str) -> str | None:
     if pick.get("assumed_g"):
         return "≈ " + format_pack(pick["assumed_g"], "g")
     size = format_pack(pick.get("pack_amount"), pick.get("pack_unit"))
+    if pick.get("bulk_sachet_g"):
+        return f"{size} (≈ {pick['n_units']:g} vrećica od {pick['bulk_sachet_g']:g} g)"
     if need_unit == "vrecica" and (pick.get("n_units") or 0) > 1:
         return f"{pick['n_units']:g} vrećica" + (f", {size}" if size else "")
     return size or format_pack(pick.get("qty"), need_unit)
@@ -927,7 +944,9 @@ def _add_item(stores: dict, key: tuple, rows: list[dict], need: Need, idx: int, 
         "have": have, "pantry": bool(need.staple and need.staple.pantry),
         "price_per_unit": pick["price_per_unit"], "per_unit": pick["per_unit"],
         "unit_confidence": pick["unit_confidence"], "pack_source": pick["pack_source"],
-        "is_special": pick["is_special"], "flags": pick["flags"], "notes": pick["notes"] + notes,
+        "is_special": pick["is_special"], "flags": pick["flags"], "notes": pick["notes"] + notes + (
+            [f"rinfuza {format_pack(pick['pack_amount'], 'g')} (gramatura iz: {pick['pack_source']}): utrošak je udio "
+             f"{need.amount * pick['bulk_sachet_g']:g} g od {pick['pack_amount']:g} g"] if pick.get("bulk_sachet_g") else []),
         "fallback": pick["fallback"], "food_unverified": pick["is_food"] is None,
         "date": pick["date"].isoformat(), "date_hr": date_hr(pick["date"]), "stale_days": pick["stale_days"],
         "match_quality": "free_text" if need.free_text else pick.get("match_quality"),

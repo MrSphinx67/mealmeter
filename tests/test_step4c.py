@@ -43,6 +43,9 @@ def con4c(tmp_path_factory):
         ("konzum", "K4", "KIKIRIKI MASLAC MINI 20 g", "HRANA", "ko", 0.49),
         ("konzum", "K5", "KIKIRIKI MASLAC CRUNCHY 1 kg", "HRANA", "ko", 6.99),
         ("konzum", "J1", "SOK JUICY ZMAJEVO VOĆE 1,5 L", "PIĆA", "ko", 1.99),
+        # vrećice: Lidlova rinfuza 80 g i višestruko pakiranje 6x8g
+        ("lidl", "V1", "Vanilin šećer", "HRANA", "80g", 0.39),
+        ("lidl", "V2", "Dolcela Vanilin šećer", "HRANA", "6x8g", 0.99),
     ]
     c.executemany("INSERT INTO products (chain, product_id, barcode, name, category, unit) VALUES (?, ?, ?, ?, ?, ?)",
                   [(ch, pid, f"{ch}:{pid}", n, cat, u) for ch, pid, n, cat, u, _ in products])
@@ -180,3 +183,25 @@ def test_unmatched_suggestions_without_drinks(con4c):
     assert con4c.execute("SELECT food_group FROM clean.products WHERE product_id = 'J1'").fetchone()[0] == "pice"
     res = plan_basket([{"name": "zmajevo voće", "amount": 100, "unit": "g", "free_text": True}], "Osijek", con=con4c)
     assert res["unmatched"] and not any("SOK" in s for s in res["unmatched"][0]["suggestions"])
+
+
+# --- 5. vrećice iz rinfuze ---------------------------------------------------------------------------------
+
+def test_bulk_sachet_share(con4c, capsys):
+    lidl = {"chain": "lidl", "address_contains": ""}
+    res = plan_basket([{"name": "vanilin šećer", "amount": 1, "unit": "vrećica"}], "Osijek", con=con4c, store=lidl)
+    item = res["best_store"]["items"][0]
+    print(f"{item['name']} | {item['pack_size']} | izvor gramature: {item['pack_source']}")
+    assert item["product_id"] == "V1" and item["pack_source"] == "unit"
+    assert item["pack_size"] == "80 g (≈ 10 vrećica od 8 g)"
+    assert item["cost_pack"] == 0.39 and item["cost_used"] == round(1 * 8 / 80 * 0.39, 2)
+    assert any("udio 8 g od 80 g" in n for n in item["notes"])
+    # višestruko pakiranje vrećica ostaje po vrećici: 1 od 6
+    rows = [it for it in plan_basket([{"name": "vanilin šećer", "amount": 3, "unit": "vrećica"}], "Osijek",
+                                     con=con4c, store=lidl)["best_store"]["items"]]
+    assert rows[0]["product_id"] in ("V1", "V2")
+    from mealmeter.basket import bulk_sachets
+    r = {"pack_unit": "g", "pack_amount": 48.0, "n_units": 6.0}
+    bulk_sachets(r, load_staples()["vanilin_secer"])
+    assert r["n_units"] == 6.0 and "bulk_sachet_g" not in r
+    assert "Vanilin šećer | 80 g" in capsys.readouterr().out
