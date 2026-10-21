@@ -10,7 +10,7 @@
 | 6 koherentnost EAN grupe | kod i testovi gotovi; docs/ean_incoherent.md nakon ponovne izgradnje baze |
 | 7 pravila (tjestenina, med, mlijeko, slanina, krastavac) | gotovo (slanina: "carsko", krastavac: i "ult\\b") |
 | 8 rate limit (IP, sesija, globalno) | gotovo (HTTP je stateless, pa Mcp-Session-Id šalje samo klijent koji ga sam postavi) |
-| 9 zamjena datoteke baze bez restarta | - |
+| 9 zamjena datoteke baze bez restarta | gotovo (ATTACH u novoj instanci u memoriji, zbog predmemorije instanci DuckDB-a) |
 | 10 smoke_4b i shelf_check.csv | - |
 
 Hosting: nije dirano.

@@ -84,18 +84,54 @@ Pravila / rules:
 """
 
 _local = threading.local()
+_lock = threading.Lock()
 _db_path: str | None = None
 _shared_con: duckdb.DuckDBPyConnection | None = None
+_fixed_con = False  # veza zadana izvana (testovi): bez praćenja datoteke
+_db_key: tuple | None = None  # (inode, mtime_ns, veličina) otvorene datoteke baze
+
+
+def _file_key(path) -> tuple | None:
+    try:
+        st = os.stat(path)
+    except OSError:  # datoteka upravo nestaje ili nije dostupna: ostaje otvorena veza
+        return None
+    return st.st_ino, st.st_mtime_ns, st.st_size
+
+
+def _open(path) -> duckdb.DuckDBPyConnection:
+    """Read-only baza kao ATTACH u novoj instanci u memoriji. duckdb.connect(putanja) bi vratio već otvorenu
+    instancu iste putanje (predmemorija instanci po procesu), pa bi poslužitelj nakon zamjene datoteke i dalje
+    čitao staru; ovako je svaka zamjena nova instanca. Kursori trebaju USE (vidi _con)."""
+    con = duckdb.connect(":memory:")
+    con.execute(f"ATTACH '{str(path).replace(chr(39), chr(39) * 2)}' AS {_DB_ALIAS} (READ_ONLY)")
+    con.execute(f"USE {_DB_ALIAS}")
+    return con
+
+
+_DB_ALIAS = "mm"
 
 
 def _con() -> duckdb.DuckDBPyConnection:
-    """Kursor po dretvi nad jednom read-only vezom (ili vezom zadanom za testove)."""
-    global _shared_con
-    if _shared_con is None:
-        _shared_con = search.connect(_db_path)  # MEALMETER_DB ili data/mealmeter.duckdb, read-only
+    """Kursor po dretvi nad jednom read-only vezom (ili vezom zadanom za testove).
+
+    Pri svakom pozivu provjerava datoteku baze: kad ju je update.py zamijenio (os.replace: novi inode, mtime
+    ili veličina), otvara novu vezu bez restarta. Stara veza ostaje dok je drže kursori drugih dretvi
+    (zamijenjena datoteka je i dalje čitljiva), a zatim je zatvara sakupljač smeća."""
+    global _shared_con, _db_key
+    with _lock:
+        path = None if _fixed_con else (_db_path or search.DEFAULT_DB)  # MEALMETER_DB ili data/mealmeter.duckdb
+        key = _file_key(path) if path else None
+        if _shared_con is None or (key is not None and key != _db_key):
+            _shared_con = _open(path)
+            _db_key = key
+        shared, attached = _shared_con, not _fixed_con
     cur = getattr(_local, "cur", None)
-    if cur is None or getattr(_local, "owner", None) is not _shared_con:
-        _local.cur, _local.owner = _shared_con.cursor(), _shared_con
+    if cur is None or getattr(_local, "owner", None) is not shared:
+        cur = shared.cursor()
+        if attached:
+            cur.execute(f"USE {_DB_ALIAS}")
+        _local.cur, _local.owner = cur, shared
     return _local.cur
 
 
@@ -318,11 +354,11 @@ def _as_result(fn):
 
 def create_server(con: duckdb.DuckDBPyConnection | None = None, db_path: str | None = None) -> MCPServer:
     """Poslužitelj s alatima. `con` (testovi) ili `db_path` zamjenjuju zadanu bazu."""
-    global _shared_con, _db_path
+    global _shared_con, _db_path, _fixed_con
     if con is not None:
-        _shared_con = con
-    if db_path:
-        _db_path = db_path
+        _shared_con, _fixed_con = con, True
+    elif db_path:
+        _db_path, _shared_con, _fixed_con = db_path, None, False
     server = MCPServer(name="mealmeter", title="Mealmeter", instructions=INSTRUCTIONS,
                        description="Cijene namirnica u hrvatskim trgovinama / grocery prices in Croatian stores")
     ro = ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False)

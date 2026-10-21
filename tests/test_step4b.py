@@ -376,3 +376,33 @@ def test_rate_env(monkeypatch):
     assert (rl.limit, rl.session_limit, rl.global_limit, rl.trusted_proxy) == (7, 5, 900, False)
     monkeypatch.setenv("MM_RATE_GLOBAL", "nije-broj")
     assert RateLimit(None).global_limit == RATE_GLOBAL
+
+
+# --- 9. zamjena datoteke baze bez restarta ---------------------------------------------------------------
+
+def test_server_reopens_replaced_db(tmp_path):
+    import os
+
+    from mealmeter import server as srv
+
+    def make(path, day):
+        c = duckdb.connect(str(path))
+        c.execute("CREATE SCHEMA clean")
+        c.execute(f"CREATE TABLE clean.prices AS SELECT DATE '{day}' AS date")
+        c.close()
+
+    db, new = tmp_path / "m.duckdb", tmp_path / "m.duckdb.tmp"
+    make(db, "2026-10-19")
+    old_state = (srv._shared_con, srv._fixed_con, srv._db_path, srv._db_key)
+    try:
+        srv.create_server(db_path=str(db))
+        assert srv.list_staples()["date"] == "2026-10-19"
+        assert srv.list_staples()["date"] == "2026-10-19"  # ista datoteka: ista veza
+        first = srv._shared_con
+        assert srv._con() and srv._shared_con is first
+        make(new, "2026-10-20")
+        os.replace(new, db)  # kao update.build_database
+        assert srv.list_staples()["date"] == "2026-10-20"
+        assert srv._shared_con is not first
+    finally:
+        srv._shared_con, srv._fixed_con, srv._db_path, srv._db_key = old_state
