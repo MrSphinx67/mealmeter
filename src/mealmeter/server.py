@@ -287,8 +287,8 @@ def compact_basket(res: dict) -> dict:
         out["best_store"] = None
     # usporedba lanaca (basket.compare_chains): najviše 6 redaka s >= 80 % sastojaka, ostali kao incomplete
     out["comparison"] = res.get("comparison", [])
-    for k in ("incomplete", "ask_user", "unmatched", "warnings", "store_suggestions", "city_suggestions",
-              "already_have"):
+    for k in ("incomplete", "assumptions", "ask_user", "unmatched", "warnings", "store_suggestions",
+              "city_suggestions", "already_have"):
         if res.get(k):
             out[k] = res[k]
     out["note"] = res["note"]

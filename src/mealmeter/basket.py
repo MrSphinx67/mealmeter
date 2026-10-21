@@ -42,6 +42,31 @@ FLAG_TEXT = {
 BRANDS_PATH = Path(__file__).resolve().parents[2] / "data" / "brands.yaml"
 SYNONYMS_PATH = Path(__file__).resolve().parents[2] / "data" / "synonyms.yaml"
 FREE_SYNONYMS = 3  # najviše toliko sinonima prije zaključka da proizvoda nema
+ASSUMPTIONS_PATH = Path(__file__).resolve().parents[2] / "data" / "assumptions.yaml"
+NO_AMOUNT_UNITS = {"po ukusu", "po zelji", "malo", "za posipanje", ""}
+
+
+@lru_cache(maxsize=2)
+def load_assumptions(path: Path = ASSUMPTIONS_PATH) -> dict[str, dict]:
+    """Pretpostavljene količine za sastojke bez količine (data/assumptions.yaml, procjene)."""
+    import yaml
+
+    if not Path(path).exists():
+        return {}
+    return yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+
+
+def assume_amount(item: dict, staple: Staple) -> tuple[dict, dict | None]:
+    """Sastojak bez količine (amount prazan ili 0, ili unit "po ukusu"): količina iz data/assumptions.yaml i
+    zapis za assumptions[]; inače sastojak ostaje kakav jest."""
+    amount = item.get("amount")
+    if amount not in (None, "", 0) and norm_text(item.get("unit") or "") not in NO_AMOUNT_UNITS:
+        return item, None
+    rule = load_assumptions().get(staple.key)
+    if not rule:
+        raise IngredientError(f"'{item.get('name')}': količina nije navedena (nema pretpostavke za '{staple.name}')")
+    return ({**item, "amount": rule["amount"], "unit": rule["unit"]},
+            {"ingredient": item.get("name"), "amount": rule["amount"], "unit": rule["unit"], "text": rule["text"]})
 
 
 @lru_cache(maxsize=2)
@@ -788,7 +813,8 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
         raise ValueError("podržan je samo mode='single_store'")
     store_spec = store  # `store` je niže varijabla petlje
     con = con or connect()
-    out = {"city": city, "mode": mode, "ingredients": [], "unmatched": [], "ambiguous": [], "warnings": [],
+    out = {"city": city, "mode": mode, "ingredients": [], "unmatched": [], "ambiguous": [], "assumptions": [],
+           "warnings": [],
            "stores": [], "best_store": None}
     resolved_city = resolve_city(city, con=con) if city else None
     if not resolved_city:
@@ -841,6 +867,9 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
                     continue
                 needs.append(need)
                 continue
+            item, assumed = assume_amount(item, staple)
+            if assumed:
+                out["assumptions"].append(assumed)
             attrs.update(item.get("attributes") or {})
             for a, v in attrs.items():
                 if v not in staple.attributes.get(a, {}):

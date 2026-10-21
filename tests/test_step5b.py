@@ -230,3 +230,19 @@ def test_free_text_near_candidates(con5b):
     assert u["tried_synonyms"] == [] and 1 <= len(u["candidates"]) <= 3
     assert all(c["reason"] and c["name"] for c in u["candidates"])
     assert any("nema: tartufata" in c["reason"] for c in u["candidates"])
+
+
+# --- 6. pretpostavke --------------------------------------------------------------------------------------
+
+def test_assumptions_for_missing_amounts(con5b):
+    ing = [{"name": "špageti", "amount": 400, "unit": "g"}, {"name": "parmezan"},
+           {"name": "sol", "unit": "po ukusu"}, {"name": "lovorov list", "amount": 0}]
+    res = plan_basket(ing, "Osijek", con=con5b, store={"chain": "konzum", "address_contains": ""})
+    got = {a["ingredient"]: (a["amount"], a["unit"], a["text"]) for a in res["assumptions"]}
+    assert got == {"parmezan": (40, "g", "40 g za posipanje"), "sol": (5, "g", "5 g (žličica) po ukusu"),
+                   "lovorov list": (2, "kom", "2 lista")}
+    items = {it["ingredient"]: it for it in res["best_store"]["items"]}
+    assert items["parmezan"]["need"] == 40 and items["lovorov list"]["need"] == pytest.approx(0.4)
+    # namirnica bez pretpostavke: jasan razlog
+    res = plan_basket([{"name": "špageti"}], "Osijek", con=con5b)
+    assert "količina nije navedena" in res["unmatched"][0]["reason"] and res["assumptions"] == []
