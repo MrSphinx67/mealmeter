@@ -32,6 +32,10 @@ def con4c(tmp_path_factory):
         ("konzum", "E4", "JAJA SLOBODNI UZGOJ L 10/1", "HRANA", "ko", 2.49),
         ("lidl", "E5", "Jaja iz kaveznog uzgoja, razred M", "HRANA", "10komad", 0.89),
         ("lidl", "E6", "Jaja iz kaveznog uzgoja, razred S", "HRANA", "10komad", 0.79),
+        # čokoladni namaz: Nutella samo u Konzumu
+        ("konzum", "N1", "NUTELLA 400 g FERRERO", "HRANA", "ko", 4.49),
+        ("konzum", "N2", "NAMAZ OD LJEŠNJAKA K PLUS 400 g", "HRANA", "ko", 1.99),
+        ("lidl", "N3", "Namaz od lješnjaka", "HRANA", "400g", 2.99),
     ]
     c.executemany("INSERT INTO products (chain, product_id, barcode, name, category, unit) VALUES (?, ?, ?, ?, ?, ?)",
                   [(ch, pid, f"{ch}:{pid}", n, cat, u) for ch, pid, n, cat, u, _ in products])
@@ -109,3 +113,34 @@ def test_egg_price_per_piece_not_rounded(con4c):
                                     WHERE staple = 'jaja' AND product_id IN ('E5', 'E6')""").fetchall())
     assert suspect == {"E5": False, "E6": True}  # 0,089 u granicama [0,08, 0,55], 0,079 ispod
     assert load_staples()["jaja"].plausible_by == {"uzgoj": {"bio": (0.30, 1.00), "_other": (0.08, 0.55)}}
+
+
+# --- 3. marka u nazivu sastojka -----------------------------------------------------------------------------
+
+NUTELLA = [{"name": "nutella", "amount": 300, "unit": "g"}]
+
+
+def test_brand_preferred_in_store(con4c):
+    item = plan_basket(NUTELLA, "Osijek", con=con4c, store=KONZUM)["best_store"]["items"][0]
+    # Nutella je skuplja od namaza K PLUS, ali tražena je marka
+    assert item["product_id"] == "N1" and "substitution" not in item
+
+
+def test_brand_missing_substitution_and_other_store(con4c):
+    res = plan_basket(NUTELLA, "Osijek", con=con4c, store={"chain": "lidl", "address_contains": ""}, alternatives=True)
+    item = res["best_store"]["items"][0]
+    assert item["product_id"] == "N3"
+    assert item["substitution"] == {"requested": "nutella", "brand": "Nutella", "chosen": "Namaz od lješnjaka"}
+    other = [a for a in item["alternatives"] if a.get("other_store")]
+    assert len(other) == 1 and other[0]["product_id"] == "N1" and other[0]["chain"] == "konzum"
+    assert other[0]["delta_eur"] == 1.50 and not other[0]["cheaper"]
+    # generički naziv: bez marke, najjeftiniji namaz
+    generic = plan_basket([{"name": "čokoladni namaz", "amount": 300, "unit": "g"}], "Osijek", con=con4c, store=KONZUM)
+    assert generic["best_store"]["items"][0]["product_id"] == "N2"
+
+
+def test_brand_in():
+    from mealmeter.basket import brand_in
+
+    assert brand_in("nutella")[0] == "Nutella" and brand_in("Vegeta")[0] == "Vegeta"
+    assert brand_in("mlijeko Dukat")[0] == "Dukat" and brand_in("čokoladni namaz") is None

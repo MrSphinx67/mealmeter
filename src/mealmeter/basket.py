@@ -4,6 +4,8 @@ import difflib
 import math
 import re
 from dataclasses import dataclass, field
+from functools import lru_cache
+from pathlib import Path
 
 import duckdb
 
@@ -33,6 +35,26 @@ FLAG_TEXT = {
     "unit_suspect": "gramatura iz stupca unit izgleda krivo (cijena izvan granica ili daleko od drugih lanaca)",
     "portion_pack": "porcijsko pakiranje (>= 20 komada po <= 20 g)",
 }
+
+
+BRANDS_PATH = Path(__file__).resolve().parents[2] / "data" / "brands.yaml"
+
+
+@lru_cache(maxsize=2)
+def load_brands(path: Path = BRANDS_PATH) -> tuple[tuple[str, str], ...]:
+    """Marke iz data/brands.yaml kao (naziv, regex na početku riječi normaliziranog teksta)."""
+    import yaml
+
+    if not Path(path).exists():
+        return ()
+    raw = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+    return tuple((name, "(^| )(?:" + "|".join(pats) + ")") for name, pats in raw.items())
+
+
+def brand_in(name: str | None) -> tuple[str, str] | None:
+    """Marka iz naziva sastojka ("nutella" -> ("Nutella", regex)), inače None."""
+    text = norm_text(name or "") or ""
+    return next(((b, rx) for b, rx in load_brands() if re.search(rx, text)), None)
 
 
 class IngredientError(ValueError):
@@ -67,6 +89,7 @@ class Need:
     free_text: bool = False
     free_rows: dict = field(default_factory=dict)
     attr_fn: object = None  # odabrani proizvod -> atributi (chosen_attributes), za alternative
+    brand: tuple | None = None  # (naziv marke, regex) iz naziva sastojka (data/brands.yaml)
     note_fn: object = None  # atributi -> napomena za alternativu izvan zadanog izbora ("kavezni, s")
 
 
@@ -692,7 +715,8 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
                 if v not in staple.attributes.get(a, {}):
                     raise IngredientError(f"nepoznat atribut {a}={v} za '{staple.name}'")
             amount, unit, warns = to_base(*_input_amount(item), staple)
-            need = Need(item, staple, amount, unit, attrs, form=item.get("form"), warnings=warns)
+            need = Need(item, staple, amount, unit, attrs, form=item.get("form"), warnings=warns,
+                        brand=brand_in(item.get("name")))
             need.input_staple = staple.key  # prije oblika (rajčica -> pasirana_rajcica), za already_have
             need.warnings += _resolve_form(con, need, city, include_wholesale)
             if need.staple is not staple:  # oblik je druga namirnica: količina u njezinoj jedinici
@@ -742,8 +766,17 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
         need.note_fn = lambda attrs, n=need: tier_note(n, attrs)
         prefs = {a: v for a, v in need.staple.default_preference.items() if a not in need.attributes}
         group_values = _group_values(con, need.staple, prefs)
+        branded = set()  # trgovine u kojima je odabran proizvod tražene marke
         for key, rows in _prepare(con, need, city, include_wholesale).items():
-            pick = _choose_preferred(rows, need, prefs, group_values)
+            pick = None
+            if need.brand:  # marka iz naziva sastojka ("nutella"): proizvod te marke ima prednost
+                own = [r for r in rows if re.search(need.brand[1], r["name_norm"] or "")
+                       or re.search(need.brand[1], norm_text(r.get("brand") or "") or "")]
+                if own and (pick := _choose_preferred(own, need, prefs, group_values)) and pick["fallback"]:
+                    pick = None
+                if pick:
+                    branded.add(key)
+            pick = pick or _choose_preferred(rows, need, prefs, group_values)
             if pick is None:
                 continue
             store_rows[(key, idx)] = rows
@@ -758,6 +791,8 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
                 subst.append(f"izvan zadanog izbora: {note}")
             _add_item(stores, key, rows, need, idx, pick, chosen, subst,
                       need.staple.key in have or need.input_staple in have)
+        if need.brand:
+            _brand_substitutions(stores, idx, need, branded)
 
     if store_spec:
         stores = _filter_store(stores, store_spec, out)
@@ -790,15 +825,20 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
         if eligible[0]["data_quality"] == "suspect":
             out["warnings"].append("najbolja trgovina je lanac sa sumnjivim podacima (nema druge)")
     if alternatives and out["best_store"]:
-        # alternative samo za trgovinu iz `store` (filtrirane su) ili najbolju
+        # alternative samo za trgovinu iz `store` (filtrirane su) ili najbolju; tražena marka iz druge trgovine
+        # dolazi na kraj (other_store = true)
         s = out["best_store"]
         for it in s["items"]:
             rows = store_rows.get(((s["chain"], it.get("_from_store", s["store_id"])), it["_idx"]), [])
             it["alternatives"] = _alternatives(rows, needs[it["_idx"]], it)
+            if brand_alt := it.get("_brand_alt"):
+                it["alternatives"].append({**brand_alt, "delta_eur": round(brand_alt["cost_pack"] - it["cost_pack"], 2),
+                                           "cheaper": brand_alt["cost_pack"] < it["cost_pack"]})
     for s in ranked:
         for it in s["items"]:
             it.pop("_idx", None)
             it.pop("_from_store", None)
+            it.pop("_brand_alt", None)
     if price_overrides and out["best_store"]:
         _apply_overrides(out["best_store"], price_overrides, out)
     out["summary_hr"] = summary_hr(out["best_store"], out["ambiguous"])
@@ -807,6 +847,24 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
         out["date"] = max(dates)
         out["date_hr"] = next(s["date_hr"] for s in ranked if s["date"] == out["date"])
     return out
+
+
+def _brand_substitutions(stores: dict, idx: int, need: Need, branded: set) -> None:
+    """Trgovine bez tražene marke: stavka dobiva substitution {"requested", "chosen"}, a najjeftiniji proizvod
+    marke iz druge trgovine u gradu ide kao alternativa (_brand_alt, vidi plan_basket)."""
+    offers = [(stores[k]["items"][idx], stores[k]) for k in branded]
+    best = min(offers, key=lambda o: o[0]["cost_pack"]) if offers else None
+    for key, store in stores.items():
+        it = store["items"].get(idx)
+        if it is None or key in branded:
+            continue
+        it["substitution"] = {"requested": need.input.get("name"), "brand": need.brand[0], "chosen": it["name"]}
+        if best:
+            b, bs = best
+            it["_brand_alt"] = {"product_id": b["product_id"], "ean": b["ean"], "name": b["name"],
+                                "pack_size": b["pack_size"], "n_packs": b["n_packs"], "price_eff": b["price_eff"],
+                                "cost_pack": b["cost_pack"], "cost_used": b["cost_used"], "brand": need.brand[0],
+                                "other_store": True, "chain": bs["chain"], "address": bs["address"]}
 
 
 def _add_item(stores: dict, key: tuple, rows: list[dict], need: Need, idx: int, pick: dict, chosen: dict,
