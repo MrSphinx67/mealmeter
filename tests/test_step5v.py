@@ -72,7 +72,7 @@ def test_vercel_config():
     cfg = json.loads((ROOT / "vercel.json").read_text(encoding="utf-8"))
     fn = cfg["functions"]["api/index.py"]
     assert "data/compact.duckdb" in fn["includeFiles"] and "data/*.yaml" in fn["includeFiles"]
-    for excluded in ("data/mealmeter.duckdb", "data/raw/**", "tests/**", "docs/**"):
+    for excluded in ("data/mealmeter.duckdb", "data/raw/**", "tests/**", "docs/**", ".env*", ".pytest_cache/**"):
         assert excluded in fn["excludeFiles"]
     assert cfg["rewrites"] == [{"source": "/(.*)", "destination": "/api/index"}]
     assert cfg["git"] == {"deploymentEnabled": False}  # baza nije u Gitu: deploy samo preko CLI-ja / workflowa
