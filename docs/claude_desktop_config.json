@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "mealmeter": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/ABSOLUTE/PATH/TO/mealmeter",
+        "run",
+        "python",
+        "-m",
+        "mealmeter.server"
+      ]
+    }
+  }
+}

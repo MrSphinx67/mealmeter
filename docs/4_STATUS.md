@@ -7,7 +7,8 @@
 | 1 | gotovo |
 | 2 | gotovo |
 | 3 | gotovo |
-| 4 | gotovo (tests/test_server.py, 17 testova) |
-| 5 | u radu |
+| 4 | gotovo |
+| 5 | gotovo (README hr/en, docs/claude_desktop_config.json) |
+| REVIEW_4 | u radu |
 
-Sljedeća točka: 5 (README.md hr/en).
+Sljedeće: docs/REVIEW_4.md, zatim stop (bez hostinga).
