@@ -579,22 +579,60 @@ def _free_need(item: dict) -> "Need":
                 warnings=warnings + [f"'{item.get('name')}': slobodna pretraga po nazivu (nije u rječniku); provjeri proizvod"])
 
 
+# free_text: okusi (osim ako su u upitu) i grickalice/porcije nisu sastojak ("kikiriki maslac" nije
+# "ZOE KIKIRIKI MASLAC ČOKO" ni "SPORTNESS KOŠARICE KIKIRIKI MASLAC 42 g")
+FREE_FLAVOR_RX = (r"(^| )(?:cok\b|coko|cokolad|choco|kakao|karamel|vanil|jagod|malin|banan|kokos|lijesn|ljesn|"
+                  r"pistac|menta|mint\b|limun|naranc|visnj|borovnic|cimet|med\b|slani karamel)")
+FREE_SNACK_RX = (r"(^| )(?:grickal|snack|kosaric|bar\b|barovi|pločic|plocic|chips|cips|keks|pralin|cokoladic|bombon|"
+                 r"krem\b|protein|napitak|sladoled)")
+FREE_MIN_PACK_SHARE = 0.25  # pakiranje manje od 25 % medijana pakiranja kandidata u gradu je porcija
+
+
+def free_ok(name_norm: str, query: str) -> bool:
+    """Proizvod ne smije imati okus ni oznaku grickalice kojih nema u upitu."""
+    return all(not re.search(rx, name_norm) or re.search(rx, query) for rx in (FREE_FLAVOR_RX, FREE_SNACK_RX))
+
+
 def _free_rows(con, need: "Need", city: str, wholesale: bool = False) -> dict[tuple, list[dict]]:
-    """Kandidati po trgovini za slobodan naziv, kao find_products: samo provjerena hrana bez alkohola, sve
-    riječi naziva u nazivu proizvoda, a barem jedna među prve tri riječi proizvoda ("NUTELLA 400 g", a ne
-    "KEKSI S NUTELLOM"). Bez namirnice nema slabih članova (match_quality je 'free_text')."""
-    tokens = _free_tokens(need.input.get("name") or "")
+    """Kandidati po trgovini za slobodan naziv, kao find_products: samo provjerena hrana bez alkohola, a SVE
+    riječi upita među prve tri riječi naziva proizvoda ("NUTELLA 400 g", a ne "KEKSI S NUTELLOM"); bez
+    okusa i grickalica kojih nema u upitu (free_ok) i bez pakiranja manjih od FREE_MIN_PACK_SHARE medijana
+    pakiranja kandidata u gradu. Bez namirnice nema slabih članova (match_quality je 'free_text')."""
+    query = norm_text(need.input.get("name") or "") or ""
+    tokens = _free_tokens(query)
     sql, params, _ = _candidates(None, tokens, None, city, include_clearance=False, food_sql=_food_filter(),
                                  include_wholesale=wholesale)
-    early = "^(?:[^ ]+ ){0,2}(?:" + "|".join(re.escape(t) for t in tokens) + ")"
-    cur = con.execute(sql + " SELECT * FROM x WHERE regexp_matches(name_norm, ?)", params + [early])
+    early = " AND ".join("regexp_matches(name_norm, ?)" for _ in tokens)
+    cur = con.execute(sql + f" SELECT * FROM x WHERE {early}",
+                      params + ["^(?:[^ ]+ ){0,2}" + re.escape(t) for t in tokens])
     cols = [d[0] for d in cur.description]
-    by_store: dict[tuple, list[dict]] = {}
+    rows = []
     for r in (dict(zip(cols, row)) for row in cur.fetchall()):
+        if not free_ok(r["name_norm"] or "", query):
+            continue
         for k in ("price_eff", "price_per_unit", "pack_amount", "drained_amount", "n_units", "assumed_g"):
             r[k] = _num(r.get(k))
+        rows.append(r)
+    packs = sorted(r["pack_amount"] for r in rows if r.get("pack_unit") in ("g", "ml") and r.get("pack_amount"))
+    floor = packs[len(packs) // 2] * FREE_MIN_PACK_SHARE if packs else 0
+    by_store: dict[tuple, list[dict]] = {}
+    for r in rows:
+        if r.get("pack_unit") in ("g", "ml") and (r.get("pack_amount") or 0) < floor:
+            continue
         by_store.setdefault((r["chain"], r["store_id"]), []).append(r)
     return by_store
+
+
+def free_candidates(rows: list[dict], need: "Need", n: int = 3) -> list[dict]:
+    """Do n proizvoda u trgovini za potvrdu slobodne pretrage, od najjeftinijeg pakiranja koje pokriva količinu."""
+    picks, seen = [], set()
+    for r in rows:
+        if r["name"] not in seen and (p := choose_product([r], *_choose_args(need))):
+            seen.add(r["name"])
+            picks.append(p)
+    return [{"product_id": p["product_id"], "name": p["name"], "pack_size": pack_size(p, need.unit),
+             "n_packs": p["n_packs"], "cost_pack": p["cost_pack"]}
+            for p in sorted(picks, key=lambda p: (p["cost_pack"], p["name"]))[:n]]
 
 
 def suggestions(con, name: str, city: str | None, n: int = 3) -> list[str]:
@@ -606,8 +644,9 @@ def suggestions(con, name: str, city: str | None, n: int = 3) -> list[str]:
     for token in sorted(_free_tokens(name), key=len, reverse=True):
         if len(out) >= n:
             break
-        try:
-            out += [r["name"] for r in find_products(token, city=city, limit=n, con=con)]
+        try:  # bez pića ("ZMAJEVO VOĆE" ne predlaže sok)
+            out += [r["name"] for r in find_products(token, city=city, limit=n + 5, con=con)
+                    if r.get("food_group") not in ("pice", "alkohol")]
         except ValueError:
             continue
     return list(dict.fromkeys(out))[:n]
@@ -741,13 +780,16 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
         out["warnings"] += need.warnings
         if need.free_text:
             out["ingredients"].append({
-                "name": need.input.get("name"), "staple": None, "free_text": True, "amount": round(need.amount, 3),
+                "name": need.input.get("name"), "staple": None, "free_text": True, "needs_confirmation": True,
+                "amount": round(need.amount, 3),
                 "unit": need.unit, "attributes": {}, "form": None, "assumed_form": None, "pantry": False,
                 "warnings": need.warnings})
             for key, rows in need.free_rows.items():
                 if pick := choose_product(rows, *_choose_args(need)):
                     store_rows[(key, idx)] = rows
                     _add_item(stores, key, rows, need, idx, pick, {}, [], norm_text(need.input.get("name") or "") in have_text)
+                    # slobodna pretraga: korisnik potvrđuje proizvod, uz do 3 kandidata s cijenom
+                    stores[key]["items"][idx].update(needs_confirmation=True, candidates=free_candidates(rows, need))
             continue
         out["ingredients"].append({
             "name": need.input.get("name"), "staple": need.staple.key, "amount": round(need.amount, 3),

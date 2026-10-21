@@ -36,6 +36,13 @@ def con4c(tmp_path_factory):
         ("konzum", "N1", "NUTELLA 400 g FERRERO", "HRANA", "ko", 4.49),
         ("konzum", "N2", "NAMAZ OD LJEŠNJAKA K PLUS 400 g", "HRANA", "ko", 1.99),
         ("lidl", "N3", "Namaz od lješnjaka", "HRANA", "400g", 2.99),
+        # free_text: kikiriki maslac uz okus, grickalicu i porciju; sok kao piće
+        ("konzum", "K1", "KIKIRIKI MASLAC 350 g", "HRANA", "ko", 2.99),
+        ("konzum", "K2", "ZOE KIKIRIKI MASLAC ČOKO 250 g", "HRANA", "ko", 1.99),
+        ("konzum", "K3", "SPORTNESS KOŠARICE KIKIRIKI MASLAC 42 g", "HRANA", "ko", 0.99),
+        ("konzum", "K4", "KIKIRIKI MASLAC MINI 20 g", "HRANA", "ko", 0.49),
+        ("konzum", "K5", "KIKIRIKI MASLAC CRUNCHY 1 kg", "HRANA", "ko", 6.99),
+        ("konzum", "J1", "SOK JUICY ZMAJEVO VOĆE 1,5 L", "PIĆA", "ko", 1.99),
     ]
     c.executemany("INSERT INTO products (chain, product_id, barcode, name, category, unit) VALUES (?, ?, ?, ?, ?, ?)",
                   [(ch, pid, f"{ch}:{pid}", n, cat, u) for ch, pid, n, cat, u, _ in products])
@@ -144,3 +151,32 @@ def test_brand_in():
 
     assert brand_in("nutella")[0] == "Nutella" and brand_in("Vegeta")[0] == "Vegeta"
     assert brand_in("mlijeko Dukat")[0] == "Dukat" and brand_in("čokoladni namaz") is None
+
+
+# --- 4. free_text ------------------------------------------------------------------------------------------
+
+def test_free_text_peanut_butter(con4c):
+    ing = [{"name": "kikiriki maslac", "amount": 200, "unit": "g", "free_text": True}]
+    res = plan_basket(ing, "Osijek", con=con4c, store=KONZUM, alternatives=True)
+    item = res["best_store"]["items"][0]
+    assert item["product_id"] == "K1" and item["needs_confirmation"] and item["match_quality"] == "free_text"
+    names = [c["name"] for c in item["candidates"]] + [a["name"] for a in item["alternatives"]]
+    assert not any("ČOKO" in n or "SPORTNESS" in n or "MINI" in n for n in names)
+    assert [c["product_id"] for c in item["candidates"]] == ["K1", "K5"] and item["candidates"][0]["cost_pack"] == 2.99
+    assert res["ingredients"][0]["needs_confirmation"]
+
+
+def test_free_ok():
+    from mealmeter.basket import free_ok
+
+    assert not free_ok("zoe kikiriki maslac coko 250 g", "kikiriki maslac")
+    assert not free_ok("sportness kosarice kikiriki maslac 42 g", "kikiriki maslac")
+    assert free_ok("kikiriki maslac 350 g", "kikiriki maslac")
+    assert free_ok("tahini sezamova pasta 300 g", "tahini")
+    assert free_ok("zoe kikiriki maslac coko 250 g", "kikiriki maslac coko")  # okus iz upita je dopušten
+
+
+def test_unmatched_suggestions_without_drinks(con4c):
+    assert con4c.execute("SELECT food_group FROM clean.products WHERE product_id = 'J1'").fetchone()[0] == "pice"
+    res = plan_basket([{"name": "zmajevo voće", "amount": 100, "unit": "g", "free_text": True}], "Osijek", con=con4c)
+    assert res["unmatched"] and not any("SOK" in s for s in res["unmatched"][0]["suggestions"])
