@@ -208,3 +208,25 @@ def test_italian_cheese_substitution(con5b):
 
 
 from mealmeter.staples import load_staples  # noqa: E402
+
+
+# --- 5. free_text: sinonimi i najbliži kandidati -------------------------------------------------------------
+
+def test_free_text_synonyms(con5b):
+    from mealmeter.basket import load_synonyms
+
+    assert load_synonyms()["dimljena kobasica"] == ("slavonska kobasica", "kulen", "suha kobasica")
+    res = plan_basket([{"name": "domaća kobasica", "amount": 400, "unit": "g", "free_text": True}], "Osijek",
+                      con=con5b, store={"chain": "konzum", "address_contains": ""})
+    item = res["best_store"]["items"][0]
+    assert item["product_id"] == "P21" and item["match_quality"] == "free_text"
+    assert any("traženo kao 'slavonska kobasica'" in w for w in res["warnings"])
+
+
+def test_free_text_near_candidates(con5b):
+    res = plan_basket([{"name": "kobasica tartufata", "amount": 200, "unit": "g", "free_text": True}], "Osijek",
+                      con=con5b)
+    u = res["unmatched"][0]
+    assert u["tried_synonyms"] == [] and 1 <= len(u["candidates"]) <= 3
+    assert all(c["reason"] and c["name"] for c in u["candidates"])
+    assert any("nema: tartufata" in c["reason"] for c in u["candidates"])

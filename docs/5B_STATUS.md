@@ -6,7 +6,7 @@
 | 2 preporuka po total_to_buy, usporedba lanaca | gotovo (comparison do 6 redaka, incomplete s "nedostaje: …") |
 | 3 prinos oblika mahunarki (data/yields.yaml) | gotovo; količina u receptu = gotov proizvod, suho / 2,5 i pri usporedbi i pri izračunu |
 | 4 nove namirnice | gotovo: origano, bosiljak, lovorov_list, kobasica; papar (mljeveni zadano), paprika (slatka zadano); parmezan -> tvrdi_sir_talijanski (Grana = substitution); slanina već pokriva pancetu |
-| 5 free_text sinonimi (data/synonyms.yaml) | - |
+| 5 free_text sinonimi (data/synonyms.yaml) | gotovo (12 unosa; bez pogotka: candidates s razlogom) |
 | 6 pretpostavke (assumptions) | - |
 | 7 alternative na istu količinu | - |
 | 8 upute poslužitelja | - |

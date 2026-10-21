@@ -40,6 +40,19 @@ FLAG_TEXT = {
 
 
 BRANDS_PATH = Path(__file__).resolve().parents[2] / "data" / "brands.yaml"
+SYNONYMS_PATH = Path(__file__).resolve().parents[2] / "data" / "synonyms.yaml"
+FREE_SYNONYMS = 3  # najviše toliko sinonima prije zaključka da proizvoda nema
+
+
+@lru_cache(maxsize=2)
+def load_synonyms(path: Path = SYNONYMS_PATH) -> dict[str, tuple[str, ...]]:
+    """Sinonimi za slobodnu pretragu (data/synonyms.yaml): normalizirani naziv -> drugi nazivi."""
+    import yaml
+
+    if not Path(path).exists():
+        return {}
+    raw = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+    return {norm_text(k): tuple(v) for k, v in raw.items()}
 
 
 @lru_cache(maxsize=2)
@@ -672,6 +685,37 @@ def free_candidates(rows: list[dict], need: "Need", n: int = 3) -> list[dict]:
             for p in sorted(picks, key=lambda p: (p["cost_pack"], p["name"]))[:n]]
 
 
+def near_candidates(con, name: str, city: str | None, n: int = 3) -> list[dict]:
+    """Do n najbližih proizvoda (hrana, bez pića) za naziv bez pogotka, s razlogom zašto nisu prihvaćeni:
+    koje riječi naziva sadrže, koje im nedostaju, ili da riječ nije među prve tri riječi."""
+    tokens = _free_tokens(name)
+    query = norm_text(name) or ""
+    seen, out = set(), []
+    for token in sorted(tokens, key=len, reverse=True):
+        try:
+            rows = find_products(token, city=city, limit=10, con=con)
+        except ValueError:
+            continue
+        for r in rows:
+            if r["name"] in seen or r.get("food_group") in ("pice", "alkohol"):
+                continue
+            seen.add(r["name"])
+            text = norm_text(r["name"]) or ""
+            has = [t for t in tokens if t in text]
+            missing = [t for t in tokens if t not in text]
+            if missing:
+                reason = f"ima: {', '.join(has)}; nema: {', '.join(missing)}"
+            elif not free_ok(text, query):
+                reason = "drugi okus ili grickalica"
+            else:
+                reason = "riječi naziva nisu među prve tri riječi proizvoda"
+            out.append({"name": r["name"], "price_min": r.get("price_min"), "reason": reason, "_score": len(has)})
+    out.sort(key=lambda c: -c["_score"])
+    for c in out:
+        c.pop("_score")
+    return out[:n]
+
+
 def suggestions(con, name: str, city: str | None, n: int = 3) -> list[str]:
     """Do n prijedloga za sastojak bez pogotka: slične namirnice iz rječnika, zatim proizvodi koji imaju
     barem jednu riječ naziva (najdulja riječ prva)."""
@@ -777,10 +821,22 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
                 # izvan rječnika: pretraga po nazivu u svakoj trgovini; bez pogotka ide u unmatched
                 need = _free_need(item)
                 need.free_rows = _free_rows(con, need, city, include_wholesale)
+                tried = []
+                for alt in load_synonyms().get(norm_text(item.get("name") or ""), ())[:FREE_SYNONYMS]:
+                    if need.free_rows:
+                        break
+                    tried.append(alt)  # prije zaključka da proizvoda nema: sinonimi iz data/synonyms.yaml
+                    probe = _free_need({**item, "name": alt})
+                    if rows := _free_rows(con, probe, city, include_wholesale):
+                        need.free_rows = rows
+                        need.warnings.append(f"'{item.get('name')}' nije pronađeno po nazivu; traženo kao '{alt}'")
                 if not need.free_rows:
                     out["unmatched"].append({
                         "name": item.get("name"), "free_text": True,
-                        "reason": f"nijedan prehrambeni proizvod s nazivom '{item.get('name')}' u gradu",
+                        "reason": f"nijedan prehrambeni proizvod s nazivom '{item.get('name')}' u gradu"
+                                  + (f" (ni kao: {', '.join(tried)})" if tried else ""),
+                        "tried_synonyms": tried,
+                        "candidates": near_candidates(con, item.get("name") or "", city),
                         "suggestions": suggestions(con, item.get("name") or "", city)})
                     continue
                 needs.append(need)
