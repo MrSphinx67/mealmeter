@@ -3,7 +3,7 @@
 | točka | stanje |
 |---|---|
 | 0 kako Vercel puni paket; Python 3.12; paket bez baze | gotovo |
-| 1 veličina sažete baze po tablici i stupcu | - |
+| 1 veličina sažete baze po tablici i stupcu | gotovo |
 | 2 smanjena baza (isti view-ovi, isti rezultat) | - |
 | 3 zlatni izlazi i mjerenja na novoj bazi | - |
 | 4 `vercel build --prod` s bazom | - |
@@ -39,3 +39,23 @@ nema vanjske instalacije, pa za paket ≤ 200 MB sažeta baza mora biti ≤ ~105
 **Sigurnost:** u paketu je bio `.env.local` (i `.pytest_cache`). `.vercelignore` na `vercel build` ne djeluje, pa
 `vercel.json` → `excludeFiles` sada izričito isključuje `.env*`, `.pytest_cache/**`, `__pycache__` i `_uv/**`;
 provjereno: `.env*` više nije u paketu.
+
+## 1. Sažeta baza iz 5P (212,5 MB), po tablici i stupcu
+
+Metoda: `pragma_storage_info`, veličina segmenta = razmak do idućeg segmenta u istom bloku od 256 KiB (+ dodatni blokovi).
+
+| tablica | MB | redaka | najveći stupci |
+|---|---|---|---|
+| price_exceptions | 59,2 | 3 396 054 | product_id 11,4 (FSST); price_per_unit 7,4, unit_price 7,0, price 6,4, price_eff 6,4, anchor_price 6,3 (BitPacking); store_id 2,5 |
+| **store_products** | **55,2** | 13 220 036 | **product_id 44,1** (Dictionary/FSST), store_id 7,9, chain 3,2 |
+| products | 39,5 | 478 181 | name 9,3, name_norm 8,0, match_norm 8,0, barcode 2,9, ean_norm 2,6 |
+| staple_prices | 32,2 | 2 239 329 | ista struktura kao cijene, product_id 4,4 |
+| chain_prices | 11,0 | 477 819 | product_id 1,9, cijene ~1 MB po stupcu |
+| staple_items | 4,5 | 53 734 | name, match_norm, name_norm ~1 MB |
+| ostalo | ~3,5 | | |
+
+Zaključci: najviše prostora zauzimaju tekstualni ključevi (`product_id` i `store_id` u 13,2 M + 3,4 M redaka) i stupci
+koje alati ne čitaju. Dodatne provjere:
+- trgovine s istim asortimanom: 1 380 različitih od 1 535, pa grupiranje ne pomaže;
+- "lanac minus nedostajući": samo 31 % manje redaka, a view bi morao graditi komplement pri upitu;
+- datum je gotovo uvijek svojstvo trgovine (16 trgovina ima više datuma); iznimki samo zbog datuma ima 481 089.
