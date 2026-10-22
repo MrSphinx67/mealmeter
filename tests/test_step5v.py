@@ -74,7 +74,8 @@ def test_vercel_config():
     assert "data/compact.duckdb" in fn["includeFiles"] and "data/*.yaml" in fn["includeFiles"]
     for excluded in ("data/mealmeter.duckdb", "data/raw/**", "tests/**", "docs/**", ".env*", ".pytest_cache/**"):
         assert excluded in fn["excludeFiles"]
-    assert cfg["rewrites"] == [{"source": "/(.*)", "destination": "/api/index"}]
+    # Korak 5V3: bez rewritea; Python backend dobiva sve putanje s izvornom putanjom (rewrite je slao /api/index)
+    assert "rewrites" not in cfg and "routes" not in cfg
     assert cfg["git"] == {"deploymentEnabled": False}  # baza nije u Gitu: deploy samo preko CLI-ja / workflowa
     ignore = (ROOT / ".vercelignore").read_text(encoding="utf-8").splitlines()
     assert "data/mealmeter.duckdb" in ignore and not any("compact" in line and not line.startswith("#")
@@ -147,3 +148,47 @@ def test_bundle_size_script(tmp_path):
     too_big_file = run("--max-mb", "10", "--max-file-mb", "2")
     assert too_big_file.returncode == 1 and "data/compact.duckdb ima 3.0 MB" in too_big_file.stdout
     assert run("--max-mb", "3.5", "--max-file-mb", "5").returncode == 1
+
+
+# --- Korak 5V3: putanje i metode kroz Vercel omotač ---------------------------------------------------------
+
+def test_routes_and_methods(con):
+    from mealmeter import server as srv
+    from mealmeter.asgi import LifespanOnDemand
+
+    http = srv.http_app(srv.create_server(con=con), allowed_hosts=["*.vercel.app"], allowed_origins=[])
+    app = LifespanOnDemand(http, _inner(http))
+    host = "mealmeter.vercel.app"
+    calls = [
+        ("POST", "/mcp", INIT),  # izvorna putanja
+        ("POST", "/api/index/mcp", INIT),  # prepisana putanja
+        ("GET", "/mcp", None), ("DELETE", "/mcp", None), ("OPTIONS", "/mcp", None),
+        ("GET", "/.well-known/oauth-protected-resource", None),
+        ("GET", "/.well-known/oauth-protected-resource/mcp", None),
+        ("GET", "/.well-known/oauth-authorization-server", None),
+        ("POST", "/.well-known/oauth-authorization-server", {"x": 1}),
+        ("GET", "/nepostoji", None),
+        ("GET", "/healthz", None), ("GET", "/", None), ("POST", "/healthz", {"x": 1}),
+    ]
+
+    async def go():
+        out = [await _request(app, m, p, host, b) for m, p, b in calls]
+        app._task.cancel()
+        return out
+    res = dict(zip([f"{m} {p}" for m, p, _ in calls], asyncio.run(go())))
+    for key in ("POST /mcp", "POST /api/index/mcp"):
+        status, body = res[key]
+        assert status == 200 and json.loads(body)["result"]["serverInfo"]["name"] == "mealmeter", key
+    # GET/DELETE/OPTIONS /mcp stižu do MCP aplikacije (JSON-RPC odgovor SDK-a): stateless poslužitelj bez SSE
+    # smije odbiti GET (406/405), DELETE (405, nema sesija) i OPTIONS
+    for key in ("GET /mcp", "DELETE /mcp", "OPTIONS /mcp"):
+        status, body = res[key]
+        assert status in (405, 406) and json.loads(body)["jsonrpc"] == "2.0", key
+    # nepoznate putanje, uključujući OAuth .well-known: JSON 404 (konektor tako zna da nema prijave)
+    for key in ("GET /.well-known/oauth-protected-resource", "GET /.well-known/oauth-protected-resource/mcp",
+                "GET /.well-known/oauth-authorization-server", "POST /.well-known/oauth-authorization-server",
+                "GET /nepostoji"):
+        status, body = res[key]
+        assert status == 404 and json.loads(body)["error"] == "not found", key
+    assert res["GET /healthz"][0] == 200 and res["GET /"][0] == 200
+    assert res["POST /healthz"][0] == 405 and json.loads(res["POST /healthz"][1])["error"] == "method not allowed"

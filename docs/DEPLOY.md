@@ -34,6 +34,32 @@ curl https://<host>/healthz      # {"status":"ok","db_date":"...","db_age_hours"
 ```
 `https://<host>/` je kratka stranica s uputom i točnim URL-om konektora.
 
+### Provjera nakon deploya
+
+```sh
+H=https://mealmeter.vercel.app   # ili tvoj <host>
+
+# 1. OAuth .well-known: mora biti 404 s JSON-om (poslužitelj nema prijave), ne 200
+for p in /.well-known/oauth-protected-resource /.well-known/oauth-protected-resource/mcp /.well-known/oauth-authorization-server; do
+  curl -s -o /dev/null -w "%{http_code} %{content_type}  $p\n" "$H$p"
+done
+# očekivano: 404 application/json  (svaki redak)
+
+# 2. MCP initialize: 200 i serverInfo "mealmeter"
+curl -s -X POST "$H/mcp" \
+  -H 'content-type: application/json' -H 'accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"curl","version":"0"}}}' \
+  -w '\n%{http_code}\n'
+# očekivano: {"jsonrpc":"2.0","id":1,"result":{...,"serverInfo":{"name":"mealmeter",...}}} i 200
+
+# 3. Zdravlje i početna stranica
+curl -s "$H/healthz"                                # {"status":"ok","db_date":"...",...}
+curl -s -o /dev/null -w "%{http_code}\n" "$H/"     # 200
+```
+
+Ako POST /mcp vrati `405` s `server: Vercel` i `allow: GET, HEAD`, zahtjev ne stiže do funkcije: provjeri da
+`vercel.json` nema `rewrites` (Korak 5V3).
+
 ## 3. Dnevno ažuriranje (GitHub Actions)
 
 1. Na vercel.com → Account Settings → Tokens stvori token.

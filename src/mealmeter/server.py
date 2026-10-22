@@ -756,6 +756,18 @@ def http_app(server: MCPServer, host: str = "127.0.0.1", allowed_hosts: list[str
         return HTMLResponse(home(request.headers.get("host"), request.headers.get("x-forwarded-proto")))
 
     app.router.routes[:0] = [Route("/healthz", healthz, methods=["GET"]), Route("/", index, methods=["GET"])]
+
+    async def http_error(request: Request, exc):
+        # nepoznata putanja (i /.well-known/oauth-*) je JSON 404: klijent (npr. Claude konektor) tako zna da
+        # poslužitelj nema prijave (OAuth), umjesto da dobije HTML ili tekst
+        status = getattr(exc, "status_code", 500)
+        text = {404: "not found", 405: "method not allowed"}.get(status, getattr(exc, "detail", "error"))
+        return JSONResponse({"error": text, "path": request.url.path}, status_code=status,
+                            headers=getattr(exc, "headers", None))
+
+    from starlette.exceptions import HTTPException as StarletteHTTPException
+
+    app.add_exception_handler(StarletteHTTPException, http_error)
     return RequestLog(HostGuard(RateLimit(app), allowed_hosts, allowed_origins))
 
 
