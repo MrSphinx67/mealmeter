@@ -7,8 +7,9 @@
 | 2 tajne u Git povijesti | provjereno: nema tajni |
 | 3 LICENSE i navod izvora podataka | gotovo, ali **tekst licence podataka je drukčiji od traženog** (vidi dolje) |
 | 4 README.md | gotovo |
+| 5 osobna e-pošta u Git povijesti | gotovo: metapodaci i sadržaj datoteka prepisani na noreply adresu, force push na GitHub |
 
-Ništa nije deployano.
+Ništa nije deployano (točka 5 je force push povijesti na GitHub, bez deploya).
 
 ## 0. Suhi grah u Lidlu, Eurospinu, NTL-u i Rotu
 
@@ -96,7 +97,7 @@ Pregledani su svi commitovi (`--all`, 129 commitova, jedna grana `master`).
   `${{ secrets.… }}` u `.github/workflows/update.yml` i kao upute u `docs/DEPLOY.md`.
 
 **Nije tajna, ali postaje javno objavom:**
-- autor commitova je `MrSphinx67 <282975938+MrSphinx67@users.noreply.github.com>` (sve commitove);
+- autor commitova je bila osobna e-pošta (sve commitove; prepisano u točki 5);
 - lokalna putanja `/home/fran-mostarkic/mealmeter/...` u `docs/smoke_4b.md`, `docs/smoke_4c.md` i `docs/smoke_5b.md`
   (korisničko ime na računalu). Ništa od toga nije mijenjano; za e-poštu bi trebalo prepisati povijest, što nisam radio.
 
@@ -152,3 +153,48 @@ lokalno pokretanje i osvježavanje (GitHub Actions → Vercel).
   `docs/DEPLOY.md`.
 
 **Provjera:** pytest izlazni kod 0.
+
+## 5. Osobna e-pošta u Git povijesti
+
+Osobna adresa (Gmail) uklonjena je iz cijele povijesti, i iz metapodataka commitova i iz sadržaja datoteka. Svugdje
+je sada `282975938+MrSphinx67@users.noreply.github.com`; ime autora `MrSphinx67` je isto. Sigurnosna kopija
+`~/mealmeter-backup.git` (`git clone --mirror`, stari `master` = `aefd675`) napravljena je prije prvog prepisivanja i
+nije dirana.
+
+**5a. Autor i committer.** Prije je svih 132 commita imalo osobnu adresu (jedina adresa u povijesti).
+`git filter-repo` 2.47.0 (`uv tool install git-filter-repo`) s `--mailmap` (stara adresa → noreply). filter-repo je
+odbio rad jer repo nije svježi klon; pokrenut je s `--force` (kopija postoji, radno stablo čisto). Stablo zadnjeg
+commita bilo je nepromijenjeno. Prije pusha `origin` nije imao nijedan commit koji lokalno nema (lokalni `master` bio
+je 5 commitova ispred), pa force push nije ništa izgubio: `+ 17ecbbb...446ec6f`.
+
+**5b. Sadržaj datoteka.** Pretraga prije:
+- `git log --all -p | grep -c <adresa>` → 2 (adresa je dodana jednom u `pyproject.toml`, jednom u ovaj dokument);
+- `git grep <adresa> $(git rev-list --all)` → `pyproject.toml` (`authors`) u svih 132 revizije, `docs/6_STATUS.md`
+  (točka 2) u 3 revizije; u porukama commitova 0.
+
+`git filter-repo --force --replace-text` s pravilom `<adresa>==>282975938+MrSphinx67@users.noreply.github.com`.
+`pyproject.toml` ima `authors = [{ name = "MrSphinx67", email = "282975938+MrSphinx67@users.noreply.github.com" }]`.
+
+Pretraga poslije: `git log --all -p` → 0, `git grep … $(git rev-list --all)` → 0, autori i committeri svih 132
+commita → samo noreply adresa. Novi `master` prije ovog commita = `1d32968`.
+
+**Provjera:** pytest izlazni kod 0 (994 prolazi, 2 preskočena), nakon 5a i nakon 5b. `origin` ponovno dodan,
+`git push --force -u origin master`. Tagova nema.
+
+**Worktree `../mealmeter-live`:** ne postoji (ni direktorij ni zapis u `git worktree list`).
+
+**`.github/workflows/update.yml`:** ne ovisi ni o jednom hashu commita: akcije su vezane uz oznake verzija (`@v4`,
+`@v6`), ključ cachea je `mealmeter-db-${{ github.run_id }}`. Globalni `git config user.email` je već noreply adresa.
+
+**Radna mapa (uključujući ignorirane datoteke; pretraga s `/usr/bin/grep -rla`, bez `.git`), ništa nije mijenjano:**
+- Osobna adresa: samo u lokalnom Vercel buildu, `.vercel/python/.venv/.../mealmeter-0.1.0.dist-info/METADATA` i
+  `.vercel/python/cache/uv/archive-v0/.../mealmeter-0.1.0.dist-info/METADATA` (generirano iz starog
+  `pyproject.toml`). `.vercel/` je ignoriran; ako je paket na Vercelu izgrađen iz te verzije, adresa je u METADATA
+  deployanog paketa dok ga sljedeći deploy ne zamijeni. U `data/`, `docs/`, `tests/`, `src/` i `.venv/` je nema.
+- Putanja `/home/fran-mostarkic`:
+  - praćeno u Gitu: `docs/smoke_4b.md`, `docs/smoke_4c.md`, `docs/smoke_5b.md` (po jedan redak) i ovaj dokument
+    (točka 2);
+  - ignorirano: `.venv/` (566 `.pyc`, skripte u `bin/`, `activate*`, `mealmeter.pth`, `direct_url.json`);
+    `__pycache__/*.pyc` u `src/`, `scripts/`, `tests/` i `api/`; `.vercel/output/builds.json`,
+    `.vercel/output/diagnostics/cli_traces.json`, `.vercel/python/cache/uv/interpreter-v4/…msgpack`. U `data/` i u
+    `.env.local` je nema.
