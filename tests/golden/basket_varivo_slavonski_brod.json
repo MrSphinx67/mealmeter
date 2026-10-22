@@ -142,7 +142,7 @@
       "cheaper": true,
       "cost_pack": 3.9,
       "cost_used": 0.16,
-      "delta_eur": -0.29,
+      "delta_eur": -0.2,
       "ean": "20344375",
       "match_quality": "strong",
       "n_packs": 1,
@@ -152,13 +152,13 @@
       "price_eff": 3.9,
       "price_per_unit": 0.39,
       "product_id": "0083229",
-      "size_note": "usporedba za 400 g: pakiranje 10 kg, odabrano 800 g"
+      "size_note": "usporedba za 400 g: pakiranje 10 kg, odabrano 1 kg"
      },
      {
       "cheaper": true,
       "cost_pack": 3.99,
       "cost_used": 0.32,
-      "delta_eur": -0.13,
+      "delta_eur": -0.04,
       "ean": "20673482",
       "match_quality": "strong",
       "n_packs": 1,
@@ -168,36 +168,36 @@
       "price_eff": 3.99,
       "price_per_unit": 0.8,
       "product_id": "0083228",
-      "size_note": "usporedba za 400 g: pakiranje 5 kg, odabrano 800 g"
+      "size_note": "usporedba za 400 g: pakiranje 5 kg, odabrano 1 kg"
      }
     ],
     "attributes": {},
     "by_weight_fallback": false,
     "cost_pack": 0.89,
-    "cost_used": 0.45,
+    "cost_used": 0.36,
     "date": "2026-10-20",
     "date_hr": "20.10.2026.",
-    "ean": "20516918",
+    "ean": null,
     "fallback": false,
     "flags": [],
     "food_unverified": false,
     "have": false,
     "ingredient": "krumpir",
-    "is_special": true,
+    "is_special": false,
     "match_quality": "strong",
     "n_packs": 1,
-    "name": "Krumpir 800g",
+    "name": "Krumpir",
     "need": 400.0,
     "need_unit": "g",
     "notes": [],
-    "pack_qty": 800.0,
-    "pack_size": "800 g",
-    "pack_source": "name",
+    "pack_qty": 1000.0,
+    "pack_size": "1 kg",
+    "pack_source": "unit",
     "pantry": false,
     "per_unit": "kg",
     "price_eff": 0.89,
-    "price_per_unit": 1.11,
-    "product_id": "0083219",
+    "price_per_unit": 0.89,
+    "product_id": "0083215",
     "stale_days": 0,
     "staple": "krumpir",
     "unit_confidence": "high"
@@ -458,7 +458,7 @@
   "stale_days": 0,
   "store_id": "244",
   "total_to_buy": 12.61,
-  "total_used": 5.84,
+  "total_used": 5.75,
   "unit_confidence": "high"
  },
  "city": "Slavonski Brod",
@@ -474,7 +474,7 @@
    "n_matched": 10,
    "n_stores_city": 2,
    "total_to_buy": 12.61,
-   "total_used": 5.84
+   "total_used": 5.75
   },
   {
    "addresses": [
@@ -523,7 +523,7 @@
    "n_matched": 10,
    "n_stores_city": 2,
    "total_to_buy": 18.64,
-   "total_used": 14.73
+   "total_used": 14.69
   },
   {
    "addresses": [
@@ -743,7 +743,7 @@
  ],
  "note": "Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists (cijene.dev); in-store prices may differ, a price list is not stock, and promotions change.",
  "stores": [],
- "summary_hr": "Za kupiti: 12,61 €. Stvarno utrošeno: 5,84 €.",
+ "summary_hr": "Za kupiti: 12,61 €. Stvarno utrošeno: 5,75 €.",
  "truncated": true,
  "unmatched": [],
  "warnings": [

@@ -7,6 +7,7 @@ Test: palačinke za 4 osobe, Osijek, already_have sol, ulje i šećer, uz Nutell
 | 1 Lorenco u usporedbi trgovina | gotovo: popravljeno, test i zlatni scenarij |
 | 2 dva lanca iste cijene "spojena" | gotovo: izlaz je bio ispravan; uputa poslužitelja |
 | 3 Kaufland Osijek: mlijeko 2,8 % i Nutella | gotovo: stvarni cjenik |
+| 5V6 uz jednaku cijenu veće pakiranje | gotovo |
 
 Ništa nije deployano.
 
@@ -77,3 +78,29 @@ U bazi (`clean.prices`): datum 20.10.2026., `stale_days` 0, `price_eff` = price 
 trgovinama. Nutella 600 g po 4,99 € neobično je jeftina (jednako kao 400 g), ali nije greška učitavanja: tako piše u
 cjeniku, bez akcijske cijene. Napomena: za 300 g plan_basket uz jednaku cijenu bira manje pakiranje (400 g). Za
 korisnika je 600 g za isti novac bolja kupnja; to sada nije označeno.
+
+## 5V6. Uz jednaku cijenu bira se veće pakiranje
+
+**Pravilo (`basket.choose_product`):** od pakiranja koja pokrivaju potrebnu količinu bira se najjeftinije (cijena
+pakiranja). Uz jednaku cijenu bira se ono s **većom** količinom, a uz jednaku cijenu i količinu ostaje redoslijed
+redaka (product_id). Prije je uz jednaku cijenu birano manje pakiranje. Slučaj "veće pakiranje unutar +10 %
+cijene, a jeftinije po jedinici" nije diran.
+
+**Test:** `tests/test_step5v5.py::test_equal_price_prefers_larger_pack`. Nutella 400 g i 600 g, obje 4,99 €, za
+300 g: bira se 600 g. Ista cijena i ista količina: redoslijed product_id. Jeftinije pakiranje i dalje pobjeđuje.
+Kad ništa ne pokriva količinu, vrijedi najjeftinije po jedinici, kao i prije. Stari test
+`test_cheapest_covering_pack_absolute` je tvrdio "ista cijena: manje" i promijenjen je u "veće".
+
+**Zlatni izlazi:** na punoj bazi razlikovalo se 5 od 21 scenarija; skripta je svaku promjenu usporedila sa starim
+izlazom. Svaka promijenjena stavka ima istu cijenu pakiranja i veću količinu, a nijedan `total_to_buy` (trgovine i
+usporedba) se nije promijenio:
+
+| scenarij | promjena |
+|---|---|
+| basket_palacinke_nutella_osijek | Kaufland: Nutella 400 g → Nutella 600 g (4,99 €); utrošak 3,74 → 2,50 €. Nutella više nema jeftinijih alternativa, pa je detaljan odgovor manji i u skraćeni popis `stores` stane i Lidl (isti iznos 7,98 €). |
+| basket_varivo_slavonski_brod | Lidl (najbolja): Krumpir 800 g → Krumpir 1 kg (0,89 €); utrošak 0,45 → 0,36 €, alternative i `size_note` preračunati prema 1 kg |
+| basket_lidl_varivo_zagreb | isto (Krumpir 800 g → 1 kg, 0,89 €); odgovor više nije skraćen (`truncated` nestao) |
+| basket_bolonjez_zagreb, basket_already_have_zagreb | u dva lanca iz usporedbe utrošak (total_used) je niži (6,77 → 6,21 €, 6,38 → 5,96 €); `total_to_buy` je isti, jer je izabrano veće pakiranje iste cijene |
+
+Zlatni izlazi su ponovno zapisani iz pune baze. Promijenilo se točno ovih 5 datoteka, a sažeta baza daje
+**21/21 jednako**. pytest: 977 prolazi.

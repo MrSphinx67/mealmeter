@@ -267,7 +267,8 @@ def choose_product(rows: list[dict], need: float, need_unit: str, by_weight_unit
 
     1. Kandidati bez zastavica (rasprodaja, cijena izvan granica, nesigurna gramatura, sumnjiv
        lanac); samo ako takvih nema, uzimaju se označeni.
-    2. Najjeftinije pakiranje (apsolutna cijena) koje pokriva količinu, uz jednaku cijenu manje. Roba na vagu
+    2. Najjeftinije pakiranje (apsolutna cijena) koje pokriva količinu, uz jednaku cijenu veće (pa redoslijed
+       redaka, product_id). Roba na vagu
        (cijena po kg/l, bez pakiranja) pokriva točno potrebnu količinu:
        - `loose` (svježe voće i povrće, svježe meso: _by_weight_primary): ravnopravan izbor;
        - inače (sirevi, šunke...): samo roba promjenjive težine ("CCA 4 KG") i samo kad u trgovini nema
@@ -300,9 +301,10 @@ def choose_product(rows: list[dict], need: float, need_unit: str, by_weight_unit
 
     covering = [o for o in pool if o["by_weight"] or o["qty"] >= need]
     if covering:
-        # najjeftinije pakiranje koje pokriva količinu (apsolutna cijena), uz jednaku cijenu manje
+        # najjeftinije pakiranje koje pokriva količinu (apsolutna cijena); uz jednaku cijenu VEĆE (Korak 5V6: Nutella
+        # 600 g umjesto 400 g za isti novac), a uz jednaku cijenu i količinu prvo po redoslijedu redaka (product_id)
         best = min(covering, key=lambda o: (o["price_per_unit"] * need / 1000 if o["by_weight"] else o["price_eff"],
-                                            need if o["by_weight"] else o["qty"]))
+                                            -(need if o["by_weight"] else o["qty"])))
     else:
         best = min(pool, key=per_unit_cost)
     if best["by_weight"]:

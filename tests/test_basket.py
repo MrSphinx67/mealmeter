@@ -217,8 +217,8 @@ def test_get_prices_two_level_class_id(con, monkeypatch):
 def test_cheapest_covering_pack_absolute():
     rows = [row("1kg", 0.79, 1000), row("2kg", 0.75, 2000)]  # veće pakiranje je jeftinije u apsolutnom iznosu
     assert choose_product(rows, 700, "g", "kg", loose=False)["product_id"] == "2kg"
-    rows = [row("1kg", 0.79, 1000), row("2kg", 0.79, 2000)]  # ista cijena: manje
-    assert choose_product(rows, 700, "g", "kg", loose=False)["product_id"] == "1kg"
+    rows = [row("1kg", 0.79, 1000), row("2kg", 0.79, 2000)]  # ista cijena: veće (Korak 5V6; prije manje)
+    assert choose_product(rows, 700, "g", "kg", loose=False)["product_id"] == "2kg"
 
 
 def test_already_have_and_totals(con):

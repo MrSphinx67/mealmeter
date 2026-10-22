@@ -64,3 +64,37 @@ def test_comparison_rows_per_chain_with_own_addresses(con5v5):
         for ch in ("konzum", "lidl")}
     for r in same_total:
         assert r["addresses"] and set(r["addresses"]) <= addresses[r["chain"]], r
+
+
+# --- Korak 5V6: uz jednaku cijenu veće pakiranje --------------------------------------------------------------
+
+def test_equal_price_prefers_larger_pack(tmp_path):
+    from mealmeter.basket import choose_product
+
+    c = duckdb.connect(str(tmp_path / "n.duckdb"))
+    load_raw(c, FIXTURE, "2026-10-19")
+    # kao Kaufland Osijek 20.10.2026.: Nutella 400 g i 600 g, obje 4,99 € (fixture nema Kauflanda, pa Konzum Osijek)
+    c.execute("""INSERT INTO products (chain, product_id, barcode, name, category, unit) VALUES
+                 ('konzum', 'N4', 'konzum:N4', 'Nutella 400g', 'HRANA', 'KOM'),
+                 ('konzum', 'N6', 'konzum:N6', 'Nutella Namaz od lješnjaka 600 g', 'HRANA', 'KOM')""")
+    c.execute(f"""INSERT INTO prices (chain, store_id, product_id, price, date) VALUES
+                  ('konzum', '0907', 'N4', 4.99, {D}), ('konzum', '0907', 'N6', 4.99, {D})""")
+    build_clean(c)
+    res = plan_basket([{"name": "nutella", "amount": 300, "unit": "g"}], "Osijek", con=c,
+                      store={"chain": "konzum", "address_contains": ""})
+    item = res["best_store"]["items"][0]
+    assert item["product_id"] == "N6" and item["cost_pack"] == 4.99 and item["pack_size"] == "600 g"
+    # 700 g: nijedno pakiranje ne pokriva količinu, pa vrijedi najjeftinije po jedinici (600 g), kao i prije
+    item = plan_basket([{"name": "nutella", "amount": 700, "unit": "g"}], "Osijek", con=c,
+                       store={"chain": "konzum", "address_contains": ""})["best_store"]["items"][0]
+    assert item["product_id"] == "N6" and item["n_packs"] == 2
+    c.close()
+    # isti iznos i ista količina: ostaje redoslijed redaka (product_id); jeftinije ostaje jeftinije
+    rows = [{"product_id": pid, "name": n, "price_eff": 4.99, "pack_amount": 400.0, "pack_unit": "g",
+             "price_per_unit": 12.48, "per_unit": "kg"} for pid, n in (("A1", "x"), ("A2", "y"))]
+    assert choose_product(rows, 300, "g", None, False)["product_id"] == "A1"
+    rows.append({"product_id": "B", "name": "z", "price_eff": 4.98, "pack_amount": 400.0, "pack_unit": "g",
+                 "price_per_unit": 12.45, "per_unit": "kg"})
+    rows.append({"product_id": "C", "name": "w", "price_eff": 4.99, "pack_amount": 600.0, "pack_unit": "g",
+                 "price_per_unit": 8.32, "per_unit": "kg"})
+    assert choose_product(rows, 300, "g", None, False)["product_id"] == "B"  # jeftinije pakiranje i dalje pobjeđuje
