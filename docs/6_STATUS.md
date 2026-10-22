@@ -8,6 +8,7 @@
 | 3 LICENSE i navod izvora podataka | gotovo, ali **tekst licence podataka je drukčiji od traženog** (vidi dolje) |
 | 4 README.md | gotovo |
 | 5 osobna e-pošta u Git povijesti | gotovo: metapodaci i sadržaj datoteka prepisani na noreply adresu, force push na GitHub |
+| 6 kod preuzet iz senko/cijene-api (AGPL)? | provjereno: nema preuzetog ni prilagođenog koda; poklapanja su samo format CSV-a iz arhive i opći idiomi |
 
 Ništa nije deployano (točka 5 je force push povijesti na GitHub, bez deploya).
 
@@ -198,3 +199,65 @@ commita → samo noreply adresa. Novi `master` prije ovog commita = `1d32968`.
     `__pycache__/*.pyc` u `src/`, `scripts/`, `tests/` i `api/`; `.vercel/output/builds.json`,
     `.vercel/output/diagnostics/cli_traces.json`, `.vercel/python/cache/uv/interpreter-v4/…msgpack`. U `data/` i u
     `.env.local` je nema.
+
+## 6. Kod iz senko/cijene-api (AGPL-3.0)?
+
+**Zaključak: nema koda preuzetog, prepisanog ni prilagođenog iz `senko/cijene-api`.** Mealmeter ne parsira cjenike
+lanaca. Čita gotove dnevne arhive (`api.cijene.dev/v0/archive/<datum>.zip`), koje proizvodi njihov crawler. Jedina
+dodirna točka je dakle format tih CSV-ova: nazivi datoteka i stupaca. To je sučelje podataka, ne kod.
+
+Uspoređeno s `git clone --depth 1 https://github.com/senko/cijene-api /tmp/cijene-api` (`ce6b6e0`, 10.10.2026.;
+58 `.py` datoteka, ~13.700 redaka). S naše strane: `src/`, `scripts/`, `api/` (37 `.py` + `staples.yaml`). Njihov kod
+nije pokretan, samo čitan.
+
+**(1) Duplicirani blokovi.** Vlastita usporedba (skripta u scratchpadu, jscpd nije korišten): traže se nizovi od ≥5
+uzastopnih normaliziranih redaka koji su isti u obje datoteke, za svaki par datoteka. Prazni redci, komentari i
+trivijalni redci (`)`, `else:`, `pass`…) su izostavljeni.
+- **Točno** (bez razmaka i komentara): **0** nizova.
+- **Apstrahirano** (imena, stringovi i brojevi zamijenjeni oznakama, tj. kod s preimenovanim varijablama): prvo 233
+  niza. Svi su lažni: rječnici i liste literala, gdje svaki redak ima isti oblik `"…": "…",`. Primjer je naš
+  `normalize.CITY_ALIASES` (`"sesvete": "Zagreb", …`) naspram njihovog `eurospin.STORE_ID_MAP` (adresa → ID trgovine).
+  Uz uvjet da niz ima ≥4 različita apstrahirana retka: **0** nizova od 5 redaka. Na pragu od 4 retka ostaje jedan
+  niz, `import` redci (`server.py:29-33` ↔ `service/main.py:1-6`, `from x import a, b`), što je opći idiom.
+- **Cijela povijest:** ista usporedba na svih 305 različitih verzija `.py`/`.yaml` datoteka iz `src/`, `scripts/` i
+  `api/` kroz sve commitove: točno 0, apstrahirano 0.
+
+**(2) Parseri, nazivi funkcija, regexi, mape stupaca, konstante** (AST: definicije, `UPPER_CASE` konstante, prvi
+argument `re.*` poziva, string literali ≥8 znakova):
+- **Parseri po lancima:** mi ih nemamo. Njihovih 30-ak `crawler/store/<lanac>.py` (HTML, XML, CSV, ZIP s web
+  stranica lanaca) nemaju pandan u našem kodu. Nemamo `xml`, `openpyxl`, `DictReader` ni URL-ove stranica lanaca, a
+  ovisnosti su samo `duckdb`, `mcp` i `pyyaml`. `build.py` učitava `stores.csv`, `products.csv` i `prices.csv` po lancu
+  generički (`read_csv(..., header=true, all_varchar=true)`, `SELECT *`).
+- **Mapa stupaca:** zajednički literali su nazivi stupaca iz arhive (`store_id`, `product_id`, `unit_price`,
+  `special_price`, `anchor_price`, `best_price_30`, `quantity`, `category`, `store_type`) i nazivi datoteka. Kod njih
+  ih zapisuje `crawler/store/output.py` (`DictWriter`), a mi ih čitamo. Slučajno poklapanje: format CSV-a.
+- **Ostali zajednički literali:** kodovi lanaca (`eurospin`, `kaufland`, `studenac`, `trgovina-krk` = nazivi mapa u
+  arhivi), nazivi gradova (`Velika Gorica`, `Slavonski Brod`, `Hrvatska Kostajnica`), `__main__`, `store_true`,
+  `not found`, `archives`. Opći ili činjenični podaci.
+- **Funkcije i klase:** od 293 naših i 297 njihovih zajedničkih je 5: `__init__`, `main`, `connect`, `get_prices` i
+  `list_stores`. Naši `get_prices` i `list_stores` su MCP alati, njihovi FastAPI rute i metode baze. Potpisi i tijela
+  se razlikuju (npr. njihov `get_prices(eans, chains, city)` je upit nad PostgreSQL-om).
+- **Konstante (`UPPER_CASE`): 0** zajedničkih. **Regexi: 0** zajedničkih (24 naša, 29 njihovih).
+- **Slične zadaće, drukčija rješenja:**
+  - *Gradovi.* Njihov `crawler/store/cities.py` normalizira gradove pri izvozu preko `enrichment/cities.csv`
+    (dijakritici, title-case, veznici). Naš `normalize.CITY_ALIASES` je mali rječnik s ključevima iz `norm_text` koji
+    gradske četvrti svodi na grad. Odluke su i suprotne: mi Sesvete svodimo na Zagreb, a njihov test kaže
+    `("Zagreb - Sesvete", "Sesvete")` ("except Sesvete kept separate").
+  - *EAN.* Njihov `common/barcodes.normalize_barcode` skida vodeće nule i ostavlja RCN kodove. Naš
+    `normalize.normalize_ean` provjerava kontrolnu znamenku (`gtin_ok`), dopunjava 11/12 znamenki na EAN-13 i vraća
+    `(ean_norm, ean_valid, ean_global)`. Oba prate GS1 pravila za kodove ograničene upotrebe (prefiks 2, 02, 04). To je
+    zajednički standard, a kod, struktura i rezultat su različiti (oni ne provjeravaju kontrolnu znamenku).
+  - *Dijakritici.* Njihov `strip_diacritics` i `cities._key` naspram našeg `norm_text`: oba su NFD/NFKD + uklanjanje
+    kombinirajućih znakova + `đ`, što je standardni Python idiom. Razlike: mi dodatno svodimo `dj` na `d` i
+    interpunkciju na razmake.
+
+**(3) Spominjanje u Git povijesti i dokumentaciji.** `git log --all` (poruke): 0 pogodaka za `cijene-api`, `senko`,
+`kopir*`, `copied`, `preuzet`, `prepisan`, `adapt*`, `prilagođ*`. U diffovima je `cijene-api`/`senko` dodan točno
+dvaput, oba u commitu točke 3, kao navod licence podataka: `docs/6_STATUS.md` (točka 3) i komentar u
+`src/mealmeter/server.py:44` ("CC BY-NC-SA 4.0 je samo za enrichment/products.csv u repozitoriju cijene-api, koji
+Mealmeter ne koristi"). `enrichment/` se nigdje drugdje ne spominje i ne koristi. Jedini pogodak za "kopir" u kodu je
+`scripts/build_compact.py:33` ("tablice koje se ne kopiraju"), o DuckDB tablicama.
+
+**Ograničenje:** uspoređena je samo trenutna verzija njihovog repozitorija (`--depth 1`). Kod koji su u međuvremenu
+uklonili ili bitno promijenili nije uspoređen. To ne mijenja zaključak, jer Mealmeter nema parsere ni drugi kod iste
+namjene kao njihov crawler.
