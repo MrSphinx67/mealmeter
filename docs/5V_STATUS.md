@@ -4,7 +4,7 @@
 |---|---|
 | 0 ograničenja Vercela (službena dokumentacija) | gotovo |
 | 1 api/index.py (ASGI, lifespan, compact) | gotovo: uvicorn s --lifespan off i on: /healthz 200, plan_basket 200 (~0,85 s) |
-| 2 vercel.json i veličina paketa | gotovo: procjena paketa ≈ 306 MB od 500 MB (vidi niže) |
+| 2 vercel.json i veličina paketa | gotovo; **ispravak u 5V2: stvarna granica je 225 MB, a ne 500 MB**, paket je sada 192,7 MB |
 | 3 GitHub Actions (2x dnevno) | gotovo: .github/workflows/update.yml (nije pokrenuto) |
 | 4 postavke (hostovi, rate limit, IP zaglavlje) | gotovo: TRUSTED_PROXY=vercel (x-vercel-forwarded-for), zadane postavke u api/index.py |
 | 5 docs/DEPLOY.md | gotovo; uz to Git auto-deploy isključen (git.deploymentEnabled: false) i .vercel/ u .gitignore |
@@ -15,7 +15,7 @@ Ništa nije deployano.
 
 | svojstvo | vrijednost | izvor |
 |---|---|---|
-| veličina paketa (nekomprimirano) | **500 MB** za Python (250 MB ostali runtimeovi); "Large functions" do 5 GB (beta, uz Fluid compute) | [Functions limits](https://vercel.com/docs/functions/limitations), [Python runtime](https://vercel.com/docs/functions/runtimes/python) |
+| veličina paketa (nekomprimirano) | dokumentacija: 500 MB za Python. **Ispravak (5V2): `vercel build` pada iznad 225 MB** ako se ovisnosti ne mogu instalirati pri pokretanju (duckdb); vidi docs/5V2_STATUS.md | [Functions limits](https://vercel.com/docs/functions/limitations), [Python runtime](https://vercel.com/docs/functions/runtimes/python) |
 | trajanje, s Fluid compute (zadano za nove projekte od 23.4.2025.) | **300 s zadano i najviše** | [Functions limits](https://vercel.com/docs/functions/limitations), [Duration](https://vercel.com/docs/functions/configuring-functions/duration), [Fluid compute](https://vercel.com/docs/fluid-compute) |
 | trajanje bez Fluid compute | trenutna dokumentacija ga ne navodi; stariji changelog kaže 10 s zadano i do 60 s (možda zastarjelo, nije potvrđeno) | [Changelog: Hobby do 60 s](https://vercel.com/changelog/vercel-functions-for-hobby-can-now-run-up-to-60-seconds) |
 | memorija | **2 GB / 1 vCPU** (zadano i najviše) | [Functions limits](https://vercel.com/docs/functions/limitations) |
@@ -25,7 +25,7 @@ Ništa nije deployano.
 | paket | Python nema tree-shakinga: ulaze sve datoteke projekta dostupne pri buildu; `excludeFiles` / `includeFiles` u `vercel.json` (`functions`) | [Python runtime](https://vercel.com/docs/functions/runtimes/python) |
 | IP klijenta | `x-forwarded-for` (Vercel ga prepisuje, "do not forward external IPs", sprječava lažiranje); `x-vercel-forwarded-for` i `x-real-ip` su isti | [Request headers](https://vercel.com/docs/headers/request-headers) |
 
-Posljedice za Mealmeter: sažeta baza (212 MB) i ovisnosti (oko 100 MB) stanu u 500 MB, a puna baza (1,1 GB) mora biti
+Posljedice za Mealmeter (ispravak u 5V2: stvarna granica je 225 MB, pa je sažeta baza smanjena na 100 MB): puna baza (1,1 GB) mora biti
 isključena iz paketa. plan_basket (~0,9 s) je daleko ispod 300 s, a RSS (~370 MB) daleko ispod 2 GB. Dokumentacija ne
 navodi šalje li Python runtime ASGI lifespan, pa ga omotač pokreće sam (5-0).
 
@@ -40,7 +40,7 @@ isključuje punu bazu, `data/raw`, testove, dokumente i skripte; `maxDuration` 6
 | ovisnosti bez razvojnih (`uv export --no-dev`, cp312 manylinux; duckdb .so 58 MB) | 93 |
 | data/compact.duckdb (20.10.2026.) | 213 |
 | src/ i data/*.yaml | 0,4 |
-| **ukupno (procjena)** | **≈ 306 od 500** |
+| **ukupno (procjena)** | **≈ 306**; u 5V2 `vercel build` je pao (granica 225 MB), sada 192,7 MB |
 
 Rezerva je ~190 MB; sažeta baza raste s brojem proizvoda i trgovina, pa CI provjerava veličinu (točka 3).
 

@@ -97,10 +97,10 @@ jobs:
         run: |
           vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
           vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
-          size=$(du -sm .vercel/output/functions | cut -f1)
-          echo "veličina funkcija: ${size} MB"
-          if [ "$size" -gt 490 ]; then
-            echo "::error::paket ${size} MB je preblizu granici od 500 MB; ne deployam"
+          # stvarna veličina (filePathMap); builder iznad 225 MB pokušava instalaciju pri pokretanju, a duckdb
+          # bez manylinux 2.17 wheela ostaje u paketu, pa build pada (Korak 5V2)
+          if ! uv run python scripts/vercel_bundle_size.py --max-mb 220; then
+            echo "::error::paket je preblizu granici od 225 MB; ne deployam"
             exit 4
           fi
 

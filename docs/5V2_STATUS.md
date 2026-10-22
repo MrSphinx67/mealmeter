@@ -6,7 +6,7 @@
 | 1 veličina sažete baze po tablici i stupcu | gotovo |
 | 2 smanjena baza (isti view-ovi, isti rezultat) | gotovo: **100,0 MB** (bilo 212,5; najmanje izmjereno 85,0 MB, ali sporije) |
 | 3 zlatni izlazi i mjerenja na novoj bazi | gotovo: zlatni 20/20; brzina jednaka bazi iz 5P |
-| 4 `vercel build --prod` s bazom | - |
+| 4 `vercel build --prod` s bazom | gotovo: **192,7 MB**, build prolazi |
 
 Ništa nije deployano.
 
@@ -129,3 +129,28 @@ Nova baza je jednako brza kao stara, uz manji RSS. Cilj ≤ 1 s za bolonjez u ov
 bazom; u uvjetima iz 5P stara baza je imala 0,86 s, a nova bi trebala jednako. Usko grlo su upiti kandidata
 (~0,1-0,14 s po sastojku) i atributi (~0,03 s po sastojku). Na Vercelu funkcija ima 1 vCPU, pa treba izmjeriti
 tamo.
+
+## 4. `vercel build --prod` (stvarno, s bazom od 100 MB)
+
+Build prolazi (`Using Python 3.14 from .python-version`), bez "optimizing dependencies" i bez `_uv/`.
+Veličina iz `.vc-config.json` → `filePathMap` (`scripts/vercel_bundle_size.py`):
+
+| dio | MB |
+|---|---|
+| data/compact.duckdb | 100,0 |
+| duckdb (.so) | 57,7 |
+| cryptography | 14,2 |
+| pydantic_core, pyyaml, pydantic, vercel_runtime, mcp, ostalo | 20,8 |
+| **ukupno** | **192,7** (cilj ≤ 200, granica 225) |
+
+Provjereno: u paketu nema `.env*`; od `data/` su samo `compact.duckdb` i `*.yaml`. `_uv/` nije nastao, a već je
+u `.gitignore` i `.vercelignore`.
+
+**Ispravci:**
+- `docs/5V_STATUS.md` i `docs/DEPLOY.md`: granica je 225 MB, a ne 500 MB.
+- GitHub workflow je veličinu mjerio s `du` na `.vercel/output`, što pokazuje ~1 MB, jer se datoteke funkcije samo
+  navode u `filePathMap`. Sada koristi `scripts/vercel_bundle_size.py --max-mb 220`.
+
+**Rezerva:** paket ima ~32 MB do granice od 225 MB. Sažeta baza raste s cjenicima, pa će CI javiti kad se približi.
+Ako granica postane problem, mogućnosti su: verzija baze od 85 MB (~20 % sporiji plan_basket), izbaciti
+`cryptography` (14 MB; povlači ga mcp, a mi ga ne koristimo) ili "Large functions" (`VERCEL_SUPPORT_LARGE_FUNCTIONS=1`).
