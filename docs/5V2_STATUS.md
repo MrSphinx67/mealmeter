@@ -4,8 +4,8 @@
 |---|---|
 | 0 kako Vercel puni paket; Python 3.12; paket bez baze | gotovo |
 | 1 veličina sažete baze po tablici i stupcu | gotovo |
-| 2 smanjena baza (isti view-ovi, isti rezultat) | gotovo: **85,0 MB** (bilo 212,5) |
-| 3 zlatni izlazi i mjerenja na novoj bazi | - |
+| 2 smanjena baza (isti view-ovi, isti rezultat) | gotovo: **100,0 MB** (bilo 212,5; najmanje izmjereno 85,0 MB, ali sporije) |
+| 3 zlatni izlazi i mjerenja na novoj bazi | gotovo: zlatni 20/20; brzina jednaka bazi iz 5P |
 | 4 `vercel build --prod` s bazom | - |
 
 Ništa nije deployano.
@@ -89,3 +89,43 @@ koje alati ne čitaju. Dodatne provjere:
 | **ukupno (datoteka)** | **85,0** | |
 
 Build traje ~2 min. DuckDB ima memory_limit 1,5 GB i 2 dretve, a RSS procesa je do 1,86 GB. Testovi: 971 prolazi.
+
+### 2b. Konačni izbor: 100,0 MB (nakon mjerenja brzine)
+
+Verzija od 85 MB je cijene namirnica držala kao ključeve (osnovni redak + iznimke), a proizvode namirnice kao view.
+Svaki upit kandidata ih je spajao natrag s `products` i `chain_prices_k`. To je bilo **~20 % sporije** od baze iz 5P
+(palačinke 1,08 s naspram 0,89 s, bolonjez 1,50 naspram 1,25 s, mjereno zajedno). Zato su `clean.staple_prices` i
+`clean.staple_items` opet tablice, ali samo sa stupcima koje čita upit kandidata (`STAPLE_PRICE_COLS`: lanac,
+trgovina, proizvod, date, stale_days, price_eff, is_special, price_per_unit, per_unit, unit_confidence,
+price_per_kg_drained). To dodaje 15 MB, a brzina je ista kao prije.
+
+| tablica | MB | redaka |
+|---|---|---|
+| products (bez nekorištenih stupaca, + pk) | 27,5 | 478 181 |
+| price_exceptions_k (pk, sk, vrijednosti) | 26,5 | 3 395 582 |
+| staple_prices (samo potrebni stupci) | 20,0 | 2 239 329 |
+| store_products_k (sk, pk) | 14,0 | 13 220 508 |
+| chain_prices_k (pk, vrijednosti) | 4,5 | 477 819 |
+| staple_items | 3,0 | 53 734 |
+| ostalo | 3,7 | |
+| **datoteka** | **100,0** | |
+
+## 3. Zlatni izlazi i mjerenja (nova baza)
+
+Zlatni izlazi: **20/20 jednaki punoj bazi** (`MM_GOLDEN=1`, `scripts/golden.py --check --db data/compact.duckdb`).
+Testovi: 971 prolazi.
+
+Mjerenje kao u 5P (medijan 20 ponavljanja, jedan proces, funkcije alata). Stroj je sada sporiji nego u 5P (Firefox i
+ostalo; sam import traje 1,2-1,5 s umjesto 0,8 s), pa je baza iz 5P izmjerena ponovno, u istim uvjetima:
+
+| mjerenje | baza iz 5P (212,5 MB), sada | nova baza (100 MB), sada | baza iz 5P, mjereno u 5P |
+|---|---|---|---|
+| find_products brašno, Osijek | 0,19 s | 0,19 s | 0,13 s |
+| plan_basket palačinke (7), Osijek | 0,89 s | **0,90 s** | 0,61 s |
+| plan_basket bolonjez (7), Zagreb | 1,25 s | **1,25 s** | 0,86 s |
+| najveći RSS | 368 MB | **330 MB** | 371 MB |
+
+Nova baza je jednako brza kao stara, uz manji RSS. Cilj ≤ 1 s za bolonjez u ovim uvjetima nije ostvaren ni sa starom
+bazom; u uvjetima iz 5P stara baza je imala 0,86 s, a nova bi trebala jednako. Usko grlo su upiti kandidata
+(~0,1-0,14 s po sastojku) i atributi (~0,03 s po sastojku). Na Vercelu funkcija ima 1 vCPU, pa treba izmjeriti
+tamo.

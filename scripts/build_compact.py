@@ -2,15 +2,15 @@
 
 Upotreba: python scripts/build_compact.py [puna_baza] [izlaz]   (zadano: data/mealmeter.duckdb -> data/compact.duckdb)
 
-View-ovi clean.prices, clean.staple_prices i clean.staple_items imaju ista imena i stupce koje alati čitaju, pa
+View clean.prices i tablice clean.staple_prices i clean.staple_items imaju ista imena i stupce koje alati čitaju, pa
 search.py i plan_basket rade bez promjena (baza se bira preko env MM_DB). Ispod njih su cjelobrojni ključevi
 (clean.products.pk INTEGER, clean.stores.sk SMALLINT) i tablice složene radi kompresije:
 - clean.chain_prices_k (pk, vrijednosti): po paru (lanac, proizvod) najčešći redak cijene;
 - clean.store_products_k (sk, pk): trgovine čiji je redak jednak osnovnom (trgovina nema svaki proizvod lanca,
   popunjenost ~46 %, pa se dostupnost čuva po trgovini);
 - clean.price_exceptions_k (sk, pk, vrijednosti): redci trgovina koji se razlikuju (cijena, akcija, datum...);
-- clean.staple_base_k (staple, sk, pk), clean.staple_exceptions_k (staple, pk, sk, vrijednosti) i
-  clean.staple_items_k (staple, pk): predizračun za namirnice, na isti način (osnovni redak + iznimke).
+- clean.staple_prices: cijene namirnica samo sa stupcima koje čita upit kandidata (STAPLE_PRICE_COLS);
+  clean.staple_items: proizvodi namirnice (bez izostavljenih stupaca).
 Izostavljeni su stupci koje alati ne čitaju (DROP_PRICE_COLS, DROP_PRODUCT_COLS); ostali su isti. Na kraju se
 provjerava da svaki view vraća točno iste retke kao puna baza (broj redaka i zbroj hash-eva redaka).
 DuckDB je ograničen na 1,5 GB memorije (privremene datoteke u data/compact_tmp).
@@ -34,6 +34,9 @@ KEYS = ("chain", "store_id", "product_id")
 SKIP = {"prices", "price_history", "staple_prices", "staple_items", "products", "stores"}
 # stupci koje alati (search.py, basket.py, server.py) ne čitaju; koristi ih samo build pune baze
 DROP_PRICE_COLS = ("price", "unit_price", "price_date")
+# stupci cijena koje čita upit kandidata za namirnicu (search._candidates, STAPLE_PPU_SQL)
+STAPLE_PRICE_COLS = ("chain", "store_id", "product_id", "date", "stale_days", "price_eff", "is_special",
+                     "price_per_unit", "per_unit", "unit_confidence", "price_per_kg_drained")
 DROP_PRODUCT_COLS = ("barcode", "ean_valid", "match_norm", "category", "unit", "quantity", "unit_hint", "ean_note",
                      "ean_incoherent", "hard_nonfood")
 
@@ -106,33 +109,21 @@ def build(SRC: Path, OUT: Path) -> dict:
     staple_src = f"""SELECT DISTINCT sg.staple, c.* FROM src.clean.staple_groups sg
         JOIN (SELECT chain, product_id, {BKEY_SQL} AS bkey FROM src.clean.products p) pb ON pb.bkey = sg.bkey
         JOIN src.clean.prices c USING (chain, product_id) WHERE sg.status IN ('member', 'ambiguous')"""
-    # redci namirnice: ključevi za one jednake osnovnom retku (cijena iz chain_prices_k) i puni redci za iznimke
-    c.execute(f"""CREATE TEMP TABLE staple_rows AS
-        SELECT x.staple, s.sk, p.pk, {", ".join(f"x.{col}" for col in vals)},
-               {" AND ".join(f"x.{col} IS NOT DISTINCT FROM b.{col}" for col in vals)} AS is_base
-        FROM ({staple_src}) x JOIN dst.clean.products p USING (chain, product_id)
-        JOIN dst.clean.stores s USING (chain, store_id) JOIN dst.clean.chain_prices_k b ON b.pk = p.pk""")
-    c.execute("""CREATE TABLE dst.clean.staple_base_k AS
-        SELECT staple, sk, pk FROM staple_rows WHERE is_base ORDER BY staple, sk, pk""")
-    c.execute(f"""CREATE TABLE dst.clean.staple_exceptions_k AS
-        SELECT staple, pk, sk, {v} FROM staple_rows WHERE NOT is_base ORDER BY staple, pk, sk""")
-    c.execute("""CREATE TABLE dst.clean.staple_items_k AS
-        SELECT DISTINCT staple, pk FROM staple_rows ORDER BY staple, pk""")
-    c.execute("DROP TABLE staple_rows")
-    c.execute(f"""CREATE VIEW dst.clean.staple_prices AS
-        SELECT a.staple, {out_cols} FROM clean.staple_base_k a JOIN clean.chain_prices_k x USING (pk)
-          JOIN clean.products p USING (pk) JOIN clean.stores s USING (sk)
-        UNION ALL
-        SELECT x.staple, {out_cols} FROM clean.staple_exceptions_k x JOIN clean.products p USING (pk)
-          JOIN clean.stores s USING (sk)""")
-    c.execute("""CREATE VIEW dst.clean.staple_items AS
-        SELECT k.staple, p.* FROM clean.staple_items_k k JOIN clean.products p USING (pk)""")
+    # cijene namirnica kao tablica s tekstualnim ključevima, ali samo sa stupcima koje čita upit kandidata
+    # (search._candidates); view nad ključevima bio je ~20 % sporiji (spajanje s products i chain_prices_k)
+    sp = ", ".join(f"x.{col}" for col in STAPLE_PRICE_COLS)
+    c.execute(f"""CREATE TABLE dst.clean.staple_prices AS
+        SELECT x.staple, {sp} FROM ({staple_src}) x ORDER BY x.staple, x.chain, x.product_id, x.store_id""")
+    # proizvodi namirnice kao tablica (ne view): view nad products bi pri svakom upitu čitao cijelu tablicu proizvoda
+    c.execute("""CREATE TABLE dst.clean.staple_items AS
+        SELECT k.staple, p.* FROM (SELECT DISTINCT staple, chain, product_id FROM dst.clean.staple_prices) k
+        JOIN dst.clean.products p USING (chain, product_id) ORDER BY k.staple, p.chain, p.product_id""")
 
     # provjera: view-ovi vraćaju točno iste retke kao puna baza (za stupce koji su ostali)
     checks = {
         "prices": (f"SELECT {', '.join(cols)} FROM src.clean.prices", f"SELECT * FROM dst.clean.prices", cols),
-        "staple_prices": (f"SELECT staple, {', '.join(cols)} FROM ({staple_src})", "SELECT * FROM dst.clean.staple_prices",
-                          ["staple"] + cols),
+        "staple_prices": (f"SELECT staple, {', '.join(STAPLE_PRICE_COLS)} FROM ({staple_src})",
+                          "SELECT * FROM dst.clean.staple_prices", ["staple", *STAPLE_PRICE_COLS]),
         "staple_items": (f"""SELECT DISTINCT x.staple, {', '.join(f'p.{col}' for col in pcols)} FROM ({staple_src}) x
                              JOIN src.clean.products p USING (chain, product_id)""",
                          f"SELECT staple, {', '.join(pcols)} FROM dst.clean.staple_items", ["staple"] + pcols),
@@ -142,8 +133,7 @@ def build(SRC: Path, OUT: Path) -> dict:
         if a != b:
             raise SystemExit(f"{name}: view se razlikuje od pune baze ({a} != {b})")
     counts = {t: c.execute(f"SELECT count(*) FROM dst.clean.{t}").fetchone()[0]
-              for t in ("chain_prices_k", "store_products_k", "price_exceptions_k", "staple_base_k",
-                        "staple_exceptions_k", "staple_items_k")}
+              for t in ("chain_prices_k", "store_products_k", "price_exceptions_k", "staple_prices", "staple_items")}
     counts.update(store_products=counts["store_products_k"], price_exceptions=counts["price_exceptions_k"])
     c.execute("CHECKPOINT dst")
     c.close()
