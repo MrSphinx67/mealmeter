@@ -199,11 +199,6 @@
    "chain": "konzum",
    "n_matched": 1,
    "total_to_buy": 1.48
-  },
-  {
-   "chain": "lorenco",
-   "n_matched": 1,
-   "total_to_buy": 3.55
   }
  ],
  "note": "Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists (cijene.dev); in-store prices may differ, a price list is not stock, and promotions change.",

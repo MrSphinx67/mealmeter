@@ -28,6 +28,7 @@ def test_kind_note():
 # --- 1. zlatni izlazi (stvarna baza; samo uz MM_GOLDEN=1, jer ovise o učitanom cjeniku) --------------------
 
 import os  # noqa: E402
+from pathlib import Path  # noqa: E402
 
 import pytest  # noqa: E402
 
@@ -35,20 +36,23 @@ import pytest  # noqa: E402
 @pytest.mark.skipif(os.environ.get("MM_GOLDEN") != "1", reason="zlatni izlazi traže stvarnu bazu (MM_GOLDEN=1)")
 def test_golden_outputs():
     import importlib.util
-    from pathlib import Path
 
     spec = importlib.util.spec_from_file_location("golden", Path(__file__).parents[1] / "scripts" / "golden.py")
     golden = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(golden)
     diffs = golden.check(os.environ.get("MM_DB"), verbose=False)
     assert not {k: v for k, v in diffs.items() if v}
+    # Korak 5V5: Lorenco i Metro nikad u izlazu plan_basketa
+    for f in sorted((Path(__file__).parent / "golden").glob("basket_*.json")):
+        text = f.read_text(encoding="utf-8").lower()
+        assert not any(f'"{ch}"' in text for ch in golden.EXCLUDED_CHAINS), f.name
 
 
 def test_golden_files_present():
     from pathlib import Path
 
     files = sorted((Path(__file__).parent / "golden").glob("*.json"))
-    assert len(files) == 20
+    assert len(files) == 21
     kinds = {f.name.split("_")[0] for f in files}
     assert kinds == {"find", "prices", "basket"}
 

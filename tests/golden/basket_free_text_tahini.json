@@ -292,14 +292,6 @@
    "note": "nedostaje: tahini"
   },
   {
-   "chain": "lorenco",
-   "missing": [
-    "tahini"
-   ],
-   "n_matched": 3,
-   "note": "nedostaje: tahini"
-  },
-  {
    "chain": "eurospin",
    "missing": [
     "tahini"

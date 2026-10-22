@@ -62,7 +62,14 @@ SCENARIOS = {
                                                           "free_text": True}], "city": "Osijek"}),
     "basket_lidl_varivo_zagreb": ("plan_basket", {"ingredients": VARIVO, "city": "Zagreb",
                                                   "store": {"chain": "lidl", "address_contains": ""}}),
+    # Korak 5V5: stvarni test na Vercelu (Lorenco se pojavio kao najjeftiniji)
+    "basket_palacinke_nutella_osijek": ("plan_basket", {"ingredients": PALACINKE[:3] + [
+        {"name": "šećer", "amount": 15, "unit": "g"}, {"name": "sol", "amount": 1, "unit": "g"},
+        {"name": "ulje", "amount": 30, "unit": "ml"}, {"name": "nutella", "amount": 300, "unit": "g"}],
+        "city": "Osijek", "already_have": ["sol", "ulje", "šećer"]}),
 }
+# lanci koji nikad ne smiju biti u izlazu plan_basketa: nepouzdani podaci (Lorenco) i veleprodaja (Metro)
+EXCLUDED_CHAINS = ("lorenco", "metro")
 
 
 def run(db: str | None) -> dict:

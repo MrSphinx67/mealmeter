@@ -739,11 +739,6 @@
    "chain": "boso",
    "n_matched": 9,
    "total_to_buy": 13.83
-  },
-  {
-   "chain": "lorenco",
-   "n_matched": 9,
-   "total_to_buy": 18.86
   }
  ],
  "note": "Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists (cijene.dev); in-store prices may differ, a price list is not stock, and promotions change.",

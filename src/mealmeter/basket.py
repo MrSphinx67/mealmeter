@@ -12,7 +12,7 @@ import duckdb
 
 from mealmeter import units
 from mealmeter.build import NATIONAL_NOTE
-from mealmeter.build import WHOLESALE_CHAINS
+from mealmeter.build import SUSPECT_CHAINS, WHOLESALE_CHAINS
 from mealmeter.normalize import date_hr, norm_text, parse_multipack_unit
 from mealmeter.search import (_candidates, _city_filter, _food_filter, connect, find_products, format_pack,
                               has_staple_prices, resolve_city)
@@ -443,6 +443,8 @@ def _prepare(con, need: Need, city: str, wholesale: bool = False) -> dict[tuple,
         attrs.setdefault(a, v)
     by_store: dict[tuple, list[dict]] = {}
     for r in _rows_for(con, need.staple, attrs, city, wholesale, required):
+        if r["data_quality"] == "suspect":  # lanac s nepouzdanim podacima (Lorenco) nikad nije u košarici
+            continue
         for k in ("price_eff", "price_per_unit", "pack_amount", "drained_amount", "n_units", "assumed_g"):
             r[k] = _num(r.get(k))
         r["portion_pack"] = portion_pack(r, need.staple)
@@ -708,7 +710,7 @@ def _free_rows(con, need: "Need", city: str, wholesale: bool = False) -> dict[tu
     cols = [d[0] for d in cur.description]
     rows = []
     for r in (dict(zip(cols, row)) for row in cur.fetchall()):
-        if not free_ok(r["name_norm"] or "", query):
+        if not free_ok(r["name_norm"] or "", query) or r["data_quality"] == "suspect":
             continue
         for k in ("price_eff", "price_per_unit", "pack_amount", "drained_amount", "n_units", "assumed_g"):
             r[k] = _num(r.get(k))
@@ -993,6 +995,9 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
             _brand_substitutions(stores, idx, need, branded)
 
     if store_spec:
+        if norm_text(store_spec.get("chain") or "") in SUSPECT_CHAINS:
+            out["warnings"].append(f"lanac '{store_spec.get('chain')}' ima nepouzdane podatke (cijene bez lokacije "
+                                   "trgovine) i ne koristi se u košarici")
         stores = _filter_store(stores, store_spec, out)
     n_needs = len(needs)
     for s in stores.values():
@@ -1024,11 +1029,10 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
         f"SELECT DISTINCT s.chain FROM clean.stores s WHERE s.scope = 'local' AND {city_sql}", city_params).fetchall()}
     out["comparison"], out["incomplete"], out["more_chains"] = compare_chains(
         ranked, in_city, n_needs, needs, city_chains if not store_spec else set())
-    eligible = [s for s in ranked if s["data_quality"] != "suspect"] or ranked
-    if eligible:
-        out["best_store"] = eligible[0]
-        if eligible[0]["data_quality"] == "suspect":
-            out["warnings"].append("najbolja trgovina je lanac sa sumnjivim podacima (nema druge)")
+    # lanci s nepouzdanim podacima (clean.chains.data_quality 'suspect', npr. Lorenco: nacionalni cjenik bez
+    # lokacije) ne ulaze u kandidate (_prepare, _free_rows), pa ni u stores, comparison, more_chains ni alternative
+    if ranked:
+        out["best_store"] = ranked[0]
     if alternatives and out["best_store"]:
         # alternative samo za trgovinu iz `store` (filtrirane su) ili najbolju; tražena marka iz druge trgovine
         # dolazi na kraj (other_store = true)

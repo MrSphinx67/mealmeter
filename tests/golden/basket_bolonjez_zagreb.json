@@ -573,11 +573,6 @@
    "chain": "vrutak",
    "n_matched": 6,
    "total_to_buy": 15.79
-  },
-  {
-   "chain": "lorenco",
-   "n_matched": 6,
-   "total_to_buy": 17.97
   }
  ],
  "note": "Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists (cijene.dev); in-store prices may differ, a price list is not stock, and promotions change.",

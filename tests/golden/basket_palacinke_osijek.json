@@ -406,14 +406,17 @@
    "total_used": 1.31
   },
   {
-   "addresses": [],
-   "chain": "lorenco",
+   "addresses": [
+    "Huttlerova 30",
+    "J J Strossmayera 343"
+   ],
+   "chain": "plodine",
    "complete": true,
    "n_ingredients": 7,
    "n_matched": 7,
-   "n_stores_city": 1,
-   "total_to_buy": 7.5,
-   "total_used": 1.54
+   "n_stores_city": 2,
+   "total_to_buy": 7.62,
+   "total_used": 1.58
   }
  ],
  "date": "2026-10-20",
@@ -552,11 +555,6 @@
  ],
  "mode": "single_store",
  "more_chains": [
-  {
-   "chain": "plodine",
-   "n_matched": 7,
-   "total_to_buy": 7.62
-  },
   {
    "chain": "spar",
    "n_matched": 7,
