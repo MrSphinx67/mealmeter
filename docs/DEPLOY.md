@@ -52,7 +52,10 @@ curl -s -X POST "$H/mcp" \
   -w '\n%{http_code}\n'
 # očekivano: {"jsonrpc":"2.0","id":1,"result":{...,"serverInfo":{"name":"mealmeter",...}}} i 200
 
-# 3. Zdravlje i početna stranica
+# 3. GET /mcp: odmah 405 s "allow: POST" (bez SSE toka koji bi visio); -m 5 prekida ako visi
+curl -s -m 5 -o /dev/null -w "%{http_code} allow=%header{allow}\n" "$H/mcp"   # očekivano: 405 allow=POST
+
+# 4. Zdravlje i početna stranica
 curl -s "$H/healthz"                                # {"status":"ok","db_date":"...",...}
 curl -s -o /dev/null -w "%{http_code}\n" "$H/"     # 200
 ```

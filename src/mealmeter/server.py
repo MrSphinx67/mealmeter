@@ -736,6 +736,32 @@ class RequestLog:
                      (time.perf_counter() - start) * 1000, anon_ip(self.ip(scope, headers)))
 
 
+class McpPostOnly:
+    """ASGI: GET, HEAD i DELETE na /mcp odmah dobivaju 405 (JSON, Allow: POST); POST ide dalje.
+
+    Poslužitelj je stateless: nema sesija (DELETE) ni poruka koje bi slao SSE tokom (GET). MCP Streamable HTTP tada
+    dopušta 405. SDK bi na GET s `Accept: text/event-stream` otvorio tok i držao vezu, što na Vercelu troši trajanje
+    funkcije (do 300 s) i može se zlorabiti (Korak 5V4)."""
+
+    METHODS = {"GET", "HEAD", "DELETE"}
+
+    def __init__(self, app, path: str = "/mcp"):
+        self.app, self.path = app, path
+
+    async def __call__(self, scope, receive, send):
+        if (scope["type"] == "http" and scope.get("method") in self.METHODS
+                and scope.get("path", "").rstrip("/") == self.path):
+            body = json.dumps({"jsonrpc": "2.0", "id": None, "error": {
+                "code": -32000, "message": "Method not allowed: koristi POST / use POST"}}).encode()
+            await send({"type": "http.response.start", "status": 405,
+                        "headers": [(b"content-type", b"application/json"), (b"allow", b"POST"),
+                                    (b"content-length", str(len(body)).encode())]})
+            await send({"type": "http.response.body",
+                        "body": b"" if scope["method"] == "HEAD" else body})
+            return
+        await self.app(scope, receive, send)
+
+
 def http_app(server: MCPServer, host: str = "127.0.0.1", allowed_hosts: list[str] | None = None,
              allowed_origins: list[str] | None = None):
     """ASGI aplikacija za HTTP način: MCP na /mcp (streamable HTTP, bez sesija, JSON odgovori), zatim
@@ -768,7 +794,7 @@ def http_app(server: MCPServer, host: str = "127.0.0.1", allowed_hosts: list[str
     from starlette.exceptions import HTTPException as StarletteHTTPException
 
     app.add_exception_handler(StarletteHTTPException, http_error)
-    return RequestLog(HostGuard(RateLimit(app), allowed_hosts, allowed_origins))
+    return RequestLog(HostGuard(RateLimit(McpPostOnly(app)), allowed_hosts, allowed_origins))
 
 
 def main(argv: list[str] | None = None) -> None:

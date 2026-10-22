@@ -179,11 +179,10 @@ def test_routes_and_methods(con):
     for key in ("POST /mcp", "POST /api/index/mcp"):
         status, body = res[key]
         assert status == 200 and json.loads(body)["result"]["serverInfo"]["name"] == "mealmeter", key
-    # GET/DELETE/OPTIONS /mcp stižu do MCP aplikacije (JSON-RPC odgovor SDK-a): stateless poslužitelj bez SSE
-    # smije odbiti GET (406/405), DELETE (405, nema sesija) i OPTIONS
+    # GET/DELETE /mcp: 405 iz McpPostOnly (Korak 5V4); OPTIONS stiže do MCP aplikacije (405 iz SDK-a)
     for key in ("GET /mcp", "DELETE /mcp", "OPTIONS /mcp"):
         status, body = res[key]
-        assert status in (405, 406) and json.loads(body)["jsonrpc"] == "2.0", key
+        assert status == 405 and json.loads(body)["jsonrpc"] == "2.0", key
     # nepoznate putanje, uključujući OAuth .well-known: JSON 404 (konektor tako zna da nema prijave)
     for key in ("GET /.well-known/oauth-protected-resource", "GET /.well-known/oauth-protected-resource/mcp",
                 "GET /.well-known/oauth-authorization-server", "POST /.well-known/oauth-authorization-server",
@@ -192,3 +191,66 @@ def test_routes_and_methods(con):
         assert status == 404 and json.loads(body)["error"] == "not found", key
     assert res["GET /healthz"][0] == 200 and res["GET /"][0] == 200
     assert res["POST /healthz"][0] == 405 and json.loads(res["POST /healthz"][1])["error"] == "method not allowed"
+
+
+# --- Korak 5V4: GET i DELETE /mcp → 405 odmah (bez SSE toka) -----------------------------------------------
+
+async def _raw(app, method, path, headers, body=b""):
+    sent, done = [], False
+
+    async def receive():
+        nonlocal done
+        if done:
+            await asyncio.sleep(3600)
+        done = True
+        return {"type": "http.request", "body": body, "more_body": False}
+
+    async def send(m):
+        sent.append(m)
+    hdrs = [(k.encode(), v.encode()) for k, v in headers.items()] + [(b"content-length", str(len(body)).encode())]
+    await app({"type": "http", "method": method, "path": path, "raw_path": path.encode(), "query_string": b"",
+               "headers": hdrs, "client": ("10.0.0.1", 1), "server": ("x", 443), "scheme": "https",
+               "http_version": "1.1", "root_path": ""}, receive, send)
+    start = next(m for m in sent if m["type"] == "http.response.start")
+    return start["status"], dict(start["headers"]), b"".join(m.get("body", b"") for m in sent if m["type"] == "http.response.body")
+
+
+def test_mcp_get_delete_405_immediately(con):
+    from mealmeter import server as srv
+    from mealmeter.asgi import LifespanOnDemand
+
+    def fresh():  # session manager smije se pokrenuti samo jednom po instanci
+        return srv.http_app(srv.create_server(con=con), allowed_hosts=["*.vercel.app"], allowed_origins=[])
+    host = {"host": "mealmeter.vercel.app"}
+    accepts = [{}, {"accept": "text/event-stream"}, {"accept": "application/json, text/event-stream"}, {"accept": "*/*"}]
+
+    async def go(app):
+        out = []
+        for method in ("GET", "DELETE", "HEAD"):
+            for path in ("/mcp", "/mcp/"):
+                for acc in accepts:
+                    # odmah: bez SSE toka, inače bi wait_for istekao
+                    out.append((method, path, acc, await asyncio.wait_for(_raw(app, method, path, {**host, **acc}), 2)))
+        init = await asyncio.wait_for(_raw(app, "POST", "/mcp", {**host, "content-type": "application/json",
+                                                                 "accept": "application/json, text/event-stream"},
+                                           json.dumps(INIT).encode()), 10)
+        return out, init
+
+    local, vercel = fresh(), fresh()
+    for label, app in (("lokalni HTTP", local), ("Vercel omotač", LifespanOnDemand(vercel, _inner(vercel)))):
+        async def run(app=app):
+            if isinstance(app, LifespanOnDemand):
+                try:
+                    return await go(app)
+                finally:
+                    app._task.cancel()
+            inner = _inner(app)
+            async with inner.router.lifespan_context(inner):
+                return await go(app)
+        out, init = asyncio.run(run())
+        for method, path, acc, (status, headers, body) in out:
+            assert status == 405 and headers[b"allow"] == b"POST", (label, method, path, acc)
+            assert headers[b"content-type"] == b"application/json"
+            if method != "HEAD":
+                assert json.loads(body)["error"]["message"].startswith("Method not allowed")
+        assert init[0] == 200 and json.loads(init[2])["result"]["serverInfo"]["name"] == "mealmeter", label

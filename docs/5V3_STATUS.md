@@ -7,6 +7,7 @@
 | 3 nepoznate putanje i /.well-known/* → JSON 404 | gotovo |
 | 4 testovi; `vercel build --prod` | gotovo: 973 testa prolaze; build prolazi, 184,9 MB |
 | 5 provjera nakon deploya u docs/DEPLOY.md | gotovo |
+| 5V4 GET/DELETE /mcp → 405 odmah (bez SSE toka) | gotovo |
 
 Ništa nije deployano.
 
@@ -41,8 +42,7 @@ Izvori: [FastAPI na Vercelu (routing backend aplikacije)](https://vercel.com/doc
 - `server.http_app`: Starletteove greške (nepoznata putanja, kriva metoda) vraćaju JSON (`{"error": "not found",
   "path": ...}`, 404 ili 405) umjesto teksta. `/.well-known/oauth-protected-resource[/mcp]` i
   `/.well-known/oauth-authorization-server` daju 404, pa Claude konektor zna da prijave nema.
-- `GET /mcp` ostaje kakav je u SDK-u (stateless, bez SSE): 406 bez `Accept: text/event-stream`, a DELETE i OPTIONS
-  daju 405. MCP specifikacija to dopušta poslužitelju koji ne nudi SSE tok ni sesije.
+- `GET /mcp`: u 5V3 ostavljen kakav je u SDK-u; to se pokazalo krivim, vidi 5V4.
 
 ## 4. Provjera
 
@@ -55,3 +55,21 @@ Izvori: [FastAPI na Vercelu (routing backend aplikacije)](https://vercel.com/doc
 
 Nakon deploya treba provjeriti (curl blok u DEPLOY.md) da Vercelova ruta `handle: error` ne zamijeni naš JSON 404
 svojim `/404.html`. Lokalno se to ne može provjeriti.
+
+## 5V4. GET i DELETE /mcp → 405 odmah
+
+Na Vercelu je `GET /mcp` (curl šalje `Accept: */*`) otvarao SSE tok (200 `text/event-stream`) i držao vezu. To troši
+trajanje funkcije (do 300 s) i može se zlorabiti. Poslužitelj je stateless: nema sesija ni poruka koje bi slao
+tokom, a MCP Streamable HTTP tada dopušta 405.
+
+- `server.McpPostOnly` (u `http_app`, ispod HostGuard/RateLimit, iznad MCP aplikacije): GET, HEAD i DELETE na `/mcp`
+  i `/mcp/` odmah vraćaju **405**, JSON-RPC greška, `content-type: application/json`, **`Allow: POST`**, bez obzira na
+  `Accept`. POST ide do SDK-a kao prije. OPTIONS i dalje stiže do SDK-a (405).
+- Vrijedi za oba načina: lokalni HTTP (`python -m mealmeter.server --http`) i Vercel (`api/index.py` → `http_app`).
+  Omotač `/api/index/mcp` svodi na `/mcp` prije provjere.
+- Test `test_mcp_get_delete_405_immediately`: za lokalni HTTP i Vercel omotač, GET, DELETE i HEAD na `/mcp` i `/mcp/`
+  s četiri različita `Accept` zaglavlja daju 405 i `Allow: POST` unutar 2 s (inače bi `asyncio.wait_for` istekao).
+  POST initialize daje 200 sa `serverInfo`.
+- Ručno pod uvicornom (`api.index:app`): GET 405 za 1,4 ms, GET s `Accept: text/event-stream` 405 za 0,9 ms,
+  DELETE 405 za 0,9 ms, POST initialize 200.
+- `pytest`: 974 prolazi. `vercel build --prod` prolazi, paket 184,9 MB (najveća datoteka 92,3 MB).
