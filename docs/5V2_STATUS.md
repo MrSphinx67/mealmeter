@@ -4,7 +4,7 @@
 |---|---|
 | 0 kako Vercel puni paket; Python 3.12; paket bez baze | gotovo |
 | 1 veličina sažete baze po tablici i stupcu | gotovo |
-| 2 smanjena baza (isti view-ovi, isti rezultat) | - |
+| 2 smanjena baza (isti view-ovi, isti rezultat) | gotovo: **85,0 MB** (bilo 212,5) |
 | 3 zlatni izlazi i mjerenja na novoj bazi | - |
 | 4 `vercel build --prod` s bazom | - |
 
@@ -59,3 +59,33 @@ koje alati ne čitaju. Dodatne provjere:
 - trgovine s istim asortimanom: 1 380 različitih od 1 535, pa grupiranje ne pomaže;
 - "lanac minus nedostajući": samo 31 % manje redaka, a view bi morao graditi komplement pri upitu;
 - datum je gotovo uvijek svojstvo trgovine (16 trgovina ima više datuma); iznimki samo zbog datuma ima 481 089.
+
+## 2. Nova sažeta baza: 85,0 MB (`scripts/build_compact.py`)
+
+Što je promijenjeno (izbor prema mjerenju iz točke 1):
+1. **Cjelobrojni ključevi.** `clean.products.pk` (INTEGER) i `clean.stores.sk` (SMALLINT). Dostupnost, osnovne
+   cijene i iznimke čuvaju ključeve umjesto teksta. Iznimke su složene po (proizvod, trgovina), jer su cijene istog
+   proizvoda slične i bolje se sažimaju.
+2. **Izostavljeni stupci koje alati ne čitaju** (provjereno pretragom koda search/basket/server):
+   - cijene: `price`, `unit_price`, `price_date`;
+   - proizvodi: `barcode`, `ean_valid`, `match_norm`, `category`, `unit`, `quantity`, `unit_hint`, `ean_note`,
+     `ean_incoherent`, `hard_nonfood`.
+3. **Cijene namirnica** kao i glavne: ključevi za retke jednake osnovnom (`staple_base_k`) i puni redci samo za
+   iznimke (`staple_exceptions_k`). Proizvodi namirnice su samo ključevi (`staple_items_k`).
+4. **View-ovi** `clean.prices`, `clean.staple_prices` i `clean.staple_items` imaju ista imena i iste stupce koje
+   alati čitaju. `search.has_staple_prices` prepoznaje i view.
+5. **Provjera pri svakom buildu:** svaki view mora vratiti točno iste retke kao puna baza (broj redaka i zbroj
+   hash-eva redaka po svim preostalim stupcima), inače build pada.
+
+| tablica | MB | redaka |
+|---|---|---|
+| price_exceptions_k (pk, sk, vrijednosti) | 26,5 | 3 395 582 |
+| products (bez nekorištenih stupaca, + pk) | 26,0 | 478 181 |
+| store_products_k (sk, pk) | 14,0 | 13 220 508 |
+| staple_base_k (staple, sk, pk) | 5,0 | 1 775 283 |
+| chain_prices_k (pk, vrijednosti) | 4,5 | 477 819 |
+| staple_exceptions_k | 4,5 | 464 046 |
+| ostalo (grupe, pravila, trgovine...) | 3,8 | |
+| **ukupno (datoteka)** | **85,0** | |
+
+Build traje ~2 min. DuckDB ima memory_limit 1,5 GB i 2 dretve, a RSS procesa je do 1,86 GB. Testovi: 971 prolazi.

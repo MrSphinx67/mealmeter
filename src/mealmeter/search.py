@@ -101,9 +101,10 @@ def _required_attrs_sql(staple, required: dict | None) -> str:
 
 
 def has_staple_prices(con) -> bool:
-    """Ima li baza clean.staple_prices (build_staple_prices); starije baze je nemaju, pa vrijedi clean.prices."""
-    return bool(con.execute("""SELECT count(*) FROM duckdb_tables() WHERE schema_name = 'clean'
-                               AND table_name = 'staple_prices' AND database_name = current_database()""").fetchone()[0])
+    """Ima li baza clean.staple_prices (tablica iz build_staple_prices ili view sažete baze); starije baze je nemaju,
+    pa vrijedi clean.prices."""
+    return bool(con.execute("""SELECT count(*) FROM information_schema.tables WHERE table_schema = 'clean'
+                               AND table_name = 'staple_prices' AND table_catalog = current_database()""").fetchone()[0])
 
 
 def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | None,
