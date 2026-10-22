@@ -45,3 +45,13 @@ def test_golden_grah_suho_all_chains():
     chains = {r["chain"] for r in out["comparison"]} | {r["chain"] for r in out["more_chains"]}
     assert {"lidl", "eurospin", "ntl", "roto"} <= chains
     assert not out["incomplete"]
+
+
+def test_data_attribution_in_tools_and_home():
+    """Korak 6.3: navod izvora podataka u odgovoru alata (note) i na početnoj stranici."""
+    from mealmeter import server as srv
+
+    for text in (srv.PRICE_NOTE, srv.home("mealmeter.vercel.app")):
+        for word in ("cijene.dev (DobarKod)", "https://cijene.dev/uvjeti-koristenja", "Podaci", "Data"):
+            assert word in text
+    assert "MIT" in srv.home("mealmeter.vercel.app")

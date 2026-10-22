@@ -1,7 +1,7 @@
 {
  "date": "2026-10-20",
  "date_hr": "20.10.2026.",
- "note": "Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists (cijene.dev); in-store prices may differ, a price list is not stock, and promotions change.",
+ "note": "Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists (cijene.dev); in-store prices may differ, a price list is not stock, and promotions change. Podaci: cijene.dev (DobarKod), prema uvjetima korištenja (https://cijene.dev/uvjeti-koristenja). / Data: cijene.dev (DobarKod), under its terms of use (https://cijene.dev/uvjeti-koristenja).",
  "product_id": "3850104223624",
  "stores": [
   {
@@ -930,35 +930,6 @@
    "special_price": null,
    "stale_days": 0,
    "store_id": "20580",
-   "unit_confidence": "high",
-   "variable_weight": false
-  },
-  {
-   "address": "Reisnerova 110, Osijek",
-   "anchor_price": 0.8,
-   "best_price_30": null,
-   "chain": "ntl",
-   "city": "Osijek",
-   "clearance": false,
-   "data_quality": "ok",
-   "date": "2026-10-20",
-   "date_hr": "20.10.2026.",
-   "drained_amount": null,
-   "ean": "3850104223624",
-   "food_group": "hrana",
-   "food_unverified": false,
-   "is_special": false,
-   "name": "BRAŠNO PŠENIČNO T-550 GLATKO 1 kg PODRAVKA",
-   "pack_source": "name",
-   "per_unit": "kg",
-   "price_eff": 0.8,
-   "price_per_kg_drained": null,
-   "price_per_unit": 0.8,
-   "product_id": "169600",
-   "scope": "local",
-   "special_price": null,
-   "stale_days": 0,
-   "store_id": "20677",
    "unit_confidence": "high",
    "variable_weight": false
   }

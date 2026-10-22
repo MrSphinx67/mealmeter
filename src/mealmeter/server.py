@@ -40,6 +40,12 @@ MAX_REQUEST_BYTES = 64_000
 PRICE_NOTE = ("Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik "
               "nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists "
               "(cijene.dev); in-store prices may differ, a price list is not stock, and promotions change.")
+# Korak 6.3: navod izvora podataka. cijene.dev za dnevne arhive ne navodi licencu, nego uvjete korištenja
+# (CC BY-NC-SA 4.0 je samo za enrichment/products.csv u repozitoriju cijene-api, koji Mealmeter ne koristi).
+TERMS_URL = "https://cijene.dev/uvjeti-koristenja"
+DATA_NOTE = (f"Podaci: cijene.dev (DobarKod), prema uvjetima korištenja ({TERMS_URL}). / "
+             f"Data: cijene.dev (DobarKod), under its terms of use ({TERMS_URL}).")
+PRICE_NOTE = f"{PRICE_NOTE} {DATA_NOTE}"
 
 INSTRUCTIONS = """\
 Mealmeter: cijene namirnica u hrvatskim trgovinama iz službenih dnevnih cjenika (cijene.dev).
@@ -671,6 +677,8 @@ trgovinama i najjeftiniju trgovinu. Besplatan, otvorenog koda, bez prijave.</p>
 <code>{url}</code>.</p>
 <p><strong>Izvor podataka:</strong> službeni dnevni cjenici trgovina, preuzeti s
 <a href="https://cijene.dev">cijene.dev</a> (DobarKod). Učitani cjenik: {db_date}.</p>
+<p><strong>Podaci:</strong> cijene.dev (DobarKod), prema <a href="https://cijene.dev/uvjeti-koristenja">uvjetima
+korištenja</a> cijene.dev. <strong>Kod:</strong> licenca MIT.</p>
 <p><strong>Napomena:</strong> cijene su iz cjenika; u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se
 mijenjaju.</p>
 <p><strong>Privatnost:</strong> nema računa ni kolačića. Sadržaj upita se ne sprema; zapisuje se samo broj poziva
@@ -681,6 +689,8 @@ list in a given city, and the cheapest store. Free, open source, no login.</p>
 <p><strong>Add to Claude:</strong> Settings &rarr; Connectors &rarr; Add custom connector, URL <code>{url}</code>.</p>
 <p><strong>Data source:</strong> the stores' official daily price lists via <a href="https://cijene.dev">cijene.dev</a>
 (DobarKod). Loaded price list: {db_date}.</p>
+<p><strong>Data:</strong> cijene.dev (DobarKod), under the cijene.dev
+<a href="https://cijene.dev/uvjeti-koristenja">terms of use</a>. <strong>Code:</strong> MIT license.</p>
 <p><strong>Note:</strong> prices come from price lists; in-store prices may differ, a price list is not stock, and
 promotions change.</p>
 <p><strong>Privacy:</strong> no accounts or cookies. Query content is not stored; only the number of calls per tool,

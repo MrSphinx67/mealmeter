@@ -5,6 +5,7 @@
 | 0 grah "nedostaje" u Lidlu, Eurospinu, NTL-u i Rotu | gotovo: pravilo oblika popravljeno, test i zlatni scenarij |
 | 1 NTL Osijek: 34 trgovine, na karti ~18 | provjereno: grad je iz cjenika, bez popravka |
 | 2 tajne u Git povijesti | provjereno: nema tajni |
+| 3 LICENSE i navod izvora podataka | gotovo, ali **tekst licence podataka je drukčiji od traženog** (vidi dolje) |
 
 Ništa nije deployano.
 
@@ -99,3 +100,36 @@ Pregledani su svi commitovi (`--all`, 129 commitova, jedna grana `master`).
   (korisničko ime na računalu). Ništa od toga nije mijenjano; za e-poštu bi trebalo prepisati povijest, što nisam radio.
 
 **Provjera:** pytest izlazni kod 0.
+
+## 3. LICENSE i navod izvora podataka
+
+**LICENSE** već postoji (od ranije, nepromijenjen): MIT, "Copyright (c) 2026 Fran Mostarkić".
+
+**Licenca podataka, provjereno 22.10.2026. na izvoru (ne iz sjećanja):**
+- `https://cijene.dev` i `https://cijene.dev/uvjeti-koristenja` (DobarKod) **ne navode licencu** za podatke. Uvjeti,
+  točka 4 (Intelektualno vlasništvo): "Podaci dostupni putem Usluge prikupljeni su iz javno dostupnih izvora."
+  i "Korisnik može slobodno koristiti podatke u svojim aplikacijama, ali bez izričitog jamstva točnosti." Točka 3.3:
+  za veće potrebe kontaktirati pružatelja za komercijalni plan.
+- Repozitorij `github.com/senko/cijene-api`: kod je AGPL-3.0, a **CC BY-NC-SA 4.0 vrijedi samo za
+  `enrichment/products.csv`** ("Pročišćeni CSV podaci o proizvodima (`enrichment/products.csv`) dostupni su pod CC
+  BY-NC-SA licencom."). Mealmeter tu datoteku ne koristi, nego dnevne arhive `api.cijene.dev/v0/archive/<datum>.zip`.
+- `archive-info.txt` u dnevnoj arhivi ne spominje licencu.
+
+Zato tekst "licenca CC BY-NC-SA 4.0" za podatke Mealmetera ne bi bio točan i nisam ga upisao. Upisano je:
+
+> Podaci: cijene.dev (DobarKod), prema uvjetima korištenja (https://cijene.dev/uvjeti-koristenja). /
+> Data: cijene.dev (DobarKod), under its terms of use (https://cijene.dev/uvjeti-koristenja).
+
+Ako ipak želiš navesti CC BY-NC-SA 4.0 (npr. kao strožu pretpostavku), to je jedna konstanta (`server.DATA_NOTE`) i
+dva retka na početnoj stranici (`server.HOME_HTML`). Najsigurnije je pitati DobarKod (info@dobarkod.hr).
+
+**Gdje:**
+- odgovor svakog alata: `note` (= `PRICE_NOTE`) sada završava s `DATA_NOTE` (find_products, get_prices, plan_basket);
+- početna stranica `/`: redak "Podaci: … Kod: licenca MIT." i "Data: … Code: MIT license.", s poveznicom na uvjete.
+
+**Posljedica:** `note` je dulji za ~190 B. `prices_ean_osijek` i `prices_class_jaja_m` su već bili na granici od
+20 KB (`truncated: true`), pa sada imaju jednu trgovinu manje u popisu. Zlatni izlazi su ponovno zapisani; osim `note`
+razlika je samo ta jedna trgovina u ta dva scenarija.
+
+**Provjera:** `tests/test_step6.py::test_data_attribution_in_tools_and_home`; pytest izlazni kod 0 (994 prolazi,
+2 preskočena); uz `MM_GOLDEN=1` na sažetoj bazi izlazni kod 0.
