@@ -6,7 +6,8 @@
 | 1 veličina sažete baze po tablici i stupcu | gotovo |
 | 2 smanjena baza (isti view-ovi, isti rezultat) | gotovo: **100,0 MB** (bilo 212,5; najmanje izmjereno 85,0 MB, ali sporije) |
 | 3 zlatni izlazi i mjerenja na novoj bazi | gotovo: zlatni 20/20; brzina jednaka bazi iz 5P |
-| 4 `vercel build --prod` s bazom | gotovo: **192,7 MB**, build prolazi |
+| 4 `vercel build --prod` s bazom | gotovo: 192,7 MB; zatim smanjeno, vidi 5 |
+| 5 nijedna datoteka > 95 MB (Hobby upload) | gotovo: baza **92,3 MB** u jednoj datoteci, paket **184,9 MB** |
 
 Ništa nije deployano.
 
@@ -154,3 +155,38 @@ u `.gitignore` i `.vercelignore`.
 **Rezerva:** paket ima ~32 MB do granice od 225 MB. Sažeta baza raste s cjenicima, pa će CI javiti kad se približi.
 Ako granica postane problem, mogućnosti su: verzija baze od 85 MB (~20 % sporiji plan_basket), izbaciti
 `cryptography` (14 MB; povlači ga mcp, a mi ga ne koristimo) ili "Large functions" (`VERCEL_SUPPORT_LARGE_FUNCTIONS=1`).
+
+## 5. Najviše 95 MB po datoteci (Hobby: `vercel deploy` odbija datoteke > 100 MB)
+
+`vercel deploy --prebuilt --prod` je odbio bazu od 100 MB ("File size limit exceeded (100 MB)").
+
+**Izbor: jedna datoteka od 92,3 MB, bez dijeljenja na više datoteka (ATTACH).** `clean.staple_prices` sada ima
+cjelobrojne ključeve (`staple_prices_k`: staple, pk, sk i potrebni stupci, po (staple, pk, sk)), a view s istim imenom
+spaja samo male `stores` i `products` po ključu. Za razliku od verzije od 85 MB, ne spaja osnovne cijene
+(`chain_prices_k`, 478 tisuća redaka).
+
+Usporedba u istim uvjetima (medijan 20 ponavljanja, dva uzastopna mjerenja):
+
+| | verzija 100 MB | nova 92,3 MB |
+|---|---|---|
+| plan_basket palačinke (7), Osijek | 0,62 s / 0,91 s | 0,63 s / 0,92 s |
+| plan_basket bolonjez (7), Zagreb | 0,86 s / 1,29 s | 0,92 s / 1,05 s |
+| find_products brašno | 0,13 s / 0,19 s | 0,13 s / 0,19 s |
+| najveći RSS | 332 MB | 369-378 MB |
+
+(Prvi broj je mjeren u brzim uvjetima, kao u 5P, a drugi u sporijim.) Nova verzija je najviše ~7 % sporija, a ponekad
+brža. Cilj ≤ 1 s i RSS ≤ 400 MB vrijede u uvjetima iz 5P. Dijeljenje na dvije datoteke (glavna ~77 MB i namirnice
+~23 MB) zadržalo bi brzinu verzije od 100 MB, ali bi svako mjesto koje otvara bazu (poslužitelj, `search.connect`,
+zlatni testovi, testovi) moralo priključiti i drugu datoteku, a view-ovi bi pokazivali u drugi katalog. To je više
+posla i krhko, za razliku od ~0-7 % brzine.
+
+**Provjere:**
+- zlatni izlazi 20/20 (`MM_GOLDEN=1`, skripta i pytest);
+- testovi: 972 prolazi;
+- `vercel build --prod` prolazi: **184,9 MB** (baza 92,3, duckdb 57,7, cryptography 14,2 MB), najveća datoteka
+  92,3 MB.
+
+**`scripts/vercel_bundle_size.py --max-file-mb 95`** (zadano 95) pada ako je ijedna datoteka u paketu veća od 95 MB, a
+workflow ga zove s `--max-mb 220 --max-file-mb 95`, pa ne deploya. Rezerva po datoteci je samo ~2,7 MB. Baza
+raste s cjenicima, pa će CI javiti prije nego Vercel odbije upload. Sljedeći korak tada je dijeljenje baze ili
+izbacivanje dodatnih stupaca.

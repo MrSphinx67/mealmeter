@@ -1,7 +1,7 @@
 # Deploy na Vercel (ručni koraci)
 
 Mealmeter na Vercelu radi kao jedna Python funkcija (`api/index.py`) sa sažetom bazom `data/compact.duckdb`
-(~100 MB) u paketu (192,7 MB; `vercel build` pada iznad 225 MB, vidi docs/5V2_STATUS.md). Baza nije u Gitu, pa Vercel ne smije graditi iz Gita
+(~92 MB) u paketu (184,9 MB; `vercel build` pada iznad 225 MB, a `vercel deploy` na Hobby planu odbija datoteke veće od 100 MB, vidi docs/5V2_STATUS.md). Baza nije u Gitu, pa Vercel ne smije graditi iz Gita
 (`vercel.json`: `git.deploymentEnabled: false`); deploy ide samo preko Vercel CLI-ja: ručno ili iz GitHub Actionsa.
 
 ## 1. Jednom: projekt na Vercelu
@@ -11,7 +11,7 @@ Mealmeter na Vercelu radi kao jedna Python funkcija (`api/index.py`) sa sažetom
    ```sh
    uv sync
    uv run python scripts/update.py          # puna baza data/mealmeter.duckdb (~1,1 GB, ~10 min)
-   uv run python scripts/build_compact.py   # data/compact.duckdb (~100 MB)
+   uv run python scripts/build_compact.py   # data/compact.duckdb (~92 MB; mora biti < 95 MB)
    ```
 3. `vercel link`: odaberi ili stvori projekt (Framework Preset: **Other**). Nastaje `.vercel/project.json` s `orgId` i
    `projectId` (mapa `.vercel/` je u `.gitignore`).

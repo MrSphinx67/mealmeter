@@ -96,7 +96,7 @@ def test_update_workflow():
         assert f"secrets.{secret}" in text
     assert "git commit" not in text and "git push" not in text  # baza se ne commita
     assert "nedostaje lanac" in runs and "exit 3" in runs  # pad lanca > 20 % prekida deploy
-    assert "vercel_bundle_size.py --max-mb 220" in runs  # stvarna veličina paketa (5V2), ne du na .vercel/output
+    assert "vercel_bundle_size.py --max-mb 220 --max-file-mb 95" in runs  # stvarna veličina paketa (5V2), ne du na .vercel/output
 
 
 def test_vercel_client_ip(monkeypatch):
@@ -123,3 +123,27 @@ def test_index_vercel_settings():
     for line in ('"MM_ALLOWED_HOSTS", "*.vercel.app"', '"TRUSTED_PROXY", "vercel"', '"MM_RATE_IP", "60"',
                  '"MM_RATE_GLOBAL", "600"', '"MM_ALLOWED_ORIGINS"'):
         assert line in src, line
+
+
+def test_bundle_size_script(tmp_path):
+    """scripts/vercel_bundle_size.py: zbraja filePathMap i pada na datoteci većoj od --max-file-mb."""
+    import subprocess
+    import sys
+
+    func = tmp_path / "functions" / "python.func"
+    func.mkdir(parents=True)
+    big, small = tmp_path / "big.bin", tmp_path / "small.bin"
+    big.write_bytes(b"\0" * (3 * 2**20))
+    small.write_bytes(b"\0" * (1 * 2**20))
+    (func / ".vc-config.json").write_text(json.dumps({"filePathMap": {"data/compact.duckdb": str(big),
+                                                                      "_vendor/x.so": str(small)}}))
+    script = str(ROOT / "scripts" / "vercel_bundle_size.py")
+
+    def run(*args):
+        return subprocess.run([sys.executable, script, "--root", str(tmp_path / "functions"), *args],
+                              capture_output=True, text=True)
+    ok = run("--max-mb", "10", "--max-file-mb", "5")
+    assert ok.returncode == 0 and "python.func: 4.0 MB" in ok.stdout and "data/compact.duckdb" in ok.stdout
+    too_big_file = run("--max-mb", "10", "--max-file-mb", "2")
+    assert too_big_file.returncode == 1 and "data/compact.duckdb ima 3.0 MB" in too_big_file.stdout
+    assert run("--max-mb", "3.5", "--max-file-mb", "5").returncode == 1

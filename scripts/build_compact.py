@@ -111,13 +111,18 @@ def build(SRC: Path, OUT: Path) -> dict:
         JOIN src.clean.prices c USING (chain, product_id) WHERE sg.status IN ('member', 'ambiguous')"""
     # cijene namirnica kao tablica s tekstualnim ključevima, ali samo sa stupcima koje čita upit kandidata
     # (search._candidates); view nad ključevima bio je ~20 % sporiji (spajanje s products i chain_prices_k)
-    sp = ", ".join(f"x.{col}" for col in STAPLE_PRICE_COLS)
-    c.execute(f"""CREATE TABLE dst.clean.staple_prices AS
-        SELECT x.staple, {sp} FROM ({staple_src}) x ORDER BY x.staple, x.chain, x.product_id, x.store_id""")
+    staple_vals = [col for col in STAPLE_PRICE_COLS if col not in KEYS]
+    c.execute(f"""CREATE TABLE dst.clean.staple_prices_k AS
+        SELECT x.staple, s.sk, p.pk, {", ".join(f"x.{col}" for col in staple_vals)} FROM ({staple_src}) x
+        JOIN dst.clean.products p USING (chain, product_id) JOIN dst.clean.stores s USING (chain, store_id)
+        ORDER BY x.staple, p.pk, s.sk""")
+    c.execute(f"""CREATE VIEW dst.clean.staple_prices AS
+        SELECT x.staple, s.chain, s.store_id, p.product_id, {", ".join(f"x.{col}" for col in staple_vals)}
+        FROM clean.staple_prices_k x JOIN clean.products p USING (pk) JOIN clean.stores s USING (sk)""")
     # proizvodi namirnice kao tablica (ne view): view nad products bi pri svakom upitu čitao cijelu tablicu proizvoda
     c.execute("""CREATE TABLE dst.clean.staple_items AS
-        SELECT k.staple, p.* FROM (SELECT DISTINCT staple, chain, product_id FROM dst.clean.staple_prices) k
-        JOIN dst.clean.products p USING (chain, product_id) ORDER BY k.staple, p.chain, p.product_id""")
+        SELECT k.staple, p.* FROM (SELECT DISTINCT staple, pk FROM dst.clean.staple_prices_k) k
+        JOIN dst.clean.products p USING (pk) ORDER BY k.staple, p.chain, p.product_id""")
 
     # provjera: view-ovi vraćaju točno iste retke kao puna baza (za stupce koji su ostali)
     checks = {
@@ -133,7 +138,7 @@ def build(SRC: Path, OUT: Path) -> dict:
         if a != b:
             raise SystemExit(f"{name}: view se razlikuje od pune baze ({a} != {b})")
     counts = {t: c.execute(f"SELECT count(*) FROM dst.clean.{t}").fetchone()[0]
-              for t in ("chain_prices_k", "store_products_k", "price_exceptions_k", "staple_prices", "staple_items")}
+              for t in ("chain_prices_k", "store_products_k", "price_exceptions_k", "staple_prices_k", "staple_items")}
     counts.update(store_products=counts["store_products_k"], price_exceptions=counts["price_exceptions_k"])
     c.execute("CHECKPOINT dst")
     c.close()
