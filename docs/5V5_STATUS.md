@@ -5,7 +5,7 @@ Test: palačinke za 4 osobe, Osijek, already_have sol, ulje i šećer, uz Nutell
 | točka | stanje |
 |---|---|
 | 1 Lorenco u usporedbi trgovina | gotovo: popravljeno, test i zlatni scenarij |
-| 2 dva lanca iste cijene "spojena" | - |
+| 2 dva lanca iste cijene "spojena" | gotovo: izlaz je bio ispravan; uputa poslužitelja |
 | 3 Kaufland Osijek: mlijeko 2,8 % i Nutella | - |
 
 Ništa nije deployano.
@@ -33,3 +33,16 @@ bio izvan košarice (SQL kandidata, `include_wholesale = False`) i nije se pojav
   ponovno zapisani iz pune baze, a sažeta baza daje **21/21 jednako**.
 - Stvarni scenarij nakon popravka: najbolja je Kaufland (7,98 €), Lidl ima isti iznos u svom retku; Lorenca nema.
 - pytest: 976 prolazi.
+
+## 2. Dva lanca iste cijene
+
+Izlaz plan_basketa već ima **zaseban redak po lancu** s vlastitim adresama. Stvarni scenarij, lokalno:
+`{"chain": "kaufland", "addresses": ["Josipa Reihl-Kira 40"], "total_to_buy": 7.98, ...}` i
+`{"chain": "lidl", "addresses": ["Svetog Leopolda Bogdana Mandića 33 A", "Ulica J. J. Strossmayera 350"],
+"total_to_buy": 7.98, ...}`. `merge_same_chain` spaja samo trgovine istog lanca (lanac je dio ključa). Redak
+"Kaufland i Lidl (Sv. L. B. Mandića 33A, Strossmayerova 350)" je napisao AI kad je sažimao dva retka istog iznosa.
+
+**Popravak:** pravilo 8 uputa poslužitelja (hr i en): svaki lanac u svoj redak sa svojim adresama, i kad je iznos
+isti; nikad ne spajati lance ni miješati adrese. Testovi: `test_descriptions_bilingual` traži to pravilo, a
+`tests/test_step5v5.py::test_comparison_rows_per_chain_with_own_addresses` provjerava da dva lanca istog iznosa
+imaju dva retka i da su adrese svakog retka iz trgovina tog lanca.

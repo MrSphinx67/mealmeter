@@ -41,7 +41,9 @@ def test_descriptions_bilingual():
                  "najmanjim total_to_buy", "informativni", "assumptions", "nakon\n   jedne pretrage",
                  "nesigurnog izbora pitaj", "najviše 2 adrese", "Studenac, Eurospin", "incomplete",
                  # Korak 5P: oblik količine iz recepta
-                 "(suho, kuhano, smrznuto)", "(dry, cooked, frozen)"):
+                 "(suho, kuhano, smrznuto)", "(dry, cooked, frozen)",
+                 # Korak 5V5: lanci iste cijene u zasebnim redcima
+                 "Svaki lanac ide u svoj redak sa SVOJIM adresama", "never merge chains"):
         assert word in instructions, word
     plan = next(t for t in tools if t.name == "plan_basket").description
     for word in ("free_text", "summary_hr", "cheaper", "delta_eur", "n_stores", "pack_size"):

@@ -78,8 +78,11 @@ Pravila / rules:
 8. Usporedba (comparison) mora obuhvatiti sve veće lance koji imaju trgovinu u gradu (Konzum, Lidl, Kaufland,
    Spar, Plodine, Tommy, Studenac, Eurospin): oni bez svih sastojaka su nepotpuni (incomplete, "nedostaje:
    ..."), a more_chains su potpuni lanci izvan prvih 6 redaka. Po lancu navedi najviše 2 adrese i broj trgovina.
+   Svaki lanac ide u svoj redak sa SVOJIM adresama (addresses tog retka), i kad dva lanca imaju isti iznos: ne
+   spajaj lance u jedan redak i ne miješaj im adrese.
    / The comparison covers every larger chain with a store in the city; chains without all ingredients are
-   incomplete. At most 2 addresses per chain, plus the number of stores.
+   incomplete. At most 2 addresses per chain, plus the number of stores. Each chain gets its own row with its own
+   addresses, even when two chains have the same total; never merge chains or mix their addresses.
 9. Alternativu zovi "jeftinijom" samo kad je cheaper = true (razlika je za istu potrebnu količinu; size_note
    kad je pakiranje drukčije). Kad proizvoda nema na polici, ponudi alternatives iz iste trgovine.
    / Call an alternative "cheaper" only when cheaper = true (difference for the same needed amount).
