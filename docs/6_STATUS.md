@@ -4,6 +4,7 @@
 |---|---|
 | 0 grah "nedostaje" u Lidlu, Eurospinu, NTL-u i Rotu | gotovo: pravilo oblika popravljeno, test i zlatni scenarij |
 | 1 NTL Osijek: 34 trgovine, na karti ~18 | provjereno: grad je iz cjenika, bez popravka |
+| 2 tajne u Git povijesti | provjereno: nema tajni |
 
 Ništa nije deployano.
 
@@ -76,5 +77,25 @@ usporediti redak po redak.
 
 **Zaključak:** 34 je broj koji NTL sam objavljuje u cjeniku za Osijek. Nema očitog i malog popravka; ništa nije
 promijenjeno. Ako treba, sljedeći korak je usporedba s popisom s karte (ručno, iz preglednika).
+
+**Provjera:** pytest izlazni kod 0.
+
+## 2. Tajne u Git povijesti
+
+Pregledani su svi commitovi (`--all`, 129 commitova, jedna grana `master`).
+
+- **gitleaks 8.21.2** (službeno izdanje s GitHuba, SHA-256 provjeren prema `checksums.txt`):
+  `gitleaks git --log-opts="--all" --redact .` → "129 commits scanned, no leaks found".
+- **Datoteke:** nijedna `.env*`, `.vercel/`, `*.pem`, `id_rsa`, `.npmrc` ni `.netrc` nikad nije bila u povijesti
+  (`git log --all --name-only`). `.gitignore` isključuje `.env`, `.env*`, `.vercel/` i baze.
+- **Ručna pretraga** dodanih redaka (`git log --all -p`) za `api_key`, `secret`, `token`, `password`/`lozinka`,
+  `bearer`, `Authorization:`, `PRIVATE KEY`, `ghp_`, `github_pat_`, `sk-…`, `AKIA…`, `xox[bp]-`, JWT (`eyJ…`),
+  `prj_…`, `team_…`: nema vrijednosti. `VERCEL_TOKEN`, `VERCEL_ORG_ID` i `VERCEL_PROJECT_ID` pojavljuju se samo kao
+  `${{ secrets.… }}` u `.github/workflows/update.yml` i kao upute u `docs/DEPLOY.md`.
+
+**Nije tajna, ali postaje javno objavom:**
+- autor commitova je `MrSphinx67 <282975938+MrSphinx67@users.noreply.github.com>` (sve commitove);
+- lokalna putanja `/home/fran-mostarkic/mealmeter/...` u `docs/smoke_4b.md`, `docs/smoke_4c.md` i `docs/smoke_5b.md`
+  (korisničko ime na računalu). Ništa od toga nije mijenjano; za e-poštu bi trebalo prepisati povijest, što nisam radio.
 
 **Provjera:** pytest izlazni kod 0.
