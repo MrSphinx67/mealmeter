@@ -3,6 +3,7 @@
 | točka | stanje |
 |---|---|
 | 0 grah "nedostaje" u Lidlu, Eurospinu, NTL-u i Rotu | gotovo: pravilo oblika popravljeno, test i zlatni scenarij |
+| 1 NTL Osijek: 34 trgovine, na karti ~18 | provjereno: grad je iz cjenika, bez popravka |
 
 Ništa nije deployano.
 
@@ -58,3 +59,22 @@ PINTO"/"GRAH ŠARENI" bez gramature (na vagu) i Zorela 480 g (vjerojatno staklen
 - Puna baza ponovno izgrađena (`scripts/build_clean.py`), sažeta baza (`scripts/build_compact.py`) također.
 - pytest: izlazni kod 0 (993 prolazi, 2 preskočena); uz `MM_GOLDEN=1` na punoj bazi izlazni kod 0. Sažeta baza
   (91,8 MB): `golden.py --check` 22/22 jednako.
+
+## 1. NTL Osijek: 34 trgovine u izlazu, ~18 na karti
+
+**Kako se određuje grad.** Za NTL se grad ne izvodi ni iz adrese ni iz poštanskog broja: `clean.stores.city` je
+stupac `city` iz NTL-ova `stores.csv` (cijene.dev), a `city_key` je samo `norm_text` toga (bez aliasa; Kaufland je
+jedini lanac kojem se grad popunjava iz adrese). `n_stores_city` broji trgovine lanca u gradu koje imaju proizvod.
+
+**Nalaz.** U `data/raw/2026-10-20/ntl/stores.csv` 34 retka imaju `city = Osijek`, sve tipa `minimarket`, s 34 različite
+adrese (npr. A. Kanižlića 31, Anina 83, Divaltova 183, Dobra ulica 2 Brijest, Tvrđavica 47, Svilajska 36). Sve 34
+trgovine imaju cijene u dnevnom cjeniku (npr. "GRAH PINTO 1 kg" u svih 34). Adrese su u Osijeku ili njegovim
+prigradskim naseljima (Brijest, Tvrđavica, Bosutsko naselje), pa grad nije pogrešno pripisan. Brojevi trgovina imaju
+više serija (202xx, 203xx, 205xx, 206xx-207xx); NTL je savez trgovaca, pa je moguće da karta na ntl.hr prikazuje samo
+dio prodajnih mjesta (format ili članice). Karta na ntl.hr učitava trgovine dinamički, pa je ovdje nisam mogao
+usporediti redak po redak.
+
+**Zaključak:** 34 je broj koji NTL sam objavljuje u cjeniku za Osijek. Nema očitog i malog popravka; ništa nije
+promijenjeno. Ako treba, sljedeći korak je usporedba s popisom s karte (ručno, iz preglednika).
+
+**Provjera:** pytest izlazni kod 0.
