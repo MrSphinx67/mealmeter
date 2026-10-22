@@ -6,6 +6,7 @@
 | 1 NTL Osijek: 34 trgovine, na karti ~18 | provjereno: grad je iz cjenika, bez popravka |
 | 2 tajne u Git povijesti | provjereno: nema tajni |
 | 3 LICENSE i navod izvora podataka | gotovo, ali **tekst licence podataka je drukčiji od traženog** (vidi dolje) |
+| 4 README.md | gotovo |
 
 Ništa nije deployano.
 
@@ -133,3 +134,21 @@ razlika je samo ta jedna trgovina u ta dva scenarija.
 
 **Provjera:** `tests/test_step6.py::test_data_attribution_in_tools_and_home`; pytest izlazni kod 0 (994 prolazi,
 2 preskočena); uz `MM_GOLDEN=1` na sažetoj bazi izlazni kod 0.
+
+## 4. README.md
+
+Prepisan, hrvatski pa engleski u istoj datoteci: što je Mealmeter, dodavanje u Claude
+(`https://mealmeter.vercel.app/mcp`), primjer pitanja i odgovora, izvor podataka i licence, ograničenja, privatnost,
+lokalno pokretanje i osvježavanje (GitHub Actions → Vercel).
+
+- Primjer je stvarni izlaz `plan_basket` iz točke 0 (Osijek, 500 g kuhanog graha, suhi; cjenik od 20.10.2026.).
+  Odgovor je napisan kao primjer onoga što asistent kaže; brojke su iz alata.
+- Licenca podataka je napisana kao u točki 3 (uvjeti korištenja cijene.dev), ne CC BY-NC-SA 4.0.
+- Ograničenja: "točnost nije izmjerena" je točno: `data/eval/shelf_check.csv` (provjera na polici) još nema
+  popunjenih cijena s police.
+- Privatnost prema kodu: `server._as_result` zapisuje samo alat, status i trajanje, a HTTP zapis ima `anon_ip`
+  (IPv4 /24, IPv6 /48).
+- Izbačeni su detalji za razvoj (ograničenja broja upita, `MM_ALLOWED_HOSTS`, tunel, ChatGPT); ostaju u kodu i
+  `docs/DEPLOY.md`.
+
+**Provjera:** pytest izlazni kod 0.
