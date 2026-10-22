@@ -1,4 +1,4 @@
-"""Zlatni izlazi (Korak 5P): 20 scenarija alata nad stvarnom bazom, spremljeni u tests/golden/*.json.
+"""Zlatni izlazi (Korak 5P): 22 scenarija alata nad stvarnom bazom, spremljeni u tests/golden/*.json.
 
     python scripts/golden.py --write [--db data/mealmeter.duckdb]   # spremi izlaze (prije promjena)
     python scripts/golden.py --check [--db data/compact.duckdb]     # usporedi; ispiše razlike po scenariju
@@ -67,6 +67,9 @@ SCENARIOS = {
         {"name": "šećer", "amount": 15, "unit": "g"}, {"name": "sol", "amount": 1, "unit": "g"},
         {"name": "ulje", "amount": 30, "unit": "ml"}, {"name": "nutella", "amount": 300, "unit": "g"}],
         "city": "Osijek", "already_have": ["sol", "ulje", "šećer"]}),
+    # Korak 6.0: suhi grah 500/1000 g bez oznake oblika (Lidl, Eurospin, NTL, Roto su bili "nedostaje")
+    "basket_grah_suho_osijek": ("plan_basket", {"ingredients": [{"name": "grah", "amount": 500, "unit": "g",
+                                                                 "form": "suho"}], "city": "Osijek"}),
 }
 # lanci koji nikad ne smiju biti u izlazu plan_basketa: nepouzdani podaci (Lorenco) i veleprodaja (Metro)
 EXCLUDED_CHAINS = ("lorenco", "metro")

@@ -252,7 +252,7 @@ def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> d
             require_pack=tuple(_fold(p) for p in d.get("require_pack", [])),
             assume_piece=bool(d.get("assume_piece", False)),
             fresh_meat=bool(d.get("fresh_meat", False)),
-            dry_rule={k: tuple(_fold(str(x)) if k != "pack_g" else float(x) for x in v)
+            dry_rule={k: tuple(float(x) if k in ("pack_g", "pack_exact") else _fold(str(x)) for x in v)
                       for k, v in (d.get("dry_rule") or {}).items()},
             substitutes={a: tuple(str(v) for v in vals) for a, vals in (d.get("substitutes") or {}).items()},
             default_preference={a: tuple(str(v) for v in vals)
@@ -395,6 +395,8 @@ def form_heuristic(staple: Staple, name: str, unit: str | None, pack_amount: flo
     1. Oznaka konzerve ili smrznutog u stupcu `unit` (isti uzorci kao za naziv).
     2. dry_rule: pakiranje u rasponu pack_g (g), bez oznake konzerve/smrznutog u nazivu i unit-u, a
        unit pogađa dry_rule.unit (rinfuza) ili naziv pogađa dry_rule.words (vrećica, PVC, marke).
+    3. dry_rule.pack_exact: pakiranje je točno 500 g ili 1 kg (tipično za suhe mahunarke; konzerve su
+       400-480 g ili 800-850 g), bez oznake konzerve/smrznutog i bez dry_rule.not_words (gastro, varivo).
     """
     if not staple.ambiguous_form:
         return None
@@ -414,6 +416,9 @@ def form_heuristic(staple: Staple, name: str, unit: str | None, pack_amount: flo
         return None
     words = _word_start(rule.get("words", ()))
     if (rule.get("unit") and re.search(_word_start(rule["unit"]), unit_text)) or (rule.get("words") and re.search(words, text)):
+        return "suho"
+    if pack_amount in rule.get("pack_exact", ()) and not (
+            rule.get("not_words") and re.search(_word_start(rule["not_words"]), text)):
         return "suho"
     return None
 
