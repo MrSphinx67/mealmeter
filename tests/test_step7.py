@@ -92,32 +92,37 @@ def test_golden_bolonjez_junece():
 # --- 1.-6. upute poslužitelja ----------------------------------------------------------------------------------
 
 def _instructions() -> str:
+    """Upute bez prijeloma redaka i uvlaka (pravila se uspoređuju neovisno o prelamanju)."""
     from mealmeter.server import INSTRUCTIONS
 
-    return INSTRUCTIONS
+    return " ".join(INSTRUCTIONS.split())
+
+
+def _rule(n: int) -> str:
+    text = _instructions()
+    return text.split(f" {n}. ", 1)[1].split(f" {n + 1}. ", 1)[0]
 
 
 def test_rule_call_again():
     text = _instructions()
     for phrase in ("Za svako novo jelo, promjenu broja osoba, sastojaka, grada ili trgovine ponovno pozovi plan_basket",
-                   "nikad ne\n   procjenjuj cijene niti ih prenosi iz ranijeg odgovora",
+                   "nikad ne procjenjuj cijene niti ih prenosi iz ranijeg odgovora",
                    "Every new dish or change of servings, ingredients, city or store: call plan_basket again",
-                   "never estimate or reuse earlier prices"):
+                   "never estimate, reuse or add up prices yourself"):
         assert phrase in text, phrase
 
 
 def test_rule_when_to_ask():
-    text = _instructions()
-    rule1 = text.split("\n1. ", 1)[1].split("\n2. ", 1)[0]
+    rule1 = _rule(1)
     for phrase in ("samo recept, bez pitanja o cijeni ili kupnji", "jednu kratku rečenicu",
                    "koliko košta i gdje to može kupiti u svom gradu", "Ne zovi plan_basket dok ne pristane"):
         assert phrase in rule1, phrase
-    rule2 = text.split("\n2. ", 1)[1].split("\n3. ", 1)[0]
+    rule2 = _rule(2)
     for phrase in ("Kad pita koliko košta ili gdje kupiti", "JEDNOJ poruci", "samo ono što još ne znaš", "grad;",
                    "što već ima doma",
-                   '"U koju trgovinu ideš (može i adresa ili kvart), ili da usporedim sve u\n   gradu?"',
-                   "nadjev ili dodatke kad je relevantno", "Ne pretpostavljaj što korisnik\n   ima doma",
-                   "izričito traži brz odgovor bez pitanja", "navedi\n   pretpostavke i ponudi ponovni izračun",
+                   '"U koju trgovinu ideš (može i adresa ili kvart), ili da usporedim sve u gradu?"',
+                   "nadjev ili dodatke kad je relevantno", "Ne pretpostavljaj što korisnik ima doma",
+                   "izričito traži brz odgovor bez pitanja", "navedi pretpostavke i ponudi ponovni izračun",
                    "Never assume what is at home"):
         assert phrase in rule2, phrase
 
@@ -158,7 +163,7 @@ def test_cheaper_elsewhere_only_with_store(con5b):  # noqa: F811
 def test_rule_known_store():
     text = _instructions()
     for phrase in ("Trgovina poznata: plan_basket zovi sa store, a odgovor je točan popis za tu trgovinu",
-                   "Ostale lance ne\n   nabrajaj, osim jedne rečenice ako je neki drugi lanac u gradu jeftiniji za više od ~2 € ili 15 %",
+                   "Ostale lance ne nabrajaj, osim jedne rečenice ako je neki drugi lanac u gradu jeftiniji za više od ~2 € ili 15 %",
                    "cheaper_elsewhere", "Known store"):
         assert phrase in text, phrase
 
@@ -212,8 +217,8 @@ def test_price_spread_only_without_store(con5b):  # noqa: F811
 def test_rule_no_store():
     text = _instructions()
     for phrase in ('Trgovina nije zadana ili korisnik kaže "svejedno": odgovor počinje s "Sve možeš kupiti u:"',
-                   "lanaca koji\n   imaju sve sastojke", "poredanih po cijeni", "najviše 2 adrese i broj trgovina",
-                   "koji je najjeftiniji i kolika je\n   razlika do najskupljeg u popisu", "~1,5 € ili 15 %",
+                   "lanaca koji imaju sve sastojke", "poredanih po cijeni", "najviše 2 SVOJE adrese i broj trgovina",
+                   "koji je najjeftiniji i kolika je razlika do najskupljeg u popisu", "~1,5 € ili 15 %",
                    "razlike male", "najpraktičnije", 'idu na kraj, s "nedostaje: ..."',
                    "ponudi točan popis za trgovinu koju odabere", "price_spread"):
         assert phrase in text, phrase
@@ -225,7 +230,7 @@ def test_rule_no_store():
 def test_rule_list_not_table():
     text = _instructions()
     for phrase in ("Stavke prikaži kao popis: proizvod, veličina pakiranja (pack_size), cijena pakiranja (cost_pack)",
-                   "tablicu\n   koristi samo ako je korisnik traži", "Usporedbu lanaca također kao popis, jedan lanac po retku",
-                   "a table only if the user asks for one"):
+                   "tablicu koristi samo ako je korisnik traži", "Usporedbu lanaca također kao popis, jedan lanac po retku",
+                   "a table only if asked"):
         assert phrase in text, phrase
     assert "Tablica stavki ima stupce" not in text and "Item table columns" not in text

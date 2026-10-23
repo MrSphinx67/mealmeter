@@ -8,6 +8,7 @@
 | 3 poznata trgovina: točan popis, drugi lanac samo ako je bitno jeftiniji | gotovo, uz novo polje `cheaper_elsewhere` |
 | 4 bez trgovine: "Sve možeš kupiti u:" | gotovo; usporedba sad sadrži samo potpune lance, novo polje `price_spread` |
 | 5 popis umjesto tablice | gotovo |
+| 6 usklađivanje uputa | gotovo: 13 pravila, 6031 znak (+19,8 %) |
 
 Ništa nije deployano.
 
@@ -161,3 +162,36 @@ ne navodi; ostaje u odgovoru alata.
 
 **Provjera:** `tests/test_step7.py::test_rule_list_not_table` (novo pravilo, nema "Tablica stavki ima stupce" ni
 "Item table columns"); pytest izlazni kod 0 (1041 prolazi, 3 preskočena).
+
+## 6. Usklađivanje uputa
+
+Upute sad imaju 13 pravila, redom: (1) samo recept, (2) pitanja prije izračuna, (3) ponovni poziv za svaku promjenu,
+(4) potvrđeni sastojci i free_text, (5) količine i oblik, (6) ne izmišljaj, (7) poznata trgovina, (8) bez trgovine,
+(9) popis umjesto tablice, (10) prirodan jezik i datum, (11) "jeftinija" alternativa, (12) nesiguran izbor,
+(13) napomena o cjeniku.
+
+Uklonjeno ili spojeno:
+- staro pravilo 1 (pitanja) -> pravila 1 i 2 (točka 2); "ne pitaj ponovno" je "samo ono što još ne znaš";
+- staro 5 (preporuka po total_to_buy) -> pravilo 8; "total_used i from_stock_value su informativni" premješteno u
+  pravilo 10;
+- staro 6: "Odgovor počni sa summary_hr" uklonjeno, jer proturječi početku "Sve možeš kupiti u:" (pravilo 8) i
+  popisu za trgovinu (pravilo 7); summary_hr ostaje u odgovoru alata;
+- staro 7 (tablica) -> pravilo 9;
+- staro 8 (usporedba svih većih lanaca, nepotpuni, more_chains, 2 adrese, zasebni redci) uklonjeno: 2 SVOJE adrese,
+  broj trgovina i "lance iste cijene ne spajaj" su u pravilu 8, jedan lanac po retku u pravilu 9, nepotpuni lanci
+  na kraju u pravilu 8. Popis većih lanaca (Konzum ... Eurospin) nije potreban u uputama: plan_basket ih sam stavlja
+  u incomplete kad u gradu nemaju sastojke (`basket.MAJOR_CHAINS`);
+- staro 2 "Nikad ne zbrajaj cijene sam" premješteno u pravilo 3 (uz ponovni poziv i price_overrides), staro 11
+  (price_overrides) također;
+- engleski dijelovi pravila 5, 6 i 10 skraćeni.
+
+Opis alata plan_basket usklađen: "samo recept: ne zovi dok korisnik ne pristane", "svaka promjena: novi poziv",
+summary_hr više nije "počni njime", best_store je opisan (najviše sastojaka, pa najmanji total_to_buy) umjesto
+"preporuka je", comparison/more_chains/incomplete/price_spread/cheaper_elsewhere prema točkama 3 i 4.
+
+**Duljina:** 6031 znak prema 5036 prije Koraka 7 (+19,8 %, granica ~20 %).
+
+**Provjera:** testovi uputa u `tests/test_step7.py` uspoređuju tekst bez prijeloma redaka; `test_server` popis riječi
+prilagođen (uklonjeno: summary_hr, "Studenac, Eurospin", "Svaki lanac ide u svoj redak sa SVOJIM adresama";
+dodano: "najviše 2 SVOJE adrese", "lance iste cijene ne spajaj", "jedan lanac po retku"). pytest izlazni kod 0 (1041
+prolazi, 3 preskočena).

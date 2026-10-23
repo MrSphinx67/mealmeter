@@ -34,17 +34,19 @@ def test_descriptions_bilingual():
     for word in ("convert_units", "already_have", "store", "date_hr", "stale_days", "total_to_buy", "total_used",
                  "warnings", "ambiguity", "assumed_form", "match_quality", "alternatives", "price_overrides",
                  "zaliha", "stock", "izmišljaj",
-                 # Korak 4B: jedna poruka pitanja, potvrđeni sastojci, free_text, cheaper, summary_hr, tablica
-                 "JEDNOJ", "nadjev", "nije potvrdio", "free_text", "cheaper = true", "summary_hr",
+                 # Korak 4B: jedna poruka pitanja, potvrđeni sastojci, free_text, cheaper, veličina pakiranja
+                 # (Korak 7.6: "počni sa summary_hr" uklonjeno, odgovor bez trgovine počinje s "Sve možeš kupiti u:")
+                 "JEDNOJ", "nadjev", "nije potvrdio", "free_text", "cheaper = true",
                  "cijene iz cjenika od 20.10.2026.", "veličina pakiranja", "akcije se mijenjaju",
                  # Korak 5B: preporuka po total_to_buy, pretpostavke, ne nakon jedne pretrage, pitaj, 2 adrese, lanci
                  # (Korak 7.4: preporuka po total_to_buy zamijenjena popisom "Sve možeš kupiti u:")
                  "Sve možeš kupiti u:", "assumptions", "nakon\n   jedne pretrage",
-                 "nesigurnog izbora pitaj", "najviše 2 adrese", "Studenac, Eurospin", "incomplete",
+                 # (Korak 7.6: popis većih lanaca uklonjen; incomplete ih ionako sadrži, basket.MAJOR_CHAINS)
+                 "nesigurnog izbora pitaj", "najviše 2\n   SVOJE adrese", "incomplete",
                  # Korak 5P: oblik količine iz recepta
                  "(suho, kuhano, smrznuto)", "(dry, cooked, frozen)",
-                 # Korak 5V5: lanci iste cijene u zasebnim redcima
-                 "Svaki lanac ide u svoj redak sa SVOJIM adresama", "never merge chains"):
+                 # Korak 5V5: lanci iste cijene u zasebnim redcima (Korak 7.6: u pravilu 8 i 9)
+                 "lance iste cijene ne spajaj", "jedan lanac po retku", "never merge chains"):
         assert word in instructions, word
     plan = next(t for t in tools if t.name == "plan_basket").description
     for word in ("free_text", "summary_hr", "cheaper", "delta_eur", "n_stores", "pack_size"):
