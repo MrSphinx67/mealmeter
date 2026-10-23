@@ -86,3 +86,20 @@ def test_golden_bolonjez_junece():
     assert {"konzum", "lidl", "kaufland", "plodine", "spar"} <= {r["chain"] for r in rows}
     meat = [i for i in out["best_store"]["items"] if i["staple"] == "mljeveno_meso"]
     assert meat and meat[0]["attributes"]["vrsta"] == "junece"
+
+
+# --- 1.-6. upute poslužitelja ----------------------------------------------------------------------------------
+
+def _instructions() -> str:
+    from mealmeter.server import INSTRUCTIONS
+
+    return INSTRUCTIONS
+
+
+def test_rule_call_again():
+    text = _instructions()
+    for phrase in ("Za svako novo jelo, promjenu broja osoba, sastojaka, grada ili trgovine ponovno pozovi plan_basket",
+                   "nikad ne\n   procjenjuj cijene niti ih prenosi iz ranijeg odgovora",
+                   "Every new dish or change of servings, ingredients, city or store: call plan_basket again",
+                   "never estimate or reuse earlier prices"):
+        assert phrase in text, phrase

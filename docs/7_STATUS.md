@@ -3,6 +3,7 @@
 | točka | stanje |
 |---|---|
 | 0 mljeveno meso (juneće, svinjsko, miješano) | gotovo: nazivi sastojaka, nazivi proizvoda, vrsta; zlatni scenarij |
+| 1 pravilo: svaka promjena -> ponovno plan_basket | gotovo |
 
 Ništa nije deployano.
 
@@ -66,3 +67,12 @@ je nepromijenjeno. Zlatni izlazi ponovno zapisani (23 scenarija).
   baza (`scripts/build_compact.py`, 92,3 MB) također.
 - pytest: izlazni kod 0 (1031 prolazi, 3 preskočena); uz `MM_GOLDEN=1` (puna baza) izlazni kod 0; sažeta baza:
   `golden.py --check` 23/23 jednako.
+
+## 1. Novo pravilo: ponovni poziv plan_basket
+
+Pravilo 11 u uputama (`server.INSTRUCTIONS`), hr i en: za svako novo jelo, promjenu broja osoba, sastojaka, grada ili
+trgovine ponovno pozovi plan_basket; nikad ne procjenjuj cijene niti ih prenosi iz ranijeg odgovora. Staro pravilo 11
+(stvarna cijena -> price_overrides) je u istom pravilu, jer je to isti slučaj ponovnog poziva. Mjesto i brojevi
+pravila se usklađuju u točki 6.
+
+**Provjera:** `tests/test_step7.py::test_rule_call_again`; pytest izlazni kod 0 (1032 prolazi, 3 preskočena).
