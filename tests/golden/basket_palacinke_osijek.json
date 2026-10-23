@@ -585,12 +585,11 @@
   ],
   "cheapest_total": 5.81,
   "difference_eur": 1.97,
-  "difference_pct": 34,
   "most_expensive": [
    "eurospin"
   ],
   "most_expensive_total": 7.78,
-  "small": false
+  "small": true
  },
  "stores": [
   {

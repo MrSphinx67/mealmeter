@@ -10,6 +10,7 @@
 | 5 popis umjesto tablice | gotovo |
 | 6 usklađivanje uputa | gotovo: 13 pravila, 6031 znak (+19,8 %) |
 | 7 testovi | gotovo; zlatni testovi prolaze (i popravljen stariji kvar redoslijeda testova uz `MM_GOLDEN=1`) |
+| 8 jedinstveni prag 2,00 € (naknadni zahtjev) | gotovo: `MM_SWITCH_EUR` za `cheaper_elsewhere` i `price_spread.small`, bez postotka; zamjenjuje pragove iz točaka 3 i 4 |
 
 Ništa nije deployano. Promjene u odgovoru alata (za pregled prije deploya): `cheaper_elsewhere` (uz `store`),
 `price_spread` (bez `store`), `comparison`/`more_chains` samo s potpunim lancima, `more_chains` s adresama i brojem
@@ -222,3 +223,35 @@ vezu koju je postavio raniji test. Do sada je prolazilo samo `-k golden` ili uz 
 - `pytest`: izlazni kod 0, 1054 prolazi, 3 preskočena;
 - `MM_GOLDEN=1 pytest`: izlazni kod 0, 1057 prolazi (puna baza od 20.10.2026.);
 - `golden.py --check --db data/compact.duckdb`: 23/23 jednako.
+
+## 8. Jedinstveni prag isplativosti: 2,00 € (naknadni zahtjev)
+
+Pragovi iz točaka 3 i 4 (drugi lanac: više od 2 € **ili** 15 %; male razlike: manje od 1,5 € **ili** 15 %)
+zamijenjeni su jednim apsolutnim pragom bez postotnog uvjeta, `basket.MM_SWITCH_EUR = 2.00` (jedino mjesto):
+- `cheaper_elsewhere` (uz `store`): drugi lanac se vraća samo kad je jeftiniji za **više od** 2,00 €;
+- `price_spread.small` (bez `store`): true kad je razlika najjeftiniji/najskuplji **najviše** 2,00 €.
+
+Pragovi su komplementarni: razlika od točno 2,00 € je "mala" i nije razlog za spominjanje drugog lanca. Uklonjeni su
+`CHEAPER_EUR`, `CHEAPER_SHARE`, `SMALL_SPREAD_EUR`, `SMALL_SPREAD_SHARE` i polje `price_spread.difference_pct` (bez
+postotnog uvjeta postotak u odgovoru samo bi navodio Claudea na njegovu uporabu).
+
+**Upute:** pravilo 7 "jeftiniji za više od 2 € (cheaper_elsewhere)", pravilo 8 "ako je razlika najviše 2 €
+(small)"; opis alata plan_basket isto (`> 2 €`, `small: <= 2 €`). Duljina uputa 5999 znakova (+19,1 % prema 5036).
+
+**Zlatni izlazi:** promijenjeno 10 košarica, svima samo `price_spread`:
+- u svih 10 nema više `difference_pct` (polje uklonjeno);
+- u 4 `small` false -> true, jer je razlika najviše 2 €, a postotak više ne odlučuje:
+  `basket_palacinke_osijek` (1,97 €, prije 34 %), `basket_price_overrides` (1,97 €), `basket_palacinke_nutella_osijek`
+  (1,54 €, prije 19 %), `basket_grah_suho_osijek` (1,50 €, prije 126 %);
+- `small` nepromijenjen u ostalih 6: `basket_krumpir_rijeka` (0,59 €, i dalje malo), a `bolonjez_zagreb` 10,21 €,
+  `already_have_zagreb` 10,31 €, `varivo_slavonski_brod` 7,13 €, `bolonjez_junece_osijek` 4,93 € i
+  `free_text_tahini` 2,04 € (tik iznad praga) su i dalje velike razlike.
+
+`cheaper_elsewhere` se ni u jednom zlatnom scenariju ne mijenja (oba scenarija sa `store` i dalje bez njega): Konzum
+palačinke Osijek 6,40 € prema Kaufland 5,81 € (0,59 €), Lidl varivo Zagreb je i sam najjeftiniji.
+
+**Provjera:** `tests/test_step7.py`: pragovi `cheaper_elsewhere` (2,01 € da, točno 2,00 € ne, 0,60 € / 17 % ne),
+`price_spread` (točno 2,00 € malo, 190 % malo, 2,01 € nije), `test_one_switch_threshold` (jedna konstanta, stari
+nazivi ne postoje, nema "15 %" ni "1,5 €" u uputama i opisu alata, isti prag s obje strane). pytest izlazni kod 0
+(1055 prolazi, 3 preskočena); `MM_GOLDEN=1 pytest` izlazni kod 0 (1058 prolazi); sažeta baza `golden.py --check`
+23/23 jednako.

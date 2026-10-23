@@ -557,12 +557,11 @@
   ],
   "cheapest_total": 7.98,
   "difference_eur": 1.54,
-  "difference_pct": 19,
   "most_expensive": [
    "spar"
   ],
   "most_expensive_total": 9.52,
-  "small": false
+  "small": true
  },
  "stores": [
   {

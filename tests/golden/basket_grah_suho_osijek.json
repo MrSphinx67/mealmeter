@@ -227,12 +227,11 @@
   ],
   "cheapest_total": 1.19,
   "difference_eur": 1.5,
-  "difference_pct": 126,
   "most_expensive": [
    "ntl"
   ],
   "most_expensive_total": 2.69,
-  "small": false
+  "small": true
  },
  "stores": [
   {

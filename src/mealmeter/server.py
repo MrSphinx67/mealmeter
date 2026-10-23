@@ -79,13 +79,13 @@ Pravila / rules:
    jedne pretrage: pokušaj free_text, drugi naziv ili find_products, pa ponudi candidates.
    / Never invent prices or products; do not conclude a product is missing after one search.
 7. Trgovina poznata: plan_basket zovi sa store, a odgovor je točan popis za tu trgovinu. Ostale lance ne
-   nabrajaj, osim jedne rečenice ako je neki drugi lanac u gradu jeftiniji za više od ~2 € ili 15 %
-   (cheaper_elsewhere). / Known store: call with store, answer with its exact list; other chains only in one
-   sentence if one is cheaper by more than ~2 € or 15 % (cheaper_elsewhere).
+   nabrajaj, osim jedne rečenice ako je neki drugi lanac u gradu jeftiniji za više od 2 € (cheaper_elsewhere).
+   / Known store: call with store, answer with its exact list; other chains only in one sentence if one is
+   cheaper by more than 2 € (cheaper_elsewhere).
 8. Trgovina nije zadana ili korisnik kaže "svejedno": odgovor počinje s "Sve možeš kupiti u:" i popisom lanaca koji
    imaju sve sastojke (comparison, pa more_chains) s cijenom za kupiti, poredanih po cijeni; po lancu najviše 2
    SVOJE adrese i broj trgovina (lance iste cijene ne spajaj). Zatim jedna rečenica (price_spread): koji je
-   najjeftiniji i kolika je razlika do najskupljeg u popisu; ako je razlika manja od ~1,5 € ili 15 % (small), reci
+   najjeftiniji i kolika je razlika do najskupljeg u popisu; ako je razlika najviše 2 € (small), reci
    da su razlike male i da može ići gdje mu je najpraktičnije. Lanci kojima nešto nedostaje (incomplete) idu na
    kraj, s "nedostaje: ...". Na kraju ponudi točan popis za trgovinu koju odabere.
    / No store or "any": start with "Sve možeš kupiti u:", complete chains by price to buy (max 2 own addresses,
@@ -416,10 +416,10 @@ Vraća / returns (sažeto / compact): summary_hr (zbroj za best_store / totals o
 cost_pack, cost_used, alternatives; trgovine istog lanca s istim proizvodima spojene: n_stores, addresses),
 comparison (lanci sa svim sastojcima, po lancu jedan redak, do 6 / chains with every ingredient, one row per
 chain, up to 6: chain, addresses, n_stores_city, total_to_buy, total_used), more_chains (ostali potpuni lanci /
-further complete chains), price_spread (najjeftiniji i najskuplji potpuni lanac, difference_eur, small / cheapest
+further complete chains), price_spread (najjeftiniji i najskuplji potpuni lanac, difference_eur, small: <= 2 € / cheapest
 and dearest complete chain), incomplete (lanci kojima nešto nedostaje: missing / chains missing ingredients),
-cheaper_elsewhere (uz store: drugi lanac u gradu jeftiniji za > 2 € ili 15 % / with store: another
-chain in the city cheaper by > 2 € or 15 %), assumptions (pretpostavljene količine / assumed amounts), ask_user,
+cheaper_elsewhere (uz store: drugi lanac u gradu jeftiniji za > 2 € / with store: another chain in the
+city cheaper by > 2 €), assumptions (pretpostavljene količine / assumed amounts), ask_user,
 warnings, unmatched (s prijedlozima / with suggestions), date_hr. detail=true: sve trgovine i sva polja /
 all stores and fields.
 Primjer / example: {"ingredients": [{"name": "brašno glatko", "amount": 250, "unit": "g"},

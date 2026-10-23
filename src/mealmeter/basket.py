@@ -1112,12 +1112,15 @@ def confirm_and_substitution(need: Need, chosen: dict, product: str) -> dict:
     return out
 
 
-CHEAPER_EUR, CHEAPER_SHARE = 2.0, 0.15
+# Korak 7: prag isplativosti druge trgovine, samo apsolutni (bez postotka). Drugi lanac je vrijedan spomena
+# (cheaper_elsewhere) kad je jeftiniji za VIŠE od praga; razlike u usporedbi su male (price_spread.small) kad su
+# NAJVIŠE prag.
+MM_SWITCH_EUR = 2.00
 
 
 def cheaper_elsewhere(best: dict, others: list[dict]) -> dict | None:
     """Uz zadanu trgovinu (store): najjeftiniji drugi lanac u gradu sa svim sastojcima, samo ako je jeftiniji za
-    više od CHEAPER_EUR ili CHEAPER_SHARE (Korak 7.3: odgovor je popis za zadanu trgovinu, a drugi lanac se spominje
+    više od MM_SWITCH_EUR (Korak 7.3: odgovor je popis za zadanu trgovinu, a drugi lanac se spominje
     samo tada, u jednoj rečenici). `others` su trgovine prije zbrajanja (items je dict)."""
     by_chain: dict[str, tuple[float, dict]] = {}
     count = Counter(s["chain"] for s in others)
@@ -1129,7 +1132,7 @@ def cheaper_elsewhere(best: dict, others: list[dict]) -> dict | None:
         return None
     chain, (total, s) = min(by_chain.items(), key=lambda kv: (kv[1][0], kv[0]))
     diff = round(best["total_to_buy"] - total, 2)
-    if diff <= CHEAPER_EUR and diff <= CHEAPER_SHARE * best["total_to_buy"]:
+    if diff <= MM_SWITCH_EUR:
         return None
     return {"chain": chain, "address": s["address"], "n_stores_city": count[chain], "total_to_buy": total,
             "difference_eur": diff}
@@ -1209,21 +1212,17 @@ def compare_chains(ranked: list[dict], in_city: Counter, n_needs: int, needs: li
     return complete[:COMPARE_ROWS], incomplete, more
 
 
-SMALL_SPREAD_EUR, SMALL_SPREAD_SHARE = 1.5, 0.15
-
-
 def price_spread(rows: list[dict]) -> dict | None:
     """Razlika između najjeftinijeg i najskupljeg potpunog lanca (comparison + more_chains), za rečenicu u odgovoru
-    bez zadane trgovine (Korak 7.4). small = razlika je manja od SMALL_SPREAD_EUR ili od SMALL_SPREAD_SHARE cijene
-    najjeftinijeg (dovoljan je jedan uvjet): korisnik može ići gdje mu je najpraktičnije."""
+    bez zadane trgovine (Korak 7.4). small = razlika je najviše MM_SWITCH_EUR (isti prag kao
+    cheaper_elsewhere): korisnik može ići gdje mu je najpraktičnije."""
     if len(rows) < 2:
         return None
     lo, hi = min(r["total_to_buy"] for r in rows), max(r["total_to_buy"] for r in rows)
     diff = round(hi - lo, 2)
     return {"cheapest": [r["chain"] for r in rows if r["total_to_buy"] == lo], "cheapest_total": lo,
             "most_expensive": [r["chain"] for r in rows if r["total_to_buy"] == hi], "most_expensive_total": hi,
-            "difference_eur": diff, "difference_pct": round(100 * diff / lo) if lo else None,
-            "small": diff < SMALL_SPREAD_EUR or diff < SMALL_SPREAD_SHARE * lo}
+            "difference_eur": diff, "small": diff <= MM_SWITCH_EUR}
 
 
 def merge_same_chain(stores: list[dict]) -> list[dict]:

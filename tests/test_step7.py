@@ -139,11 +139,10 @@ def test_cheaper_elsewhere_thresholds():
     # 10,00 -> 3,00: više od 2 €
     out = cheaper_elsewhere({"total_to_buy": 10.0}, others)
     assert out == {"chain": "lidl", "address": "A 1", "n_stores_city": 2, "total_to_buy": 3.0, "difference_eur": 7.0}
-    # 3,60 -> 3,00: 0,60 € je više od 15 % od 3,60 (0,54 €)
-    assert cheaper_elsewhere({"total_to_buy": 3.6}, others)["chain"] == "lidl"
-    # 3,40 -> 3,00: 0,40 € je manje od 2 € i od 15 % (0,51 €)
-    assert cheaper_elsewhere({"total_to_buy": 3.4}, others) is None
-    # 20,00 -> 18,00: 2 € nije više od 2 €, a 10 % nije više od 15 %
+    # samo apsolutni prag MM_SWITCH_EUR (2,00 €), bez postotka
+    assert cheaper_elsewhere({"total_to_buy": 5.01}, others)["difference_eur"] == 2.01
+    assert cheaper_elsewhere({"total_to_buy": 5.0}, others) is None  # točno 2,00 € nije više od praga
+    assert cheaper_elsewhere({"total_to_buy": 3.6}, others) is None  # 0,60 € (17 %): postotak se ne gleda
     assert cheaper_elsewhere({"total_to_buy": 20.0}, [_store("spar", "D", 18.0)]) is None
     # ono što korisnik ima ne ulazi u zbroj
     assert cheaper_elsewhere({"total_to_buy": 5.0}, [_store("spar", "D", 1.0, 9.0, have=(1,))])["total_to_buy"] == 1.0
@@ -163,7 +162,7 @@ def test_cheaper_elsewhere_only_with_store(con5b):  # noqa: F811
 def test_rule_known_store():
     text = _instructions()
     for phrase in ("Trgovina poznata: plan_basket zovi sa store, a odgovor je točan popis za tu trgovinu",
-                   "Ostale lance ne nabrajaj, osim jedne rečenice ako je neki drugi lanac u gradu jeftiniji za više od ~2 € ili 15 %",
+                   "Ostale lance ne nabrajaj, osim jedne rečenice ako je neki drugi lanac u gradu jeftiniji za više od 2 € (cheaper_elsewhere)",
                    "cheaper_elsewhere", "Known store"):
         assert phrase in text, phrase
 
@@ -193,12 +192,11 @@ def test_price_spread():
     rows = [{"chain": c, "total_to_buy": t} for c, t in [("kaufland", 2.99), ("lidl", 2.99), ("eurospin", 4.36)]]
     sp = price_spread(rows)
     assert sp == {"cheapest": ["kaufland", "lidl"], "cheapest_total": 2.99, "most_expensive": ["eurospin"],
-                  "most_expensive_total": 4.36, "difference_eur": 1.37, "difference_pct": 46, "small": True}
-    # male razlike: manje od ~1,5 € ili od 15 % (dovoljan je jedan uvjet)
-    assert price_spread([{"chain": "a", "total_to_buy": 3.0}, {"chain": "b", "total_to_buy": 4.2}])["small"]  # 1,20 €
-    assert price_spread([{"chain": "a", "total_to_buy": 40.0}, {"chain": "b", "total_to_buy": 43.0}])["small"]  # 7,5 %
-    # 2 € i 20 %: nije malo
-    assert not price_spread([{"chain": "a", "total_to_buy": 10.0}, {"chain": "b", "total_to_buy": 12.0}])["small"]
+                  "most_expensive_total": 4.36, "difference_eur": 1.37, "small": True}
+    # male razlike: najviše MM_SWITCH_EUR (2,00 €), isti prag kao cheaper_elsewhere, bez postotka
+    assert price_spread([{"chain": "a", "total_to_buy": 10.0}, {"chain": "b", "total_to_buy": 12.0}])["small"]  # 2,00 €
+    assert price_spread([{"chain": "a", "total_to_buy": 1.0}, {"chain": "b", "total_to_buy": 2.9}])["small"]  # 190 %
+    assert not price_spread([{"chain": "a", "total_to_buy": 40.0}, {"chain": "b", "total_to_buy": 42.01}])["small"]
     assert price_spread(rows[:1]) is None
 
 
@@ -218,7 +216,7 @@ def test_rule_no_store():
     text = _instructions()
     for phrase in ('Trgovina nije zadana ili korisnik kaže "svejedno": odgovor počinje s "Sve možeš kupiti u:"',
                    "lanaca koji imaju sve sastojke", "poredanih po cijeni", "najviše 2 SVOJE adrese i broj trgovina",
-                   "koji je najjeftiniji i kolika je razlika do najskupljeg u popisu", "~1,5 € ili 15 %",
+                   "koji je najjeftiniji i kolika je razlika do najskupljeg u popisu", "najviše 2 € (small)",
                    "razlike male", "najpraktičnije", 'idu na kraj, s "nedostaje: ..."',
                    "ponudi točan popis za trgovinu koju odabere", "price_spread"):
         assert phrase in text, phrase
@@ -272,3 +270,19 @@ def test_tool_description_aligned():
     for word in ("Samo recept: ne zovi dok korisnik ne pristane", "Svaka promjena: novi poziv", "price_spread",
                  "cheaper_elsewhere", "lanci sa svim sastojcima"):
         assert word in plan, word
+
+
+def test_one_switch_threshold():
+    """Jedan apsolutni prag (MM_SWITCH_EUR) za cheaper_elsewhere i price_spread.small; bez postotnog uvjeta."""
+    from mealmeter import basket
+    from mealmeter.server import DESCRIPTIONS
+
+    assert basket.MM_SWITCH_EUR == 2.00
+    for old in ("CHEAPER_EUR", "CHEAPER_SHARE", "SMALL_SPREAD_EUR", "SMALL_SPREAD_SHARE"):
+        assert not hasattr(basket, old), old
+    text = _instructions()
+    assert "15 %" not in text and "1,5 €" not in text and "15 %" not in DESCRIPTIONS["plan_basket"]
+    # isti prag s obje strane: razlika od točno 2 € je "mala" i nije razlog za spominjanje drugog lanca
+    rows = [{"chain": "a", "total_to_buy": 8.0}, {"chain": "b", "total_to_buy": 10.0}]
+    assert basket.price_spread(rows)["small"]
+    assert basket.cheaper_elsewhere({"total_to_buy": 10.0}, [_store("a", "X", 8.0)]) is None
