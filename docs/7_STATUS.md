@@ -6,6 +6,7 @@
 | 1 pravilo: svaka promjena -> ponovno plan_basket | gotovo |
 | 2 kad pitati: samo recept / pitanje o cijeni | gotovo |
 | 3 poznata trgovina: točan popis, drugi lanac samo ako je bitno jeftiniji | gotovo, uz novo polje `cheaper_elsewhere` |
+| 4 bez trgovine: "Sve možeš kupiti u:" | gotovo; usporedba sad sadrži samo potpune lance, novo polje `price_spread` |
 
 Ništa nije deployano.
 
@@ -113,3 +114,39 @@ Kaufland 2,99 € (razlika 1,54 €, 34 %); Konzum 3,23 € -> nema (0,24 €, 7
 already_have), polje samo uz `store`, pravilo u uputama. Zlatni izlazi nepromijenjeni (23/23: u oba zlatna
 scenarija sa `store` nijedan drugi lanac nije jeftiniji iznad praga). pytest izlazni kod 0 (1036 prolazi, 3
 preskočena).
+
+## 4. Odgovor kad trgovina nije zadana ili je "svejedno"
+
+Pravilo o preporuci po total_to_buy (staro 5) zamijenjeno je novim pravilom 7 (hr i en): odgovor počinje s "Sve možeš
+kupiti u:" i popisom lanaca koji imaju sve sastojke, s cijenom za kupiti, po cijeni (po lancu najviše 2 adrese i broj
+trgovina); jedna rečenica o najjeftinijem i razlici do najskupljeg (male razlike: neka ide gdje mu je
+najpraktičnije); lanci kojima nešto nedostaje na kraj, s "nedostaje: ..."; ponuda točnog popisa za odabranu trgovinu.
+
+**Promjena alata: u usporedbi samo potpuni lanci.** Do sada su u `comparison` i `more_chains` ulazili lanci s barem
+80 % sastojaka, a `more_chains` nije imao oznaku potpunosti ni adrese. Popis "Sve možeš kupiti u:" bi time bio
+pogrešan. Primjeri iz zlatnih izlaza (puna baza od 20.10.2026.):
+- Slavonski Brod, varivo: Eurospin 11,17 € i Boso 13,83 € bili su u `more_chains`, Eurospin jeftiniji od
+  "najjeftinijeg" Lidla (12,61 €), a obama nedostaje jedan od 10 sastojaka;
+- Osijek, bolonjez s junećim: NTL 15,07 € u `more_chains`, bez mesa (točka 0);
+- Zagreb, bolonjez: Vrutak 15,79 € u `more_chains` sa 6 od 7 sastojaka.
+
+Sada (`basket.compare_chains`): `comparison` je najviše 6 potpunih lanaca po total_to_buy, `more_chains` ostali
+potpuni lanci, i oni s `addresses` (najviše 2) i `n_stores_city`; lanci kojima išta nedostaje su u `incomplete` (sa
+`total_to_buy` za ono što imaju), od najviše sastojaka. `COMPARE_MIN_SHARE` (80 %) je uklonjen. best_store se ne
+mijenja (rangiranje je i prije bilo po broju sastojaka, pa po cijeni).
+
+**Novo polje `price_spread`** (samo bez `store`, uz barem 2 potpuna lanca), da Claude ne mora sam računati razliku:
+`cheapest` (popis lanaca, i kad ih je više iste cijene), `cheapest_total`, `most_expensive`, `most_expensive_total`,
+`difference_eur`, `difference_pct` (u odnosu na najjeftiniji) i `small`. **Tumačenje praga:** `small` je true kad je
+razlika manja od 1,5 € **ili** manja od 15 % najjeftinijeg (dovoljan je jedan uvjet, doslovno prema tekstu točke 4;
+`SMALL_SPREAD_EUR`, `SMALL_SPREAD_SHARE`). Npr. krumpir u Rijeci 0,89 / 1,48 € (0,59 €, 66 %) je malo; palačinke s
+Nutellom u Osijeku 7,98 / 9,52 € (1,54 €, 19 %) nije. Ako treba "oba uvjeta", to je jedna promjena u
+`basket.price_spread`.
+
+**Zlatni izlazi:** promijenjeno 10 košarica, samo `comparison`/`more_chains`/`incomplete` (gore) i novo
+`price_spread`; best_store, stavke i iznosi su isti. Ponovno zapisani.
+
+**Provjera:** `tests/test_step7.py`: compare_chains (nepotpuni lanac ide u incomplete), price_spread (izjednačeni
+najjeftiniji, oba praga, jedan lanac), polje samo bez `store`, pravilo u uputama i nema stare preporuke;
+`test_step5b` (more_chains s adresama) i `test_server` (popis riječi) prilagođeni. pytest izlazni kod 0 (1040
+prolazi, 3 preskočena); `MM_GOLDEN=1` izlazni kod 0; sažeta baza `golden.py --check` 23/23 jednako.

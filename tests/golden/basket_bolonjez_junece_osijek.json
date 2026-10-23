@@ -508,6 +508,15 @@
  "date_hr": "20.10.2026.",
  "incomplete": [
   {
+   "chain": "ntl",
+   "missing": [
+    "juneće mljeveno meso"
+   ],
+   "n_matched": 6,
+   "note": "nedostaje: juneće mljeveno meso",
+   "total_to_buy": 15.07
+  },
+  {
    "chain": "dm",
    "missing": [
     "juneće mljeveno meso",
@@ -515,7 +524,8 @@
     "parmezan"
    ],
    "n_matched": 4,
-   "note": "nedostaje: juneće mljeveno meso, luk, parmezan"
+   "note": "nedostaje: juneće mljeveno meso, luk, parmezan",
+   "total_to_buy": 16.5
   },
   {
    "chain": "dukat",
@@ -528,7 +538,8 @@
     "sol"
    ],
    "n_matched": 1,
-   "note": "nedostaje: špageti, juneće mljeveno meso, rajčica, luk, maslinovo ulje, sol"
+   "note": "nedostaje: špageti, juneće mljeveno meso, rajčica, luk, maslinovo ulje, sol",
+   "total_to_buy": 1.59
   }
  ],
  "ingredients": [
@@ -637,17 +648,29 @@
  "mode": "single_store",
  "more_chains": [
   {
+   "addresses": [
+    "Josipa Reihl-Kira 40"
+   ],
    "chain": "kaufland",
    "n_matched": 7,
+   "n_stores_city": 2,
    "total_to_buy": 21.46
-  },
-  {
-   "chain": "ntl",
-   "n_matched": 6,
-   "total_to_buy": 15.07
   }
  ],
  "note": "Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists (cijene.dev); in-store prices may differ, a price list is not stock, and promotions change. Podaci: cijene.dev (DobarKod), prema uvjetima korištenja (https://cijene.dev/uvjeti-koristenja). / Data: cijene.dev (DobarKod), under its terms of use (https://cijene.dev/uvjeti-koristenja).",
+ "price_spread": {
+  "cheapest": [
+   "konzum"
+  ],
+  "cheapest_total": 16.53,
+  "difference_eur": 4.93,
+  "difference_pct": 30,
+  "most_expensive": [
+   "kaufland"
+  ],
+  "most_expensive_total": 21.46,
+  "small": false
+ },
  "stores": [
   {
    "address": "Sjenjak 133",

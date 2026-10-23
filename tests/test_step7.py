@@ -161,3 +161,60 @@ def test_rule_known_store():
                    "Ostale lance ne\n   nabrajaj, osim jedne rečenice ako je neki drugi lanac u gradu jeftiniji za više od ~2 € ili 15 %",
                    "cheaper_elsewhere", "Known store"):
         assert phrase in text, phrase
+
+
+# --- 4. bez zadane trgovine -----------------------------------------------------------------------------------
+
+def test_compare_only_complete_chains():
+    from collections import Counter
+
+    from mealmeter.basket import compare_chains
+
+    def store(chain, total, n, missing=()):
+        return {"chain": chain, "total_to_buy": total, "total_used": total, "n_matched": n, "missing": list(missing),
+                "address": f"{chain} 1", "addresses": [f"{chain} 1", f"{chain} 2", f"{chain} 3"]}
+    # NTL (prije u more_chains sa 6 od 7 sastojaka, bez mesa) je sada u incomplete
+    ranked = [store("konzum", 16.53, 7), store("eurospin", 17.4, 7), store("ntl", 15.07, 6, ["juneće mljeveno meso"])]
+    rows, incomplete, more = compare_chains(ranked, Counter({"konzum": 7, "eurospin": 2}), 7)
+    assert [r["chain"] for r in rows] == ["konzum", "eurospin"] and not more
+    assert all(r["complete"] and len(r["addresses"]) == 2 for r in rows) and rows[0]["n_stores_city"] == 7
+    assert incomplete == [{"chain": "ntl", "n_matched": 6, "total_to_buy": 15.07, "missing": ["juneće mljeveno meso"],
+                           "note": "nedostaje: juneće mljeveno meso"}]
+
+
+def test_price_spread():
+    from mealmeter.basket import price_spread
+
+    rows = [{"chain": c, "total_to_buy": t} for c, t in [("kaufland", 2.99), ("lidl", 2.99), ("eurospin", 4.36)]]
+    sp = price_spread(rows)
+    assert sp == {"cheapest": ["kaufland", "lidl"], "cheapest_total": 2.99, "most_expensive": ["eurospin"],
+                  "most_expensive_total": 4.36, "difference_eur": 1.37, "difference_pct": 46, "small": True}
+    # male razlike: manje od ~1,5 € ili od 15 % (dovoljan je jedan uvjet)
+    assert price_spread([{"chain": "a", "total_to_buy": 3.0}, {"chain": "b", "total_to_buy": 4.2}])["small"]  # 1,20 €
+    assert price_spread([{"chain": "a", "total_to_buy": 40.0}, {"chain": "b", "total_to_buy": 43.0}])["small"]  # 7,5 %
+    # 2 € i 20 %: nije malo
+    assert not price_spread([{"chain": "a", "total_to_buy": 10.0}, {"chain": "b", "total_to_buy": 12.0}])["small"]
+    assert price_spread(rows[:1]) is None
+
+
+def test_price_spread_only_without_store(con5b):  # noqa: F811
+    from mealmeter.basket import plan_basket
+
+    ing = [{"name": "brašno glatko", "amount": 250, "unit": "g"}, {"name": "mlijeko", "amount": 500, "unit": "ml"}]
+    res = plan_basket(ing, "Osijek", con=con5b)
+    rows = res["comparison"] + res["more_chains"]
+    if len(rows) >= 2:
+        assert res["price_spread"]["cheapest_total"] == min(r["total_to_buy"] for r in rows)
+    assert all(i["missing"] for i in res["incomplete"])
+    assert "price_spread" not in plan_basket(ing, "Osijek", con=con5b, store={"chain": "konzum", "address_contains": ""})
+
+
+def test_rule_no_store():
+    text = _instructions()
+    for phrase in ('Trgovina nije zadana ili korisnik kaže "svejedno": odgovor počinje s "Sve možeš kupiti u:"',
+                   "lanaca koji\n   imaju sve sastojke", "poredanih po cijeni", "najviše 2 adrese i broj trgovina",
+                   "koji je najjeftiniji i kolika je\n   razlika do najskupljeg u popisu", "~1,5 € ili 15 %",
+                   "razlike male", "najpraktičnije", 'idu na kraj, s "nedostaje: ..."',
+                   "ponudi točan popis za trgovinu koju odabere", "price_spread"):
+        assert phrase in text, phrase
+    assert "Preporuka je trgovina s najmanjim total_to_buy" not in text

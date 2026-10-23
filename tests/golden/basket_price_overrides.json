@@ -432,7 +432,8 @@
     "vanilin šećer"
    ],
    "n_matched": 4,
-   "note": "nedostaje: brašno glatko, jaja, vanilin šećer"
+   "note": "nedostaje: brašno glatko, jaja, vanilin šećer",
+   "total_to_buy": 9.25
   },
   {
    "chain": "dukat",
@@ -445,7 +446,8 @@
     "vanilin šećer"
    ],
    "n_matched": 1,
-   "note": "nedostaje: brašno glatko, jaja, šećer, sol, ulje, vanilin šećer"
+   "note": "nedostaje: brašno glatko, jaja, šećer, sol, ulje, vanilin šećer",
+   "total_to_buy": 0.78
   }
  ],
  "ingredients": [
@@ -558,17 +560,40 @@
  "mode": "single_store",
  "more_chains": [
   {
+   "addresses": [
+    "Kneza Trpimira 14",
+    "Sv. Leopolda B. Mandica 7"
+   ],
    "chain": "spar",
    "n_matched": 7,
+   "n_stores_city": 5,
    "total_to_buy": 7.7
   },
   {
+   "addresses": [
+    "Ulica 3 gardijske brigade „Kune“ 30",
+    "Ulica Josipa Jurja Strossmayera 343A"
+   ],
    "chain": "eurospin",
    "n_matched": 7,
+   "n_stores_city": 2,
    "total_to_buy": 7.78
   }
  ],
  "note": "Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists (cijene.dev); in-store prices may differ, a price list is not stock, and promotions change. Podaci: cijene.dev (DobarKod), prema uvjetima korištenja (https://cijene.dev/uvjeti-koristenja). / Data: cijene.dev (DobarKod), under its terms of use (https://cijene.dev/uvjeti-koristenja).",
+ "price_spread": {
+  "cheapest": [
+   "kaufland"
+  ],
+  "cheapest_total": 5.81,
+  "difference_eur": 1.97,
+  "difference_pct": 34,
+  "most_expensive": [
+   "eurospin"
+  ],
+  "most_expensive_total": 7.78,
+  "small": false
+ },
  "stores": [
   {
    "address": "Josipa Reihl-Kira 40",

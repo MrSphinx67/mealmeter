@@ -526,13 +526,23 @@
  "date_hr": "20.10.2026.",
  "incomplete": [
   {
+   "chain": "vrutak",
+   "missing": [
+    "luk"
+   ],
+   "n_matched": 6,
+   "note": "nedostaje: luk",
+   "total_to_buy": 15.79
+  },
+  {
    "chain": "zabac",
    "missing": [
     "mljeveno meso",
     "luk"
    ],
    "n_matched": 5,
-   "note": "nedostaje: mljeveno meso, luk"
+   "note": "nedostaje: mljeveno meso, luk",
+   "total_to_buy": 9.05
   },
   {
    "chain": "stanic",
@@ -541,7 +551,8 @@
     "luk"
    ],
    "n_matched": 5,
-   "note": "nedostaje: mljeveno meso, luk"
+   "note": "nedostaje: mljeveno meso, luk",
+   "total_to_buy": 12.65
   },
   {
    "chain": "dm",
@@ -551,7 +562,8 @@
     "parmezan"
    ],
    "n_matched": 4,
-   "note": "nedostaje: mljeveno meso, luk, parmezan"
+   "note": "nedostaje: mljeveno meso, luk, parmezan",
+   "total_to_buy": 16.5
   },
   {
    "chain": "dukat",
@@ -564,7 +576,8 @@
     "sol"
    ],
    "n_matched": 1,
-   "note": "nedostaje: špageti, mljeveno meso, rajčica, luk, maslinovo ulje, sol"
+   "note": "nedostaje: špageti, mljeveno meso, rajčica, luk, maslinovo ulje, sol",
+   "total_to_buy": 1.59
   }
  ],
  "ingredients": [
@@ -681,37 +694,68 @@
  "mode": "single_store",
  "more_chains": [
   {
+   "addresses": [
+    "Antuna Soljana 43",
+    "Vile Velebita 6"
+   ],
    "chain": "kaufland",
    "n_matched": 7,
+   "n_stores_city": 12,
    "total_to_buy": 15.47
   },
   {
+   "addresses": [
+    "Soblinecka 55, Soblinec"
+   ],
    "chain": "ntl",
    "n_matched": 7,
+   "n_stores_city": 4,
    "total_to_buy": 16.1
   },
   {
+   "addresses": [
+    "Kovinska 1"
+   ],
    "chain": "roto",
    "n_matched": 7,
+   "n_stores_city": 1,
    "total_to_buy": 16.14
   },
   {
+   "addresses": [
+    "Kolakova 14 Dubrava",
+    "Slavonska Avenija 11D"
+   ],
    "chain": "spar",
    "n_matched": 7,
+   "n_stores_city": 52,
    "total_to_buy": 17.95
   },
   {
+   "addresses": [
+    "Cakovecka 17",
+    "Gospodska 28"
+   ],
    "chain": "gavranovic",
    "n_matched": 7,
+   "n_stores_city": 17,
    "total_to_buy": 21.13
-  },
-  {
-   "chain": "vrutak",
-   "n_matched": 6,
-   "total_to_buy": 15.79
   }
  ],
  "note": "Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists (cijene.dev); in-store prices may differ, a price list is not stock, and promotions change. Podaci: cijene.dev (DobarKod), prema uvjetima korištenja (https://cijene.dev/uvjeti-koristenja). / Data: cijene.dev (DobarKod), under its terms of use (https://cijene.dev/uvjeti-koristenja).",
+ "price_spread": {
+  "cheapest": [
+   "tommy"
+  ],
+  "cheapest_total": 10.92,
+  "difference_eur": 10.21,
+  "difference_pct": 93,
+  "most_expensive": [
+   "gavranovic"
+  ],
+  "most_expensive_total": 21.13,
+  "small": false
+ },
  "stores": [],
  "summary_hr": "Za kupiti: 10,92 €. Stvarno utrošeno: 6,24 €.",
  "truncated": true,

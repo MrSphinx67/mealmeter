@@ -1041,6 +1041,8 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
         f"SELECT DISTINCT s.chain FROM clean.stores s WHERE s.scope = 'local' AND {city_sql}", city_params).fetchall()}
     out["comparison"], out["incomplete"], out["more_chains"] = compare_chains(
         ranked, in_city, n_needs, needs, city_chains if not store_spec else set())
+    if not store_spec and (spread := price_spread(out["comparison"] + out["more_chains"])):
+        out["price_spread"] = spread
     # lanci s nepouzdanim podacima (clean.chains.data_quality 'suspect', npr. Lorenco: nacionalni cjenik bez
     # lokacije) ne ulaze u kandidate (_prepare, _free_rows), pa ni u stores, comparison, more_chains ni alternative
     if ranked:
@@ -1174,39 +1176,54 @@ def _add_item(stores: dict, key: tuple, rows: list[dict], need: Need, idx: int, 
 MAX_ADDRESSES = 3
 
 
-COMPARE_MIN_SHARE, COMPARE_ROWS, COMPARE_ADDRESSES = 0.8, 6, 2
+COMPARE_ROWS, COMPARE_ADDRESSES = 6, 2
 # veći lanci: u usporedbi su uvijek, i kad u gradu nemaju nijedan sastojak (tada incomplete)
 MAJOR_CHAINS = ("konzum", "lidl", "kaufland", "spar", "plodine", "tommy", "studenac", "eurospin")
 
 
 def compare_chains(ranked: list[dict], in_city: Counter, n_needs: int, needs: list | None = None,
                    city_chains: set | None = None) -> tuple[list[dict], list[dict], list[dict]]:
-    """Usporedba lanaca: po jedan redak (najjeftinija trgovina lanca s najviše sastojaka) za lance s >= 80 %
-    povezanih sastojaka, od najmanjeg total_to_buy, najviše COMPARE_ROWS redaka i COMPARE_ADDRESSES adrese;
-    takvi lanci iza COMPARE_ROWS idu u more (lanac i total_to_buy). Lanci ispod 80 % i veći lanci (MAJOR_CHAINS)
-    koji u gradu imaju trgovinu, a nijedan sastojak, idu u incomplete ("nedostaje: X, Y")."""
+    """Usporedba lanaca (Korak 7.4): lanci koji imaju SVE sastojke, po jedan redak (najjeftinija trgovina lanca), od
+    najmanjeg total_to_buy; prvih COMPARE_ROWS redaka je comparison, ostali more_chains, svi s najviše
+    COMPARE_ADDRESSES adrese i brojem trgovina. Lanci kojima nešto nedostaje (i veći lanci, MAJOR_CHAINS, koji u
+    gradu imaju trgovinu, a nijedan sastojak) idu u incomplete ("nedostaje: X, Y"), od najviše sastojaka."""
     best: dict[str, dict] = {}
     for s in ranked:  # ranked: najviše sastojaka, pa najmanji total_to_buy
         best.setdefault(s["chain"], s)
-    rows, incomplete, more = [], [], []
-    for s in sorted(best.values(), key=lambda s: (-s["n_matched"], s["total_to_buy"])):
-        enough = n_needs and s["n_matched"] / n_needs >= COMPARE_MIN_SHARE
-        if enough and len(rows) >= COMPARE_ROWS:
-            more.append({"chain": s["chain"], "total_to_buy": s["total_to_buy"], "n_matched": s["n_matched"]})
-            continue
-        if enough:
+    complete, incomplete = [], []
+    for s in sorted(best.values(), key=lambda s: (-s["n_matched"], s["total_to_buy"], s["chain"])):
+        if n_needs and not s["missing"]:
             addresses = [a for a in (s.get("addresses") or [s["address"]]) if a][:COMPARE_ADDRESSES]
-            rows.append({"chain": s["chain"], "addresses": addresses,
-                         "n_stores_city": in_city.get(s["chain"], 1), "total_to_buy": s["total_to_buy"],
-                         "total_used": s["total_used"], "n_matched": s["n_matched"], "n_ingredients": n_needs,
-                         "complete": not s["missing"], **({"missing": s["missing"]} if s["missing"] else {})})
+            complete.append({"chain": s["chain"], "addresses": addresses,
+                             "n_stores_city": in_city.get(s["chain"], 1), "total_to_buy": s["total_to_buy"],
+                             "total_used": s["total_used"], "n_matched": s["n_matched"], "n_ingredients": n_needs,
+                             "complete": True})
         else:
-            incomplete.append({"chain": s["chain"], "n_matched": s["n_matched"], "missing": s["missing"],
-                               "note": "nedostaje: " + ", ".join(s["missing"])})
+            incomplete.append({"chain": s["chain"], "n_matched": s["n_matched"], "total_to_buy": s["total_to_buy"],
+                               "missing": s["missing"], "note": "nedostaje: " + ", ".join(s["missing"])})
     names = [n.input.get("name") for n in needs or []]
     for chain in sorted((city_chains or set()) & set(MAJOR_CHAINS) - set(best)):
         incomplete.append({"chain": chain, "n_matched": 0, "missing": names, "note": "nedostaje: " + ", ".join(names)})
-    return rows, incomplete, more
+    more = [{k: r[k] for k in ("chain", "addresses", "n_stores_city", "total_to_buy", "n_matched")}
+            for r in complete[COMPARE_ROWS:]]
+    return complete[:COMPARE_ROWS], incomplete, more
+
+
+SMALL_SPREAD_EUR, SMALL_SPREAD_SHARE = 1.5, 0.15
+
+
+def price_spread(rows: list[dict]) -> dict | None:
+    """Razlika između najjeftinijeg i najskupljeg potpunog lanca (comparison + more_chains), za rečenicu u odgovoru
+    bez zadane trgovine (Korak 7.4). small = razlika je manja od SMALL_SPREAD_EUR ili od SMALL_SPREAD_SHARE cijene
+    najjeftinijeg (dovoljan je jedan uvjet): korisnik može ići gdje mu je najpraktičnije."""
+    if len(rows) < 2:
+        return None
+    lo, hi = min(r["total_to_buy"] for r in rows), max(r["total_to_buy"] for r in rows)
+    diff = round(hi - lo, 2)
+    return {"cheapest": [r["chain"] for r in rows if r["total_to_buy"] == lo], "cheapest_total": lo,
+            "most_expensive": [r["chain"] for r in rows if r["total_to_buy"] == hi], "most_expensive_total": hi,
+            "difference_eur": diff, "difference_pct": round(100 * diff / lo) if lo else None,
+            "small": diff < SMALL_SPREAD_EUR or diff < SMALL_SPREAD_SHARE * lo}
 
 
 def merge_same_chain(stores: list[dict]) -> list[dict]:

@@ -38,7 +38,8 @@ def test_descriptions_bilingual():
                  "JEDNOJ", "nadjev", "nije potvrdio", "free_text", "cheaper = true", "summary_hr",
                  "cijene iz cjenika od 20.10.2026.", "veličina pakiranja", "akcije se mijenjaju",
                  # Korak 5B: preporuka po total_to_buy, pretpostavke, ne nakon jedne pretrage, pitaj, 2 adrese, lanci
-                 "najmanjim total_to_buy", "informativni", "assumptions", "nakon\n   jedne pretrage",
+                 # (Korak 7.4: preporuka po total_to_buy zamijenjena popisom "Sve možeš kupiti u:")
+                 "Sve možeš kupiti u:", "assumptions", "nakon\n   jedne pretrage",
                  "nesigurnog izbora pitaj", "najviše 2 adrese", "Studenac, Eurospin", "incomplete",
                  # Korak 5P: oblik količine iz recepta
                  "(suho, kuhano, smrznuto)", "(dry, cooked, frozen)",

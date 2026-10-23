@@ -542,6 +542,24 @@
  "date_hr": "20.10.2026.",
  "incomplete": [
   {
+   "chain": "eurospin",
+   "missing": [
+    "grašak"
+   ],
+   "n_matched": 9,
+   "note": "nedostaje: grašak",
+   "total_to_buy": 11.17
+  },
+  {
+   "chain": "boso",
+   "missing": [
+    "brašno glatko"
+   ],
+   "n_matched": 9,
+   "note": "nedostaje: brašno glatko",
+   "total_to_buy": 13.83
+  },
+  {
    "chain": "stanic",
    "missing": [
     "grašak",
@@ -550,7 +568,8 @@
     "krumpir"
    ],
    "n_matched": 6,
-   "note": "nedostaje: grašak, luk, mrkva, krumpir"
+   "note": "nedostaje: grašak, luk, mrkva, krumpir",
+   "total_to_buy": 10.99
   },
   {
    "chain": "dm",
@@ -563,7 +582,8 @@
     "papar"
    ],
    "n_matched": 4,
-   "note": "nedostaje: grašak, luk, mrkva, krumpir, brašno glatko, papar"
+   "note": "nedostaje: grašak, luk, mrkva, krumpir, brašno glatko, papar",
+   "total_to_buy": 14.1
   }
  ],
  "ingredients": [
@@ -729,19 +749,21 @@
   }
  ],
  "mode": "single_store",
- "more_chains": [
-  {
-   "chain": "eurospin",
-   "n_matched": 9,
-   "total_to_buy": 11.17
-  },
-  {
-   "chain": "boso",
-   "n_matched": 9,
-   "total_to_buy": 13.83
-  }
- ],
+ "more_chains": [],
  "note": "Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists (cijene.dev); in-store prices may differ, a price list is not stock, and promotions change. Podaci: cijene.dev (DobarKod), prema uvjetima korištenja (https://cijene.dev/uvjeti-koristenja). / Data: cijene.dev (DobarKod), under its terms of use (https://cijene.dev/uvjeti-koristenja).",
+ "price_spread": {
+  "cheapest": [
+   "lidl"
+  ],
+  "cheapest_total": 12.61,
+  "difference_eur": 7.13,
+  "difference_pct": 57,
+  "most_expensive": [
+   "konzum"
+  ],
+  "most_expensive_total": 19.74,
+  "small": false
+ },
  "stores": [],
  "summary_hr": "Za kupiti: 12,61 €. Stvarno utrošeno: 5,75 €.",
  "truncated": true,

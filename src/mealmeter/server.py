@@ -82,9 +82,15 @@ Pravila / rules:
    nabrajaj, osim jedne rečenice ako je neki drugi lanac u gradu jeftiniji za više od ~2 € ili 15 %
    (cheaper_elsewhere). / Known store: call with store, answer with its exact list; other chains only in one
    sentence if one is cheaper by more than ~2 € or 15 % (cheaper_elsewhere).
-7. Preporuka je trgovina s najmanjim total_to_buy (cijena cijelih pakiranja); utrošak (total_used) i
-   from_stock_value su samo informativni. / The recommendation is the store with the lowest total_to_buy; the
-   cost of the amount used and from_stock_value are informative only.
+7. Trgovina nije zadana ili korisnik kaže "svejedno": odgovor počinje s "Sve možeš kupiti u:" i popisom lanaca koji
+   imaju sve sastojke (comparison, pa more_chains) s cijenom za kupiti (total_to_buy), poredanih po cijeni; po
+   lancu najviše 2 adrese i broj trgovina. Zatim jedna rečenica (price_spread): koji je najjeftiniji i kolika je
+   razlika do najskupljeg u popisu; ako je razlika manja od ~1,5 € ili 15 % (small), reci da su razlike male i da
+   može ići gdje mu je najpraktičnije. Lanci kojima nešto nedostaje (incomplete) idu na kraj, s "nedostaje: ...".
+   Na kraju ponudi točan popis za trgovinu koju odabere.
+   / No store or "any": start with "Sve možeš kupiti u:", complete chains by price to buy, one per line (max 2
+   addresses, number of stores); one sentence on cheapest vs dearest (price_spread; small: go where it is
+   convenient); incomplete chains last; offer the exact list for the chosen store.
 8. Odgovor počni sa summary_hr. Piši prirodnim jezikom, bez internih naziva polja (stale_days, total_to_buy,
    total_used, match_quality, cheaper, delta_eur). Datum piši kao "cijene iz cjenika od 20.10.2026." (date_hr);
    ako je cijena iz starijeg cjenika (stale_days > 0), reci od kojeg datuma. / Start with summary_hr; natural
@@ -329,9 +335,10 @@ def compact_basket(res: dict) -> dict:
             "items": [_compact_item(it) for it in best["items"]]}
     else:
         out["best_store"] = None
-    # usporedba lanaca (basket.compare_chains): najviše 6 redaka s >= 80 % sastojaka, ostali kao incomplete
+    # usporedba lanaca (basket.compare_chains): najviše 6 potpunih lanaca, ostali potpuni u more_chains, nepotpuni
+    # u incomplete
     out["comparison"] = res.get("comparison", [])
-    for k in ("incomplete", "more_chains", "cheaper_elsewhere", "assumptions", "ask_user", "unmatched", "warnings",
+    for k in ("incomplete", "more_chains", "price_spread", "cheaper_elsewhere", "assumptions", "ask_user", "unmatched", "warnings",
               "store_suggestions", "city_suggestions", "already_have"):
         if res.get(k):
             out[k] = res[k]
@@ -417,9 +424,11 @@ Preporuka je best_store = najmanji total_to_buy; total_used i from_stock_value (
 / best_store has the lowest total_to_buy; total_used and from_stock_value are informative.
 Vraća / returns (sažeto / compact): summary_hr (počni njime / start with it), best_store (items s pack_size,
 cost_pack, cost_used, alternatives; trgovine istog lanca s istim proizvodima spojene: n_stores, addresses),
-comparison (po lancu do 6 redaka / one row per chain, up to 6: chain, addresses, n_stores_city, total_to_buy,
-total_used, n_matched), incomplete (lanci bez >= 80 % sastojaka: missing / chains missing ingredients),
-more_chains, cheaper_elsewhere (uz store: drugi lanac u gradu jeftiniji za > 2 € ili 15 % / with store: another
+comparison (lanci sa svim sastojcima, po lancu jedan redak, do 6 / chains with every ingredient, one row per
+chain, up to 6: chain, addresses, n_stores_city, total_to_buy, total_used), more_chains (ostali potpuni lanci /
+further complete chains), price_spread (najjeftiniji i najskuplji potpuni lanac, difference_eur, small / cheapest
+and dearest complete chain), incomplete (lanci kojima nešto nedostaje: missing / chains missing ingredients),
+cheaper_elsewhere (uz store: drugi lanac u gradu jeftiniji za > 2 € ili 15 % / with store: another
 chain in the city cheaper by > 2 € or 15 %), assumptions (pretpostavljene količine / assumed amounts), ask_user,
 warnings, unmatched (s prijedlozima / with suggestions), date_hr. detail=true: sve trgovine i sva polja /
 all stores and fields.

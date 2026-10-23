@@ -278,5 +278,6 @@ def test_compare_chains_overflow_and_major_without_items():
     ranked = [store(c, i + 1.0) for i, c in enumerate(["a", "b", "c", "d", "e", "f", "g"])] + [store("h", 9, 1, ["x"])]
     rows, incomplete, more = compare_chains(ranked, Counter(), 2, city_chains={"studenac", "a"})
     assert [r["chain"] for r in rows] == ["a", "b", "c", "d", "e", "f"] and all(len(r["addresses"]) == 2 for r in rows)
-    assert more == [{"chain": "g", "total_to_buy": 7.0, "n_matched": 2}]
+    # Korak 7.4: more_chains s adresama i brojem trgovina (popis "Sve možeš kupiti u:")
+    assert more == [{"chain": "g", "addresses": ["g 1", "g 2"], "n_stores_city": 1, "total_to_buy": 7.0, "n_matched": 2}]
     assert [(i["chain"], i["note"]) for i in incomplete] == [("h", "nedostaje: x"), ("studenac", "nedostaje: ")]

@@ -273,7 +273,8 @@
     "tahini"
    ],
    "n_matched": 3,
-   "note": "nedostaje: tahini"
+   "note": "nedostaje: tahini",
+   "total_to_buy": 2.99
   },
   {
    "chain": "ntl",
@@ -281,7 +282,8 @@
     "tahini"
    ],
    "n_matched": 3,
-   "note": "nedostaje: tahini"
+   "note": "nedostaje: tahini",
+   "total_to_buy": 3.52
   },
   {
    "chain": "roto",
@@ -289,7 +291,8 @@
     "tahini"
    ],
    "n_matched": 3,
-   "note": "nedostaje: tahini"
+   "note": "nedostaje: tahini",
+   "total_to_buy": 3.59
   },
   {
    "chain": "eurospin",
@@ -297,7 +300,8 @@
     "tahini"
    ],
    "n_matched": 3,
-   "note": "nedostaje: tahini"
+   "note": "nedostaje: tahini",
+   "total_to_buy": 4.36
   },
   {
    "chain": "dm",
@@ -306,7 +310,8 @@
     "jaja"
    ],
    "n_matched": 2,
-   "note": "nedostaje: brašno glatko, jaja"
+   "note": "nedostaje: brašno glatko, jaja",
+   "total_to_buy": 5.2
   },
   {
    "chain": "dukat",
@@ -316,7 +321,8 @@
     "tahini"
    ],
    "n_matched": 1,
-   "note": "nedostaje: brašno glatko, jaja, tahini"
+   "note": "nedostaje: brašno glatko, jaja, tahini",
+   "total_to_buy": 0.78
   }
  ],
  "ingredients": [
@@ -392,6 +398,19 @@
  "mode": "single_store",
  "more_chains": [],
  "note": "Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists (cijene.dev); in-store prices may differ, a price list is not stock, and promotions change. Podaci: cijene.dev (DobarKod), prema uvjetima korištenja (https://cijene.dev/uvjeti-koristenja). / Data: cijene.dev (DobarKod), under its terms of use (https://cijene.dev/uvjeti-koristenja).",
+ "price_spread": {
+  "cheapest": [
+   "kaufland"
+  ],
+  "cheapest_total": 9.48,
+  "difference_eur": 2.04,
+  "difference_pct": 22,
+  "most_expensive": [
+   "spar"
+  ],
+  "most_expensive_total": 11.52,
+  "small": false
+ },
  "stores": [
   {
    "address": "Josipa Reihl-Kira 40",

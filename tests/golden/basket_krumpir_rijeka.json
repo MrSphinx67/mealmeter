@@ -196,12 +196,34 @@
  "mode": "single_store",
  "more_chains": [
   {
+   "addresses": [
+    "Osječka 71"
+   ],
    "chain": "konzum",
    "n_matched": 1,
+   "n_stores_city": 1,
    "total_to_buy": 1.48
   }
  ],
  "note": "Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists (cijene.dev); in-store prices may differ, a price list is not stock, and promotions change. Podaci: cijene.dev (DobarKod), prema uvjetima korištenja (https://cijene.dev/uvjeti-koristenja). / Data: cijene.dev (DobarKod), under its terms of use (https://cijene.dev/uvjeti-koristenja).",
+ "price_spread": {
+  "cheapest": [
+   "eurospin",
+   "kaufland",
+   "lidl",
+   "plodine",
+   "spar",
+   "tommy"
+  ],
+  "cheapest_total": 0.89,
+  "difference_eur": 0.59,
+  "difference_pct": 66,
+  "most_expensive": [
+   "konzum"
+  ],
+  "most_expensive_total": 1.48,
+  "small": true
+ },
  "stores": [
   {
    "address": "Kukuljanovo 350",
