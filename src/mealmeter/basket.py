@@ -136,7 +136,8 @@ class Need:
 
 def resolve_name(name: str) -> tuple[Staple, dict]:
     """Naziv sastojka -> (namirnica, atributi). Točan sinonim, ili sinonim + vrijednosti atributa
-    ("glatko brašno" -> brasno, tip=glatko). Inače IngredientError."""
+    ("glatko brašno" -> brasno, tip=glatko; "mljevena junetina" -> mljeveno_meso, vrsta=junece preko
+    value_words). Inače IngredientError."""
     if st := resolve_ingredient(name):
         # sinonim koji je i vrijednost atributa ("špageti" -> tjestenina, oblik=spageti)
         q = norm_text(name)
@@ -157,8 +158,14 @@ def resolve_name(name: str) -> tuple[Staple, dict]:
                     continue
                 rest = words[:i] + words[i + len(syn_words):]
                 attrs, ok = {}, True
+                # riječi iz sinonima iste namirnice ne smetaju ("mljeveno juneće meso": "meso")
+                filler = {x for s in st.synonyms for x in s.split()}
                 for w in rest:
                     hit = [(a, v) for a, vals in st.attributes.items() for v in vals if norm_text(v.replace("_", " ")) == w]
+                    if not hit and w in st.value_words:  # "mljevena junetina": vrsta=junece
+                        hit = [st.value_words[w]]
+                    if not hit and w in filler:
+                        continue
                     if len(hit) != 1:
                         ok = False
                         break

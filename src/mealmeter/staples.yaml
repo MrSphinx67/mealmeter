@@ -28,6 +28,8 @@
 #   group_by        atribut ili popis atributa po kojima se grupira umjesto EAN-a (jaja: [velicina, uzgoj])
 #   require_any     dodatni uzorci: barem jedan mora pogoditi (npr. dio mesa: but, vrat...)
 #   default_attributes  zadani filtar ako atribut nije zadan (mljeveno meso: vrsta=mijesano)
+#   value_words     {atribut: {vrijednost: [riječi]}}: riječ u nazivu sastojka koja znači vrijednost atributa
+#                   ("mljevena junetina" -> vrsta=junece); samo za upis korisnika, ne za proizvode
 #   default_preference {atribut: [vrijednosti]}: zadani redoslijed kad atribut nije tražen (prva dostupna)
 #   substitutes     {atribut: [vrijednosti]}: zamjenjive vrijednosti (mlijeko: mast 2.8 = 3.2 = 3.5 = 3.8)
 #   disabled        namirnica postoji, ali nije u v1 (ne gradi se i ne može se tražiti)
@@ -1092,9 +1094,25 @@ piletina:
 
 mljeveno_meso:
   name: mljeveno meso
-  synonyms: [mljeveno meso, mljeveno, mljeveno mesano meso]
+  synonyms: [mljeveno meso, mljeveno, mljevena, mljeveno mesano meso, mljeveno mijesano meso, faširano,
+             faširano meso, samljeveno meso]
+  # Korak 7.0: riječi koje u nazivu sastojka znače vrijednost atributa ("mljevena junetina", "faširano juneće")
+  value_words:
+    vrsta:
+      junece: [junetina, juneće, juneći, juneća, junećeg, govedina, goveđe, goveđi, goveđa]
+      svinjsko: [svinjetina, svinjski, svinjska, svinjskog]
+      mijesano: [miješana, mješano, mješana, miješanog]
+      purece: [puretina, pureći, pureća]
+      pilece: [piletina, pileći, pileća]
+      telece: [teletina, teleći, teleća]
   must_match: [mljeveno meso, meso mljeveno, mljeveno mijesano, mljeveno junece, mljeveno svinjsko,
-               mljeveno purece, mljeveno pilece, mljeveno telece, mljev meso]
+               mljeveno purece, mljeveno pilece, mljeveno telece, mljev meso,
+               # Korak 7.0: "JUNETINA MLJEVENA", "JUN MLJEVENA 540G", "MLJEVENA JUN. 450 g", "MLJEVENO MJEŠANO MESO",
+               # "MIJEŠ.MLJEVENO", "MESO MLJ. MIJ. (SVI+JUN)", "MESO MIJEŠANO 1 kg MLJEVENO", "Svinjska lopatica mljevena"
+               'jun\w* mljev', 'jun\w* but mljev', 'svinj\w* mljev', 'svinj\w* (but|lopatic\w*) mljev',
+               'mij\w* mlj', 'mjes\w* mlj', 'pur\w* mlj', 'pil\w* mlj', 'tele\w* mlj', sv mlj,
+               'mljeven\w* (jun|svinj|tele|mij|mjes|pur|pil)', 'meso (mij|mjes)\w*( \w+){0,2} mlj', meso mlj,
+               meso samlj]
   must_not_match: [posipac, secer, papar, aluminij, veggie, polpete, cevap, pljeskav, burger]
   unit: kg
   fresh_meat: true  # na vagu je ravnopravan izbor (Korak 2F)
@@ -1104,10 +1122,12 @@ mljeveno_meso:
   min_pack: 300
   attributes:
     vrsta:
-      mijesano: '\bmijes|\bmjes'
-      junece: '\bjunec|\bjunet|\bjun\.|\bgoved'
-      svinjsko: '\bsvinj'
-      purece: '\bpurec|\bpuret'
+      # "MIJ.", "mije.", "SVI+JUN", "JUNEĆE I SVINJSKO", "JUN/SVINJ" su miješano (prije juneće)
+      mijesano: '\bmijes|\bmjes|\bmije?\b|\bsvi\+jun|\bjun\w*\.?\s*(i|/|\+)\s*svinj|\bsvinj\w*\.?\s*(i|/|\+)\s*jun'
+      # "JUN MLJEV MESO" (bez točke) je juneće, a ne zadano miješano
+      junece: '\bjunec|\bjunet|\bjun\b|\bgoved'
+      svinjsko: '\bsvinj|\bsv\.?\s*mlj'  # "SV.MLJ.MESO", "SV MLJEV MESO"
+      purece: '\bpurec|\bpuret|\bpur\.'
       pilece: '\bpilec|\bpilet'
       telece: '\btelec|\btelet'
       _default: mijesano

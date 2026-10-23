@@ -88,6 +88,8 @@ class Staple:
     confirm_unless: dict[str, str] = field(default_factory=dict, hash=False, compare=False)
     # odabrana vrijednost koja je zamjena: {atribut: {vrijednost: {unless: riječ u nazivu sastojka, note}}}
     substitution_values: dict = field(default_factory=dict, hash=False, compare=False)
+    # riječ u nazivu sastojka -> (atribut, vrijednost): {"junetina": ("vrsta", "junece")} (value_words)
+    value_words: dict[str, tuple[str, str]] = field(default_factory=dict, hash=False, compare=False)
 
     def defaults(self) -> dict:
         """Zadani filtri atributa: vrijednost (default_attributes) ili n-torka redoslijeda (default_preference)."""
@@ -263,7 +265,12 @@ def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> d
             substitution_values=d.get("substitution_values") or {},
             preferred_tiers=tuple({a: tuple(str(v) for v in vals) for a, vals in t.items()}
                                   for t in d.get("preferred_tiers") or []),
+            value_words={norm_text(w): (a, str(v)) for a, vals in (d.get("value_words") or {}).items()
+                         for v, words in vals.items() for w in words},
         )
+        for a, v in st.value_words.values():
+            if v not in attrs.get(a, {}):
+                raise ValueError(f"{key}: value_words {a}={v} nije definiran atribut")
         for a, vals in st.default_preference.items():
             if any(v not in attrs.get(a, {}) for v in vals) or a in st.default_attributes:
                 raise ValueError(f"{key}: default_preference {a}={vals}: nedefinirana vrijednost ili i default_attributes")
