@@ -1003,7 +1003,10 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
         if need.brand:
             _brand_substitutions(stores, idx, need, branded)
 
+    others = []  # potpune lokalne trgovine drugih lanaca, za cheaper_elsewhere (samo uz store)
     if store_spec:
+        others = [s for s in stores.values() if norm_text(s["chain"]) != norm_text(store_spec.get("chain") or "")
+                  and s["scope"] == "local" and s["data_quality"] != "suspect" and len(s["items"]) == len(needs)]
         if norm_text(store_spec.get("chain") or "") in SUSPECT_CHAINS:
             out["warnings"].append(f"lanac '{store_spec.get('chain')}' ima nepouzdane podatke (cijene bez lokacije "
                                    "trgovine) i ne koristi se u košarici")
@@ -1058,6 +1061,9 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
             it.pop("_brand_alt", None)
     if price_overrides and out["best_store"]:
         _apply_overrides(out["best_store"], price_overrides, out)
+    if others and out["best_store"] and not out["best_store"]["missing"]:
+        if cheaper := cheaper_elsewhere(out["best_store"], others):
+            out["cheaper_elsewhere"] = cheaper
     out["summary_hr"] = summary_hr(out["best_store"], out["ambiguous"], out.get("ask_user"))
     for q in out.get("ask_user", []):
         q.pop("genitive", None)
@@ -1102,6 +1108,29 @@ def confirm_and_substitution(need: Need, chosen: dict, product: str) -> dict:
         if rule and not re.search(r"(^| )" + rule["unless"], name):
             out["substitution"] = {"requested": need.input.get("name"), "chosen": product, "note": rule["note"]}
     return out
+
+
+CHEAPER_EUR, CHEAPER_SHARE = 2.0, 0.15
+
+
+def cheaper_elsewhere(best: dict, others: list[dict]) -> dict | None:
+    """Uz zadanu trgovinu (store): najjeftiniji drugi lanac u gradu sa svim sastojcima, samo ako je jeftiniji za
+    više od CHEAPER_EUR ili CHEAPER_SHARE (Korak 7.3: odgovor je popis za zadanu trgovinu, a drugi lanac se spominje
+    samo tada, u jednoj rečenici). `others` su trgovine prije zbrajanja (items je dict)."""
+    by_chain: dict[str, tuple[float, dict]] = {}
+    count = Counter(s["chain"] for s in others)
+    for s in others:
+        total = round(sum(it["cost_pack"] for it in s["items"].values() if not it["have"]), 2)
+        if s["chain"] not in by_chain or total < by_chain[s["chain"]][0]:
+            by_chain[s["chain"]] = (total, s)
+    if not by_chain:
+        return None
+    chain, (total, s) = min(by_chain.items(), key=lambda kv: (kv[1][0], kv[0]))
+    diff = round(best["total_to_buy"] - total, 2)
+    if diff <= CHEAPER_EUR and diff <= CHEAPER_SHARE * best["total_to_buy"]:
+        return None
+    return {"chain": chain, "address": s["address"], "n_stores_city": count[chain], "total_to_buy": total,
+            "difference_eur": diff}
 
 
 def set_totals(store: dict, items: list[dict]) -> None:

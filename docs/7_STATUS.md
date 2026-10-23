@@ -5,6 +5,7 @@
 | 0 mljeveno meso (juneće, svinjsko, miješano) | gotovo: nazivi sastojaka, nazivi proizvoda, vrsta; zlatni scenarij |
 | 1 pravilo: svaka promjena -> ponovno plan_basket | gotovo |
 | 2 kad pitati: samo recept / pitanje o cijeni | gotovo |
+| 3 poznata trgovina: točan popis, drugi lanac samo ako je bitno jeftiniji | gotovo, uz novo polje `cheaper_elsewhere` |
 
 Ništa nije deployano.
 
@@ -91,3 +92,24 @@ Staro pravilo 1 ("prije plan_basket u JEDNOJ poruci pitaj...") zamijenjeno je s 
 "Ne pitaj ponovno ono što je već rekao" je sad "samo ono što još ne znaš". Ostala pravila su pomaknuta za jedno mjesto.
 
 **Provjera:** `tests/test_step7.py::test_rule_when_to_ask`; pytest izlazni kod 0 (1033 prolazi, 3 preskočena).
+
+## 3. Odgovor kad je trgovina poznata
+
+Novo pravilo 6 (hr i en): plan_basket sa `store`, odgovor je točan popis za tu trgovinu; ostali lanci se ne nabrajaju,
+osim jedne rečenice ako je neki drugi lanac u gradu jeftiniji za više od ~2 € ili 15 %.
+
+**Zašto i promjena alata.** Sa `store` plan_basket vraća samo tu trgovinu (`comparison` ima jedan redak), pa Claude
+ne bi mogao znati je li drugi lanac jeftiniji bez drugog poziva, a pravilo 12 zabranjuje procjenu cijena. plan_basket
+ionako računa sve trgovine u gradu prije filtriranja, pa sad uz `store` vraća i **`cheaper_elsewhere`**:
+najjeftiniji drugi lanac s trgovinom u gradu koji ima sve sastojke (lokalne trgovine, bez lanaca s nepouzdanim
+podacima), `{chain, address, n_stores_city, total_to_buy, difference_eur}`, samo kad je razlika veća od 2 € ili od
+15 % (`basket.CHEAPER_EUR`, `CHEAPER_SHARE`). Zbroj je isti kao total_to_buy (cijela pakiranja, bez already_have);
+uspoređuje se nakon price_overrides. Polje je i u sažetom odgovoru i u opisu alata. Bez `store` ga nema.
+
+Primjer (puna baza, palačinke bez dodataka: brašno, mlijeko, jaja; Osijek): Spar 4,53 € -> `cheaper_elsewhere`
+Kaufland 2,99 € (razlika 1,54 €, 34 %); Konzum 3,23 € -> nema (0,24 €, 7 %); Kaufland 2,99 € -> nema.
+
+**Provjera:** `tests/test_step7.py`: pragovi (više od 2 €, više od 15 %, ni jedno ni drugo, točno 2 € i 10 %,
+already_have), polje samo uz `store`, pravilo u uputama. Zlatni izlazi nepromijenjeni (23/23: u oba zlatna
+scenarija sa `store` nijedan drugi lanac nije jeftiniji iznad praga). pytest izlazni kod 0 (1036 prolazi, 3
+preskočena).

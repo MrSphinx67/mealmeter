@@ -78,16 +78,20 @@ Pravila / rules:
    jedne pretrage: pokušaj free_text, drugi naziv ili find_products, pa ponudi candidates.
    / Never invent prices or products. Do not conclude a product is missing after one search: try free_text,
    another name or find_products, then offer the candidates.
-6. Preporuka je trgovina s najmanjim total_to_buy (cijena cijelih pakiranja); utrošak (total_used) i
+6. Trgovina poznata: plan_basket zovi sa store, a odgovor je točan popis za tu trgovinu. Ostale lance ne
+   nabrajaj, osim jedne rečenice ako je neki drugi lanac u gradu jeftiniji za više od ~2 € ili 15 %
+   (cheaper_elsewhere). / Known store: call with store, answer with its exact list; other chains only in one
+   sentence if one is cheaper by more than ~2 € or 15 % (cheaper_elsewhere).
+7. Preporuka je trgovina s najmanjim total_to_buy (cijena cijelih pakiranja); utrošak (total_used) i
    from_stock_value su samo informativni. / The recommendation is the store with the lowest total_to_buy; the
    cost of the amount used and from_stock_value are informative only.
-7. Odgovor počni sa summary_hr. Piši prirodnim jezikom, bez internih naziva polja (stale_days, total_to_buy,
+8. Odgovor počni sa summary_hr. Piši prirodnim jezikom, bez internih naziva polja (stale_days, total_to_buy,
    total_used, match_quality, cheaper, delta_eur). Datum piši kao "cijene iz cjenika od 20.10.2026." (date_hr);
    ako je cijena iz starijeg cjenika (stale_days > 0), reci od kojeg datuma. / Start with summary_hr; natural
    language without internal field names; date as "cijene iz cjenika od 20.10.2026.".
-8. Tablica stavki ima stupce: proizvod, veličina pakiranja (pack_size), cijena pakiranja (cost_pack),
+9. Tablica stavki ima stupce: proizvod, veličina pakiranja (pack_size), cijena pakiranja (cost_pack),
    utrošak (cost_used). / Item table columns: product, pack size, pack price, cost of the amount used.
-9. Usporedba (comparison) mora obuhvatiti sve veće lance koji imaju trgovinu u gradu (Konzum, Lidl, Kaufland,
+10. Usporedba (comparison) mora obuhvatiti sve veće lance koji imaju trgovinu u gradu (Konzum, Lidl, Kaufland,
    Spar, Plodine, Tommy, Studenac, Eurospin): oni bez svih sastojaka su nepotpuni (incomplete, "nedostaje:
    ..."), a more_chains su potpuni lanci izvan prvih 6 redaka. Po lancu navedi najviše 2 adrese i broj trgovina.
    Svaki lanac ide u svoj redak sa SVOJIM adresama (addresses tog retka), i kad dva lanca imaju isti iznos: ne
@@ -95,18 +99,18 @@ Pravila / rules:
    / The comparison covers every larger chain with a store in the city; chains without all ingredients are
    incomplete. At most 2 addresses per chain, plus the number of stores. Each chain gets its own row with its own
    addresses, even when two chains have the same total; never merge chains or mix their addresses.
-10. Alternativu zovi "jeftinijom" samo kad je cheaper = true (razlika je za istu potrebnu količinu; size_note
+11. Alternativu zovi "jeftinijom" samo kad je cheaper = true (razlika je za istu potrebnu količinu; size_note
    kad je pakiranje drukčije). Kad proizvoda nema na polici, ponudi alternatives iz iste trgovine.
    / Call an alternative "cheaper" only when cheaper = true (difference for the same needed amount).
-11. Kod nesigurnog izbora pitaj: ask_user (oblik, cijene po obliku su za traženu količinu), needs_confirmation
+12. Kod nesigurnog izbora pitaj: ask_user (oblik, cijene po obliku su za traženu količinu), needs_confirmation
    (free_text, kobasica bez dimljene), substitution (druga marka ili Grana Padano). Prenesi i warnings,
    assumed_form i slabije podudaranje (match_quality = 'weak'), običnim riječima. / When a choice is uncertain,
    ask: ask_user / ambiguity, needs_confirmation, substitution; pass on warnings, assumed_form, weaker matches.
-12. Za svako novo jelo, promjenu broja osoba, sastojaka, grada ili trgovine ponovno pozovi plan_basket; nikad ne
+13. Za svako novo jelo, promjenu broja osoba, sastojaka, grada ili trgovine ponovno pozovi plan_basket; nikad ne
    procjenjuj cijene niti ih prenosi iz ranijeg odgovora. Kad korisnik kaže stvarnu cijenu, pozovi ga s
    price_overrides. / Every new dish or change of servings, ingredients, city or store: call plan_basket again;
    never estimate or reuse earlier prices (real price: price_overrides).
-13. Uz cijene uvijek dodaj: cijene su iz cjenika, u trgovini se mogu razlikovati, cjenik nije zaliha,
+14. Uz cijene uvijek dodaj: cijene su iz cjenika, u trgovini se mogu razlikovati, cjenik nije zaliha,
    a akcije se mijenjaju. / Always add: prices come from price lists, may differ in store, a price list is not
    stock, and promotions change.
 """
@@ -327,8 +331,8 @@ def compact_basket(res: dict) -> dict:
         out["best_store"] = None
     # usporedba lanaca (basket.compare_chains): najviše 6 redaka s >= 80 % sastojaka, ostali kao incomplete
     out["comparison"] = res.get("comparison", [])
-    for k in ("incomplete", "more_chains", "assumptions", "ask_user", "unmatched", "warnings", "store_suggestions",
-              "city_suggestions", "already_have"):
+    for k in ("incomplete", "more_chains", "cheaper_elsewhere", "assumptions", "ask_user", "unmatched", "warnings",
+              "store_suggestions", "city_suggestions", "already_have"):
         if res.get(k):
             out[k] = res[k]
     out["note"] = res["note"]
@@ -415,7 +419,8 @@ Vraća / returns (sažeto / compact): summary_hr (počni njime / start with it),
 cost_pack, cost_used, alternatives; trgovine istog lanca s istim proizvodima spojene: n_stores, addresses),
 comparison (po lancu do 6 redaka / one row per chain, up to 6: chain, addresses, n_stores_city, total_to_buy,
 total_used, n_matched), incomplete (lanci bez >= 80 % sastojaka: missing / chains missing ingredients),
-more_chains, assumptions (pretpostavljene količine / assumed amounts), ask_user,
+more_chains, cheaper_elsewhere (uz store: drugi lanac u gradu jeftiniji za > 2 € ili 15 % / with store: another
+chain in the city cheaper by > 2 € or 15 %), assumptions (pretpostavljene količine / assumed amounts), ask_user,
 warnings, unmatched (s prijedlozima / with suggestions), date_hr. detail=true: sve trgovine i sva polja /
 all stores and fields.
 Primjer / example: {"ingredients": [{"name": "brašno glatko", "amount": 250, "unit": "g"},

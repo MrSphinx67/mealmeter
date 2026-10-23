@@ -8,6 +8,7 @@ import pytest
 
 from mealmeter.basket import resolve_name
 from mealmeter.staples import extract_attributes, load_staples, name_match
+from tests.test_step5b import con5b  # noqa: F401  (fixture)
 
 S = load_staples()
 
@@ -119,3 +120,44 @@ def test_rule_when_to_ask():
                    "izričito traži brz odgovor bez pitanja", "navedi\n   pretpostavke i ponudi ponovni izračun",
                    "Never assume what is at home"):
         assert phrase in rule2, phrase
+
+
+def _store(chain, address, *costs, have=()):
+    return {"chain": chain, "address": address,
+            "items": {i: {"cost_pack": c, "have": i in have} for i, c in enumerate(costs)}}
+
+
+def test_cheaper_elsewhere_thresholds():
+    from mealmeter.basket import cheaper_elsewhere
+
+    others = [_store("lidl", "A 1", 1.0, 2.0), _store("lidl", "B 2", 1.5, 2.0), _store("konzum", "C 3", 2.0, 2.0)]
+    # 10,00 -> 3,00: više od 2 €
+    out = cheaper_elsewhere({"total_to_buy": 10.0}, others)
+    assert out == {"chain": "lidl", "address": "A 1", "n_stores_city": 2, "total_to_buy": 3.0, "difference_eur": 7.0}
+    # 3,60 -> 3,00: 0,60 € je više od 15 % od 3,60 (0,54 €)
+    assert cheaper_elsewhere({"total_to_buy": 3.6}, others)["chain"] == "lidl"
+    # 3,40 -> 3,00: 0,40 € je manje od 2 € i od 15 % (0,51 €)
+    assert cheaper_elsewhere({"total_to_buy": 3.4}, others) is None
+    # 20,00 -> 18,00: 2 € nije više od 2 €, a 10 % nije više od 15 %
+    assert cheaper_elsewhere({"total_to_buy": 20.0}, [_store("spar", "D", 18.0)]) is None
+    # ono što korisnik ima ne ulazi u zbroj
+    assert cheaper_elsewhere({"total_to_buy": 5.0}, [_store("spar", "D", 1.0, 9.0, have=(1,))])["total_to_buy"] == 1.0
+
+
+def test_cheaper_elsewhere_only_with_store(con5b):  # noqa: F811
+    from mealmeter.basket import plan_basket
+
+    ing = [{"name": "brašno glatko", "amount": 250, "unit": "g"}, {"name": "mlijeko", "amount": 500, "unit": "ml"}]
+    assert "cheaper_elsewhere" not in plan_basket(ing, "Osijek", con=con5b)
+    res = plan_basket(ing, "Osijek", con=con5b, store={"chain": "konzum", "address_contains": ""})
+    if "cheaper_elsewhere" in res:
+        ce = res["cheaper_elsewhere"]
+        assert ce["chain"] != "konzum" and ce["difference_eur"] == round(res["best_store"]["total_to_buy"] - ce["total_to_buy"], 2)
+
+
+def test_rule_known_store():
+    text = _instructions()
+    for phrase in ("Trgovina poznata: plan_basket zovi sa store, a odgovor je točan popis za tu trgovinu",
+                   "Ostale lance ne\n   nabrajaj, osim jedne rečenice ako je neki drugi lanac u gradu jeftiniji za više od ~2 € ili 15 %",
+                   "cheaper_elsewhere", "Known store"):
+        assert phrase in text, phrase
