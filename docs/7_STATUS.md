@@ -4,6 +4,7 @@
 |---|---|
 | 0 mljeveno meso (juneće, svinjsko, miješano) | gotovo: nazivi sastojaka, nazivi proizvoda, vrsta; zlatni scenarij |
 | 1 pravilo: svaka promjena -> ponovno plan_basket | gotovo |
+| 2 kad pitati: samo recept / pitanje o cijeni | gotovo |
 
 Ništa nije deployano.
 
@@ -76,3 +77,17 @@ trgovine ponovno pozovi plan_basket; nikad ne procjenjuj cijene niti ih prenosi 
 pravila se usklađuju u točki 6.
 
 **Provjera:** `tests/test_step7.py::test_rule_call_again`; pytest izlazni kod 0 (1032 prolazi, 3 preskočena).
+
+## 2. Kad pitati
+
+Staro pravilo 1 ("prije plan_basket u JEDNOJ poruci pitaj...") zamijenjeno je s dva pravila (hr i en):
+- **1.** Samo recept, bez pitanja o cijeni ili kupnji: recept i na kraju jedna kratka rečenica s ponudom da izračuna
+  koliko košta i gdje to može kupiti u svom gradu; plan_basket tek kad korisnik pristane.
+- **2.** Pitanje koliko košta ili gdje kupiti: u JEDNOJ poruci samo ono što još ne zna (grad; što već ima doma;
+  "U koju trgovinu ideš (može i adresa ili kvart), ili da usporedim sve u gradu?"; nadjev ili dodatke kad je
+  relevantno). Ne pretpostavlja što korisnik ima doma; samo na izričit zahtjev za brz odgovor smije pretpostaviti, uz
+  jasno navedene pretpostavke i ponudu ponovnog izračuna.
+
+"Ne pitaj ponovno ono što je već rekao" je sad "samo ono što još ne znaš". Ostala pravila su pomaknuta za jedno mjesto.
+
+**Provjera:** `tests/test_step7.py::test_rule_when_to_ask`; pytest izlazni kod 0 (1033 prolazi, 3 preskočena).

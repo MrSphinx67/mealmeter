@@ -103,3 +103,19 @@ def test_rule_call_again():
                    "Every new dish or change of servings, ingredients, city or store: call plan_basket again",
                    "never estimate or reuse earlier prices"):
         assert phrase in text, phrase
+
+
+def test_rule_when_to_ask():
+    text = _instructions()
+    rule1 = text.split("\n1. ", 1)[1].split("\n2. ", 1)[0]
+    for phrase in ("samo recept, bez pitanja o cijeni ili kupnji", "jednu kratku rečenicu",
+                   "koliko košta i gdje to može kupiti u svom gradu", "Ne zovi plan_basket dok ne pristane"):
+        assert phrase in rule1, phrase
+    rule2 = text.split("\n2. ", 1)[1].split("\n3. ", 1)[0]
+    for phrase in ("Kad pita koliko košta ili gdje kupiti", "JEDNOJ poruci", "samo ono što još ne znaš", "grad;",
+                   "što već ima doma",
+                   '"U koju trgovinu ideš (može i adresa ili kvart), ili da usporedim sve u\n   gradu?"',
+                   "nadjev ili dodatke kad je relevantno", "Ne pretpostavljaj što korisnik\n   ima doma",
+                   "izričito traži brz odgovor bez pitanja", "navedi\n   pretpostavke i ponudi ponovni izračun",
+                   "Never assume what is at home"):
+        assert phrase in rule2, phrase
