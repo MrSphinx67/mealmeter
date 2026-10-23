@@ -9,8 +9,12 @@
 | 4 bez trgovine: "Sve možeš kupiti u:" | gotovo; usporedba sad sadrži samo potpune lance, novo polje `price_spread` |
 | 5 popis umjesto tablice | gotovo |
 | 6 usklađivanje uputa | gotovo: 13 pravila, 6031 znak (+19,8 %) |
+| 7 testovi | gotovo; zlatni testovi prolaze (i popravljen stariji kvar redoslijeda testova uz `MM_GOLDEN=1`) |
 
-Ništa nije deployano.
+Ništa nije deployano. Promjene u odgovoru alata (za pregled prije deploya): `cheaper_elsewhere` (uz `store`),
+`price_spread` (bez `store`), `comparison`/`more_chains` samo s potpunim lancima, `more_chains` s adresama i brojem
+trgovina, `incomplete` s `total_to_buy`. Puna i sažeta baza ponovno izgrađene (točka 0); za deploy treba nova sažeta
+baza.
 
 ## 0. Mljeveno meso
 
@@ -195,3 +199,26 @@ summary_hr više nije "počni njime", best_store je opisan (najviše sastojaka, 
 prilagođen (uklonjeno: summary_hr, "Studenac, Eurospin", "Svaki lanac ide u svoj redak sa SVOJIM adresama";
 dodano: "najviše 2 SVOJE adrese", "lance iste cijene ne spajaj", "jedan lanac po retku"). pytest izlazni kod 0 (1041
 prolazi, 3 preskočena).
+
+## 7. Testovi
+
+`tests/test_step7.py` (60 testova, 1 uz `MM_GOLDEN=1`):
+- pravila iz točaka 1-5 u uputama (fraze iz zadatka, uspoređeno bez prijeloma redaka);
+- nema starih proturječnih formulacija: "Odgovor počni sa summary_hr", "Preporuka je trgovina s najmanjim
+  total_to_buy", "Tablica stavki ima stupce", "utrošak (cost_used)", "Usporedba (comparison) mora obuhvatiti",
+  "more_chains su potpuni lanci izvan", staro pravilo 1 ("ide li u određenu trgovinu", "želi li nadjev"), i engleski
+  parovi;
+- duljina najviše 1,2 x 5036 znakova, pravila numerirana 1-13, svako dvojezično;
+- opis alata plan_basket usklađen (bez "počni njime", "Preporuka je", ">= 80 %");
+- mljeveno meso, `cheaper_elsewhere`, `compare_chains`, `price_spread` (točke 0, 3, 4).
+
+**Zlatni testovi i stariji kvar.** `MM_GOLDEN=1 pytest` (cijeli paket, bez `MM_DB`) padao je i prije Koraka 7
+(provjereno na commitu ba1ccc3 u zasebnom worktreeju): `test_golden_outputs` je dobivao izlaze iz fixture baze
+(cjenik 19.10.2026., prazni rezultati), jer `golden.run` bez `--db` zove `create_server(db_path=None)`, a to zadržava
+vezu koju je postavio raniji test. Do sada je prolazilo samo `-k golden` ili uz `MM_DB`. Popravak u
+`scripts/golden.py`: uvijek izričita putanja (`MM_DB` ili `search.DEFAULT_DB`).
+
+**Provjera (konačno stanje):**
+- `pytest`: izlazni kod 0, 1054 prolazi, 3 preskočena;
+- `MM_GOLDEN=1 pytest`: izlazni kod 0, 1057 prolazi (puna baza od 20.10.2026.);
+- `golden.py --check --db data/compact.duckdb`: 23/23 jednako.

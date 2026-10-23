@@ -9,6 +9,7 @@ nakon dnevnog ažuriranja treba ih ponovno zapisati (--write).
 
 import argparse
 import json
+import os
 import sys
 import time
 from pathlib import Path
@@ -80,9 +81,11 @@ EXCLUDED_CHAINS = ("lorenco", "metro")
 
 
 def run(db: str | None) -> dict:
+    from mealmeter import search
     from mealmeter import server as srv
 
-    srv.create_server(db_path=db)
+    # uvijek izričita putanja: bez nje bi poslužitelj zadržao vezu koju je ostavio drugi test (fixture baza)
+    srv.create_server(db_path=db or os.environ.get("MM_DB") or str(search.DEFAULT_DB))
     out = {}
     for name, (tool, args) in SCENARIOS.items():
         fn = getattr(srv, tool)

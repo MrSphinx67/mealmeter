@@ -234,3 +234,41 @@ def test_rule_list_not_table():
                    "a table only if asked"):
         assert phrase in text, phrase
     assert "Tablica stavki ima stupce" not in text and "Item table columns" not in text
+
+
+# --- 7. nema starih proturječnih formulacija, duljina -----------------------------------------------------------
+
+OLD_INSTRUCTIONS_LEN = 5036  # upute prije Koraka 7
+
+
+@pytest.mark.parametrize("old", [
+    "Odgovor počni sa summary_hr", "Start with summary_hr",  # proturječi "Sve možeš kupiti u:"
+    "Preporuka je trgovina s najmanjim total_to_buy", "The recommendation is the store",  # zamijenjeno pravilom 8
+    "Tablica stavki ima stupce", "Item table columns", "utrošak (cost_used)",  # tablica -> popis
+    "Usporedba (comparison) mora obuhvatiti", "more_chains su potpuni lanci izvan",  # staro pravilo o usporedbi
+    "ide li u određenu trgovinu", "želi li nadjev",  # staro pravilo 1
+])
+def test_no_old_formulations(old):
+    assert old not in _instructions()
+
+
+def test_instructions_length_and_numbering():
+    import re
+
+    from mealmeter.server import INSTRUCTIONS
+
+    assert len(INSTRUCTIONS) <= OLD_INSTRUCTIONS_LEN * 1.2
+    assert [int(n) for n in re.findall(r"(?m)^(\d+)\. ", INSTRUCTIONS)] == list(range(1, 14))
+    # svako pravilo je dvojezično (hr / en)
+    for n in range(1, 14):
+        assert " / " in _rule(n), n
+
+
+def test_tool_description_aligned():
+    from mealmeter.server import DESCRIPTIONS
+
+    plan = DESCRIPTIONS["plan_basket"]
+    assert "počni njime" not in plan and "Preporuka je" not in plan and ">= 80 %" not in plan
+    for word in ("Samo recept: ne zovi dok korisnik ne pristane", "Svaka promjena: novi poziv", "price_spread",
+                 "cheaper_elsewhere", "lanci sa svim sastojcima"):
+        assert word in plan, word
