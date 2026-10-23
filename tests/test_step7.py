@@ -218,3 +218,14 @@ def test_rule_no_store():
                    "ponudi točan popis za trgovinu koju odabere", "price_spread"):
         assert phrase in text, phrase
     assert "Preporuka je trgovina s najmanjim total_to_buy" not in text
+
+
+# --- 5. popis umjesto tablice -----------------------------------------------------------------------------------
+
+def test_rule_list_not_table():
+    text = _instructions()
+    for phrase in ("Stavke prikaži kao popis: proizvod, veličina pakiranja (pack_size), cijena pakiranja (cost_pack)",
+                   "tablicu\n   koristi samo ako je korisnik traži", "Usporedbu lanaca također kao popis, jedan lanac po retku",
+                   "a table only if the user asks for one"):
+        assert phrase in text, phrase
+    assert "Tablica stavki ima stupce" not in text and "Item table columns" not in text

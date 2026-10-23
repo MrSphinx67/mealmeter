@@ -7,6 +7,7 @@
 | 2 kad pitati: samo recept / pitanje o cijeni | gotovo |
 | 3 poznata trgovina: točan popis, drugi lanac samo ako je bitno jeftiniji | gotovo, uz novo polje `cheaper_elsewhere` |
 | 4 bez trgovine: "Sve možeš kupiti u:" | gotovo; usporedba sad sadrži samo potpune lance, novo polje `price_spread` |
+| 5 popis umjesto tablice | gotovo |
 
 Ništa nije deployano.
 
@@ -150,3 +151,13 @@ Nutellom u Osijeku 7,98 / 9,52 € (1,54 €, 19 %) nije. Ako treba "oba uvjeta"
 najjeftiniji, oba praga, jedan lanac), polje samo bez `store`, pravilo u uputama i nema stare preporuke;
 `test_step5b` (more_chains s adresama) i `test_server` (popis riječi) prilagođeni. pytest izlazni kod 0 (1040
 prolazi, 3 preskočena); `MM_GOLDEN=1` izlazni kod 0; sažeta baza `golden.py --check` 23/23 jednako.
+
+## 5. Popis umjesto tablice
+
+Staro pravilo 7 ("Tablica stavki ima stupce: proizvod, veličina pakiranja, cijena pakiranja, utrošak") zamijenjeno je
+(hr i en): stavke kao popis (proizvod, veličina pakiranja, cijena pakiranja), tablica samo ako je korisnik traži;
+usporedba lanaca također kao popis, jedan lanac po retku. Utrošak (cost_used) više nije stupac stavke, jer ga točka 5
+ne navodi; ostaje u odgovoru alata.
+
+**Provjera:** `tests/test_step7.py::test_rule_list_not_table` (novo pravilo, nema "Tablica stavki ima stupce" ni
+"Item table columns"); pytest izlazni kod 0 (1041 prolazi, 3 preskočena).

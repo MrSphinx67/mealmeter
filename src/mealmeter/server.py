@@ -95,8 +95,10 @@ Pravila / rules:
    total_used, match_quality, cheaper, delta_eur). Datum piši kao "cijene iz cjenika od 20.10.2026." (date_hr);
    ako je cijena iz starijeg cjenika (stale_days > 0), reci od kojeg datuma. / Start with summary_hr; natural
    language without internal field names; date as "cijene iz cjenika od 20.10.2026.".
-9. Tablica stavki ima stupce: proizvod, veličina pakiranja (pack_size), cijena pakiranja (cost_pack),
-   utrošak (cost_used). / Item table columns: product, pack size, pack price, cost of the amount used.
+9. Stavke prikaži kao popis: proizvod, veličina pakiranja (pack_size), cijena pakiranja (cost_pack); tablicu
+   koristi samo ako je korisnik traži. Usporedbu lanaca također kao popis, jedan lanac po retku.
+   / Items as a list: product, pack size, pack price; a table only if the user asks for one. The chain comparison
+   is a list too, one chain per line.
 10. Usporedba (comparison) mora obuhvatiti sve veće lance koji imaju trgovinu u gradu (Konzum, Lidl, Kaufland,
    Spar, Plodine, Tommy, Studenac, Eurospin): oni bez svih sastojaka su nepotpuni (incomplete, "nedostaje:
    ..."), a more_chains su potpuni lanci izvan prvih 6 redaka. Po lancu navedi najviše 2 adrese i broj trgovina.
