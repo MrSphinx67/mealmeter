@@ -90,11 +90,12 @@ def test_validate():
     old = [("konzum", 1, 10, 1000), ("lidl", 1, 10, 1000), ("ntl", 1, 10, 1000)]
     assert validate(old, old) == []
     with pytest.raises(ValidationError):
-        validate([("konzum", 1, 10, 1000)], old)  # 3 -> 1 lanac
+        validate([("konzum", 1, 10, 1000)], old)  # 3000 -> 1000 redaka
     with pytest.raises(ValidationError):
         validate([("konzum", 1, 10, 500), ("lidl", 1, 10, 500), ("ntl", 1, 10, 1000)], old)  # 3000 -> 2000
+    # pad pojedinog lanca više nije upozorenje iz validate (Korak 8: chain_report)
     warns = validate([("konzum", 1, 10, 700), ("lidl", 1, 10, 1150), ("ntl", 1, 10, 1150), ("spar", 1, 1, 10)], old)
-    assert "konzum: redaka cijena 1000 -> 700" in warns and "novi lanac spar" in warns
+    assert warns == ["novi lanac spar"]
     assert validate(old, []) == ["nema prethodne arhive za usporedbu (prvo učitavanje)"]
 
 
@@ -184,12 +185,13 @@ def test_carry_forward(env, tmp_path):
     assert stale[0][0] == 2
     assert q(db, "SELECT count(*) FROM clean.prices WHERE chain = 'konzum' AND store_id = '0907'")[0][0] == 11
 
-    # 3) dm ponovno nestane od 22.10.: cijene od 21.10. prenose se 1, 2 i 3 dana, a 4. dan (25.10.) više ne
+    # 3) dm ponovno nestane od 22.10.: cijene od 21.10. prenose se 1-7 dana (CARRY_DAYS, Korak 8), a 8. dan
+    # (29.10.) više ne
     assert q(db, "SELECT DISTINCT stale_days FROM clean.prices WHERE chain = 'dm'") == [(0,)]
-    for day, stale in (("2026-10-22", 1), ("2026-10-23", 2), ("2026-10-24", 3)):
-        assert run(base + ["--archive", str(no_dm), "--date", day]) == 0
+    for stale in range(1, 8):
+        assert run(base + ["--archive", str(no_dm), "--date", f"2026-10-{21 + stale}"]) == 0
         assert q(db, "SELECT DISTINCT stale_days FROM clean.prices WHERE chain = 'dm'") == [(stale,)]
-    assert run(base + ["--archive", str(no_dm), "--date", "2026-10-25"]) == 0
+    assert run(base + ["--archive", str(no_dm), "--date", "2026-10-29"]) == 0
     assert q(db, "SELECT count(*) FROM clean.prices WHERE chain = 'dm'")[0][0] == 0
 
 

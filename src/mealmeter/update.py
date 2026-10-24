@@ -1,7 +1,9 @@
 """Dnevno ažuriranje: najnovija arhiva cijene.dev -> provjera -> nova baza -> atomarna zamjena.
 
 Izlazni kodovi: 0 = uspjeh ili arhiva već učitana, 1 = greška, 2 = provjera nije prošla
-(pad broja lanaca ili redaka cijena veći od dopuštenog).
+(ukupni broj sirovih cijena ili čistih cijena nakon carry-forwarda pao je više od dopuštenog).
+Pojedini lanac nikad ne blokira (Korak 8): izostali ili prepolovljeni lanac nasljeđuje prethodne cijene
+(carry-forward, najviše CARRY_DAYS dana) i javlja se kao upozorenje.
 """
 
 import argparse
@@ -24,9 +26,11 @@ LIST_URL = "https://api.cijene.dev/v0/list"
 ARCHIVE_URL = "https://api.cijene.dev/v0/archive/{date}.zip"
 KEEP_DAYS = 30
 MAX_DROP = 0.20
-# carry-forward: trgovina koja nedostaje ili ima > 10 % manje cijena zadržava prethodne cijene, najviše 3 dana
+# carry-forward: trgovina koja nedostaje ili ima > 10 % manje cijena zadržava prethodne cijene, najviše
+# CARRY_DAYS dana (stale_days u odgovoru alata); poslije toga ispada iz rezultata alata, a u povijesti cijena
+# (clean.price_history) ostaje i vraća se sama kad se ponovno pojavi u arhivi
 CARRY_DROP = 0.10
-CARRY_DAYS = 3
+CARRY_DAYS = 7
 
 SCHEDULE = """\
 # Dva pokretanja dnevno (15:30 i 23:30). Najnovija arhiva uzima se iz /v0/list, a ne po satu: 20.10. je
@@ -138,30 +142,88 @@ def archive_stats(con) -> list[tuple]:
 
 
 def validate(new: list[tuple], old: list[tuple], max_drop: float = MAX_DROP) -> list[str]:
-    """Usporedba s prethodnom arhivom. Pad broja lanaca ili ukupnih redaka cijena veći od
-    max_drop -> ValidationError; pad pojedinog lanca ili nestali lanac -> upozorenje."""
+    """Usporedba s prethodnom arhivom. Pad ukupnih redaka cijena veći od max_drop -> ValidationError.
+    Broj lanaca i pojedini lanac ne blokiraju (Korak 8: izvor vikendom redovito nema branka, dm i roto);
+    izostale i prepolovljene lance javlja chain_report."""
     if not old:
         return ["nema prethodne arhive za usporedbu (prvo učitavanje)"]
-    warnings = []
-    new_by, old_by = {r[0]: r for r in new}, {r[0]: r for r in old}
-    n_new, n_old = len(new_by), len(old_by)
     rows_new, rows_old = sum(r[3] for r in new), sum(r[3] for r in old)
-    errors = []
-    if n_new < n_old * (1 - max_drop):
-        errors.append(f"broj lanaca pao s {n_old} na {n_new}")
     if rows_new < rows_old * (1 - max_drop):
-        errors.append(f"broj redaka cijena pao s {rows_old} na {rows_new} ({100 * (1 - rows_new / rows_old):.0f} %)")
-    if errors:
-        raise ValidationError("; ".join(errors))
-    for chain in sorted(set(old_by) - set(new_by)):
-        warnings.append(f"nedostaje lanac {chain}")
-    for chain in sorted(set(new_by) - set(old_by)):
-        warnings.append(f"novi lanac {chain}")
-    for chain in sorted(set(new_by) & set(old_by)):
-        before, after = old_by[chain][3], new_by[chain][3]
-        if before and after < before * (1 - max_drop):
-            warnings.append(f"{chain}: redaka cijena {before} -> {after}")
-    return warnings
+        raise ValidationError(
+            f"broj redaka cijena pao s {rows_old} na {rows_new} ({100 * (1 - rows_new / rows_old):.0f} %)")
+    new_by, old_by = {r[0] for r in new}, {r[0] for r in old}
+    return [f"novi lanac {chain}" for chain in sorted(new_by - old_by)]
+
+
+def chain_report(con, date: str, new: list[tuple], max_drop: float = MAX_DROP,
+                 max_days: int = CARRY_DAYS) -> list[dict]:
+    """Lanci koji nedostaju u arhivi (a imaju cijene u povijesti) ili imaju > max_drop manje redaka nego zadnji
+    dan kad su ih imali: {chain, missing, days, last_date, drop_pct, carried, in_results}. `days` je koliko dana
+    lanac izostaje (= stale_days prenesenih cijena), `carried` broj prenesenih cijena u clean.prices, a
+    `in_results` je False kad je lanac izostao dulje od max_days i više nije u rezultatima alata. Usporedba sa
+    zadnjim danom s cijenama, a ne samo s jučer: gavranovic 21.10.2026. nije bio u arhivi, a 22.10. je imao
+    5445 od ~1,7 milijuna cijena. Traži clean.prices, clean.price_history i clean.archive_stats nove baze."""
+    new_by = {r[0]: r[3] for r in new}
+    old_by = {chain: n for chain, n in con.execute("""
+        SELECT chain, arg_max(n_prices, date) FROM clean.archive_stats
+        WHERE date < ? AND n_prices > 0 GROUP BY chain""", [date]).fetchall()}
+    last = dict(con.execute("SELECT chain, max(date) FROM clean.price_history WHERE date < ? GROUP BY chain",
+                            [date]).fetchall())
+    carried = dict(con.execute("SELECT chain, count(*) FROM clean.prices WHERE date < ? GROUP BY chain",
+                               [date]).fetchall())
+    today = dt.date.fromisoformat(date)
+    report = []
+    for chain in sorted(set(last) | set(old_by)):
+        if not new_by.get(chain):
+            if chain not in last:
+                continue
+            days = (today - last[chain]).days
+            report.append({"chain": chain, "missing": True, "days": days, "last_date": last[chain],
+                           "drop_pct": 100, "carried": carried.get(chain, 0), "in_results": days <= max_days})
+        elif old_by.get(chain) and new_by[chain] < old_by[chain] * (1 - max_drop):
+            report.append({"chain": chain, "missing": False, "days": 0, "last_date": today,
+                           "drop_pct": round(100 * (1 - new_by[chain] / old_by[chain])),
+                           "carried": carried.get(chain, 0), "in_results": True,
+                           "before": old_by[chain], "after": new_by[chain]})
+    return report
+
+
+def describe_chain(r: dict, max_days: int = CARRY_DAYS) -> str:
+    """Jedan redak upozorenja za lanac iz chain_report."""
+    last = f"{r['last_date']:%d.%m.%Y.}"
+    if not r["missing"]:
+        return (f"{r['chain']}: redaka cijena {r['before']} -> {r['after']} (-{r['drop_pct']} %), "
+                f"preneseno {r['carried']} cijena")
+    if r["in_results"]:
+        return (f"{r['chain']}: nema u arhivi {r['days']}. dan, zadnje cijene {last}, preneseno {r['carried']} "
+                f"cijena (stale_days {r['days']})")
+    return (f"{r['chain']}: nema u arhivi {r['days']}. dan, zadnje cijene {last}; ispao iz rezultata alata "
+            f"(carry-forward najviše {max_days} dana), vraća se kad se pojavi u arhivi")
+
+
+def github_report(report: list[dict], error: str | None = None) -> None:
+    """U GitHub Actionsu: ::warning:: po lancu (::error:: kad provjera nije prošla) i sažetak u
+    GITHUB_STEP_SUMMARY. Izvan Actionsa ne radi ništa."""
+    if os.environ.get("GITHUB_ACTIONS") != "true":
+        return
+    for r in report:
+        print(f"::warning title=Lanac {r['chain']}::{describe_chain(r)}", flush=True)
+    if error:
+        print(f"::error title=update.py::{error}; baza nije promijenjena, ne deployam", flush=True)
+    path = os.environ.get("GITHUB_STEP_SUMMARY")
+    if not path or not (report or error):
+        return
+    lines = ["### update.py: lanci", ""]
+    if error:
+        lines += [f"**Provjera nije prošla:** {error}. Baza nije promijenjena, nema deploya.", ""]
+    if report:
+        lines += ["| lanac | stanje | dana izostaje | zadnje cijene | preneseno cijena |", "|---|---|---:|---|---:|"]
+        for r in report:
+            state = (("nema u arhivi" if r["in_results"] else "nema u arhivi, ispao iz rezultata")
+                     if r["missing"] else f"pad -{r['drop_pct']} %")
+            lines.append(f"| {r['chain']} | {state} | {r['days']} | {r['last_date']:%d.%m.%Y.} | {r['carried']} |")
+    with open(path, "a", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n\n")
 
 
 # --- carry-forward po trgovini -------------------------------------------------------------
@@ -268,11 +330,26 @@ def _previous(db_path: Path) -> tuple[str | None, list[tuple]]:
         con.close()
 
 
+def _clean_count(db_path: Path) -> int | None:
+    """Broj čistih cijena (clean.prices) u postojećoj bazi, ili None."""
+    if not db_path.exists():
+        return None
+    con = duckdb.connect(str(db_path), read_only=True)
+    try:
+        if not con.execute("SELECT count(*) FROM duckdb_tables() WHERE schema_name = 'clean' "
+                           "AND table_name = 'prices'").fetchone()[0]:
+            return None
+        return con.execute("SELECT count(*) FROM clean.prices").fetchone()[0]
+    finally:
+        con.close()
+
+
 def build_database(root: Path, date: str, db_path: Path, keep_days: int = KEEP_DAYS,
                    max_drop: float = MAX_DROP, info: dict | None = None) -> dict:
     """Izgradi novu bazu u privremenu datoteku, provjeri je, prenese povijest cijena i atomarno
     zamijeni `db_path`. Pri bilo kojoj grešci stara baza ostaje netaknuta."""
     prev_date, prev_stats = _previous(db_path)
+    prev_clean = _clean_count(db_path)
     tmp = db_path.with_name(f"{db_path.name}.tmp-{date}")
     tmp.unlink(missing_ok=True)
     try:
@@ -283,6 +360,11 @@ def build_database(root: Path, date: str, db_path: Path, keep_days: int = KEEP_D
         # provjera gleda stvarnu arhivu; zatim nepotpune trgovine nasljeđuju prethodne cijene
         carried = carry_forward(con, db_path, date) if prev_date and prev_date != date else []
         build_clean(con)
+        # druga zaštita: što alat stvarno vidi (nakon carry-forwarda); hvata kvar u našoj izgradnji
+        n_clean = con.execute("SELECT count(*) FROM clean.prices").fetchone()[0]
+        if prev_clean and n_clean < prev_clean * (1 - max_drop):
+            raise ValidationError(f"broj čistih cijena (nakon carry-forwarda) pao s {prev_clean} na {n_clean} "
+                                  f"({100 * (1 - n_clean / prev_clean):.0f} %)")
 
         # statistika arhiva i povijest cijena (zadnjih keep_days dana, uključujući današnji)
         cutoff = (dt.date.fromisoformat(date) - dt.timedelta(days=keep_days - 1)).isoformat()
@@ -318,14 +400,15 @@ def build_database(root: Path, date: str, db_path: Path, keep_days: int = KEEP_D
         con.execute("""INSERT INTO clean.price_history
                        SELECT date, chain, store_id, product_id, price, special_price, price_eff,
                               price_per_unit, per_unit FROM clean.prices WHERE date = ?""", [date])
+        report = chain_report(con, date, stats, max_drop)
         summary = {
-            "date": date, "previous_date": prev_date, "warnings": warnings,
+            "date": date, "previous_date": prev_date, "warnings": warnings, "chain_report": report,
             "chains": len(stats), "stores": sum(r[1] for r in stats), "products": sum(r[2] for r in stats),
             "price_rows": sum(r[3] for r in stats),
             "price_rows_previous": sum(r[3] for r in prev_stats) if prev_stats else None,
             "diff": compare_stats(stats, prev_stats) if prev_stats and prev_date != date else [],
             "carried": carried,
-            "clean_prices": con.execute("SELECT count(*) FROM clean.prices").fetchone()[0],
+            "clean_prices": n_clean, "clean_prices_previous": prev_clean,
             "history_days": [d.isoformat() for (d,) in con.execute(
                 "SELECT DISTINCT date FROM clean.price_history ORDER BY date").fetchall()],
         }
@@ -396,6 +479,7 @@ def run(argv: list[str] | None = None) -> int:
         summary = build_database(root, date, db_path, args.keep_days, args.max_drop, info)
     except ValidationError as e:
         log(f"PROVJERA NIJE PROŠLA: {e}; baza nije promijenjena")
+        github_report([], str(e))
         return 2
     except Exception as e:  # noqa: BLE001
         log(f"GREŠKA: {type(e).__name__}: {e}; baza nije promijenjena")
@@ -408,10 +492,14 @@ def run(argv: list[str] | None = None) -> int:
     print(f"  trgovina:        {summary['stores']}")
     print(f"  proizvoda:       {summary['products']}")
     print(f"  redaka cijena:   {summary['price_rows']}{delta}")
-    print(f"  čistih cijena:   {summary['clean_prices']}")
+    prev_clean = summary["clean_prices_previous"]
+    print(f"  čistih cijena:   {summary['clean_prices']}"
+          + (f" ({summary['clean_prices'] - prev_clean:+d})" if prev_clean else ""))
     print(f"  povijest:        {len(summary['history_days'])} dana ({summary['history_days'][0]} .. {summary['history_days'][-1]})")
     for w in summary["warnings"]:
         print(f"  ! {w}")
+    for r in summary["chain_report"]:
+        print(f"  ~ {describe_chain(r)}")
     if summary["carried"]:
         n_rows = sum(r[4] for r in summary["carried"])
         chains = sorted({r[0] for r in summary["carried"]})
@@ -421,6 +509,7 @@ def run(argv: list[str] | None = None) -> int:
         print(f"  {'lanac':<28}{'trgovina':>9}{'Δ':>6}{'proizvoda':>11}{'Δ':>8}{'cijena':>11}{'Δ':>9}")
         for chain, st, dst, pr, dpr, pc, dpc in summary["diff"]:
             print(f"  {chain:<28}{st:>9}{dst:>+6}{pr:>11}{dpr:>+8}{pc:>11}{dpc:>+9}")
+    github_report(summary["chain_report"])
     return 0
 
 

@@ -72,8 +72,11 @@ Ako POST /mcp vrati `405` s `server: Vercel` i `allow: GET, HEAD`, zahtjev ne st
    - `VERCEL_PROJECT_ID`: `projectId` iz `.vercel/project.json`.
 3. Actions → **update** → Run workflow (prvi put ručno). Prvo pokretanje gradi bazu bez prethodne
    (nema usporedbe ni prenošenja cijena); zatim workflow radi sam u 13:30 i 21:30 UTC.
-4. Workflow ne deploya ako: update.py javi pad > 20 % (ukupno ili po lancu) ili nestali lanac; zlatni izlazi sažete
-   baze nisu jednaki punoj; testovi ne prolaze; paket je veći od 490 MB.
+4. Workflow ne deploya ako: update.py završi s izlazom 2 (ukupni broj sirovih cijena ili čistih cijena nakon
+   carry-forwarda pao je > 20 %); zlatni izlazi sažete baze nisu jednaki punoj; testovi ne prolaze; paket je veći
+   od 220 MB ili datoteka veća od 95 MB. Izostali ili prepolovljeni lanac ne prekida deploy (Korak 8): njegove
+   cijene se prenose najviše 7 dana (`CARRY_DAYS`, uz `stale_days`), a workflow ga javi kao `::warning::` i u
+   sažetku pokretanja.
 
 ## 4. Postavke (po želji: Project Settings → Environment Variables)
 

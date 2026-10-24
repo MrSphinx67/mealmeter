@@ -3,8 +3,9 @@
 | točka | stanje |
 |---|---|
 | 1 dijagnoza | gotovo: izvor stvarno nema lance (branka, dm, roto vikendom), lažne uzbune kod nas nema |
-| 2 odluka | prijedlog politike niže; **čeka potvrdu**, logika provjere nije mijenjana |
+| 2 odluka | prijedlog prihvaćen uz izmjenu (jedan lanac nikad ne blokira, carry-forward 7 dana) |
 | 3 update.yml: Node 24, ubuntu-24.04 | gotovo |
+| 4 provedba politike | gotovo: update.py, workflow, datum prenesenih cijena u usporedbi lanaca, testovi |
 
 Ništa nije deployano.
 
@@ -141,3 +142,84 @@ cijene dulje uz veći `stale_days` (npr. 7 dana) prije blokade?
   setup-uv od v8 izlazi kao nepromjenjivo izdanje bez pomičnog `v10` taga, pa je fiksiran na točnu verziju;
   `python-version` ulaz i dalje postoji. Ključevi cachea (`mealmeter-db-`) se ne mijenjaju.
 - logika provjere (grep na `! ... ->` i `nedostaje lanac`) nije dirana.
+
+## 4. Provedba (prihvaćena politika)
+
+Prihvaćeno: podtočke 1, 2, 4 i 5 te ukidanje pravila o broju lanaca, uz izmjenu za lanac koji izostaje dulje od 3
+dana (prijedlog `allow_missing` otpada):
+
+- **Jedan lanac nikad ne blokira.** `validate` diže `ValidationError` samo kad ukupni broj sirovih redaka cijena
+  padne > 20 %. Pravilo o broju lanaca je ukinuto. Upozorenja `nedostaje lanac` i `X: redaka cijena a -> b` više
+  ne dolaze iz `validate`, nego iz `chain_report`.
+- **Carry-forward 7 dana:** `CARRY_DAYS = 7` u `update.py` (jedino mjesto; isti prag vrijedi za trgovinu i za
+  lanac). Prenesene cijene imaju `stale_days` 1-7. 8. dan lanac ispada iz `clean.prices` (rezultati alata).
+  Ne briše se iz baze: njegove cijene ostaju u `clean.price_history` (30 dana) i lanac se vraća sam kad se
+  ponovno pojavi u arhivi.
+- **Druga blokada:** broj čistih cijena (`clean.prices`, nakon carry-forwarda) pao je > 20 % naspram prethodne
+  baze, pa izlaz 2 i baza se ne mijenja. Hvata kvar u našoj izgradnji.
+- **`chain_report` / `describe_chain`:** za svaki lanac koji nema u arhivi, a ima cijene u povijesti, javlja
+  koliko dana izostaje, datum zadnjih cijena, broj prenesenih cijena i je li još u rezultatima. Javlja i svaki
+  lanac s > 20 % manje redaka. Pad se mjeri prema **zadnjem danu kad je lanac imao cijene**
+  (`clean.archive_stats`), a ne samo prema jučer. Bez toga bi gavranovic 22.10. (5 445 cijena nakon dana bez
+  arhive, prije 854 124) izgledao kao "novi lanac" (nađeno u replayu, test `test_drop_after_missing_day`).
+- **Workflow:** grep i `exit 3` su uklonjeni; deploy prekida samo izlazni kod update.py (`pipefail`). U Actionsu
+  (`GITHUB_ACTIONS=true`) update.py za svaki lanac iz `chain_report` ispiše `::warning title=Lanac X::...` i doda
+  tablicu u `GITHUB_STEP_SUMMARY` (lanac, stanje, dana izostaje, zadnje cijene, preneseno cijena). Kad provjera
+  ne prođe: `::error::` i razlog u sažetku.
+- **Odgovor alata:** `stale_days` je već bio na stavkama, trgovini (`best_store`), `find_products`, `get_prices`
+  i `list_stores`, ali **ne u usporedbi lanaca**. Vikendom bi "Sve možeš kupiti u: ... dm ..." navelo jučerašnje
+  cijene bez datuma. Zato `comparison`, `more_chains`, `incomplete` i `cheaper_elsewhere` sada nose `date_hr` i
+  `stale_days`, ali samo kad je `stale_days` > 0, pa se svježi odgovori ne mijenjaju.
+- **Upute:** pravilo 10 već je tražilo da Claude kaže datum kad je `stale_days` > 0. Dopunjeno je s "i kod lanca u
+  usporedbi" (6024 znaka, granica 6043).
+- Dokumentacija usklađena: `docs/DEPLOY.md`, `docs/SCHEMA.md`, `README.md` (3 -> 7 dana, nova pravila blokade).
+
+**Testovi** (`tests/test_step8.py`, sintetičke arhive iz `tests/fixtures/archive`; ne ovise o `data/raw/diag8`):
+
+| test | scenarij | očekivano |
+|---|---|---|
+| `test_weekend_three_chains_missing` | subota i nedjelja bez 3 lanca (dm, roto, trgovina-krk; branke nema u fixtureu) | exit 0, `stale_days` 1 pa 2, `::warning::` i sažetak; u ponedjeljak svježe |
+| `test_sunday_18_10` | 30 % lanaca nema, lidl -67 %, ukupno -12,5 % | exit 0, lidl javljen kao pad, `clean.prices` jednako |
+| `test_chain_missing_4_and_8_days` | dm izostaje 8 dana | 4. i 7. dan u rezultatima (`stale_days` 4, 7); 8. dan ispada, ostaje u povijesti, exit 0; vraća se svjež |
+| `test_total_raw_drop_blocks` | ukupno sirovih -74 % | exit 2, baza netaknuta, `::error::` i sažetak |
+| `test_clean_drop_blocks` | sirovi jednaki, izgradnja izgubi pola čistih cijena | exit 2, baza netaknuta |
+| `test_drop_after_missing_day` | lanca nema, sutradan 1 od 9 cijena | javljen kao pad -89 % |
+| `test_stale_chain_in_comparison` | usporedba bez trgovine, konzum s prenesenim cijenama | `stale_days` 1 i `date_hr` samo kod konzuma |
+| `test_validate_only_total` | `validate` | samo ukupni pad blokira |
+
+Izmijenjeni postojeći testovi: `test_update.py` (carry-forward 7 umjesto 3 dana, `validate` bez pravila o broju
+lanaca), `test_step5v.py` (workflow bez grepa i `exit 3`). Ukupno 1064 testa prolazi (+3 preskočena), uz
+`MM_GOLDEN=1` 1067. Zlatni izlazi ponovno zapisani nad lokalnom bazom (20.10.): u 3 scenarija (bolonjez Zagreb,
+already_have Zagreb, varivo Slavonski Brod) jedan nepotpuni lanac sada ima `date_hr` 19.10. i `stale_days` 1.
+Sažeta baza daje 23/23 jednako.
+
+**Replay na stvarnim arhivama** s novim kodom, od kopije lokalne baze (20.10.), DuckDB 1500 MB, vrh ~2,0 GB:
+
+| dan | izlaz | upozorenja (lanac, dana izostaje, preneseno cijena) | sirovih | čistih (Δ) |
+|---|---|---|---:|---:|
+| 21.10. | 0 | gavranovic 1, 1 331 948 | 16 199 871 | 16 636 025 (+19 935) |
+| 22.10. | 0 | metro 1, 73 728; stanic 1, 49 899 | 16 113 067 | 16 644 887 (+8 862) |
+| 23.10. | 0 | - | 17 930 684 | 17 041 202 (+396 315) |
+| 24.10. | 0 | branka 1, 24 539; dm 1, 21 910; roto 1, 79 262 | 17 821 166 | 17 058 781 (+17 579) |
+
+Replay je pokrenut prije popravka usporedbe sa zadnjim danom s cijenama. Na 22.10. zato nije javio gavranovic
+(5 445 naspram 854 124). `archive_stats` iz replaya potvrđuje da bi ga novi kod javio s -99 %. `chain_report`
+ponovno pokrenut nad bazom iz replaya za 24.10. daje ista tri retka.
+
+**Veličine** (sažeta baza iz replaya 24.10., s prenesenim cijenama branka/dm/roto): `compact.duckdb` 91,3 MB
+(dosad 92,3 MB). `vercel build --prod` (bez deploya) s njom: paket 184,0 MB (granica 220), najveća datoteka 91,3 MB
+(granica 95). Izvorna `data/compact.duckdb` vraćena nakon mjerenja (bajt-identična).
+
+**Napomena: jedan velik lanac i dalje blokira.** Pravilo "ukupno sirovih > 20 %" znači da bi nestanak samo Plodina
+blokirao deploy (6,1 od 17,8 milijuna redaka = 34 %). Isto vrijedi za kombinaciju npr. konzuma i ntl-a (~19 %)
+uz još jedan lanac. To je provedeno doslovno kako je zadano. Ako "jedan lanac nikad ne blokira" treba vrijediti i
+za Plodine, pravilo sirovih redaka mogao bi zamijeniti samo pad čistih cijena (koji carry-forward pokriva) ili
+sirovi pad bez najvećeg lanca. Nije mijenjano bez potvrde.
+
+Zlatna provjera kao u CI-ju i na bazama iz replaya (24.10.): `--write` nad punom, `--check` nad sažetom daje
+23/23 jednako; prenesene cijene (`stale_days` > 0) pojavljuju se u 18 scenarija. Zlatni izlazi u repozitoriju
+nakon toga su vraćeni na one nad lokalnom bazom.
+
+`data/raw/diag8/` (15 arhiva, baze iz replaya, 6,1 GB) obrisan; testovi ne ovise o njemu.
+
+Ništa nije deployano.

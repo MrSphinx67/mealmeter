@@ -96,7 +96,8 @@ Pravila / rules:
    / Items and chains as lists (product, pack size, pack price; one chain per line); a table only if asked.
 10. Piši prirodnim jezikom, bez internih naziva polja (stale_days, total_to_buy, total_used, match_quality,
    cheaper, delta_eur); utrošak (total_used) i from_stock_value su samo informativni. Datum piši kao "cijene iz
-   cjenika od 20.10.2026." (date_hr); ako je cijena iz starijeg cjenika (stale_days > 0), reci od kojeg datuma.
+   cjenika od 20.10.2026." (date_hr); ako je cijena iz starijeg cjenika (stale_days > 0, i kod lanca u
+   usporedbi), reci od kojeg datuma.
    / Natural language, no internal field names; date as "cijene iz cjenika od 20.10.2026.".
 11. Alternativu zovi "jeftinijom" samo kad je cheaper = true (razlika je za istu potrebnu količinu; size_note
    kad je pakiranje drukčije). Kad proizvoda nema na polici, ponudi alternatives iz iste trgovine.

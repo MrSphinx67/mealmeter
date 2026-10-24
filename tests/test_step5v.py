@@ -96,7 +96,8 @@ def test_update_workflow():
     for secret in ("VERCEL_TOKEN", "VERCEL_ORG_ID", "VERCEL_PROJECT_ID"):
         assert f"secrets.{secret}" in text
     assert "git commit" not in text and "git push" not in text  # baza se ne commita
-    assert "nedostaje lanac" in runs and "exit 3" in runs  # pad lanca > 20 % prekida deploy
+    # Korak 8: deploy prekida samo izlazni kod update.py (pipefail), a ne grep po upozorenjima lanaca
+    assert "pipefail" in runs and "nedostaje lanac" not in runs and "exit 3" not in runs
     assert "vercel_bundle_size.py --max-mb 220 --max-file-mb 95" in runs  # stvarna veličina paketa (5V2), ne du na .vercel/output
 
 

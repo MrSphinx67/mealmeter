@@ -1118,6 +1118,12 @@ def confirm_and_substitution(need: Need, chosen: dict, product: str) -> dict:
 MM_SWITCH_EUR = 2.00
 
 
+def _stale(s: dict) -> dict:
+    """date_hr i stale_days trgovine samo kad su cijene prenesene (carry-forward, stale_days > 0), da se u
+    usporedbi lanaca može reći od kojeg su datuma (Korak 8)."""
+    return {"date_hr": s["date_hr"], "stale_days": s["stale_days"]} if s.get("stale_days") else {}
+
+
 def cheaper_elsewhere(best: dict, others: list[dict]) -> dict | None:
     """Uz zadanu trgovinu (store): najjeftiniji drugi lanac u gradu sa svim sastojcima, samo ako je jeftiniji za
     više od MM_SWITCH_EUR (Korak 7.3: odgovor je popis za zadanu trgovinu, a drugi lanac se spominje
@@ -1134,8 +1140,13 @@ def cheaper_elsewhere(best: dict, others: list[dict]) -> dict | None:
     diff = round(best["total_to_buy"] - total, 2)
     if diff <= MM_SWITCH_EUR:
         return None
-    return {"chain": chain, "address": s["address"], "n_stores_city": count[chain], "total_to_buy": total,
-            "difference_eur": diff}
+    out = {"chain": chain, "address": s["address"], "n_stores_city": count[chain], "total_to_buy": total,
+           "difference_eur": diff}
+    items = list(s["items"].values())
+    if any(it.get("stale_days") for it in items):  # prenesene cijene: od kojeg su datuma (Korak 8)
+        oldest = min(items, key=lambda it: it["date"])
+        out.update(date_hr=oldest["date_hr"], stale_days=max(it["stale_days"] or 0 for it in items))
+    return out
 
 
 def set_totals(store: dict, items: list[dict]) -> None:
@@ -1200,14 +1211,15 @@ def compare_chains(ranked: list[dict], in_city: Counter, n_needs: int, needs: li
             complete.append({"chain": s["chain"], "addresses": addresses,
                              "n_stores_city": in_city.get(s["chain"], 1), "total_to_buy": s["total_to_buy"],
                              "total_used": s["total_used"], "n_matched": s["n_matched"], "n_ingredients": n_needs,
-                             "complete": True})
+                             "complete": True, **_stale(s)})
         else:
             incomplete.append({"chain": s["chain"], "n_matched": s["n_matched"], "total_to_buy": s["total_to_buy"],
-                               "missing": s["missing"], "note": "nedostaje: " + ", ".join(s["missing"])})
+                               "missing": s["missing"], "note": "nedostaje: " + ", ".join(s["missing"]), **_stale(s)})
     names = [n.input.get("name") for n in needs or []]
     for chain in sorted((city_chains or set()) & set(MAJOR_CHAINS) - set(best)):
         incomplete.append({"chain": chain, "n_matched": 0, "missing": names, "note": "nedostaje: " + ", ".join(names)})
-    more = [{k: r[k] for k in ("chain", "addresses", "n_stores_city", "total_to_buy", "n_matched")}
+    more = [{k: r[k] for k in ("chain", "addresses", "n_stores_city", "total_to_buy", "n_matched", "date_hr",
+                               "stale_days") if k in r}
             for r in complete[COMPARE_ROWS:]]
     return complete[:COMPARE_ROWS], incomplete, more
 

@@ -546,12 +546,14 @@
   },
   {
    "chain": "stanic",
+   "date_hr": "19.10.2026.",
    "missing": [
     "mljeveno meso",
     "luk"
    ],
    "n_matched": 5,
    "note": "nedostaje: mljeveno meso, luk",
+   "stale_days": 1,
    "total_to_buy": 12.65
   },
   {

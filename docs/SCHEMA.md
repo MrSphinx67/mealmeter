@@ -260,8 +260,9 @@ Ostaje:
   objavljuje se oko 22 h (20.10. u 13 h još nije postojala, 404). Ako popis nije dostupan, skripta
   ispituje obrazac URL-a za zadnjih 7 dana.
 - Tijek: preuzimanje (`data/raw/<datum>.zip`, provjera veličine) → raspakiravanje u svježu mapu →
-  izgradnja u privremenu bazu → provjera prema prethodnoj arhivi (pad broja lanaca ili redaka cijena
-  > 20 % prekida, izlaz 2) → povijest → `os.replace` (atomarno).
+  izgradnja u privremenu bazu → provjera prema prethodnoj arhivi (pad ukupnih sirovih redaka cijena
+  > 20 % prekida, izlaz 2) → carry-forward → čiste tablice (pad `clean.prices` > 20 % naspram prethodne baze
+  prekida, izlaz 2) → povijest → `os.replace` (atomarno).
 - Nove tablice: `clean.archive_stats (date, chain, n_stores, n_products, n_prices)` i
   `clean.price_history (date, chain, store_id, product_id, price, special_price, price_eff,
   price_per_unit, per_unit)`, za zadnjih 30 dana (`--keep-days`).
@@ -271,7 +272,7 @@ Ostaje:
   dnevna pokretanja (15:30 i 23:30, `--print-schedule`) sigurna.
 - Ispis nakon učitavanja uključuje razlike po lancu (trgovine, proizvodi, cijene) naspram prethodne arhive.
 - **Carry-forward:** trgovina koja nedostaje u novoj arhivi ili ima više od 10 % manje cijena nego u prethodnoj
-  zadržava prethodne cijene (sirovi retci stores/products/prices s izvornim datumom), najviše 3 dana. U
+  zadržava prethodne cijene (sirovi retci stores/products/prices s izvornim datumom), najviše 7 dana (`CARRY_DAYS`). U
   `clean.prices` takvi retci imaju `stale_days` > 0. U `price_history` ulaze samo cijene dana arhive.
 - `uv run python scripts/update.py --print-schedule` ispisuje cron (`30 15,23 * * *`) i systemd timer s dva
   `OnCalendar`; ništa se ne instalira.

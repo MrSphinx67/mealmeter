@@ -2,7 +2,9 @@
 #
 # update.py -> build_compact.py -> zlatni izlazi (puna == sažeta baza) -> vercel build -> vercel deploy --prebuilt --prod
 # Baze se NE commitaju (GitHub odbija datoteke > 100 MB). Prethodna puna baza čuva se u Actions cacheu, da update.py
-# ima s čime usporediti (pad > 20 % prekida) i odakle prenijeti cijene trgovina koje nedostaju (carry-forward).
+# ima s čime usporediti i odakle prenijeti cijene trgovina koje nedostaju (carry-forward, najviše 7 dana).
+# Deploy prekida samo izlazni kod update.py (2: ukupno sirovih ili čistih cijena > 20 % manje); izostali ili
+# prepolovljeni lanac je ::warning:: i redak u sažetku pokretanja (Korak 8).
 #
 # Tajne (Settings -> Secrets and variables -> Actions): VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID.
 
@@ -52,17 +54,13 @@ jobs:
       - name: Ažuriranje baze (update.py)
         id: update
         run: |
+          # izlazni kod update.py (pipefail) prekida korak, pa i deploy; upozorenja po lancu ne
           set -o pipefail
           uv run python scripts/update.py ${{ inputs.force && '--force' || '' }} 2>&1 | tee update.log
           if grep -q "ništa za napraviti" update.log; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
-          fi
-          # pad pojedinog lanca > 20 % ili nestali lanac je upozorenje u update.py; ovdje prekida deploy
-          if grep -E "^  ! (.*->|nedostaje lanac)" update.log; then
-            echo "::error::update.py: pad lanca > 20 % ili nestali lanac; ne deployam"
-            exit 3
           fi
 
       - name: Spremi punu bazu (cache)

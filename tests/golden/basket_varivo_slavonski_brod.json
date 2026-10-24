@@ -561,6 +561,7 @@
   },
   {
    "chain": "stanic",
+   "date_hr": "19.10.2026.",
    "missing": [
     "grašak",
     "luk",
@@ -569,6 +570,7 @@
    ],
    "n_matched": 6,
    "note": "nedostaje: grašak, luk, mrkva, krumpir",
+   "stale_days": 1,
    "total_to_buy": 10.99
   },
   {
