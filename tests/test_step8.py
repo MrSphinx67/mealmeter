@@ -1,12 +1,12 @@
-"""Korak 8: pojedini lanac nikad ne blokira update; carry-forward do CARRY_DAYS dana, blokada samo kad ukupni broj
-sirovih ili čistih cijena padne > 20 %. Sintetičke arhive iz tests/fixtures/archive (80 cijena, 10 lanaca)."""
+"""Korak 8: izvor nikad ne blokira update; carry-forward do CARRY_DAYS dana, ukupni pad sirovih cijena > 20 % je
+upozorenje, a blokada (exit 2) samo kad broj čistih cijena nakon carry-forwarda padne > 20 %. Sintetičke arhive iz tests/fixtures/archive (80 cijena, 10 lanaca)."""
 
 import datetime as dt
 
 import pytest
 
 from mealmeter import update
-from mealmeter.update import CARRY_DAYS, ValidationError, run, validate
+from mealmeter.update import CARRY_DAYS, describe_total, run, total_drop, validate
 from tests.test_update import make_zip_custom, q
 
 WEEKEND = {"dm", "roto", "trgovina-krk"}  # kao branka, dm i roto vikendom (branke nema u fixtureu)
@@ -95,27 +95,45 @@ def test_chain_missing_4_and_8_days(env, capsys):
     assert stale(db, "dm") == [(0,)]
 
 
-def test_total_raw_drop_blocks(env, capsys, monkeypatch):
-    """Ukupno sirovih cijena -74 % (bez konzuma, lidla i eurospina): exit 2, baza netaknuta, ::error:: i sažetak."""
+def test_big_chain_missing_warns(env, capsys, monkeypatch):
+    """Kao nestanak Plodina (34 % svih redaka): eurospin je 32 od 80 cijena u fixtureu. Ukupno sirovih -40 % je samo
+    upozorenje (::warning:: i redak u sažetku s lancima koji su najviše pridonijeli); deploy ide, cijene prenesene."""
     db = env["db"]
+    no_big = make_zip_custom(env["tmp"] / "no_eurospin.zip", skip={"eurospin"})
+    assert load(env, env["full"], "2026-10-19") == 0
+    n_clean = q(db, "SELECT count(*) FROM clean.prices")[0][0]
+    summary = env["tmp"] / "summary.md"
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary))
+    capsys.readouterr()
+    assert load(env, no_big, "2026-10-20") == 0
+    out = capsys.readouterr().out
+    assert "  ! ukupno sirovih redaka cijena 80 -> 48 (-40 %); najviše pridonijeli: eurospin -32" in out
+    assert "::warning title=Ukupno sirovih cijena -40 %::ukupno sirovih redaka cijena 80 -> 48 (-40 %)" in out
+    assert "::error" not in out
+    assert "**Ukupno sirovih cijena -40 %** (80 -> 48); najviše pridonijeli: eurospin (-32)." in summary.read_text(encoding="utf-8")
+    assert stale(db, "eurospin") == [(1,)] and q(db, "SELECT count(*) FROM clean.prices")[0][0] == n_clean
+
+
+def test_total_raw_drop_three_chains_warns(env, capsys):
+    """Bez konzuma, lidla i eurospina: ukupno -74 %, upozorenje navodi tri lanca od najvećeg pada; exit 0."""
     small = make_zip_custom(env["tmp"] / "small.zip", skip={"konzum", "lidl", "eurospin"})
+    assert load(env, env["full"], "2026-10-19") == 0
+    capsys.readouterr()
+    assert load(env, small, "2026-10-20") == 0
+    assert ("  ! ukupno sirovih redaka cijena 80 -> 21 (-74 %); najviše pridonijeli: eurospin -32, konzum -18, lidl -9"
+            in capsys.readouterr().out)
+
+
+def test_clean_drop_blocks(env, capsys, monkeypatch):
+    """Sirovi retci jednaki, ali izgradnja izgubi pola čistih cijena (kvar kod nas): exit 2, baza netaknuta,
+    ::error:: i razlog u sažetku."""
+    db = env["db"]
     assert load(env, env["full"], "2026-10-19") == 0
     mtime = db.stat().st_mtime
     summary = env["tmp"] / "summary.md"
     monkeypatch.setenv("GITHUB_ACTIONS", "true")
     monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary))
-    capsys.readouterr()
-    assert load(env, small, "2026-10-20") == 2
-    assert db.stat().st_mtime == mtime
-    assert "::error title=update.py::broj redaka cijena pao s 80 na 21 (74 %)" in capsys.readouterr().out
-    assert "**Provjera nije prošla:** broj redaka cijena pao s 80 na 21" in summary.read_text(encoding="utf-8")
-
-
-def test_clean_drop_blocks(env, monkeypatch):
-    """Sirovi retci jednaki, ali izgradnja izgubi pola čistih cijena (kvar kod nas): exit 2, baza netaknuta."""
-    db = env["db"]
-    assert load(env, env["full"], "2026-10-19") == 0
-    mtime = db.stat().st_mtime
     build_clean = update.build_clean
 
     def broken(con):
@@ -124,17 +142,24 @@ def test_clean_drop_blocks(env, monkeypatch):
         return out
 
     monkeypatch.setattr(update, "build_clean", broken)
+    capsys.readouterr()
     assert load(env, env["full"], "2026-10-20") == 2
     assert db.stat().st_mtime == mtime and not list(db.parent.glob("*.tmp-*"))
+    assert "::error title=update.py::broj čistih cijena (nakon carry-forwarda) pao s " in capsys.readouterr().out
+    assert "**Provjera nije prošla:** broj čistih cijena (nakon carry-forwarda) pao s " in summary.read_text(encoding="utf-8")
 
 
-def test_validate_only_total():
+def test_validate_and_total_drop():
     old = [("konzum", 1, 10, 1000), ("lidl", 1, 10, 1000), ("ntl", 1, 10, 1000), ("dm", 1, 1, 10)]
-    assert validate(old[:3], old) == []  # nestali lanac nije ni greška ni upozorenje (javlja ga chain_report)
-    assert validate([old[0], old[1], ("ntl", 1, 10, 500), old[3]], old) == []  # ntl -50 %, ukupno -17 %
+    assert validate(old[:3], old) == []  # nestali lanac javlja chain_report
     assert validate([("konzum", 1, 10, 1000), ("lidl", 1, 10, 1000), ("spar", 1, 1, 500)], old) == ["novi lanac spar"]
-    with pytest.raises(ValidationError):
-        validate([("konzum", 1, 10, 1000), ("lidl", 1, 10, 1000)], old)  # 3010 -> 2000: -34 %
+    assert validate([("konzum", 1, 10, 1000)], old) == []  # ni ukupni pad -67 % više ne diže grešku
+    assert total_drop([old[0], old[1], ("ntl", 1, 10, 500), old[3]], old) is None  # -17 %: bez upozorenja
+    d = total_drop([("konzum", 1, 10, 900), ("lidl", 1, 10, 1000), ("spar", 1, 1, 50)], old)  # 3010 -> 1950
+    assert d == {"before": 3010, "after": 1950, "pct": 35, "chains": [("ntl", -1000), ("konzum", -100), ("dm", -10)]}
+    assert describe_total(d) == ("ukupno sirovih redaka cijena 3010 -> 1950 (-35 %); "
+                                 "najviše pridonijeli: ntl -1000, konzum -100, dm -10")
+    assert total_drop(old, []) is None
 
 
 def test_stale_chain_in_comparison(env):

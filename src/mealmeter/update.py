@@ -1,9 +1,9 @@
 """Dnevno ažuriranje: najnovija arhiva cijene.dev -> provjera -> nova baza -> atomarna zamjena.
 
 Izlazni kodovi: 0 = uspjeh ili arhiva već učitana, 1 = greška, 2 = provjera nije prošla
-(ukupni broj sirovih cijena ili čistih cijena nakon carry-forwarda pao je više od dopuštenog).
-Pojedini lanac nikad ne blokira (Korak 8): izostali ili prepolovljeni lanac nasljeđuje prethodne cijene
-(carry-forward, najviše CARRY_DAYS dana) i javlja se kao upozorenje.
+(broj čistih cijena nakon carry-forwarda pao je više od dopuštenog).
+Izvor ne blokira (Korak 8): izostali ili prepolovljeni lanac nasljeđuje prethodne cijene (carry-forward, najviše
+CARRY_DAYS dana), a on i ukupni pad sirovih cijena javljaju se kao upozorenja.
 """
 
 import argparse
@@ -65,7 +65,7 @@ WantedBy=timers.target
 
 
 class ValidationError(RuntimeError):
-    """Nova arhiva izgleda nepotpuno u odnosu na prethodnu."""
+    """Nova baza ima > MAX_DROP manje čistih cijena (nakon carry-forwarda) nego prethodna."""
 
 
 def log(msg: str) -> None:
@@ -141,18 +141,35 @@ def archive_stats(con) -> list[tuple]:
     """).fetchall()
 
 
-def validate(new: list[tuple], old: list[tuple], max_drop: float = MAX_DROP) -> list[str]:
-    """Usporedba s prethodnom arhivom. Pad ukupnih redaka cijena veći od max_drop -> ValidationError.
-    Broj lanaca i pojedini lanac ne blokiraju (Korak 8: izvor vikendom redovito nema branka, dm i roto);
-    izostale i prepolovljene lance javlja chain_report."""
+def validate(new: list[tuple], old: list[tuple]) -> list[str]:
+    """Usporedba s prethodnom arhivom; ništa u sirovoj arhivi ne blokira (Korak 8: izvor vikendom redovito nema
+    branka, dm i roto, a nestanak samih Plodina je 34 % redaka). Ukupni pad javlja total_drop, izostale i
+    prepolovljene lance chain_report; blokira samo pad čistih cijena nakon carry-forwarda (build_database)."""
     if not old:
         return ["nema prethodne arhive za usporedbu (prvo učitavanje)"]
-    rows_new, rows_old = sum(r[3] for r in new), sum(r[3] for r in old)
-    if rows_new < rows_old * (1 - max_drop):
-        raise ValidationError(
-            f"broj redaka cijena pao s {rows_old} na {rows_new} ({100 * (1 - rows_new / rows_old):.0f} %)")
     new_by, old_by = {r[0] for r in new}, {r[0] for r in old}
     return [f"novi lanac {chain}" for chain in sorted(new_by - old_by)]
+
+
+def total_drop(new: list[tuple], old: list[tuple], max_drop: float = MAX_DROP, top: int = 3) -> dict | None:
+    """Ukupni broj sirovih redaka cijena pao je > max_drop naspram prethodne arhive: {before, after, pct,
+    chains: [(lanac, Δ)] s `top` najvećih padova}; inače None. Samo upozorenje (Korak 8)."""
+    if not old:
+        return None
+    before, after = sum(r[3] for r in old), sum(r[3] for r in new)
+    if not before or after >= before * (1 - max_drop):
+        return None
+    new_by = {r[0]: r[3] for r in new}
+    deltas = sorted(((r[0], new_by.get(r[0], 0) - r[3]) for r in old if new_by.get(r[0], 0) < r[3]),
+                    key=lambda d: (d[1], d[0]))
+    return {"before": before, "after": after, "pct": round(100 * (1 - after / before)), "chains": deltas[:top]}
+
+
+def describe_total(d: dict) -> str:
+    """Jedan redak upozorenja za total_drop."""
+    chains = ", ".join(f"{c} {n:+d}" for c, n in d["chains"])
+    return (f"ukupno sirovih redaka cijena {d['before']} -> {d['after']} (-{d['pct']} %); "
+            f"najviše pridonijeli: {chains}")
 
 
 def chain_report(con, date: str, new: list[tuple], max_drop: float = MAX_DROP,
@@ -201,21 +218,27 @@ def describe_chain(r: dict, max_days: int = CARRY_DAYS) -> str:
             f"(carry-forward najviše {max_days} dana), vraća se kad se pojavi u arhivi")
 
 
-def github_report(report: list[dict], error: str | None = None) -> None:
-    """U GitHub Actionsu: ::warning:: po lancu (::error:: kad provjera nije prošla) i sažetak u
-    GITHUB_STEP_SUMMARY. Izvan Actionsa ne radi ništa."""
+def github_report(report: list[dict], error: str | None = None, total: dict | None = None) -> None:
+    """U GitHub Actionsu: ::warning:: za ukupni pad sirovih cijena (total_drop) i po lancu, ::error:: kad provjera
+    nije prošla, i sažetak u GITHUB_STEP_SUMMARY. Izvan Actionsa ne radi ništa."""
     if os.environ.get("GITHUB_ACTIONS") != "true":
         return
+    if total:
+        print(f"::warning title=Ukupno sirovih cijena -{total['pct']} %::{describe_total(total)}", flush=True)
     for r in report:
         print(f"::warning title=Lanac {r['chain']}::{describe_chain(r)}", flush=True)
     if error:
         print(f"::error title=update.py::{error}; baza nije promijenjena, ne deployam", flush=True)
     path = os.environ.get("GITHUB_STEP_SUMMARY")
-    if not path or not (report or error):
+    if not path or not (report or error or total):
         return
     lines = ["### update.py: lanci", ""]
     if error:
         lines += [f"**Provjera nije prošla:** {error}. Baza nije promijenjena, nema deploya.", ""]
+    if total:
+        chains = ", ".join(f"{c} ({n:+d})" for c, n in total["chains"])
+        lines += [f"**Ukupno sirovih cijena -{total['pct']} %** ({total['before']} -> {total['after']}); "
+                  f"najviše pridonijeli: {chains}. Samo upozorenje: carry-forward pokriva lance koji nedostaju.", ""]
     if report:
         lines += ["| lanac | stanje | dana izostaje | zadnje cijene | preneseno cijena |", "|---|---|---:|---|---:|"]
         for r in report:
@@ -356,11 +379,13 @@ def build_database(root: Path, date: str, db_path: Path, keep_days: int = KEEP_D
         con = duckdb.connect(str(tmp))
         load_raw(con, root, date)
         stats = archive_stats(con)
-        warnings = validate(stats, prev_stats if prev_date != date else [], max_drop)
+        warnings = validate(stats, prev_stats if prev_date != date else [])
+        total = total_drop(stats, prev_stats if prev_date != date else [], max_drop)
         # provjera gleda stvarnu arhivu; zatim nepotpune trgovine nasljeđuju prethodne cijene
         carried = carry_forward(con, db_path, date) if prev_date and prev_date != date else []
         build_clean(con)
-        # druga zaštita: što alat stvarno vidi (nakon carry-forwarda); hvata kvar u našoj izgradnji
+        # jedina blokada: što alat stvarno vidi (nakon carry-forwarda); hvata kvar u našoj izgradnji, a nestanak
+        # lanca iz izvora pokriva carry-forward
         n_clean = con.execute("SELECT count(*) FROM clean.prices").fetchone()[0]
         if prev_clean and n_clean < prev_clean * (1 - max_drop):
             raise ValidationError(f"broj čistih cijena (nakon carry-forwarda) pao s {prev_clean} na {n_clean} "
@@ -402,7 +427,7 @@ def build_database(root: Path, date: str, db_path: Path, keep_days: int = KEEP_D
                               price_per_unit, per_unit FROM clean.prices WHERE date = ?""", [date])
         report = chain_report(con, date, stats, max_drop)
         summary = {
-            "date": date, "previous_date": prev_date, "warnings": warnings, "chain_report": report,
+            "date": date, "previous_date": prev_date, "warnings": warnings, "chain_report": report, "total_drop": total,
             "chains": len(stats), "stores": sum(r[1] for r in stats), "products": sum(r[2] for r in stats),
             "price_rows": sum(r[3] for r in stats),
             "price_rows_previous": sum(r[3] for r in prev_stats) if prev_stats else None,
@@ -496,6 +521,8 @@ def run(argv: list[str] | None = None) -> int:
     print(f"  čistih cijena:   {summary['clean_prices']}"
           + (f" ({summary['clean_prices'] - prev_clean:+d})" if prev_clean else ""))
     print(f"  povijest:        {len(summary['history_days'])} dana ({summary['history_days'][0]} .. {summary['history_days'][-1]})")
+    if summary["total_drop"]:
+        print(f"  ! {describe_total(summary['total_drop'])}")
     for w in summary["warnings"]:
         print(f"  ! {w}")
     for r in summary["chain_report"]:
@@ -509,7 +536,7 @@ def run(argv: list[str] | None = None) -> int:
         print(f"  {'lanac':<28}{'trgovina':>9}{'Δ':>6}{'proizvoda':>11}{'Δ':>8}{'cijena':>11}{'Δ':>9}")
         for chain, st, dst, pr, dpr, pc, dpc in summary["diff"]:
             print(f"  {chain:<28}{st:>9}{dst:>+6}{pr:>11}{dpr:>+8}{pc:>11}{dpc:>+9}")
-    github_report(summary["chain_report"])
+    github_report(summary["chain_report"], total=summary["total_drop"])
     return 0
 
 

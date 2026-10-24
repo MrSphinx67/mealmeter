@@ -3,8 +3,8 @@
 # update.py -> build_compact.py -> zlatni izlazi (puna == sažeta baza) -> vercel build -> vercel deploy --prebuilt --prod
 # Baze se NE commitaju (GitHub odbija datoteke > 100 MB). Prethodna puna baza čuva se u Actions cacheu, da update.py
 # ima s čime usporediti i odakle prenijeti cijene trgovina koje nedostaju (carry-forward, najviše 7 dana).
-# Deploy prekida samo izlazni kod update.py (2: ukupno sirovih ili čistih cijena > 20 % manje); izostali ili
-# prepolovljeni lanac je ::warning:: i redak u sažetku pokretanja (Korak 8).
+# Deploy prekida samo izlazni kod update.py (2: čistih cijena nakon carry-forwarda > 20 % manje); ukupni pad
+# sirovih cijena > 20 % te izostali ili prepolovljeni lanac su ::warning:: i redak u sažetku pokretanja (Korak 8).
 #
 # Tajne (Settings -> Secrets and variables -> Actions): VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID.
 

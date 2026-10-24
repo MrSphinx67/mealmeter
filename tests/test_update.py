@@ -5,7 +5,7 @@ from pathlib import Path
 import duckdb
 import pytest
 
-from mealmeter.update import ValidationError, latest_archive, run, validate
+from mealmeter.update import latest_archive, run, validate
 
 FIXTURE = Path(__file__).parent / "fixtures" / "archive"
 
@@ -55,17 +55,17 @@ def test_update_cycle(env):
     assert q(db, "SELECT DISTINCT date FROM clean.prices") == [(__import__("datetime").date(2026, 10, 20),)]
     assert q(db, "SELECT count(DISTINCT date) FROM clean.archive_stats")[0][0] == 2
 
-    # nepotpuna arhiva (bez 3 lanca, > 20 % manje redaka): izlaz 2, baza netaknuta
-    mtime = db.stat().st_mtime
-    assert run(base + ["--archive", str(env["small"]), "--date", "2026-10-21"]) == 2
-    assert db.stat().st_mtime == mtime
-    assert q(db, "SELECT max(date) FROM clean.prices")[0][0].isoformat() == "2026-10-20"
+    # nepotpuna arhiva (bez 3 lanca, 74 % manje sirovih redaka): od Koraka 8 samo upozorenje; carry-forward
+    # prenosi cijene tih lanaca, pa čistih cijena nije manje
+    assert run(base + ["--archive", str(env["small"]), "--date", "2026-10-21"]) == 0
+    assert q(db, "SELECT count(*) FROM clean.prices")[0][0] == n_prices
+    assert q(db, "SELECT DISTINCT stale_days FROM clean.prices WHERE chain = 'konzum'") == [(1,)]
     assert not list(db.parent.glob("*.tmp-*"))  # privremena baza obrisana
 
     # zadržavanje povijesti: --keep-days 2 ostavlja samo zadnja dva dana
     assert run(base + ["--archive", str(env["full"]), "--date", "2026-10-22", "--keep-days", "2"]) == 0
     days = [d.isoformat() for (d,) in q(db, "SELECT DISTINCT date FROM clean.price_history ORDER BY 1")]
-    assert days == ["2026-10-22"]  # 21. ne postoji (odbijen), 20. je stariji od 2 dana
+    assert days == ["2026-10-21", "2026-10-22"]  # 20. je stariji od 2 dana
 
 
 def test_archive_without_date_is_error(env):
@@ -89,10 +89,8 @@ def test_print_schedule(capsys):
 def test_validate():
     old = [("konzum", 1, 10, 1000), ("lidl", 1, 10, 1000), ("ntl", 1, 10, 1000)]
     assert validate(old, old) == []
-    with pytest.raises(ValidationError):
-        validate([("konzum", 1, 10, 1000)], old)  # 3000 -> 1000 redaka
-    with pytest.raises(ValidationError):
-        validate([("konzum", 1, 10, 500), ("lidl", 1, 10, 500), ("ntl", 1, 10, 1000)], old)  # 3000 -> 2000
+    # Korak 8: ni ukupni pad sirovih redaka ne diže grešku (total_drop je upozorenje)
+    assert validate([("konzum", 1, 10, 1000)], old) == []  # 3000 -> 1000 redaka
     # pad pojedinog lanca više nije upozorenje iz validate (Korak 8: chain_report)
     warns = validate([("konzum", 1, 10, 700), ("lidl", 1, 10, 1150), ("ntl", 1, 10, 1150), ("spar", 1, 1, 10)], old)
     assert warns == ["novi lanac spar"]

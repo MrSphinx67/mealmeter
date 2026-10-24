@@ -82,9 +82,9 @@ Za Claude Desktop: sadržaj [docs/claude_desktop_config.json](docs/claude_deskto
 GitHub Actions ([.github/workflows/update.yml](.github/workflows/update.yml)) se pokreće dva puta dnevno
 (13:30 i 21:30 UTC):
 
-1. `scripts/update.py` preuzme novu dnevnu arhivu s cijene.dev i izgradi bazu. Ako je ukupni cjenik manji za više od
-   20 %, postupak staje i ništa se ne objavljuje. Lanac koji nedostaje (npr. vikendom) zadržava prethodne cijene
-   najviše 7 dana, uz upozorenje.
+1. `scripts/update.py` preuzme novu dnevnu arhivu s cijene.dev i izgradi bazu. Lanac koji nedostaje (npr. vikendom)
+   zadržava prethodne cijene najviše 7 dana, uz upozorenje. Ako je i nakon toga cijena manje za više od 20 %,
+   postupak staje i ništa se ne objavljuje.
 2. `scripts/build_compact.py` napravi sažetu bazu (~92 MB) koja stane u Vercel.
 3. Zlatni izlazi (puna i sažeta baza moraju dati iste odgovore) i testovi.
 4. `vercel build` i `vercel deploy --prebuilt --prod`.
@@ -171,9 +171,9 @@ For Claude Desktop, add the contents of [docs/claude_desktop_config.json](docs/c
 
 GitHub Actions ([.github/workflows/update.yml](.github/workflows/update.yml)) runs twice a day (13:30 and 21:30 UTC):
 
-1. `scripts/update.py` downloads the new daily archive from cijene.dev and builds the database. If the price
-   lists as a whole shrink by more than 20 %, the run stops and nothing is published. A missing chain (e.g. at
-   weekends) keeps its previous prices for up to 7 days, with a warning.
+1. `scripts/update.py` downloads the new daily archive from cijene.dev and builds the database. A missing chain
+   (e.g. at weekends) keeps its previous prices for up to 7 days, with a warning. If there are still more than
+   20 % fewer prices after that, the run stops and nothing is published.
 2. `scripts/build_compact.py` builds the compact database (~92 MB) that fits on Vercel.
 3. Golden outputs (the full and compact databases must give the same answers) and tests.
 4. `vercel build` and `vercel deploy --prebuilt --prod`.

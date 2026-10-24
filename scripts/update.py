@@ -4,8 +4,8 @@
     uv run python scripts/update.py --date 2026-10-19
     uv run python scripts/update.py --print-schedule # naredba za cron / systemd timer
 
-Izlazni kod: 0 uspjeh ili već učitano, 1 greška, 2 provjera nije prošla (baza nije promijenjena): ukupni broj
-sirovih ili čistih cijena pao > 20 %. Izostali ili prepolovljeni lanac je samo upozorenje (Korak 8).
+Izlazni kod: 0 uspjeh ili već učitano, 1 greška, 2 provjera nije prošla (baza nije promijenjena): broj čistih
+cijena nakon carry-forwarda pao > 20 %. Ukupni pad sirovih cijena i izostali lanac su samo upozorenja (Korak 8).
 """
 
 from mealmeter.update import main

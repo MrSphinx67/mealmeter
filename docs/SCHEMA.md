@@ -260,8 +260,8 @@ Ostaje:
   objavljuje se oko 22 h (20.10. u 13 h još nije postojala, 404). Ako popis nije dostupan, skripta
   ispituje obrazac URL-a za zadnjih 7 dana.
 - Tijek: preuzimanje (`data/raw/<datum>.zip`, provjera veličine) → raspakiravanje u svježu mapu →
-  izgradnja u privremenu bazu → provjera prema prethodnoj arhivi (pad ukupnih sirovih redaka cijena
-  > 20 % prekida, izlaz 2) → carry-forward → čiste tablice (pad `clean.prices` > 20 % naspram prethodne baze
+  izgradnja u privremenu bazu → usporedba s prethodnom arhivom (pad ukupnih sirovih redaka cijena
+  > 20 % je samo upozorenje, s lancima koji su najviše pridonijeli) → carry-forward → čiste tablice (pad `clean.prices` > 20 % naspram prethodne baze
   prekida, izlaz 2) → povijest → `os.replace` (atomarno).
 - Nove tablice: `clean.archive_stats (date, chain, n_stores, n_products, n_prices)` i
   `clean.price_history (date, chain, store_id, product_id, price, special_price, price_eff,

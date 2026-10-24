@@ -6,6 +6,7 @@
 | 2 odluka | prijedlog prihvaćen uz izmjenu (jedan lanac nikad ne blokira, carry-forward 7 dana) |
 | 3 update.yml: Node 24, ubuntu-24.04 | gotovo |
 | 4 provedba politike | gotovo: update.py, workflow, datum prenesenih cijena u usporedbi lanaca, testovi |
+| 5 ukupni pad sirovih cijena samo upozorenje | gotovo: blokira samo pad čistih cijena nakon carry-forwarda > 20 % |
 
 Ništa nije deployano.
 
@@ -210,7 +211,7 @@ ponovno pokrenut nad bazom iz replaya za 24.10. daje ista tri retka.
 (dosad 92,3 MB). `vercel build --prod` (bez deploya) s njom: paket 184,0 MB (granica 220), najveća datoteka 91,3 MB
 (granica 95). Izvorna `data/compact.duckdb` vraćena nakon mjerenja (bajt-identična).
 
-**Napomena: jedan velik lanac i dalje blokira.** Pravilo "ukupno sirovih > 20 %" znači da bi nestanak samo Plodina
+**Napomena: jedan velik lanac i dalje blokira** (riješeno u točki 5). Pravilo "ukupno sirovih > 20 %" znači da bi nestanak samo Plodina
 blokirao deploy (6,1 od 17,8 milijuna redaka = 34 %). Isto vrijedi za kombinaciju npr. konzuma i ntl-a (~19 %)
 uz još jedan lanac. To je provedeno doslovno kako je zadano. Ako "jedan lanac nikad ne blokira" treba vrijediti i
 za Plodine, pravilo sirovih redaka mogao bi zamijeniti samo pad čistih cijena (koji carry-forward pokriva) ili
@@ -221,5 +222,32 @@ Zlatna provjera kao u CI-ju i na bazama iz replaya (24.10.): `--write` nad punom
 nakon toga su vraćeni na one nad lokalnom bazom.
 
 `data/raw/diag8/` (15 arhiva, baze iz replaya, 6,1 GB) obrisan; testovi ne ovise o njemu.
+
+## 5. Ukupni pad sirovih cijena: upozorenje umjesto blokade
+
+Prema napomeni iz točke 4 (nestanak samih Plodina = 34 % redaka bi blokirao): pad ukupnih sirovih redaka cijena
+> 20 % više ne blokira.
+
+- `validate` više ne diže grešku; vraća samo `prvo učitavanje` / `novi lanac X`.
+- Novo `total_drop(new, old)`: kad ukupni broj sirovih redaka padne > 20 %, vraća `{before, after, pct, chains}`,
+  gdje `chains` sadrži 3 lanca s najvećim padom. `describe_total` od toga radi redak upozorenja. Ispis je
+  `  ! ukupno sirovih redaka cijena 80 -> 48 (-40 %); najviše pridonijeli: eurospin -32`. U Actionsu
+  `::warning title=Ukupno sirovih cijena -40 %::...` i redak u `GITHUB_STEP_SUMMARY`:
+  `**Ukupno sirovih cijena -40 %** (80 -> 48); najviše pridonijeli: eurospin (-32). Samo upozorenje: ...`.
+- **Jedina blokada (exit 2)** je pad čistih cijena (`clean.prices`, nakon carry-forwarda) > 20 % naspram
+  prethodne baze. Tada se ispisuje `::error::`, razlog ide u sažetak, a baza se ne mijenja. Nestali lanac
+  carry-forward pokriva 7 dana. 8. dan lanac ispada iz `clean.prices`, pa bi nestanak Plodina tada (34 % čistih
+  cijena) blokirao. To je namjerno: tjedan dana bez najvećeg lanca traži pogled čovjeka.
+- Testovi (`tests/test_step8.py`):
+  - `test_total_raw_drop_blocks` zamijenjen s dva testa:
+    - `test_big_chain_missing_warns`: kao Plodine, eurospin je 32 od 80 cijena u fixtureu (-40 %); exit 0,
+      upozorenje i sažetak, cijene prenesene, čistih cijena jednako;
+    - `test_total_raw_drop_three_chains_warns`: -74 %, upozorenje navodi eurospin, konzum, lidl.
+  - `test_clean_drop_blocks` sada provjerava i `::error::` i sažetak.
+  - `test_validate_only_total` zamijenjen s `test_validate_and_total_drop`.
+  - `test_update.py`: arhiva bez 3 lanca (-74 %) sada prolazi (exit 0, konzum `stale_days` 1, čistih cijena
+    jednako); `test_validate` bez `ValidationError`.
+- Dokumentacija: komentar u `update.yml`, `docs/DEPLOY.md`, `docs/SCHEMA.md`, `README.md`.
+- 1065 testova prolazi (+3 preskočena), uz `MM_GOLDEN=1` 1068.
 
 Ništa nije deployano.
