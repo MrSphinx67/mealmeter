@@ -3,7 +3,7 @@
 | točka | stanje |
 |---|---|
 | 1 dijagnoza | gotovo: izvor stvarno nema lance (branka, dm, roto vikendom), lažne uzbune kod nas nema |
-| 2 odluka | u tijeku |
+| 2 odluka | prijedlog politike niže; **čeka potvrdu**, logika provjere nije mijenjana |
 | 3 update.yml: Node 24, ubuntu-24.04 | u tijeku |
 
 Ništa nije deployano.
@@ -99,6 +99,36 @@ Jedina "naša" slabost je samo pravilo: per-lanac blokada ne odgovara izvoru koj
 lanca, a carry-forward (do 3 dana po trgovini, `stale_days` u odgovoru alata) već postoji upravo za taj slučaj, ali
 ga blokada deploya preskače.
 
-## 2. Odluka
+## 2. Odluka (prijedlog, čeka potvrdu)
 
-U tijeku.
+Izvor je stvarno bez lanaca (nije lažna uzbuna kod nas), pa vrijedi prva grana: politika umjesto popravka.
+Prijedlog (logika provjere **nije** mijenjana, čeka potvrdu):
+
+1. **Izostali lanac ili pad pojedinog lanca > 20 % ne blokira deploy.** Pokriva ga postojeći carry-forward (po
+   trgovini, trgovina s > 10 % manje cijena, najviše `CARRY_DAYS` = 3 dana). Prenesene cijene već imaju
+   `stale_days` > 0 u odgovoru alata, a pravilo 10 uputa traži da se kaže od kojeg je datuma cjenik. update.py
+   piše upozorenje s brojem prenesenih cijena i starošću, npr. `~ nedostaje lanac roto: preneseno 82949 cijena,
+   stale_days 1`, a workflow ga prikaže kao `::warning::`.
+2. **Blokira** (update.py exit 2, baza se ne mijenja, nema deploya):
+   - ukupni broj sirovih redaka cijena pao je > 20 % naspram prethodne arhive (postojeće pravilo);
+   - lanac izostaje dulje od `CARRY_DAYS`, pa bi nakon carry-forwarda ostao bez ijedne cijene, tj. nestao bi iz
+     aplikacije. Trajni nestanak lanca odlučuje čovjek, uz ručno pokretanje s novim ulazom
+     `allow_missing: <lanac>`;
+   - nova zaštita: broj čistih cijena (`clean.prices`, nakon carry-forwarda) pao je > 20 % naspram prethodne
+     baze. Hvata kvar u našoj izgradnji, ne u izvoru.
+3. **Ukida se pravilo "broj lanaca pao > 20 %"**. U nedjelju 18.10. nestalo je 7 od 28 lanaca (-25 %), ali ukupno
+   samo -11 % redaka, i carry-forward bi sve pokrio. Prag "više lanaca odjednom" iz zadatka ne odgovara podacima:
+   svakog vikenda nestanu 3 lanca, a 18.10. 7, pa bi prag ili blokirao vikende ili bi morao biti ≥ 8 i tada ništa
+   ne bi značio. Težinu nosi pravilo ukupnih redaka.
+4. Blokadu određuje izlazni kod update.py, a ne grep po tekstu u workflowu. Grep `^  ! (.*->|nedostaje lanac)`
+   se uklanja, pa ispis i odluka više ne mogu otići svaki na svoju stranu.
+5. Testovi: vikend (3 lanca nestanu 2 dana → deploy, `stale_days` 1 i 2); 4. dan izostanka → exit 2; ukupni pad
+   > 20 % → exit 2; scenarij 18.10. (7 lanaca, -11 %) → deploy; pad `clean.prices` > 20 % → exit 2.
+
+**Simulacija na 10.-24.10.** (po lancu, ista statistika kao gore): sadašnje pravilo blokira 10 od 14 dana, a
+predloženo nijedan. Najveća starost prenesenih cijena bila bi 2 dana (vikend), a najveći ukupni pad -11 %
+(18.10.). Stvarni kvarovi i dalje bi blokirali: pad ukupno > 20 %, lanac bez podataka 4 dana i više ili kvar u
+našoj izgradnji.
+
+Otvoreno pitanje za tebe: treba li `allow_missing` (trajno uklanjanje lanca) ili radije zadržati njegove zadnje
+cijene dulje uz veći `stale_days` (npr. 7 dana) prije blokade?
