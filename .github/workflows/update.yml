@@ -27,15 +27,15 @@ permissions:
 
 jobs:
   update:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04  # fiksno: ubuntu-latest prelazi na Ubuntu 26
     timeout-minutes: 60
     env:
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: astral-sh/setup-uv@v6
+      - uses: astral-sh/setup-uv@v10.3.2  # od v8 nema pomičnog major taga (nepromjenjiva izdanja)
         with:
           python-version: "3.12"
 
@@ -43,7 +43,7 @@ jobs:
         run: uv sync --frozen
 
       - name: Prethodna puna baza (cache)
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v6
         with:
           path: data/mealmeter.duckdb
           key: mealmeter-db-${{ github.run_id }}
@@ -67,7 +67,7 @@ jobs:
 
       - name: Spremi punu bazu (cache)
         if: steps.update.outputs.changed == 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v6
         with:
           path: data/mealmeter.duckdb
           key: mealmeter-db-${{ github.run_id }}

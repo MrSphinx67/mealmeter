@@ -4,7 +4,7 @@
 |---|---|
 | 1 dijagnoza | gotovo: izvor stvarno nema lance (branka, dm, roto vikendom), lažne uzbune kod nas nema |
 | 2 odluka | prijedlog politike niže; **čeka potvrdu**, logika provjere nije mijenjana |
-| 3 update.yml: Node 24, ubuntu-24.04 | u tijeku |
+| 3 update.yml: Node 24, ubuntu-24.04 | gotovo |
 
 Ništa nije deployano.
 
@@ -132,3 +132,12 @@ našoj izgradnji.
 
 Otvoreno pitanje za tebe: treba li `allow_missing` (trajno uklanjanje lanca) ili radije zadržati njegove zadnje
 cijene dulje uz veći `stale_days` (npr. 7 dana) prije blokade?
+
+## 3. update.yml
+
+- runner fiksiran na `ubuntu-24.04` (`ubuntu-latest` prelazi na Ubuntu 26);
+- akcije na Node 24 (provjereno u `action.yml` svake verzije: `using: node24`):
+  `actions/checkout@v4` -> `@v7`, `actions/cache/restore|save@v4` -> `@v6`, `astral-sh/setup-uv@v6` -> `@v10.3.2`.
+  setup-uv od v8 izlazi kao nepromjenjivo izdanje bez pomičnog `v10` taga, pa je fiksiran na točnu verziju;
+  `python-version` ulaz i dalje postoji. Ključevi cachea (`mealmeter-db-`) se ne mijenjaju.
+- logika provjere (grep na `! ... ->` i `nedostaje lanac`) nije dirana.
