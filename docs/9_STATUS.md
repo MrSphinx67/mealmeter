@@ -207,3 +207,44 @@ na istu potrebnu količinu.
 - Zlatnih izlaza je 26 (+3: maslac, tagliatelle, crno vino); postojeća 23 su nepromijenjena.
 - Workflow ih pri sljedećem pokretanju ponovno zapisuje s punom bazom i uspoređuje sa sažetom.
 - Ništa nije deployano ručno.
+
+## 5. Ispravak: s jajima je kod tagliatelle i lazanja uobičajeno
+
+**Zašto.** Kod tagliatelle (i fettuccine, pappardelle) i lazanja tjestenina s jajima je uobičajena, a ne posebna
+vrsta. Isključivanje je Lidl u Osijeku ostavilo bez tagliatelle („nedostaje”), jer ima samo rezance s jajima.
+
+**Promjena:**
+- `default_exclude_unless` (novo pravilo namirnice u `staples.py`, primjenjuje ga `search._candidates`):
+  `vrsta=s_jajima` nije isključena za grupe s `oblik` `tagliatelle` ili `lazanje`. Za ostale oblike (špageti,
+  penne…) s jajima ostaje samo na zahtjev. Špinat, integralna, bez glutena, od pira, od mahunarki, obojena i
+  svježa ostaju isključeni i kod tagliatelle i kod lazanja.
+- Novi oblik `lazanje` (lasagne, lazanje), poslije `tagliatelle` („TAGLIATELLE NO 10 ISTARSKE LAZANJE” su
+  tagliatelle). Sinonimi i riječi: lazanje, lasagne, fettuccine i pappardelle (→ `tagliatelle`).
+- `svjeza` je sada prije `s_jajima`. Svježe tagliatelle s jajima ostaju svježe, pa i dalje isključene, jer je
+  vrsta jedna vrijednost. „sa svjež. jajima” je suha tjestenina sa svježim jajima i ostaje `s_jajima`.
+- „Condeli” (Kauflandove smrznute gotove lazanje, 5,29 €) više nije tjestenina. Postala je vidljiva kad je
+  `lazanje` dobio vlastiti oblik.
+
+**Stvarna baza, Osijek, „tagliatelle” (`free_text`):** svih 9 lanaca, nijedan ne nedostaje.
+- Lidl: Domaći rezanci s jajima XXL, 1,29 €.
+- Konzum: REZANCI ŠIROKI S JAJ K PLUS, 1,29 € (prije obični 2,15 €).
+- Ostali kao prije (Plodine i dalje PARADISO, nigdje VERDI).
+
+„lazanje” daje 8 lanaca. Špageti i „tjestenina” ne biraju s jajima.
+
+**Testovi** (`tests/test_step9.py`):
+- tagliatelle u Konzumu i Lidlu biraju s jajima, a VERDI, od pira i svježe ostaju isključeni;
+- lazanje s jajima da, zelene ne;
+- špageti s jajima samo na zahtjev;
+- klasifikacija svježe s jajima i „sa svjež. jajima”;
+- Condeli;
+- test alternativa prebačen na penne.
+
+Bez ispravka pada 12 testova.
+
+**Zlatni scenarij:** `basket_tagliatelle_plodine_osijek` zamijenjen je s `basket_tagliatelle_osijek` (stvarni
+ulaz `free_text`, cijeli grad, da se vidi Lidl). Svi lanci su potpuni, Lidl je među njima, a nijedan izbor nije
+posebna vrsta osim s jajima (`test_golden_tagliatelle_osijek`). Ostalih 25 zlatnih izlaza je nepromijenjeno.
+
+`pytest`: 1243 prolazi (+6 preskočenih), exit 0. Uz `MM_GOLDEN=1` i stvarnu bazu prolazi 1249, exit 0. Ništa nije
+deployano ručno.

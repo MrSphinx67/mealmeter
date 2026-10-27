@@ -41,6 +41,9 @@ class Staple:
     min_pack: float | None = None
     max_pack: float | None = None
     default_exclude_variants: tuple[tuple[str, str], ...] = ()
+    # iznimka od default_exclude_variants: {(atribut, vrijednost): (atribut grupe, vrijednosti)} - varijanta nije
+    # isključena kad grupa ima jednu od tih vrijednosti (tjestenina: s jajima kod tagliatelle i lazanja, Korak 9)
+    default_exclude_unless: dict = field(default_factory=dict, hash=False, compare=False)
     compare_by: str = "unit"
     sachet_g: float | None = None
     sachet_g_by: dict[str, dict[str, float]] = field(default_factory=dict, hash=False, compare=False)
@@ -237,6 +240,9 @@ def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> d
             min_pack=d.get("min_pack"),
             max_pack=d.get("max_pack"),
             default_exclude_variants=tuple(tuple(v.split("=", 1)) for v in d.get("default_exclude_variants", [])),
+            default_exclude_unless={tuple(k.split("=", 1)): (a, tuple(str(x) for x in vals))
+                                    for k, cond in (d.get("default_exclude_unless") or {}).items()
+                                    for a, vals in cond.items()},
             compare_by=d.get("compare_by", "unit"),
             sachet_g=d.get("sachet_g"),
             sachet_g_by=d.get("sachet_g_by") or {},
@@ -297,6 +303,10 @@ def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> d
         for attr, value in st.default_exclude_variants:
             if value not in attrs.get(attr, {}):
                 raise ValueError(f"{key}: default_exclude_variants {attr}={value} nije definiran atribut")
+        for (attr, value), (a, vals) in st.default_exclude_unless.items():
+            if (attr, value) not in st.default_exclude_variants or any(v not in attrs.get(a, {}) for v in vals):
+                raise ValueError(f"{key}: default_exclude_unless {attr}={value}: nije u default_exclude_variants "
+                                 f"ili {a}={vals} nije definiran atribut")
         if st.plausible_by and (len(st.plausible_by) != 1 or st.plausible_per_unit or st.plausible_per_pack
                                 or any(v != "_other" and v not in attrs.get(a, {})
                                        for a, vals in st.plausible_by.items() for v in vals)):

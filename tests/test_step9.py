@@ -50,7 +50,14 @@ PRODUCTS = [
     ("P5", "Kritharaki rezanci", {L: 0.79}),
     ("P6", "TJE.INTE.PENNE RIGATE BRONZO 500g", {K: 0.59}),
     ("P7", "TJESTENINA PENNE RIGATE 500g", {K: 0.89}),
-    ("P8", "TJESTENINA TAGLIATELLE 1 kg", {K: 2.49}),  # za 400 g jeftinije od 500 g, a na blagajni skuplje
+    ("P8", "TJESTENINA PENNE RIGATE 1 kg", {K: 1.59}),  # za 400 g jeftinije od 500 g, a na blagajni skuplje
+    # ispravak Koraka 9: s jajima je uobičajeno za tagliatelle i lazanje, ali ne za ostale oblike
+    ("P9", "Domaći rezanci s jajima XXL 600 g", {L: 1.29}),  # stvarni Lidl Osijek
+    ("P10", "TJESTENINA ŠPAGETI S JAJIMA 500 g", {K: 0.49}),
+    ("P11", "TJESTENINA ŠPAGETI 500 g", {K: 0.99}),
+    ("P12", "LASAGNE S JAJIMA 500 g", {K: 1.19}),
+    ("P13", "TIJESTO LAZANJE ZELENE 500G", {K: 0.99}),
+    ("P14", "SVJEŽE TAGLIATELLE S JAJIMA 500g", {K: 0.59}),
 ]
 # (id, naziv, kategorija lanca, cijene): vino je u kategoriji alkohola (category_map: "vino", "zestoko")
 DRINKS = [
@@ -222,6 +229,10 @@ def test_golden_maslac_plodine():
     ("bezglutenska tjestenina", {"vrsta": "bez_glutena"}),
     ("rezanci za juhu", {"oblik": "jusni"}),
     ("farfalle", {"oblik": "farfalle"}),
+    ("lazanje", {"oblik": "lazanje"}),
+    ("lasagne", {"oblik": "lazanje"}),
+    ("pappardelle", {"oblik": "tagliatelle"}),
+    ("fettuccine", {"oblik": "tagliatelle"}),
     ("špageti", {"oblik": "spageti"}),
 ])
 def test_pasta_names(name, attrs):
@@ -247,6 +258,10 @@ def test_pasta_names(name, attrs):
     ("CIKLA REZANCI 680 g PODRAVKA", "vrsta", "obojena"),
     ("TJ.PANONA 400g TRICOLORE", "vrsta", "obojena"),
     ("TJ.REGGIA 500g TAGLIATELLE SVJEŽE", "vrsta", "svjeza"),
+    ("SVJEŽE TAGLIATELLE S JAJIMA 500g", "vrsta", "svjeza"),  # svježa je i s jajima isključena
+    ("n tjest marodi premium valoviti rezanci sa svjez jajima 400g", "vrsta", "s_jajima"),  # suha, sa svježim jajima
+    ("500g barilla lasagne 199 s jaj", "vrsta", "s_jajima"),
+    ("TIJESTO LAZANJE ZELENE 500G", "vrsta", "sa_spinatom"),
     ("Kritharaki rezanci", "oblik", "jusni"),  # stvarni test, Lidl
     ("REZANCI ZA JUHU 400 g RAFAJAC", "oblik", "jusni"),
     ("REZANCI JAPAN 300 g SAITAKU SOBA", "oblik", "azijski"),
@@ -271,17 +286,21 @@ def test_pasta_plain(name, oblik):
     assert attrs.get("oblik") == oblik and "vrsta" not in attrs
 
 
-@pytest.mark.parametrize("name", ["STROJ ZA REZANCE-rasprodaja", "400G B.L REZANCI KADAIF"])
+@pytest.mark.parametrize("name", ["STROJ ZA REZANCE-rasprodaja", "400G B.L REZANCI KADAIF", "KLC.Lasagne 1000g Condeli"])
 def test_pasta_not_members(name):
     assert name_match(S["tjestenina"], name) == "excluded"
 
 
 @pytest.mark.parametrize("name,amount,chain,expected", [
-    # VERDI, s jajima i od pira su jeftiniji, ali "tagliatelle" bira obične
-    ("tagliatelle", 400, "konzum", "TJESTENINA TAGLIATELLE 500 G"),
-    ("tagliatelle", 400, "lidl", "TJESTENINA TAGLIATELLE 500 G"),  # Kritharaki nisu tagliatelle
+    # VERDI, od pira i svježe su jeftiniji, ali isključeni; s jajima je kod tagliatelle uobičajeno (ispravak)
+    ("tagliatelle", 400, "konzum", "REZANCI ŠIROKI S JAJ 400g K PLUS"),
+    ("tagliatelle", 400, "lidl", "Domaći rezanci s jajima XXL 600 g"),  # Kritharaki nisu tagliatelle
     ("zelene tagliatelle", 400, "konzum", "TJESTENINA TAGLIATELLE VERDI 500 G RISCOSA"),
+    ("svježe tagliatelle", 400, "konzum", "SVJEŽE TAGLIATELLE S JAJIMA 500g"),
     ("tagliatelle s jajima", 400, "konzum", "REZANCI ŠIROKI S JAJ 400g K PLUS"),
+    ("lazanje", 500, "konzum", "LASAGNE S JAJIMA 500 g"),  # zelene su jeftinije, ali isključene
+    ("špageti", 400, "konzum", "TJESTENINA ŠPAGETI 500 g"),  # kod špageta s jajima i dalje samo na zahtjev
+    ("špageti s jajima", 400, "konzum", "TJESTENINA ŠPAGETI S JAJIMA 500 g"),
     ("penne", 400, "konzum", "TJESTENINA PENNE RIGATE 500g"),
     ("integralni penne", 400, "konzum", "TJE.INTE.PENNE RIGATE BRONZO 500g"),
 ])
@@ -295,19 +314,20 @@ def test_tagliatelle_free_text_uses_staple(con9):
     out = plan_basket([{"name": "tagliatelle", "amount": 400, "unit": "g", "free_text": True}], "Osijek", con=con9,
                       store={"chain": "konzum", "address_contains": ""})
     item = out["best_store"]["items"][0]
-    assert item["staple"] == "tjestenina" and item["name"] == "TJESTENINA TAGLIATELLE 500 G"
+    assert item["staple"] == "tjestenina" and item["name"] == "REZANCI ŠIROKI S JAJ 400g K PLUS"
 
 
 @pytest.mark.skipif(os.environ.get("MM_GOLDEN") != "1", reason="zlatni izlazi traže stvarnu bazu (MM_GOLDEN=1)")
-def test_golden_tagliatelle_plodine():
-    """Stvarni test: "tagliatelle" (free_text) u Plodinama Osijek nisu VERDI, ni s jajima ni druga posebna vrsta."""
-    out = json.loads((GOLDEN / "basket_tagliatelle_plodine_osijek.json").read_text(encoding="utf-8"))
-    assert not out["unmatched"]
-    items = out["best_store"]["items"]
-    assert items and out["best_store"]["chain"] == "plodine"
-    for i in items + [i for s in out["stores"] for i in s["items"]]:
+def test_golden_tagliatelle_osijek():
+    """Stvarni test: "tagliatelle" (free_text) u Osijeku: nigdje VERDI ni druga posebna vrsta osim s jajima, koje su
+    kod tagliatelle uobičajene, pa ih ima i Lidl (prije ispravka "nedostaje")."""
+    out = json.loads((GOLDEN / "basket_tagliatelle_osijek.json").read_text(encoding="utf-8"))
+    assert not out["unmatched"] and not out["incomplete"]
+    chains = {r["chain"] for r in out["comparison"] if r["complete"]} | {r["chain"] for r in out["more_chains"]}
+    assert {"lidl", "konzum", "plodine", "kaufland", "spar", "eurospin"} <= chains
+    for i in out["best_store"]["items"] + [i for s in out["stores"] for i in s["items"]]:
         assert i["staple"] == "tjestenina" and i["attributes"].get("oblik") == "tagliatelle", i["name"]
-        assert "vrsta" not in i["attributes"] and "VERDI" not in i["name"].upper(), i["name"]
+        assert i["attributes"].get("vrsta") in (None, "s_jajima") and "VERDI" not in i["name"].upper(), i["name"]
 
 
 # --- 3. vino za kuhanje -------------------------------------------------------------------------------------
@@ -451,12 +471,12 @@ def test_incomplete_chain_carries_missing(con9):
 def test_alternatives_cheaper_flag(con9):
     """Podaci za pravilo 11: cheaper = true znači jeftinije za istu potrebnu količinu (delta_eur < 0), a ne na
     blagajni: veće pakiranje (size_note) ima veći cost_pack."""
-    out = plan_basket([{"name": "tagliatelle", "amount": 400, "unit": "g"}], "Osijek", con=con9, alternatives=True,
+    out = plan_basket([{"name": "penne", "amount": 400, "unit": "g"}], "Osijek", con=con9, alternatives=True,
                       store={"chain": "konzum", "address_contains": ""})
     item = out["best_store"]["items"][0]
-    assert item["name"] == "TJESTENINA TAGLIATELLE 500 G"
+    assert item["name"] == "TJESTENINA PENNE RIGATE 500g"
     alts = {a["name"]: a for a in item["alternatives"]}
-    big = alts["TJESTENINA TAGLIATELLE 1 kg"]
+    big = alts["TJESTENINA PENNE RIGATE 1 kg"]
     assert big["cheaper"] and big["delta_eur"] < 0 and big["size_note"]
     assert big["cost_pack"] > item["cost_pack"]  # na blagajni skuplje: pravilo 11 traži da se to kaže
     assert all(a["cheaper"] == (a["delta_eur"] < 0) for a in item["alternatives"])

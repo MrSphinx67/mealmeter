@@ -937,7 +937,7 @@ tjestenina:
   name: tjestenina
   synonyms: [tjestenina, pasta, špageti, spageti, penne, fusilli, makaroni,
              # Korak 9: oblici kao sinonimi, inače idu u free_text bez zadanih isključenja ("tagliatelle" -> VERDI)
-             tagliatelle, rezanci, široki rezanci, uski rezanci, farfalle, leptirići, mašnice, linguine, bucatini,
+             tagliatelle, rezanci, široki rezanci, uski rezanci, fettuccine, pappardelle, lazanje, lasagne, farfalle, leptirići, mašnice, linguine, bucatini,
              fusili, svrdlići, pužići]
   must_match: [tjestenin, spaget, spaghett, penne, fusill, makaron, tagliatell, farfalle, rigatoni,
                linguine, tortiglioni, puzic, svrdl, mascice, leptiric, pipe rigate, sedanini, tjest\b,
@@ -954,13 +954,17 @@ tjestenina:
                    # "školjke" i "tj" koje nisu tjestenina; gotove lazanje
                    cappasante, pral\b, pralin, sokn, carap, noz\b, pjescanik, pijescanik, zitn, chocapic, cok\b,
                    za tj\b, argan, bolog, meso\b, zamrz, ricott, krupica durum,
-                   # Korak 9: stroj za rezance, kadaif (tijesto za kolače)
-                   stroj, kadaif]
+                   # Korak 9: stroj za rezance, kadaif (tijesto za kolače), smrznute gotove lazanje (Condeli)
+                   stroj, kadaif, condeli]
   unit: kg
   # Korak 9: zadano obična tjestenina; ostale vrste samo na zahtjev (stvarni test 27.10.2026.: "tagliatelle" su u
   # Plodinama bile TAGLIATELLE VERDI, u Konzumu od pira, u Eurospinu i Kauflandu s jajima)
   default_exclude_variants: [vrsta=bez_glutena, vrsta=od_mahunarki, vrsta=integralna, vrsta=od_pira,
                              vrsta=sa_spinatom, vrsta=obojena, vrsta=s_jajima, vrsta=svjeza]
+  # Korak 9 (ispravak): tagliatelle (i fettuccine, pappardelle) i lazanje su uobičajeno s jajima, pa za te oblike
+  # s jajima nije posebna vrsta; za ostale oblike ostaje na zahtjev
+  default_exclude_unless:
+    vrsta=s_jajima: {oblik: [tagliatelle, lazanje]}
   max_pack: 5000
   min_pack: 250
   attributes:
@@ -977,6 +981,8 @@ tjestenina:
       jusni: '\bjus|\bza juhu|\bsitn|\bfidelin|\bfilin|\bcipkast|\bkritharak|\borzo\b'
       azijski: '\bjapan|\bsoba\b|\budon|\bramen|\bwok\b|\bkonjak|\bkonjac|\bmie\b|\byakisob|\bchow'
       tagliatelle: '\btagliatell|\brezanc|\bfettucc|\bpappardell'
+      # poslije tagliatelle: "TAGLIATELLE NO 10 ISTARSKE LAZANJE" su tagliatelle
+      lazanje: '\blasagn|\blazanj'
       farfalle: '\bfarfalle|\bleptir|\bmasnic'
       puzici: '\bpuzic'
     # prva vrijednost koja pogodi pobjeđuje: "BEZ GLUTENA KUKURUZNI" je bez_glutena, "SA ŠPINATOM I JAJIMA" sa_spinatom
@@ -990,13 +996,15 @@ tjestenina:
       sa_spinatom: '\bspin|\bsipnat|\bzel(?:en|e\.|\.|\b)|\bverdi\b'
       # s okusom ili bojom: tricolore, cikla, crnilo sipe, crni, tartuf, rajčica, mrkva, chili, gljive, šparoge
       obojena: '\btricolor|\bcikl|\bcrnil|\bcrn|\bnero di sep|\bsip[ae]\b|\btartuf|\bpomodor|\brajcic|\bmrkv|\bmrk\b|\bchili|\bpaprik|\bgljiv|\bsparog|\bzacinj|\bchlorel|\bchiorel'
+      # svježa (hladnjak), i s jajima: prije s_jajima, jer jaja kod tagliatelle više nisu isključena, a svježa jesu;
+      # "sa svjež. jajima" je suha tjestenina sa svježim jajima, ne svježa
+      svjeza: '\bsvjez(?!\w*\.? jaj)|\bsvj\b(?!\.? jaj)|\bsvj\.(?! ?jaj)|\bsv\.(?! ?jaj)|\bfresc|\bfresh'
       # "S JAJ", "s jaji.", "JAJ.", "JAJA", "s.j."; "BEZ JAJA" i "b.j." nisu s jajima
       s_jajima: 's jaj|(?<!bez )\bjaj(?:a\b|i\b|\.|\b)|\bjajim|\bjajc|\bjajn|\buovo|\beier|\bs\.j\.'
-      # svježa (hladnjak) bez jaja u nazivu; svježa s jajima je s_jajima
-      svjeza: '\bsvjez|\bsvj\b|\bsvj\.|\bsv\.|\bfresc|\bfresh'
   value_words:
     oblik:
-      tagliatelle: [rezanci, široki rezanci, uski rezanci]
+      tagliatelle: [rezanci, široki rezanci, uski rezanci, fettuccine, pappardelle]
+      lazanje: [lasagne, lazanja, lasagna]
       jusni: [jušni, jušne, za juhu, sitni]
       farfalle: [leptirići, mašnice]
       fusilli: [fusili, svrdlići]

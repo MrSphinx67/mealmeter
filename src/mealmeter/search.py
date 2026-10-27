@@ -156,9 +156,13 @@ def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | 
         for attr, value in staple.default_exclude_variants:
             if attr in (attributes or {}):
                 continue
+            unless = ""
+            if cond := staple.default_exclude_unless.get((attr, value)):  # s jajima kod tagliatelle nije posebno
+                unless = f"""AND bkey NOT IN (SELECT bkey FROM clean.staple_group_attrs WHERE staple = ? AND attr = ?
+                             AND value IN ({", ".join("?" for _ in cond[1])}))"""
             hit_sql = f"""({hit_sql}) EXCEPT (
-                SELECT bkey FROM clean.staple_group_attrs WHERE staple = ? AND attr = ? AND value = ?)"""
-            hit_params += [staple.key, attr, value]
+                SELECT bkey FROM clean.staple_group_attrs WHERE staple = ? AND attr = ? AND value = ? {unless})"""
+            hit_params += [staple.key, attr, value] + ([staple.key, cond[0], *cond[1]] if cond else [])
 
     if staple:
         # "pogodak" za izbor prikaznog naziva; razina 0 ako je riječ namirnice među prve tri riječi
