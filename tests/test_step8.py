@@ -209,3 +209,37 @@ def test_tests_do_not_write_real_step_summary(env, step_summary, capsys):
     assert not step_summary.exists()
     if REAL_STEP_SUMMARY_SIZE is not None:
         assert os.path.getsize(REAL_STEP_SUMMARY) == REAL_STEP_SUMMARY_SIZE
+
+
+def test_republished_same_day_keeps_carry_forward(env, capsys):
+    """Kao branka 23.-27.10.2026.: u 15:30 učita se rana verzija arhive (dm prenesen), u 23:30 ponovno objavljena
+    verzija istog dana (ovdje --force, isti put kroz build_database). Ponovno učitavanje nije prenosilo cijene,
+    pa ih sutradan više nije bilo odakle prenijeti: "nema u arhivi 2. dan, preneseno 0 cijena"."""
+    db = env["db"]
+    no_dm = make_zip_custom(env["tmp"] / "no_dm.zip", skip={"dm"})
+    assert load(env, env["full"], "2026-10-23") == 0
+    assert load(env, no_dm, "2026-10-24") == 0
+    assert stale(db, "dm") == [(1,)]
+    assert run(env["base"] + ["--archive", str(no_dm), "--date", "2026-10-24", "--force"]) == 0  # 23:30
+    assert stale(db, "dm") == [(1,)]
+    assert q(db, "SELECT count(*) FROM main.prices WHERE chain = 'dm'")[0][0] == 1
+    capsys.readouterr()
+    assert load(env, no_dm, "2026-10-25") == 0
+    assert stale(db, "dm") == [(2,)]
+    assert "  ~ dm: nema u arhivi 2. dan, zadnje cijene 23.10.2026., preneseno 1 cijena (stale_days 2)" in capsys.readouterr().out
+
+
+def test_republished_same_day_partial_drop(env):
+    """Kao stanic 27.10.2026.: trgovina s djelomičnim padom (konzum 0907, 3 od 11) i u ponovno učitanoj verziji
+    istog dana zadrži prenesene cijene; usporedba je sa svim prethodnim retcima trgovine, a ne samo s prenesenima."""
+    db = env["db"]
+    drop = make_zip_custom(env["tmp"] / "drop.zip", drop_rows={("konzum", "0907"): 3})
+    n = "SELECT count(*) FROM clean.prices WHERE chain = 'konzum' AND store_id = '0907' AND stale_days = 1"
+    assert load(env, env["full"], "2026-10-23") == 0
+    assert load(env, drop, "2026-10-24") == 0
+    assert q(db, n)[0][0] == 3
+    assert run(env["base"] + ["--archive", str(drop), "--date", "2026-10-24", "--force"]) == 0
+    assert q(db, n)[0][0] == 3
+    # ista verzija bez pada: ništa se ne prenosi
+    assert run(env["base"] + ["--archive", str(env["full"]), "--date", "2026-10-24", "--force"]) == 0
+    assert q(db, "SELECT max(stale_days) FROM clean.prices")[0][0] == 0

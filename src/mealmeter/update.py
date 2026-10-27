@@ -253,7 +253,8 @@ def github_report(report: list[dict], error: str | None = None, total: dict | No
 
 def carry_forward(con, old_db: Path, date: str, max_drop: float = CARRY_DROP, max_days: int = CARRY_DAYS) -> list[tuple]:
     """Sirove tablice nove arhive (stores, products, prices) dopuni prethodnim cijenama trgovina koje
-    nedostaju ili imaju više od `max_drop` manje cijena nego prije. Prethodni redak zadržava svoj datum
+    nedostaju ili imaju više od `max_drop` manje cijena nego prije (i kad se isti dan učitava ponovno).
+    Prethodni redak zadržava svoj datum
     (prices.date), a prenosi se samo ako nije stariji od `max_days` dana, pa se ni preneseni ne prenose
     zauvijek. Dodaje samo (lanac, trgovina, proizvod) kojih u novoj arhivi nema. Vraća
     (lanac, trgovina, prije, sada, preneseno)."""
@@ -268,8 +269,11 @@ def carry_forward(con, old_db: Path, date: str, max_drop: float = CARRY_DROP, ma
         cutoff = (dt.date.fromisoformat(date) - dt.timedelta(days=max_days)).isoformat()
         con.execute(f"""
             CREATE OR REPLACE TEMP TABLE carry_stores AS
+            -- usporedba sa svim prethodnim retcima trgovine, i današnjima kad se isti dan učitava ponovno
+            -- (ponovno objavljena arhiva): inače bi se trgovina s djelomičnim padom uspoređivala samo s
+            -- prenesenim retcima. Prenose se samo retci od prije današnjeg dana (carry_prices).
             WITH o AS (SELECT chain, store_id, count(*) AS n_old FROM prev.main.prices
-                       WHERE date >= DATE '{cutoff}' AND date < DATE '{date}' GROUP BY ALL),
+                       WHERE date >= DATE '{cutoff}' AND date <= DATE '{date}' GROUP BY ALL),
                  n AS (SELECT chain, store_id, count(*) AS n_new FROM prices GROUP BY ALL)
             SELECT o.chain, o.store_id, o.n_old, coalesce(n.n_new, 0) AS n_new
             FROM o LEFT JOIN n USING (chain, store_id)
@@ -381,8 +385,10 @@ def build_database(root: Path, date: str, db_path: Path, keep_days: int = KEEP_D
         stats = archive_stats(con)
         warnings = validate(stats, prev_stats if prev_date != date else [])
         total = total_drop(stats, prev_stats if prev_date != date else [], max_drop)
-        # provjera gleda stvarnu arhivu; zatim nepotpune trgovine nasljeđuju prethodne cijene
-        carried = carry_forward(con, db_path, date) if prev_date and prev_date != date else []
+        # provjera gleda stvarnu arhivu; zatim nepotpune trgovine nasljeđuju prethodne cijene. I kad se isti dan
+        # učitava ponovno (ponovno objavljena arhiva u 23:30, --force): inače prenesene cijene nestanu iz sirovih
+        # tablica i sutra ih nema odakle prenijeti (branka 27.10.2026.: izostaje 4. dan, preneseno 0 cijena)
+        carried = carry_forward(con, db_path, date) if prev_date else []
         build_clean(con)
         # jedina blokada: što alat stvarno vidi (nakon carry-forwarda); hvata kvar u našoj izgradnji, a nestanak
         # lanca iz izvora pokriva carry-forward

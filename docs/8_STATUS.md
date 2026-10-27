@@ -269,3 +269,36 @@ Potvrđeno lokalno: prije popravka `tests/test_update.py` uz te dvije varijable 
   Scenarij -74 % ne piše ni u nju ni u stvarni sažetak, čija se veličina zapamti pri učitavanju conftesta.
 - Cijeli `pytest` uz `GITHUB_ACTIONS=true` i `GITHUB_STEP_SUMMARY` postavljen na praznu datoteku:
   1066 prolazi (+3 preskočena), exit 0, datoteka ostaje prazna (0 B).
+
+## 7. Branka: „nema u arhivi | 4 | 23.10.2026. | 0”
+
+Ovo je bila greška u carry-forwardu, a ne u filtrima. Branka je u arhivi 23.10. (24 575 sirovih cijena,
+24 539 prolazi `is_food`, lokaciju i isključene lance), a u arhivama 24.-27.10. je nema.
+
+- **Replay** stvarnih arhiva 23→24→25→26→27 kroz `update.run` (svaki dan jednom): branka se prenosi svaki dan,
+  27.10. ima 24 539 cijena uz `stale_days` 4. Kod uobičajenog učitavanja carry-forward radi.
+- **Uzrok:** `build_database` je zvao `carry_forward` samo `if prev_date and prev_date != date`. Workflow u
+  15:30 učita ranu verziju arhive (27.10. objavljena u 14:30), a u 23:30 ponovno objavljenu verziju istog dana
+  (`updated` ~22:00). Pri tom ponovnom učitavanju carry-forward se preskače, pa prenesene cijene nestanu iz
+  sirovih tablica. Sutradan ih nema odakle prenijeti, a `clean.price_history` i dalje ima 23.10. Rezultat je
+  „izostaje 4. dan, preneseno 0”. Reproducirano: ponovno učitavanje 27.10. (`--force`, isti put) daje točno
+  `preneseno 0 cijena (stale_days 4)`.
+- **Popravak 1:** carry-forward radi i kad se isti dan učitava ponovno (`if prev_date`).
+- **Popravak 2:** kod ponovnog učitavanja istog dana trgovina s djelomičnim padom uspoređivala se samo sa svojim
+  prenesenim retcima, pa se pad nije vidio. Primjer je stanic 27.10.: 12 trgovina kod običnog učitavanja, 11 kod
+  ponovnog. `carry_forward` sada uspoređuje sa svim prethodnim retcima trgovine do današnjeg dana uključivo, a
+  prenosi i dalje samo retke od prije današnjeg dana.
+- **Na stvarnim podacima** ponovno učitavanje 27.10. sada daje isto što i obično: branka 24 539 cijena
+  (`stale_days` 4), carry-forward 12 trgovina, 107 832 cijena (branka, roto, stanic).
+- **Testovi** (`tests/test_step8.py`):
+  - `test_republished_same_day_keeps_carry_forward`: dm izostaje, isti dan se učita ponovno, sutradan je i dalje
+    prenesen (`stale_days` 2). Bez popravka pada.
+  - `test_republished_same_day_partial_drop`: konzum 0907 (3 od 11) zadrži prenesene cijene i nakon ponovnog
+    učitavanja, a verzija bez pada ništa ne prenosi. Bez popravka 2 pada.
+- `pytest`: 1068 prolazi (+3 preskočena), exit 0.
+- **Napomena za Actions:** baza u cacheu više nema branka sirovih cijena od 23.10., pa ih ni popravak ne može
+  prenijeti. Branka ostaje izvan rezultata dok se ne pojavi u arhivi (ionako bi ispala 31.10., nakon 7 dana).
+  Stanje u tablici (`preneseno 0`) je za taj slučaj točno.
+- Dijagnostičke arhive i baze (`data/raw/diag86/`) obrisane.
+
+Ništa nije deployano.
