@@ -255,7 +255,8 @@ def test_instructions_length_and_numbering():
 
     from mealmeter.server import INSTRUCTIONS
 
-    assert len(INSTRUCTIONS) <= OLD_INSTRUCTIONS_LEN * 1.2
+    # Korak 9: 1,2 -> 1,3 za "nedostaje" uz cijenu nepotpunog lanca (pravila 7, 8) i cheaper = false (pravilo 11)
+    assert len(INSTRUCTIONS) <= OLD_INSTRUCTIONS_LEN * 1.3
     assert [int(n) for n in re.findall(r"(?m)^(\d+)\. ", INSTRUCTIONS)] == list(range(1, 14))
     # svako pravilo je dvojezično (hr / en)
     for n in range(1, 14):

@@ -80,17 +80,18 @@ Pravila / rules:
    / Never invent prices or products; do not conclude a product is missing after one search.
 7. Trgovina poznata: plan_basket zovi sa store, a odgovor je točan popis za tu trgovinu. Ostale lance ne
    nabrajaj, osim jedne rečenice ako je neki drugi lanac u gradu jeftiniji za više od 2 € (cheaper_elsewhere).
-   / Known store: call with store, answer with its exact list; other chains only in one sentence if one is
-   cheaper by more than 2 € (cheaper_elsewhere).
+   Ako joj nešto nedostaje, uz ukupnu cijenu navedi što. / Known store: call with store, answer with its exact
+   list (and what it lacks); other chains only in one sentence if one is cheaper by more than 2 €.
 8. Trgovina nije zadana ili korisnik kaže "svejedno": odgovor počinje s "Sve možeš kupiti u:" i popisom lanaca koji
    imaju sve sastojke (comparison, pa more_chains) s cijenom za kupiti, poredanih po cijeni; po lancu najviše 2
    SVOJE adrese i broj trgovina (lance iste cijene ne spajaj). Zatim jedna rečenica (price_spread): koji je
    najjeftiniji i kolika je razlika do najskupljeg u popisu; ako je razlika najviše 2 € (small), reci
    da su razlike male i da može ići gdje mu je najpraktičnije. Lanci kojima nešto nedostaje (incomplete) idu na
-   kraj, s "nedostaje: ...". Na kraju ponudi točan popis za trgovinu koju odabere.
+   kraj, s "nedostaje: ...", i uz cijenu takvog lanca to uvijek navedi, gdje god je spomeneš ("Lidl oko 26 €,
+   nedostaje: pancetta"); nije najjeftiniji. Na kraju ponudi točan popis za trgovinu koju odabere.
    / No store or "any": start with "Sve možeš kupiti u:", complete chains by price to buy (max 2 own addresses,
    number of stores; never merge chains); one sentence on cheapest vs dearest (price_spread; small: go where it is
-   convenient); incomplete chains last; offer the exact list for the chosen store.
+   convenient); incomplete chains last, always with what is missing next to their price; offer the exact list.
 9. Stavke prikaži kao popis: proizvod, veličina pakiranja (pack_size), cijena pakiranja (cost_pack); tablicu
    koristi samo ako je korisnik traži. Usporedbu lanaca također kao popis, jedan lanac po retku.
    / Items and chains as lists (product, pack size, pack price; one chain per line); a table only if asked.
@@ -99,9 +100,10 @@ Pravila / rules:
    cjenika od 20.10.2026." (date_hr); ako je cijena iz starijeg cjenika (stale_days > 0, i kod lanca u
    usporedbi), reci od kojeg datuma.
    / Natural language, no internal field names; date as "cijene iz cjenika od 20.10.2026.".
-11. Alternativu zovi "jeftinijom" samo kad je cheaper = true (razlika je za istu potrebnu količinu; size_note
-   kad je pakiranje drukčije). Kad proizvoda nema na polici, ponudi alternatives iz iste trgovine.
-   / Call an alternative "cheaper" only when cheaper = true (difference for the same needed amount).
+11. Alternativu zovi "jeftinijom" ili uštedom samo kad je cheaper = true (za istu potrebnu količinu; uz size_note
+   je pakiranje drukčije i na blagajni može biti skuplje); cheaper = false nikad nije ušteda. Kad proizvoda nema
+   na polici, ponudi alternatives iz iste trgovine. / An alternative is "cheaper" or a saving only when
+   cheaper = true (same needed amount); cheaper = false never is.
 12. Kod nesigurnog izbora pitaj: ask_user (oblik, cijene po obliku su za traženu količinu), needs_confirmation
    (free_text, kobasica bez dimljene), substitution (druga marka ili Grana Padano). Prenesi i warnings,
    assumed_form i slabije podudaranje (match_quality = 'weak'), običnim riječima. / When a choice is uncertain,
@@ -268,8 +270,9 @@ def plan_basket(
     price_overrides: Annotated[list[dict[str, Any]] | None, Field(
         description='Stvarne cijene pakiranja / real pack prices: [{"name": "brašno", "cost_pack": 1.2}]')] = None,
     alternatives: Annotated[bool, Field(
-        description="Do 2 jeftinije alternative po stavci, s delta_eur i cheaper / up to 2 cheaper alternatives per "
-                    "item, with delta_eur and cheaper")] = True,
+        description="Do 2 jeftinije alternative po stavci (cheaper = true) i iznimno jedna iste cijene i bolje "
+                    "kvalitete (cheaper = false), s delta_eur / up to 2 cheaper alternatives per item (cheaper = true) "
+                    "and at most one of the same price and better quality (cheaper = false), with delta_eur")] = True,
     detail: Annotated[bool, Field(
         description="Puni odgovor (sve trgovine i sva polja) umjesto sažetog / full response instead of the compact "
                     "one")] = False,

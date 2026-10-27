@@ -150,7 +150,7 @@ nedostaje. Najjeftinije mirno crno vino za 200 ml:
 | Eurospin | Vranac 1 L | 2,89 € |
 | Konzum | Vupik Vranac 1 L | 2,95 € |
 
-„bijelo vino” daje 8 lanaca od 1,33 € (Lidl, Chardonnay/Colombard) do 3,79 €. Na 20.10. medu prihvaćenim članovima
+„bijelo vino” daje 8 lanaca od 1,33 € (Lidl, Chardonnay/Colombard) do 3,79 €. Na 20.10. među prihvaćenim članovima
 nema pjenušaca, slatkih ni rakija (provjera po riječima brut, poluslatko, slatko, rakija, liker, izborna berba…).
 
 **Testovi** (`tests/test_step9.py`, fixture s kategorijama „VINO” i „ZESTOKO”, gdje su desertno, pjenušac, rosé,
@@ -169,3 +169,41 @@ Bez promjene pada 42 testa.
 **Zlatni scenarij** `basket_crno_vino_osijek` (stvarni ulaz, `free_text: true`, cijeli grad): Konzum, Lidl,
 Kaufland, Plodine i Spar imaju crno vino, a nijedan izbor nije muškat, pjenušac ni slatko
 (`test_golden_crno_vino_osijek`). Ostala 25 zlatna izlaza su nepromijenjena.
+
+## 4. Upute: što nedostaje uz cijenu, `cheaper = false` nije ušteda
+
+**Problem.** U stvarnom testu asistent je napisao „Lidl oko 26 €” bez napomene da nedostaje pancetta, pa je ta
+cijena izgledala usporedivo s potpunim lancima. Pravilo 8 je tražilo „nedostaje” samo za popis na kraju, a ne
+uz svaku cijenu takvog lanca. Pravilo 11 je reklo samo kad alternativu smiješ zvati jeftinijom, a nije reklo da
+`cheaper = false` nikad nije ušteda. Alternative uključuju i jednu iste cijene i bolje kvalitete (`delta_eur`
+0). Veće pakiranje s `cheaper = true` na blagajni je skuplje (`cost_pack`), a jeftinije samo po potrebnoj
+količini.
+
+**Promjena** (`src/mealmeter/server.py`):
+- Pravilo 7 (poznata trgovina): ako joj nešto nedostaje, uz ukupnu cijenu navedi što.
+- Pravilo 8: uz cijenu lanca kojem nešto nedostaje „nedostaje: …” se uvijek navodi, gdje god se cijena
+  spomene („Lidl oko 26 €, nedostaje: pancetta”), i takav lanac nije najjeftiniji.
+- Pravilo 11: „jeftinija” ili „ušteda” samo uz `cheaper = true`, a `cheaper = false` nikad nije ušteda. Uz
+  `size_note` pakiranje je drukčije i na blagajni može biti skuplje.
+- Opis parametra `alternatives`: do 2 jeftinije (`cheaper = true`) i iznimno jedna iste cijene i bolje kvalitete
+  (`cheaper = false`).
+- Ograničenje duljine uputa u `tests/test_step7.py` povećano je s 1,2 na 1,3 puta duljine prije Koraka 7
+  (6043 → 6547 znakova; upute sada imaju 6322). Prije promjene bilo je 6027, pa za ova pravila nije bilo mjesta.
+  Skraćivanje drugih pravila bilo bi mijenjanje ponašanja koje nije traženo.
+
+Podaci nisu mijenjani: `incomplete` već nosi `total_to_buy` i `note` („nedostaje: …”), a `cheaper` se računa
+na istu potrebnu količinu.
+
+**Testovi** (`tests/test_step9.py`):
+- formulacije pravila 7, 8 i 11 (hr i en);
+- nepotpuni lanac ima cijenu i `note` s onim što nedostaje;
+- alternativa 1 kg ima `cheaper = true` i `size_note`, a `cost_pack` je veći od odabranog 500 g: to je slučaj
+  „na blagajni skuplje”.
+
+## Završno
+
+- `pytest`: 1230 prolazi (+6 preskočenih, zlatni bez stvarne baze), exit 0.
+- Uz `MM_GOLDEN=1` i stvarnu bazu s novim namirnicama: 1236 prolazi, exit 0.
+- Zlatnih izlaza je 26 (+3: maslac, tagliatelle, crno vino); postojeća 23 su nepromijenjena.
+- Workflow ih pri sljedećem pokretanju ponovno zapisuje s punom bazom i uspoređuje sa sažetom.
+- Ništa nije deployano ručno.

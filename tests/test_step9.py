@@ -50,6 +50,7 @@ PRODUCTS = [
     ("P5", "Kritharaki rezanci", {L: 0.79}),
     ("P6", "TJE.INTE.PENNE RIGATE BRONZO 500g", {K: 0.59}),
     ("P7", "TJESTENINA PENNE RIGATE 500g", {K: 0.89}),
+    ("P8", "TJESTENINA TAGLIATELLE 1 kg", {K: 2.49}),  # za 400 g jeftinije od 500 g, a na blagajni skuplje
 ]
 # (id, naziv, kategorija lanca, cijene): vino je u kategoriji alkohola (category_map: "vino", "zestoko")
 DRINKS = [
@@ -406,3 +407,56 @@ def test_golden_crno_vino_osijek():
     for i in out["best_store"]["items"] + [i for s in out["stores"] for i in s["items"]]:
         assert i["staple"] == "vino" and i["attributes"]["boja"] == "crno", i["name"]
         assert not any(w in i["name"].upper() for w in ("MUŠKAT", "PJENUŠ", "BRUT", "SLAT")), i["name"]
+
+
+# --- 4. upute: što nedostaje uz cijenu, cheaper = false nije ušteda ---------------------------------------------
+
+def _instructions() -> str:
+    from mealmeter.server import INSTRUCTIONS
+
+    return " ".join(INSTRUCTIONS.split())
+
+
+def _rule(n: int) -> str:
+    return _instructions().split(f" {n}. ", 1)[1].split(f" {n + 1}. ", 1)[0]
+
+
+def test_rule_missing_next_to_price():
+    """Stvarni test: "Lidl oko 26 €" bez napomene da nedostaje pancetta."""
+    r8 = _rule(8)
+    for phrase in ('s "nedostaje: ..."', "uz cijenu takvog lanca to uvijek navedi, gdje god je spomeneš",
+                   '("Lidl oko 26 €, nedostaje: pancetta")', "nije najjeftiniji",
+                   "always with what is missing next to their price"):
+        assert phrase in r8, phrase
+    r7 = _rule(7)
+    assert "Ako joj nešto nedostaje, uz ukupnu cijenu navedi što" in r7 and "(and what it lacks)" in r7
+
+
+def test_rule_cheaper_false_never_saving():
+    r11 = _rule(11)
+    for phrase in ('Alternativu zovi "jeftinijom" ili uštedom samo kad je cheaper = true',
+                   "cheaper = false nikad nije ušteda", "na blagajni može biti skuplje",
+                   '"cheaper" or a saving only when cheaper = true', "cheaper = false never is"):
+        assert phrase in r11, phrase
+
+
+def test_incomplete_chain_carries_missing(con9):
+    """Podaci za pravilo 8: lanac kojem nešto nedostaje ima cijenu i popis onoga što nedostaje (note)."""
+    out = plan_basket([{"name": "maslac", "amount": 50, "unit": "g"},
+                       {"name": "rose vino", "amount": 200, "unit": "ml"}], "Osijek", con=con9)
+    lidl = [r for r in out["incomplete"] if r["chain"] == "lidl"]
+    assert lidl and lidl[0]["total_to_buy"] > 0 and lidl[0]["note"] == "nedostaje: rose vino"
+
+
+def test_alternatives_cheaper_flag(con9):
+    """Podaci za pravilo 11: cheaper = true znači jeftinije za istu potrebnu količinu (delta_eur < 0), a ne na
+    blagajni: veće pakiranje (size_note) ima veći cost_pack."""
+    out = plan_basket([{"name": "tagliatelle", "amount": 400, "unit": "g"}], "Osijek", con=con9, alternatives=True,
+                      store={"chain": "konzum", "address_contains": ""})
+    item = out["best_store"]["items"][0]
+    assert item["name"] == "TJESTENINA TAGLIATELLE 500 G"
+    alts = {a["name"]: a for a in item["alternatives"]}
+    big = alts["TJESTENINA TAGLIATELLE 1 kg"]
+    assert big["cheaper"] and big["delta_eur"] < 0 and big["size_note"]
+    assert big["cost_pack"] > item["cost_pack"]  # na blagajni skuplje: pravilo 11 traži da se to kaže
+    assert all(a["cheaper"] == (a["delta_eur"] < 0) for a in item["alternatives"])
