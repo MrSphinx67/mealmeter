@@ -38,12 +38,20 @@ Claude pozove `plan_basket` i odgovori otprilike ovako (cijene iz cjenika od 20.
 
 Točan tekst ovisi o asistentu; brojke dolaze iz alata.
 
-### Izvor podataka i licence
+### Izvor podataka i zahvale
 
-- **Podaci:** cijene.dev (DobarKod), prema [uvjetima korištenja](https://cijene.dev/uvjeti-koristenja) cijene.dev.
-  cijene.dev prikuplja službene cjenike koje trgovci objavljuju po Odluci o objavi cjenika (NN 75/2025). Mealmeter ih
-  samo čita i ne mijenja cijene.
-- **Kod:** [MIT](LICENSE).
+Cijene dolaze iz službenih cjenika koje trgovci moraju javno objavljivati.
+Mealmeter koristi pročišćene dnevne arhive s **[cijene.dev](https://cijene.dev)**,
+koje izrađuje i održava Senko Rašić ([DobarKod](https://dobarkod.hr)).
+Bez tog posla ovaj projekt ne bi postojao, hvala!
+
+Podaci se koriste prema [uvjetima korištenja cijene.dev](https://cijene.dev/uvjeti-koristenja).
+Mealmeter koristi samo javne dnevne arhive (ne njihov API ni kod) i nije povezan s
+cijene.dev ni DobarKodom. Za greške u Mealmeteru javi se ovdje, ne njima.
+
+### Licenca
+
+Kod: [MIT](LICENSE).
 
 ### Ograničenja
 
@@ -127,12 +135,20 @@ Claude calls `plan_basket` and answers roughly like this (prices from the 20 Oct
 
 The wording depends on the assistant; the numbers come from the tool.
 
-### Data source and licenses
+### Data source and acknowledgements
 
-- **Data:** cijene.dev (DobarKod), under the cijene.dev [terms of use](https://cijene.dev/uvjeti-koristenja).
-  cijene.dev collects the official price lists that retailers publish under the Croatian price list decision
-  (NN 75/2025). Mealmeter only reads them and does not change prices.
-- **Code:** [MIT](LICENSE).
+Prices come from the official price lists that Croatian retailers are required to publish.
+Mealmeter uses the cleaned daily archives from **[cijene.dev](https://cijene.dev)**,
+built and maintained by Senko Rašić ([DobarKod](https://dobarkod.hr)).
+This project would not exist without that work, thank you!
+
+The data is used under the [cijene.dev terms of use](https://cijene.dev/uvjeti-koristenja).
+Mealmeter only uses the public daily archives (not their API or code) and is not affiliated
+with cijene.dev or DobarKod. Please report Mealmeter issues here, not to them.
+
+### License
+
+Code: [MIT](LICENSE).
 
 ### Limitations
 
