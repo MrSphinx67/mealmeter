@@ -67,6 +67,8 @@ class Staple:
     assume_piece: bool = False
     # svježe meso: kupnja na vagu (bez pakiranja) je ravnopravan izbor, kao kod svježeg povrća
     fresh_meat: bool = False
+    # alkoholna pića smiju biti članovi (vino za kuhanje, Korak 9); inače alkohol uvijek ispada (food_group)
+    alcohol: bool = False
     # oblik=suho bez oznake u nazivu: {"pack_g": (400, 1000), "unit": (...), "words": (...)}
     dry_rule: dict = field(default_factory=dict, hash=False, compare=False)
     # uzorci: proizvod ispada samo ako nema gramature (prazna soljenka), drop_reason 'bez_gramature'
@@ -254,6 +256,7 @@ def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> d
             require_pack=tuple(_fold(p) for p in d.get("require_pack", [])),
             assume_piece=bool(d.get("assume_piece", False)),
             fresh_meat=bool(d.get("fresh_meat", False)),
+            alcohol=bool(d.get("alcohol", False)),
             dry_rule={k: tuple(float(x) if k in ("pack_g", "pack_exact") else _fold(str(x)) for x in v)
                       for k, v in (d.get("dry_rule") or {}).items()},
             substitutes={a: tuple(str(v) for v in vals) for a, vals in (d.get("substitutes") or {}).items()},
@@ -441,7 +444,8 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
 
     staples = staples or load_staples()
     # excluded: pogađa must_not_match -> cijela grupa (EAN) ispada iz namirnice.
-    # drop_reason: samo ovaj proizvod ispada (neprehrambena skupina ili alkohol, food.py), grupa ostaje.
+    # drop_reason: samo ovaj proizvod ispada (neprehrambena skupina ili alkohol, food.py), grupa ostaje;
+    # alkohol ne ispada iz namirnice s `alcohol: true` (vino za kuhanje).
     # Proizvodi s food_group='unknown' ostaju; pretraga i košarica ih filtriraju (is_food IS NULL).
     con.execute("""
         CREATE OR REPLACE TABLE clean.product_staples (
@@ -468,7 +472,8 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
         con.execute(
             f"""INSERT INTO clean.product_staples
                 SELECT chain, product_id, '{st.key}', {excl},
-                       CASE WHEN NOT is_food OR food_group = 'alkohol' THEN 'kategorija:' || food_group END
+                       CASE WHEN NOT is_food OR (food_group = 'alkohol' AND NOT {st.alcohol})
+                            THEN 'kategorija:' || food_group END
                 FROM clean.products WHERE regexp_matches(match_norm, ?) {loose}""",
             params,
         )

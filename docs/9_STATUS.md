@@ -105,3 +105,67 @@ Bez promjene pada 42 testa.
 
 **Zlatni scenarij** `basket_tagliatelle_plodine_osijek` (stvarni ulaz, `free_text: true`): u Plodinama obične
 tagliatelle, bez vrste (`test_golden_tagliatelle_plodine`). Ostala 24 zlatna izlaza su nepromijenjena.
+
+## 3. Vino za kuhanje
+
+**Zašto ga nije bilo.** Namirnice „vino” nije bilo, pa je „crno vino” išlo kao `free_text`. Slobodna pretraga
+(i košarica) uzima samo `is_food` bez `food_group = 'alkohol'`, a vino je u kategorijama lanaca uglavnom
+alkohol (6882 od 7669 naziva s riječi „vino” na 20.10.). Pronađeno je samo ono što je lanac krivo svrstao u hranu.
+U Kauflandu je to bilo desertno „Matić Vino crno Muškat Ruža 0,5L” za 14,52 €, a u ostalim lancima „nedostaje”.
+`is_food` nije uzrok: alkohol je `is_food = true`, a izbacuje ga filtar skupine.
+
+**Promjena:**
+- Novo polje namirnice `alcohol: true` (`staples.py`). Samo za takvu namirnicu alkohol ne dobiva
+  `drop_reason` u `product_staples`, a `_food_filter(include_alcohol=...)` ga propušta u košarici
+  (`_rows_for`) i u `find_products` za tu namirnicu. Slobodna pretraga i sve ostale namirnice i dalje su bez
+  alkohola: „rakija” kao `free_text` i dalje nema rezultata.
+- Namirnica `vino` (`staples.yaml`): mirno stolno vino.
+  - Članovi su nazivi s „vino” ili s glavnom sortom (plavac, vranac, merlot, cabernet, frankovka, graševina,
+    malvazija, chardonnay, sauvignon, rizling, traminac, žilavka…). Sorta je potrebna jer proizvod bez riječi
+    „vino” („VERITAS VRANAC 1,0”) inače nema vlastitu boju i ispada kad je boja tražena. Babić i pošip su samo u
+    regexu boje: Babić je i pekara (desetci kruhova), a pošip i posip za kolače.
+  - `must_not_match`: pjenušci (pjenušavo, pj, brut, extra dry, secco, gazirano, frizzante), slatka, polusuha,
+    desertna i likerska (muškat, prošek, izborna i ledena berba, Tokaji, auslese, marsala, porto), aromatizirana
+    (vermut, Hugo), kuhano vino i začini, bezalkoholno, rakije i likeri od sorte (rakija loza malvazija,
+    komovica, liker teran), grožđe, kvasina, jela i salame s vinom, čaše i pribor.
+  - Atribut `boja`: rosé, crno, bijelo, iz boje u nazivu ili iz sorte. Rosé se provjerava prije crnog
+    („FRANKOVKA ROSE”), a crno prije bijelog („CABERNET SAUVIGNON” nije sauvignon). Ostalo je `nepoznato`.
+    Rosé i nepoznata boja samo na zahtjev (`default_exclude_variants`).
+  - Ostalo: `min_pack` 187 ml, `plausible_per_unit` 1-40 €/l.
+- Nazivi: „crno vino”, „crveno vino”, „bijelo vino”, „suho bijelo vino”, „crno vino za kuhanje” daju boju; „vino”
+  i „vino za kuhanje” su bez boje, pa je to najjeftinije od crnog i bijelog.
+- `docs/SCHEMA.md`: iznimka u filtru hrane.
+
+**Stvarna baza, Osijek, „crno vino” (`free_text`, kao u testu):** 8 lanaca (dm ne prodaje vino), nijedan
+nedostaje. Najjeftinije mirno crno vino za 200 ml:
+
+| lanac | vino | cijena |
+|---|---|---:|
+| Kaufland | Uff Vranac 250 ml | 1,79 € |
+| Plodine | Kadarita crno 1,5 L | 1,99 € |
+| Spar | Il Barone Merlot | 2,29 € |
+| Lidl | Vranac | 2,35 € |
+| NTL | Kastelan crno 1 L | 2,49 € |
+| Roto | Terra Vinea Vranac 1 L | 2,61 € |
+| Eurospin | Vranac 1 L | 2,89 € |
+| Konzum | Vupik Vranac 1 L | 2,95 € |
+
+„bijelo vino” daje 8 lanaca od 1,33 € (Lidl, Chardonnay/Colombard) do 3,79 €. Na 20.10. medu prihvaćenim članovima
+nema pjenušaca, slatkih ni rakija (provjera po riječima brut, poluslatko, slatko, rakija, liker, izborna berba…).
+
+**Testovi** (`tests/test_step9.py`, fixture s kategorijama „VINO” i „ZESTOKO”, gdje su desertno, pjenušac, rosé,
+vino nepoznate boje i rakija jeftiniji od stolnog):
+- nazivi;
+- ostali alkohol nije namirnica;
+- boja iz naziva i sorte;
+- 17 stvarnih naziva koji nisu vino za kuhanje;
+- homonimi sorti (Babić, posip);
+- izbor u košarici;
+- `free_text`;
+- rakija ni u slobodnoj pretrazi ni u `find_products` za vino.
+
+Bez promjene pada 42 testa.
+
+**Zlatni scenarij** `basket_crno_vino_osijek` (stvarni ulaz, `free_text: true`, cijeli grad): Konzum, Lidl,
+Kaufland, Plodine i Spar imaju crno vino, a nijedan izbor nije muškat, pjenušac ni slatko
+(`test_golden_crno_vino_osijek`). Ostala 25 zlatna izlaza su nepromijenjena.

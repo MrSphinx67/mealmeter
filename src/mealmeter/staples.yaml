@@ -1599,6 +1599,53 @@ ocat:
       vinski: '\bvinsk'
   loose_produce: false
 
+vino:
+  # Korak 9: vino za kuhanje. Samo mirno stolno vino (crno ili bijelo); ostala alkoholna pića nisu namirnice, a
+  # free_text ih i dalje ne nalazi. Stvarni test 27.10.2026.: "crno vino" nije pronađeno (alkohol je izvan
+  # pretrage), osim u Kauflandu, gdje je kao hrana bilo desertno Muškat Ruža 0,5 L za 14,52 €.
+  name: vino za kuhanje (crno/bijelo)
+  # boja nije u sinonimima: "crno vino" je sinonim "vino" + boja=crno (riječi "suho", "stolno", "za kuhanje" ne smetaju)
+  synonyms: [vino, vino za kuhanje, stolno vino, suho vino]
+  genitive: vina
+  alcohol: true
+  # i glavne sorte bez riječi "vino" ("VERITAS VRANAC 1,0", "GRAŠEVINA KUTJEVO 1 L"); inače bez vlastite boje ispadaju
+  # kad je boja tražena. Babić (pekara) i pošip (posip za kolače, Smarties) samo uz "vino", preko boje.
+  must_match: [vino\b, plavac, vranac, merlot, cabernet, frankovk, portugizac, zweigelt, teran\b,
+               grasevin, malvazij, chardonnay, sauvignon, rizling, riesling, traminac, zilavk]
+  must_not_match: [
+    # pjenušci, desertna, slatka, likerska i aromatizirana vina, mješavine; rakije i likeri od sorte
+    pjenu, pjen\b, pj\b, brut\b, extra dry, ex dry, demi s, sparkling, frizz, gazir, secco, sampanj,
+    slatk, sladk, polusl, izborna, izb berba, ledena, susen, tokaj, auslese, semi sw,
+    rakij, grappa, komovic, liker, vinjak, champagn, prosecco, spumante, cava\b, sekt\b, biser, perl,
+    prosek, desert, likersk, musk, muscat, moscato, sweet, lambrusc, marsala, porto\b, sherry, madeira, vermut, sangria, hugo, aromatiz,
+    gemist, spritz, kuhano, kuhanog, gluhwein, gluehwein, aromat, vermouth,
+    # bez alkohola, začini i hrana s vinom, pribor
+    bezalkohol, bezalk, alcohol free, 0 alcohol, alkoholfrei, zero\b, 0 0, zacin, kotanyi, salam, rillette, sir\b, umak, ocat, octa, aceto,
+    casa, case\b, cas\b, vrecic, set\b, poklon, kutij, boca\b, otvarac, cep\b, stalak, hladnjak,
+    # grožđe, kvasina (ocat), jela s vinom u nazivu
+    grozd, kvasin, mezzelun, junetin,
+    # vino u pakiranjima koja nisu za kuhanje (miniature ispod 187 ml ispadaju i preko min_pack)
+    to go]
+  unit: l
+  min_pack: 187
+  max_pack: 5000
+  # Korak 9: zadano crno ili bijelo prema traženom; bez boje najjeftinije od crnog i bijelog. Rosé i vino nepoznate
+  # boje (naziv ne kaže ni boju ni sortu) samo na zahtjev.
+  default_exclude_variants: [boja=rose, boja=nepoznato]
+  plausible_per_unit: [1, 40]
+  attributes:
+    boja:
+      # rosé prije crnog ("FRANKOVKA ROSE"), crno prije bijelog ("CABERNET SAUVIGNON" nije sauvignon)
+      rose: '\brose\b|\bruzic|\bopolo|\brosato|\bschiller'
+      crno: '\bcrn|\bcrven|\brouge|\brosso|\bred\b|\bcr\b|\bcr\.|\bplavac|\bmerlot|\bcab|\bfrankov|\bteran|\bbabic|\brefosk|\bportugiz|\bzweig|\bsyrah|\bshiraz|\bvranac|\bblatin|\bdingac|\bpostup|\bzinfand|\bcrljenak|\btribidrag|\bpinot (?:crni|noir|cr)|\bprimitiv|\bsangiov|\bchianti|\bmontepulc|\brioja|\btemprani|\bmalbec|\bkadarka|\bgamay|\bborgonja|\bhrvatica|\bplavina|\bbabica|\bnegroamaro|\bnero d|\bcarmen|\bpinotage'
+      bijelo: '\bbijel|\bbij\b|\bbij\.|\bbi\b|\bblanc|\bbianco|\bwhite|\bweiss|\bgrasev|\bmalvaz|\bchard|\bsauvig|\bpinot (?:bijeli|sivi|grigio|gris|blanc|bi)|\brizling|\briesling|\btraminac|\bposip|\bzilavk|\bkujundz|\bdebit|\bvugava|\bzlahtin|\bkraljevin|\bsilvanac|\bmoslavac|\bskrlet|\bgrk\b|\bmarastin|\bpusipel|\bsipon|\bbelina|\bkerner|\bmuller|\brkacitel|\bzelenac|\bkuc\b|\bvrbnick|\bbogdanus|\bpinela|\bvelt|\bgruner|\bverdicch|\btrebbian|\bvermentin|\bsoave|\bfrascati'
+      _default: nepoznato
+  value_words:
+    boja:
+      crno: [crveno, crvenog, crnog, crnim]
+      bijelo: [bijelog, bijelim]
+  loose_produce: false
+
 med:
   name: med
   synonyms: [med, pčelinji med, pcelinji med]

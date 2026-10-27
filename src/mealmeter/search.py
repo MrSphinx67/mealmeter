@@ -312,7 +312,9 @@ def find_products(
     if not tokens and staple is None:
         return []
     con = con or connect()
-    food_sql = _food_filter(include_nonfood, include_alcohol, "yes" if include_unverified else "no")
+    # namirnica s alcohol: true (vino za kuhanje) uključuje alkoholna pića, ali samo svoje članove
+    food_sql = _food_filter(include_nonfood, include_alcohol or bool(staple and staple.alcohol),
+                            "yes" if include_unverified else "no")
     cand_sql, cand_params, cov_col = _candidates(staple, tokens, attributes, city, include_clearance, food_sql,
                                                  include_ambiguous, include_wholesale, required,
                                                  "all" if include_weak else "none", has_staple_prices(con))

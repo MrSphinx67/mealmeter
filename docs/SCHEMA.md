@@ -141,6 +141,8 @@ ili `default`.
 
 - Filtar hrane: obje funkcije zadano vraćaju samo `is_food = true` bez alkohola; `include_nonfood`,
   `include_alcohol` i `include_unverified` to proširuju, a izlaz nosi `food_group` i `food_unverified`.
+  Iznimka je namirnica s `alcohol: true` (`vino`, vino za kuhanje, Korak 9): njezini članovi su i alkoholna
+  pića (u `find_products` i `plan_basket`), a slobodna pretraga i ostale namirnice i dalje su bez alkohola.
 - `find_products(query=None, city=None, limit=10, ingredient=None, attributes=None)`: grupe proizvoda
   (po EAN-u ili po lancu i nazivu) s poljima `id, ean, name, brand, pack, n_chains, n_stores, chains,
   price_min/max, price_per_unit_min/max, per_unit, unit_confidence, pack_source, suspect_chains,

@@ -83,6 +83,9 @@ SCENARIOS = {
     "basket_tagliatelle_plodine_osijek": ("plan_basket", {
         "ingredients": [{"name": "tagliatelle", "amount": 400, "unit": "g", "free_text": True}], "city": "Osijek",
         "store": {"chain": "plodine", "address_contains": ""}}),
+    # Korak 9: isti test, "crno vino" kao free_text; vina nije bilo (alkohol), osim desertnog u Kauflandu
+    "basket_crno_vino_osijek": ("plan_basket", {
+        "ingredients": [{"name": "crno vino", "amount": 200, "unit": "ml", "free_text": True}], "city": "Osijek"}),
 }
 # lanci koji nikad ne smiju biti u izlazu plan_basketa: nepouzdani podaci (Lorenco) i veleprodaja (Metro)
 EXCLUDED_CHAINS = ("lorenco", "metro")

@@ -345,9 +345,10 @@ def choose_product(rows: list[dict], need: float, need_unit: str, by_weight_unit
 def _rows_for(con, staple: Staple, attributes: dict, city: str, wholesale: bool = False,
               required: dict | None = None) -> list[dict]:
     # Slabi članovi samo s riječju namirnice među prve tri riječi (weak="early"; choose_product ih uzima
-    # tek kad trgovina nema snažnog). Samo provjerena hrana bez alkohola; proizvod nepoznate skupine (food_group 'unknown', npr.
-    # Plodine) samo za svježe voće i povrće, gdje naziv prolazi pravilo prve ili druge riječi.
-    food_sql = _food_filter(unverified="staple" if staple.loose_produce else "no")
+    # tek kad trgovina nema snažnog). Samo provjerena hrana bez alkohola (osim namirnice s alcohol: true, vino za
+    # kuhanje); proizvod nepoznate skupine (food_group 'unknown', npr. Plodine) samo za svježe voće i povrće, gdje
+    # naziv prolazi pravilo prve ili druge riječi.
+    food_sql = _food_filter(include_alcohol=staple.alcohol, unverified="staple" if staple.loose_produce else "no")
     sql, params, _ = _candidates(staple, [], attributes, city, include_clearance=True, food_sql=food_sql,
                                  include_wholesale=wholesale, required=required, weak="early",
                                  staple_prices=has_staple_prices(con))

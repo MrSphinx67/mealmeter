@@ -1,6 +1,7 @@
 """Korak 9: izbor proizvoda iz stvarnog testa (bolonjez, Osijek, 27.10.2026.): zadano kravlji maslac i obične
 mliječne namirnice; posebne vrste (kozje, ovčje, bivolje, bez laktoze, biljno, ghee) samo na zahtjev. Zadano obična
-tjestenina; sa špinatom, integralna, bez glutena, s jajima, svježa i ostale vrste samo na zahtjev."""
+tjestenina; sa špinatom, integralna, bez glutena, s jajima, svježa i ostale vrste samo na zahtjev. Vino za kuhanje:
+najjeftinije mirno crno ili bijelo vino, bez ostalih alkoholnih pića."""
 
 import json
 import os
@@ -50,6 +51,17 @@ PRODUCTS = [
     ("P6", "TJE.INTE.PENNE RIGATE BRONZO 500g", {K: 0.59}),
     ("P7", "TJESTENINA PENNE RIGATE 500g", {K: 0.89}),
 ]
+# (id, naziv, kategorija lanca, cijene): vino je u kategoriji alkohola (category_map: "vino", "zestoko")
+DRINKS = [
+    ("W1", "VINO CRNO 1L KASTELAN", "VINO", {K: 2.49}),
+    ("W2", "VINO BIJELO SUHO 1 L", "VINO", {K: 1.86}),
+    ("W3", "Matić Vino crno Muškat Ruža 0,5L", "VINO", {K: 0.99}),  # stvarni test, Kaufland (desertno)
+    ("W4", "PJENUŠAVO VINO BRUT 0,75 L", "VINO", {K: 0.89}),
+    ("W5", "VINO ROSE 0,75L DALMACIJAVINO", "VINO", {K: 0.79}),
+    ("W6", "VINO VENUS 1L TETRAPAK", "VINO", {K: 0.59}),  # boja nepoznata
+    ("W7", "VERITAS VRANAC 1 L", "VINO", {L: 1.99}),  # bez riječi "vino"
+    ("W8", "RAKIJA LOZA MALVAZIJA ISTARSKA 0,7", "ZESTOKO", {K: 0.49}),
+]
 
 
 @pytest.fixture(scope="module")
@@ -57,10 +69,10 @@ def con9(tmp_path_factory):
     c = duckdb.connect(str(tmp_path_factory.mktemp("s9") / "s9.duckdb"))
     load_raw(c, FIXTURE, "2026-10-19")
     rows, prices = [], []
-    for pid, name, by_store in PRODUCTS:
+    for pid, name, category, by_store in [(p, n, "HRANA", b) for p, n, b in PRODUCTS] + DRINKS:
         for chain, store in by_store:
             if (chain, pid) not in {(r[0], r[1]) for r in rows}:
-                rows.append((chain, pid, f"{chain}:{pid}", name, "HRANA", "ko"))
+                rows.append((chain, pid, f"{chain}:{pid}", name, category, "ko"))
             prices.append((chain, store, pid, by_store[(chain, store)]))
     c.executemany("INSERT INTO products (chain, product_id, barcode, name, category, unit) VALUES (?, ?, ?, ?, ?, ?)",
                   rows)
@@ -295,3 +307,102 @@ def test_golden_tagliatelle_plodine():
     for i in items + [i for s in out["stores"] for i in s["items"]]:
         assert i["staple"] == "tjestenina" and i["attributes"].get("oblik") == "tagliatelle", i["name"]
         assert "vrsta" not in i["attributes"] and "VERDI" not in i["name"].upper(), i["name"]
+
+
+# --- 3. vino za kuhanje -------------------------------------------------------------------------------------
+
+@pytest.mark.parametrize("name,attrs", [
+    ("vino", {}),
+    ("vino za kuhanje", {}),
+    ("crno vino", {"boja": "crno"}),
+    ("crveno vino", {"boja": "crno"}),
+    ("bijelo vino", {"boja": "bijelo"}),
+    ("suho bijelo vino", {"boja": "bijelo"}),
+    ("crno vino za kuhanje", {"boja": "crno"}),
+    ("rose vino", {"boja": "rose"}),
+])
+def test_wine_names(name, attrs):
+    st, got = resolve_name(name)
+    assert st.key == "vino" and st.alcohol and got == attrs
+
+
+@pytest.mark.parametrize("name", ["rakija", "pivo", "pjenušac", "liker"])
+def test_other_alcohol_not_staple(name):
+    with pytest.raises(Exception):
+        resolve_name(name)
+
+
+@pytest.mark.parametrize("name,boja", [
+    ("VINO CRNO MERLOT KASTELAN 1L", "crno"),
+    ("vino cab sauv vrh 0 75l", "crno"),  # cabernet sauvignon je crno, ne sauvignon
+    ("VERITAS VRANAC 1,0", "crno"),
+    ("VINO STOLNO BIJELO 2 L HAČKO", "bijelo"),
+    ("Vina Belje Graševina kvalitetno vino 1 l", "bijelo"),
+    ("vino orahovica frankovka rose 0 75l", "rose"),  # rose prije crnog (frankovka)
+    ("VINO VENUS 1L TETRAPAK", "nepoznato"),
+])
+def test_wine_colour(name, boja):
+    st = S["vino"]
+    assert name_match(st, name) == "match"
+    assert extract_attributes(st, name)["boja"] == boja
+
+
+@pytest.mark.parametrize("name", [
+    "Matić Vino crno Muškat Ruža 0,5L", "PJENUŠAVO VINO BRUT 0,75 L", "vino grasecco brut 0 2 l",
+    "Secco Vino bijelo gazirano 0,2L LIM", "venus vranac poluslatko", "slatko crveno vino 0 75l pop art",
+    "rakija loza malvazija istarska rossi 0 7", "liker teran s cvij soli 0 2 l", "KUHANO VINO VRECICA 35g",
+    "zero sl zero rosso bezalkoholno vino 750ml", "*CABERNET - SYRAH ALCOHOL FREE J.P.CHENET 0.75L",
+    "Dolin Vino aromat.Vermouth Blanc 0,75L", "200g boskarin salama crno vino", "casa za vino 370 ml",
+    "0,5L KVASINA PLAVAC MALI", "GROŽĐE CRNO VRANAC", "aromatizirano pjenusavo vino gallei hugo 0 75 l",
+])
+def test_wine_not_members(name):
+    assert name_match(S["vino"], name) in (None, "excluded")
+
+
+@pytest.mark.parametrize("name", ["KRUH FRANCUZ 500 g BABIĆ", "Mini posip za kolače SK2", "NESTLE SMARTIES POSIP 500 GRAMA"])
+def test_grape_brand_homonyms_not_wine(name):
+    """Babić je i pekara, pošip je i posip za kolače: sorte samo uz riječ "vino"."""
+    assert name_match(S["vino"], name) is None
+
+
+@pytest.mark.parametrize("name,chain,expected", [
+    ("crno vino", "konzum", "VINO CRNO 1L KASTELAN"),  # desertno, pjenušac, rose i nepoznata boja su jeftiniji
+    ("bijelo vino", "konzum", "VINO BIJELO SUHO 1 L"),
+    ("vino", "konzum", "VINO BIJELO SUHO 1 L"),  # bez boje: najjeftinije od crnog i bijelog
+    ("rose vino", "konzum", "VINO ROSE 0,75L DALMACIJAVINO"),
+    ("crno vino", "lidl", "VERITAS VRANAC 1 L"),
+])
+def test_wine_basket_choice(con9, name, chain, expected):
+    assert pick(con9, name, 200, "ml", chain)["name"] == expected
+
+
+def test_wine_free_text_uses_staple(con9):
+    """Stvarni ulaz: "crno vino" kao free_text. Prije: slobodna pretraga bez alkohola, pa vina nije bilo."""
+    out = plan_basket([{"name": "crno vino", "amount": 200, "unit": "ml", "free_text": True}], "Osijek", con=con9,
+                      store={"chain": "konzum", "address_contains": ""})
+    item = out["best_store"]["items"][0]
+    assert item["staple"] == "vino" and item["name"] == "VINO CRNO 1L KASTELAN"
+
+
+def test_other_alcohol_still_excluded(con9):
+    """Rakija (najjeftinija, u istoj trgovini) nije ni free_text ni u find_products za vino."""
+    from mealmeter.search import find_products
+
+    out = plan_basket([{"name": "rakija", "amount": 100, "unit": "ml", "free_text": True}], "Osijek", con=con9)
+    assert out["unmatched"] and not out["comparison"]
+    names = {r["name"] for r in find_products(ingredient="vino", city="Osijek", con=con9, limit=50)}
+    assert "VINO CRNO 1L KASTELAN" in names and not any("RAKIJA" in n.upper() for n in names)
+    assert not find_products("rakija", city="Osijek", con=con9)
+
+
+@pytest.mark.skipif(os.environ.get("MM_GOLDEN") != "1", reason="zlatni izlazi traže stvarnu bazu (MM_GOLDEN=1)")
+def test_golden_crno_vino_osijek():
+    """Stvarni test: "crno vino" (free_text) u Osijeku nije bilo nigdje osim desertnog vina u Kauflandu; sada je
+    mirno crno vino u svim velikim lancima."""
+    out = json.loads((GOLDEN / "basket_crno_vino_osijek.json").read_text(encoding="utf-8"))
+    assert not out["unmatched"]
+    chains = {r["chain"] for r in out["comparison"] if r["complete"]} | {r["chain"] for r in out["more_chains"]}
+    assert {"konzum", "lidl", "kaufland", "plodine", "spar"} <= chains
+    for i in out["best_store"]["items"] + [i for s in out["stores"] for i in s["items"]]:
+        assert i["staple"] == "vino" and i["attributes"]["boja"] == "crno", i["name"]
+        assert not any(w in i["name"].upper() for w in ("MUŠKAT", "PJENUŠ", "BRUT", "SLAT")), i["name"]
