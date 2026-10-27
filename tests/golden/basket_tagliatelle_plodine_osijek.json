@@ -1,0 +1,229 @@
+{
+ "already_have": [],
+ "ambiguous": [],
+ "assumptions": [],
+ "best_store": {
+  "address": "J J Strossmayera 343",
+  "addresses": [
+   "J J Strossmayera 343"
+  ],
+  "chain": "plodine",
+  "city": "Osijek",
+  "data_quality": "ok",
+  "date": "2026-10-20",
+  "date_hr": "20.10.2026.",
+  "flagged_items": 0,
+  "from_stock_value": 0,
+  "items": [
+   {
+    "alternatives": [],
+    "attributes": {
+     "oblik": "tagliatelle"
+    },
+    "by_weight_fallback": false,
+    "cost_pack": 1.06,
+    "cost_used": 1.06,
+    "date": "2026-10-20",
+    "date_hr": "20.10.2026.",
+    "ean": "3859889154246",
+    "fallback": false,
+    "flags": [],
+    "food_unverified": false,
+    "have": false,
+    "ingredient": "tagliatelle",
+    "is_special": false,
+    "match_quality": "strong",
+    "n_packs": 1,
+    "name": "TJ.SIR.REZANCI 400 G PARADISO",
+    "need": 400.0,
+    "need_unit": "g",
+    "notes": [],
+    "pack_qty": 400.0,
+    "pack_size": "400 g",
+    "pack_source": "name",
+    "pantry": false,
+    "per_unit": "kg",
+    "price_eff": 1.06,
+    "price_per_unit": 2.65,
+    "product_id": "042443",
+    "stale_days": 0,
+    "staple": "tjestenina",
+    "unit_confidence": "high"
+   }
+  ],
+  "missing": [],
+  "n_ingredients": 1,
+  "n_matched": 1,
+  "n_stores": 1,
+  "scope": "local",
+  "stale_days": 0,
+  "store_id": "030",
+  "total_to_buy": 1.06,
+  "total_used": 1.06,
+  "unit_confidence": "high"
+ },
+ "city": "Osijek",
+ "comparison": [
+  {
+   "addresses": [
+    "J J Strossmayera 343"
+   ],
+   "chain": "plodine",
+   "complete": true,
+   "n_ingredients": 1,
+   "n_matched": 1,
+   "n_stores_city": 2,
+   "total_to_buy": 1.06,
+   "total_used": 1.06
+  }
+ ],
+ "date": "2026-10-20",
+ "date_hr": "20.10.2026.",
+ "incomplete": [],
+ "ingredients": [
+  {
+   "accepted_values": {},
+   "amount": 400.0,
+   "applied_attributes": {
+    "oblik": "tagliatelle"
+   },
+   "assumed_form": null,
+   "attributes": {
+    "oblik": "tagliatelle"
+   },
+   "form": null,
+   "name": "tagliatelle",
+   "pantry": false,
+   "staple": "tjestenina",
+   "unit": "g",
+   "warnings": []
+  }
+ ],
+ "mode": "single_store",
+ "more_chains": [],
+ "note": "Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists (cijene.dev); in-store prices may differ, a price list is not stock, and promotions change. Podaci: cijene.dev (DobarKod), prema uvjetima korištenja (https://cijene.dev/uvjeti-koristenja). / Data: cijene.dev (DobarKod), under its terms of use (https://cijene.dev/uvjeti-koristenja).",
+ "stores": [
+  {
+   "address": "J J Strossmayera 343",
+   "addresses": [
+    "J J Strossmayera 343"
+   ],
+   "chain": "plodine",
+   "city": "Osijek",
+   "data_quality": "ok",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "flagged_items": 0,
+   "from_stock_value": 0,
+   "items": [
+    {
+     "alternatives": [],
+     "attributes": {
+      "oblik": "tagliatelle"
+     },
+     "by_weight_fallback": false,
+     "cost_pack": 1.06,
+     "cost_used": 1.06,
+     "date": "2026-10-20",
+     "date_hr": "20.10.2026.",
+     "ean": "3859889154246",
+     "fallback": false,
+     "flags": [],
+     "food_unverified": false,
+     "have": false,
+     "ingredient": "tagliatelle",
+     "is_special": false,
+     "match_quality": "strong",
+     "n_packs": 1,
+     "name": "TJ.SIR.REZANCI 400 G PARADISO",
+     "need": 400.0,
+     "need_unit": "g",
+     "notes": [],
+     "pack_qty": 400.0,
+     "pack_size": "400 g",
+     "pack_source": "name",
+     "pantry": false,
+     "per_unit": "kg",
+     "price_eff": 1.06,
+     "price_per_unit": 2.65,
+     "product_id": "042443",
+     "stale_days": 0,
+     "staple": "tjestenina",
+     "unit_confidence": "high"
+    }
+   ],
+   "missing": [],
+   "n_ingredients": 1,
+   "n_matched": 1,
+   "n_stores": 1,
+   "scope": "local",
+   "stale_days": 0,
+   "store_id": "030",
+   "total_to_buy": 1.06,
+   "total_used": 1.06,
+   "unit_confidence": "high"
+  },
+  {
+   "address": "Huttlerova 30",
+   "addresses": [
+    "Huttlerova 30"
+   ],
+   "chain": "plodine",
+   "city": "Osijek",
+   "data_quality": "ok",
+   "date": "2026-10-20",
+   "date_hr": "20.10.2026.",
+   "flagged_items": 0,
+   "from_stock_value": 0,
+   "items": [
+    {
+     "attributes": {
+      "oblik": "tagliatelle"
+     },
+     "by_weight_fallback": false,
+     "cost_pack": 1.69,
+     "cost_used": 1.35,
+     "date": "2026-10-20",
+     "date_hr": "20.10.2026.",
+     "ean": "8004690107201",
+     "fallback": false,
+     "flags": [],
+     "food_unverified": false,
+     "have": false,
+     "ingredient": "tagliatelle",
+     "is_special": false,
+     "match_quality": "strong",
+     "n_packs": 1,
+     "name": "TJESTENINA TAGLIATELLE 500 G LA MOLISANA",
+     "need": 400.0,
+     "need_unit": "g",
+     "notes": [],
+     "pack_qty": 500.0,
+     "pack_size": "500 g",
+     "pack_source": "name",
+     "pantry": false,
+     "per_unit": "kg",
+     "price_eff": 1.69,
+     "price_per_unit": 3.38,
+     "product_id": "621504",
+     "stale_days": 0,
+     "staple": "tjestenina",
+     "unit_confidence": "high"
+    }
+   ],
+   "missing": [],
+   "n_ingredients": 1,
+   "n_matched": 1,
+   "n_stores": 1,
+   "scope": "local",
+   "stale_days": 0,
+   "store_id": "053",
+   "total_to_buy": 1.69,
+   "total_used": 1.35,
+   "unit_confidence": "high"
+  }
+ ],
+ "summary_hr": "Za kupiti: 1,06 €. Stvarno utrošeno: 1,06 €.",
+ "unmatched": [],
+ "warnings": []
+}

@@ -138,15 +138,20 @@ class Need:
 _CONNECTIVES = {"od", "di", "iz", "mlijeka"}
 
 
+def _value_of(st: Staple, text: str) -> list[tuple[str, str]]:
+    """(atribut, vrijednost) za riječ ili dvije riječi naziva sastojka: vrijednost atributa ("s jajima" ->
+    vrsta=s_jajima) ili riječ iz value_words ("mljevena junetina": vrsta=junece)."""
+    hit = [(a, v) for a, vals in st.attributes.items() for v in vals if norm_text(v.replace("_", " ")) == text]
+    return hit or ([st.value_words[text]] if text in st.value_words else [])
+
+
 def resolve_name(name: str) -> tuple[Staple, dict]:
     """Naziv sastojka -> (namirnica, atributi). Točan sinonim, ili sinonim + vrijednosti atributa
     ("glatko brašno" -> brasno, tip=glatko; "mljevena junetina" -> mljeveno_meso, vrsta=junece preko
     value_words). Inače IngredientError."""
     if st := resolve_ingredient(name):
-        # sinonim koji je i vrijednost atributa ("špageti" -> tjestenina, oblik=spageti)
-        q = norm_text(name)
-        hit = [(a, v) for a, vals in st.attributes.items() for v in vals if norm_text(v.replace("_", " ")) == q]
-        attrs = dict(hit[:1])
+        # sinonim koji je i vrijednost atributa ("špageti" -> tjestenina, oblik=spageti; "rezanci" -> tagliatelle)
+        attrs = dict(_value_of(st, norm_text(name))[:1])
         # riječi sinonima zamjenjuju zadanu vrijednost atributa ("ljuta paprika": vrsta=ljuta, ne zadana slatka)
         detail = extract_attributes_detail(st, name)
         for a in st.default_attributes:
@@ -161,7 +166,8 @@ def resolve_name(name: str) -> tuple[Staple, dict]:
                 if words[i:i + len(syn_words)] != syn_words:
                     continue
                 rest = words[:i] + words[i + len(syn_words):]
-                attrs, ok = {}, True
+                # sinonim koji je vrijednost ("zelene tagliatelle": oblik=tagliatelle i vrsta=sa_spinatom)
+                attrs, ok = dict(_value_of(st, syn)[:1]), True
                 # riječi iz sinonima iste namirnice ne smetaju ("mljeveno juneće meso": "meso")
                 filler = {x for s in st.synonyms for x in s.split()} | _CONNECTIVES
                 j = 0
@@ -169,10 +175,7 @@ def resolve_name(name: str) -> tuple[Staple, dict]:
                     # dvije riječi prije jedne: "bez laktoze", "s jajima", "sa spinatom" (Korak 9)
                     for n in (2, 1):
                         w = " ".join(rest[j:j + n])
-                        hit = [(a, v) for a, vals in st.attributes.items() for v in vals
-                               if norm_text(v.replace("_", " ")) == w]
-                        if not hit and w in st.value_words:  # "mljevena junetina": vrsta=junece
-                            hit = [st.value_words[w]]
+                        hit = _value_of(st, w)
                         if hit or n == 1 or j + n > len(rest):
                             break
                     j += n

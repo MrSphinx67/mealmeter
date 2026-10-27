@@ -52,7 +52,7 @@ def test_golden_files_present():
     from pathlib import Path
 
     files = sorted((Path(__file__).parent / "golden").glob("*.json"))
-    assert len(files) == 24
+    assert len(files) == 25
     kinds = {f.name.split("_")[0] for f in files}
     assert kinds == {"find", "prices", "basket"}
 

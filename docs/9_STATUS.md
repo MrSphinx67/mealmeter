@@ -50,3 +50,58 @@ Bez promjene u `staples.yaml` pada 55 testova.
 
 **Zlatni scenarij** `basket_maslac_plodine_osijek` (stvarni slučaj): Plodine ne biraju kozji, ghee ni maslac bez
 laktoze (`test_golden_maslac_plodine`, uz `MM_GOLDEN=1`). Ostala 23 zlatna izlaza su nepromijenjena.
+
+## 2. Tjestenina: zadano obična
+
+**Problem.** „tagliatelle” nije bio sinonim namirnice `tjestenina`, pa je asistent sastojak poslao kao
+`free_text`. Slobodna pretraga po nazivu nema zadanih isključenja, pa su izabrane bilo kakve tagliatelle, i to ne
+nužno najjeftinije: u Plodinama TAGLIATELLE VERDI (1,19 €), iako su obični široki rezanci 1,06 €. Na istoj bazi
+Konzum je dao tagliatelle od pira, Eurospin i Kaufland s jajima, NTL svježe. Unutar namirnice su postojale samo
+vrste `integralna`, `bez_glutena` i `s_jajima`, a isključene su bile samo prve dvije. `oblik=tagliatelle`
+(`\brezanc`) obuhvaćao je i Kritharaki (orzo; to je Lidl izabrao za „tagliatelle”), jušne, sitne i japanske
+rezance, pa čak i „STROJ ZA REZANCE”.
+
+**Promjena** (`staples.yaml`, `tjestenina`):
+- Sinonimi oblika: tagliatelle, rezanci, široki/uski rezanci, farfalle, leptirići, mašnice, linguine, bucatini,
+  fusili, svrdlići, pužići. Naziv sada daje namirnicu i oblik („tagliatelle” → `oblik=tagliatelle`), i kad
+  dođe s `free_text: true`, jer se namirnica traži prije slobodne pretrage.
+- Novi oblici `jusni` (za juhu, jušni, sitni, fidelini, čipkasti, kritharaki, orzo) i `azijski` (japanski,
+  soba, udon, ramen, wok, konjak) stoje prije `tagliatelle`, pa se biraju samo kad su traženi.
+- `vrsta` (prva vrijednost koja pogodi):
+  - `bez_glutena`: i BG, B.G., heljda, kukuruz, riža;
+  - `od_mahunarki`: leća, slanutak, grah, proteinska;
+  - `integralna`: i INTE., INT;
+  - `od_pira`: pir, spelt, kamut;
+  - `sa_spinatom`: špinat, ŠPIN., ZELE., verdi, tipfeler ŠIPNAT;
+  - `obojena`: tricolore, cikla, crnilo sipe, crni, tartuf, rajčica, mrkva, chili, gljive, šparoge, chlorella,
+    začinjene;
+  - `s_jajima`: i S JAJ, s jaji., JAJ., JAJA, s.j., jajčani; „bez jaja” i „b.j.” to nisu;
+  - `svjeza`: svježa bez jaja u nazivu.
+- `default_exclude_variants`: sve navedene vrste. Zadano je obična suha tjestenina; ostale vrste biraju se samo
+  kad su tražene imenom („zelene tagliatelle”, „tagliatelle s jajima”, „integralni špageti”, „pirovi špageti”,
+  „bezglutenska tjestenina”, „svježe tagliatelle”, „rezanci za juhu”) ili atributom.
+- „stroj” i „kadaif” više nisu tjestenina.
+- `resolve_name`: sinonim koji je i vrijednost atributa vrijedi i uz druge riječi („zelene tagliatelle” →
+  `oblik=tagliatelle`, `vrsta=sa_spinatom`), i preko `value_words` („rezanci” → `tagliatelle`).
+
+**Stvarna baza, Osijek, „tagliatelle”:** 8 lanaca bira obične tagliatelle ili široke/uske rezance:
+- Plodine: TJ.SIR.REZANCI PARADISO 1,06 €;
+- Konzum: REZANCI ŠIROKI LAURA 2,15 € (prije pir 1,69 €);
+- Eurospin: TAGLIATELLE DURUM 1,29 €.
+
+**Lidl više nema tagliatelle** („nedostaje”), jer ima samo rezance s jajima, sa špinatom i Kritharaki. To je
+posljedica pravila „s jajima samo na zahtjev”. „tagliatelle s jajima” daje 7 lanaca, a „zelene tagliatelle” 7.
+Špageti i penne: nijedan lanac ne bira posebnu vrstu. Eurospin je za penne prije birao integralne
+(„TJE.INTE.PENNE”).
+
+**Testovi** (`tests/test_step9.py`):
+- nazivi sastojaka;
+- 20 stvarnih naziva posebnih vrsta i oblika;
+- obični nazivi bez vrste („BEZ JAJA”, „b.j.”, „INTERSPAR”);
+- izbor u košarici (VERDI, s jajima i pir jeftiniji od običnih);
+- stvarni ulaz `free_text: true`.
+
+Bez promjene pada 42 testa.
+
+**Zlatni scenarij** `basket_tagliatelle_plodine_osijek` (stvarni ulaz, `free_text: true`): u Plodinama obične
+tagliatelle, bez vrste (`test_golden_tagliatelle_plodine`). Ostala 24 zlatna izlaza su nepromijenjena.

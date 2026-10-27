@@ -1,5 +1,6 @@
 """Korak 9: izbor proizvoda iz stvarnog testa (bolonjez, Osijek, 27.10.2026.): zadano kravlji maslac i obične
-mliječne namirnice; posebne vrste (kozje, ovčje, bivolje, bez laktoze, biljno, ghee) samo na zahtjev."""
+mliječne namirnice; posebne vrste (kozje, ovčje, bivolje, bez laktoze, biljno, ghee) samo na zahtjev. Zadano obična
+tjestenina; sa špinatom, integralna, bez glutena, s jajima, svježa i ostale vrste samo na zahtjev."""
 
 import json
 import os
@@ -41,6 +42,13 @@ PRODUCTS = [
     ("V3", "VRHNJE ZA KUH 200ml BEZ LAKT Z BR", {K: 0.79}),
     ("L1", "MLIJEKO TR 2.8% BEZ LAKT 1L LJUB MLEK", {K: 0.49}),
     ("L2", "KOZJE MLIJEKO TRAJNO 2,8% 1 L", {K: 0.45}),
+    ("P1", "TJESTENINA TAGLIATELLE 500 G", {K: 1.49, L: 1.59}),
+    ("P2", "TJESTENINA TAGLIATELLE VERDI 500 G RISCOSA", {K: 0.99, L: 0.99}),
+    ("P3", "REZANCI ŠIROKI S JAJ 400g K PLUS", {K: 0.89}),
+    ("P4", "TIJESTO TAGLIATELLE PIR 400g SIMPLY PASTA", {K: 0.79}),
+    ("P5", "Kritharaki rezanci", {L: 0.79}),
+    ("P6", "TJE.INTE.PENNE RIGATE BRONZO 500g", {K: 0.59}),
+    ("P7", "TJESTENINA PENNE RIGATE 500g", {K: 0.89}),
 ]
 
 
@@ -182,3 +190,108 @@ def test_golden_maslac_plodine():
         attrs = i.get("attributes") or {}
         assert "vrsta_mlijeka" not in attrs and attrs.get("vrsta") != "ghee" and "laktoza" not in attrs, i["name"]
         assert "KOZJ" not in i["name"].upper()
+
+
+# --- 2. tjestenina: zadano obična ----------------------------------------------------------------------------
+
+@pytest.mark.parametrize("name,attrs", [
+    ("tagliatelle", {"oblik": "tagliatelle"}),
+    ("rezanci", {"oblik": "tagliatelle"}),
+    ("široki rezanci", {"oblik": "tagliatelle"}),
+    ("zelene tagliatelle", {"oblik": "tagliatelle", "vrsta": "sa_spinatom"}),
+    ("tagliatelle sa špinatom", {"oblik": "tagliatelle", "vrsta": "sa_spinatom"}),
+    ("tagliatelle s jajima", {"oblik": "tagliatelle", "vrsta": "s_jajima"}),
+    ("jajčani rezanci", {"oblik": "tagliatelle", "vrsta": "s_jajima"}),
+    ("svježe tagliatelle", {"oblik": "tagliatelle", "vrsta": "svjeza"}),
+    ("integralni špageti", {"oblik": "spageti", "vrsta": "integralna"}),
+    ("pirovi špageti", {"oblik": "spageti", "vrsta": "od_pira"}),
+    ("tjestenina bez glutena", {"vrsta": "bez_glutena"}),
+    ("bezglutenska tjestenina", {"vrsta": "bez_glutena"}),
+    ("rezanci za juhu", {"oblik": "jusni"}),
+    ("farfalle", {"oblik": "farfalle"}),
+    ("špageti", {"oblik": "spageti"}),
+])
+def test_pasta_names(name, attrs):
+    st, got = resolve_name(name)
+    assert st.key == "tjestenina" and got == attrs
+
+
+@pytest.mark.parametrize("name,attr,value", [
+    ("TJESTENINA TAGLIATELLE VERDI 500 G RISCOSA", "vrsta", "sa_spinatom"),  # stvarni test, Plodine
+    ("TJ.TAGLIATELLE SA SPIN.250 G DE CECCO VRECICA", "vrsta", "sa_spinatom"),
+    ("TJ.TAGLIATELLE 500 g ŠIPNAT BR98 BARI", "vrsta", "sa_spinatom"),
+    ("TJES.PREMIUM ZELE.REZANC.400 g", "vrsta", "sa_spinatom"),
+    ("REZANCI ŠIROKI S JAJ 400g K PLUS", "vrsta", "s_jajima"),
+    ("K-Favourites NMNP Šir.rezanc.s jaji.400g", "vrsta", "s_jajima"),
+    ("LM pl.linija tagliatelle 203 s.j.250g", "vrsta", "s_jajima"),
+    ("REZANCI SIROKI RAVNI JAJCANI XXL 600 G", "vrsta", "s_jajima"),
+    ("TIJESTO TAGLIATELLE PIR 400g SIMPLY PASTA", "vrsta", "od_pira"),
+    ("TJE.INTE.PENNE RIGATE BRONZO 500g", "vrsta", "integralna"),
+    ("TJ.FUSILLI B.G. CR.LEĆA 250 g", "vrsta", "bez_glutena"),
+    ("TJ.PENNE CRV.LECA 250 G BARILLA", "vrsta", "od_mahunarki"),
+    ("ZP REZANCI OD HELJDE 400g", "vrsta", "bez_glutena"),
+    ("TJEST. REZANCI CRNI 400 g MARIOLINA", "vrsta", "obojena"),
+    ("CIKLA REZANCI 680 g PODRAVKA", "vrsta", "obojena"),
+    ("TJ.PANONA 400g TRICOLORE", "vrsta", "obojena"),
+    ("TJ.REGGIA 500g TAGLIATELLE SVJEŽE", "vrsta", "svjeza"),
+    ("Kritharaki rezanci", "oblik", "jusni"),  # stvarni test, Lidl
+    ("REZANCI ZA JUHU 400 g RAFAJAC", "oblik", "jusni"),
+    ("REZANCI JAPAN 300 g SAITAKU SOBA", "oblik", "azijski"),
+])
+def test_pasta_special_variants(name, attr, value):
+    st = S["tjestenina"]
+    assert extract_attributes(st, name).get(attr) == value
+    if attr == "vrsta":
+        assert (attr, value) in st.default_exclude_variants
+
+
+@pytest.mark.parametrize("name,oblik", [
+    ("1KG MC TAGLIATELLE BEZ JAJA", "tagliatelle"),  # "bez jaja" nije s jajima
+    ("La Molisana tagliatelle 103 b.j. 500g", "tagliatelle"),
+    ("TJESTENINA TAGLIATELLE 500 G RUMMO", "tagliatelle"),
+    ("TJ. INTERSPAR PENNE 500g", "penne"),  # "INTERSPAR" nije integralna
+    ("Ragusa široki rezanci 400 g", "tagliatelle"),
+    ("TJESTENINA ŠPAGETI 400 g PANEA", "spageti"),
+])
+def test_pasta_plain(name, oblik):
+    attrs = extract_attributes(S["tjestenina"], name)
+    assert attrs.get("oblik") == oblik and "vrsta" not in attrs
+
+
+@pytest.mark.parametrize("name", ["STROJ ZA REZANCE-rasprodaja", "400G B.L REZANCI KADAIF"])
+def test_pasta_not_members(name):
+    assert name_match(S["tjestenina"], name) == "excluded"
+
+
+@pytest.mark.parametrize("name,amount,chain,expected", [
+    # VERDI, s jajima i od pira su jeftiniji, ali "tagliatelle" bira obične
+    ("tagliatelle", 400, "konzum", "TJESTENINA TAGLIATELLE 500 G"),
+    ("tagliatelle", 400, "lidl", "TJESTENINA TAGLIATELLE 500 G"),  # Kritharaki nisu tagliatelle
+    ("zelene tagliatelle", 400, "konzum", "TJESTENINA TAGLIATELLE VERDI 500 G RISCOSA"),
+    ("tagliatelle s jajima", 400, "konzum", "REZANCI ŠIROKI S JAJ 400g K PLUS"),
+    ("penne", 400, "konzum", "TJESTENINA PENNE RIGATE 500g"),
+    ("integralni penne", 400, "konzum", "TJE.INTE.PENNE RIGATE BRONZO 500g"),
+])
+def test_pasta_basket_choice(con9, name, amount, chain, expected):
+    assert pick(con9, name, amount, "g", chain)["name"] == expected
+
+
+def test_tagliatelle_free_text_uses_staple(con9):
+    """Stvarni ulaz iz testa: "tagliatelle" s free_text: true. Naziv je sada namirnica, pa vrijede zadana
+    isključenja (prije slobodna pretraga: najjeftinije bilo kakve tagliatelle, u Plodinama VERDI)."""
+    out = plan_basket([{"name": "tagliatelle", "amount": 400, "unit": "g", "free_text": True}], "Osijek", con=con9,
+                      store={"chain": "konzum", "address_contains": ""})
+    item = out["best_store"]["items"][0]
+    assert item["staple"] == "tjestenina" and item["name"] == "TJESTENINA TAGLIATELLE 500 G"
+
+
+@pytest.mark.skipif(os.environ.get("MM_GOLDEN") != "1", reason="zlatni izlazi traže stvarnu bazu (MM_GOLDEN=1)")
+def test_golden_tagliatelle_plodine():
+    """Stvarni test: "tagliatelle" (free_text) u Plodinama Osijek nisu VERDI, ni s jajima ni druga posebna vrsta."""
+    out = json.loads((GOLDEN / "basket_tagliatelle_plodine_osijek.json").read_text(encoding="utf-8"))
+    assert not out["unmatched"]
+    items = out["best_store"]["items"]
+    assert items and out["best_store"]["chain"] == "plodine"
+    for i in items + [i for s in out["stores"] for i in s["items"]]:
+        assert i["staple"] == "tjestenina" and i["attributes"].get("oblik") == "tagliatelle", i["name"]
+        assert "vrsta" not in i["attributes"] and "VERDI" not in i["name"].upper(), i["name"]

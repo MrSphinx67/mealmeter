@@ -935,7 +935,10 @@ riza:
 
 tjestenina:
   name: tjestenina
-  synonyms: [tjestenina, pasta, špageti, spageti, penne, fusilli, makaroni]
+  synonyms: [tjestenina, pasta, špageti, spageti, penne, fusilli, makaroni,
+             # Korak 9: oblici kao sinonimi, inače idu u free_text bez zadanih isključenja ("tagliatelle" -> VERDI)
+             tagliatelle, rezanci, široki rezanci, uski rezanci, farfalle, leptirići, mašnice, linguine, bucatini,
+             fusili, svrdlići, pužići]
   must_match: [tjestenin, spaget, spaghett, penne, fusill, makaron, tagliatell, farfalle, rigatoni,
                linguine, tortiglioni, puzic, svrdl, mascice, leptiric, pipe rigate, sedanini, tjest\b,
                # Korak 2E: oblici i marke (lazanje su sada tjestenina; gotova jela isključuju gotov/bolognese/smrz)
@@ -950,9 +953,14 @@ tjestenina:
                    pilec, pilet, junec, svinj, purec, dagnj, kamenic, vongol, plodovi mora, morsk, smrz,
                    # "školjke" i "tj" koje nisu tjestenina; gotove lazanje
                    cappasante, pral\b, pralin, sokn, carap, noz\b, pjescanik, pijescanik, zitn, chocapic, cok\b,
-                   za tj\b, argan, bolog, meso\b, zamrz, ricott, krupica durum]
+                   za tj\b, argan, bolog, meso\b, zamrz, ricott, krupica durum,
+                   # Korak 9: stroj za rezance, kadaif (tijesto za kolače)
+                   stroj, kadaif]
   unit: kg
-  default_exclude_variants: [vrsta=integralna, vrsta=bez_glutena]
+  # Korak 9: zadano obična tjestenina; ostale vrste samo na zahtjev (stvarni test 27.10.2026.: "tagliatelle" su u
+  # Plodinama bile TAGLIATELLE VERDI, u Konzumu od pira, u Eurospinu i Kauflandu s jajima)
+  default_exclude_variants: [vrsta=bez_glutena, vrsta=od_mahunarki, vrsta=integralna, vrsta=od_pira,
+                             vrsta=sa_spinatom, vrsta=obojena, vrsta=s_jajima, vrsta=svjeza]
   max_pack: 5000
   min_pack: 250
   attributes:
@@ -964,13 +972,44 @@ tjestenina:
       penne: '\bpenne'
       fusilli: '\bfusill|\bsvrdl'
       makaroni: '\bmakaron'
-      tagliatelle: '\btagliatell|\brezanc'
+      # Korak 9: nisu svi "rezanci" tagliatelle: jušni i sitni (i kritharaki, orzo) te azijski rezanci su zasebni
+      # oblici i biraju se samo kad su traženi (Lidl je za "tagliatelle" dao Kritharaki rezance)
+      jusni: '\bjus|\bza juhu|\bsitn|\bfidelin|\bfilin|\bcipkast|\bkritharak|\borzo\b'
+      azijski: '\bjapan|\bsoba\b|\budon|\bramen|\bwok\b|\bkonjak|\bkonjac|\bmie\b|\byakisob|\bchow'
+      tagliatelle: '\btagliatell|\brezanc|\bfettucc|\bpappardell'
       farfalle: '\bfarfalle|\bleptir|\bmasnic'
       puzici: '\bpuzic'
+    # prva vrijednost koja pogodi pobjeđuje: "BEZ GLUTENA KUKURUZNI" je bez_glutena, "SA ŠPINATOM I JAJIMA" sa_spinatom
     vrsta:
-      integralna: '\bintegral'
-      bez_glutena: 'bez glutena|gluten free'
-      s_jajima: 's jajima|\bjajim|\bjajc'
+      # i heljda, kukuruz i riža (rižini rezanci inače pogađaju tagliatelle preko "rezanci")
+      bez_glutena: 'bez glutena|gluten free|\bbg\b|\bb\.g\.|\bheljd|\bkukuruz|\briz(?:a|e|in|\b)|\brice\b'
+      od_mahunarki: '\bleca\b|\bcrvena leca|\bslanut|\bgrah\b|\bedamam|\bprotein'
+      integralna: '\bintegral|\binte?\.|\bint\b'  # "TJE.INTE.PENNE", "BIO TJ INT SPIRELLI"
+      od_pira: '\bpir\b|\bpira\b|\bpirov|\bpirin|\bspelt|\bdinkel|\bkamut'
+      # i kratice: "ŠPIN.", "ŠPINA", "ZELE.", "ZEL.", tipfeler "ŠIPNAT"
+      sa_spinatom: '\bspin|\bsipnat|\bzel(?:en|e\.|\.|\b)|\bverdi\b'
+      # s okusom ili bojom: tricolore, cikla, crnilo sipe, crni, tartuf, rajčica, mrkva, chili, gljive, šparoge
+      obojena: '\btricolor|\bcikl|\bcrnil|\bcrn|\bnero di sep|\bsip[ae]\b|\btartuf|\bpomodor|\brajcic|\bmrkv|\bmrk\b|\bchili|\bpaprik|\bgljiv|\bsparog|\bzacinj|\bchlorel|\bchiorel'
+      # "S JAJ", "s jaji.", "JAJ.", "JAJA", "s.j."; "BEZ JAJA" i "b.j." nisu s jajima
+      s_jajima: 's jaj|(?<!bez )\bjaj(?:a\b|i\b|\.|\b)|\bjajim|\bjajc|\bjajn|\buovo|\beier|\bs\.j\.'
+      # svježa (hladnjak) bez jaja u nazivu; svježa s jajima je s_jajima
+      svjeza: '\bsvjez|\bsvj\b|\bsvj\.|\bsv\.|\bfresc|\bfresh'
+  value_words:
+    oblik:
+      tagliatelle: [rezanci, široki rezanci, uski rezanci]
+      jusni: [jušni, jušne, za juhu, sitni]
+      farfalle: [leptirići, mašnice]
+      fusilli: [fusili, svrdlići]
+      puzici: [pužići]
+    vrsta:
+      integralna: [integralni, integralne, integralnih, integralnu]
+      bez_glutena: [bezglutenski, bezglutenska, bezglutenske, bezglutenskih]
+      od_mahunarki: [proteinski, proteinska, proteinske, od leće, od slanutka]
+      od_pira: [pirovi, pirova, pirove, pir, od pira, spelt]
+      sa_spinatom: [zeleni, zelene, zelena, verdi, špinatom]
+      obojena: [tricolore, tricolori, šareni, šarene, šarena]
+      s_jajima: [jajčani, jajčana, jajčane, jajčanih, jajima]
+      svjeza: [svježi, svježa, svježe, svježih]
   loose_produce: false
 
 kruh:
