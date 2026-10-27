@@ -251,3 +251,21 @@ Prema napomeni iz točke 4 (nestanak samih Plodina = 34 % redaka bi blokirao): p
 - 1065 testova prolazi (+3 preskočena), uz `MM_GOLDEN=1` 1068.
 
 Ništa nije deployano.
+
+## 6. Testovi pisali u stvarni sažetak workflowa
+
+U sažetku zadnjeg uspješnog pokretanja bile su tablice sa sintetičkim podacima iz testova (`80 -> 21`, dm 1-8 dana,
+datumi 19.-21.10.). Uzrok: korak „Testovi” pokreće se u Actionsu, gdje su `GITHUB_ACTIONS=true` i
+`GITHUB_STEP_SUMMARY` postavljeni. Fixture `env` u `tests/test_update.py`, za razliku od onog u
+`tests/test_step8.py`, nije brisao `GITHUB_ACTIONS`. Zato su `test_update_cycle` (arhiva bez konzuma, lidla i
+eurospina) i `test_carry_forward` (dm izostaje do 29.10.) kroz `github_report` dopisivali u stvarni sažetak.
+Potvrđeno lokalno: prije popravka `tests/test_update.py` uz te dvije varijable zapiše 76 redaka.
+
+- `tests/conftest.py`: autouse fixture `step_summary` za svaki test preusmjeri `GITHUB_STEP_SUMMARY` na
+  privremenu datoteku i ukloni `GITHUB_ACTIONS`. Testovi koji provjeravaju sažetak (`test_step8.py`) postave
+  `GITHUB_ACTIONS=true` i čitaju `step_summary`. Lokalno brisanje `GITHUB_ACTIONS` iz fixturea `env` je
+  uklonjeno, jer ga sada radi conftest.
+- `test_tests_do_not_write_real_step_summary`: u testu nema `GITHUB_ACTIONS`, a sažetak je privremena datoteka.
+  Scenarij -74 % ne piše ni u nju ni u stvarni sažetak, čija se veličina zapamti pri učitavanju conftesta.
+- Cijeli `pytest` uz `GITHUB_ACTIONS=true` i `GITHUB_STEP_SUMMARY` postavljen na praznu datoteku:
+  1066 prolazi (+3 preskočena), exit 0, datoteka ostaje prazna (0 B).

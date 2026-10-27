@@ -14,7 +14,6 @@ WEEKEND = {"dm", "roto", "trgovina-krk"}  # kao branka, dm i roto vikendom (bran
 
 @pytest.fixture
 def env(tmp_path, monkeypatch):
-    monkeypatch.delenv("GITHUB_ACTIONS", raising=False)
     db = tmp_path / "db" / "mealmeter.duckdb"
     db.parent.mkdir()
     return {"db": db, "base": ["--db", str(db), "--data-dir", str(tmp_path / "raw")],
@@ -33,13 +32,12 @@ def test_carry_days_constant():
     assert CARRY_DAYS == 7
 
 
-def test_weekend_three_chains_missing(env, capsys, monkeypatch):
+def test_weekend_three_chains_missing(env, capsys, monkeypatch, step_summary):
     """Subota i nedjelja bez 3 lanca: deploy ide, cijene prenesene (stale_days 1, 2); u ponedjeljak svježe."""
     db = env["db"]
     weekend = make_zip_custom(env["tmp"] / "weekend.zip", skip=WEEKEND)
-    summary = env["tmp"] / "summary.md"
+    summary = step_summary
     monkeypatch.setenv("GITHUB_ACTIONS", "true")
-    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary))
     assert load(env, env["full"], "2026-10-23") == 0
     capsys.readouterr()
     for day, days in (("2026-10-24", 1), ("2026-10-25", 2)):
@@ -95,16 +93,15 @@ def test_chain_missing_4_and_8_days(env, capsys):
     assert stale(db, "dm") == [(0,)]
 
 
-def test_big_chain_missing_warns(env, capsys, monkeypatch):
+def test_big_chain_missing_warns(env, capsys, monkeypatch, step_summary):
     """Kao nestanak Plodina (34 % svih redaka): eurospin je 32 od 80 cijena u fixtureu. Ukupno sirovih -40 % je samo
     upozorenje (::warning:: i redak u sažetku s lancima koji su najviše pridonijeli); deploy ide, cijene prenesene."""
     db = env["db"]
     no_big = make_zip_custom(env["tmp"] / "no_eurospin.zip", skip={"eurospin"})
     assert load(env, env["full"], "2026-10-19") == 0
     n_clean = q(db, "SELECT count(*) FROM clean.prices")[0][0]
-    summary = env["tmp"] / "summary.md"
+    summary = step_summary
     monkeypatch.setenv("GITHUB_ACTIONS", "true")
-    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary))
     capsys.readouterr()
     assert load(env, no_big, "2026-10-20") == 0
     out = capsys.readouterr().out
@@ -125,15 +122,14 @@ def test_total_raw_drop_three_chains_warns(env, capsys):
             in capsys.readouterr().out)
 
 
-def test_clean_drop_blocks(env, capsys, monkeypatch):
+def test_clean_drop_blocks(env, capsys, monkeypatch, step_summary):
     """Sirovi retci jednaki, ali izgradnja izgubi pola čistih cijena (kvar kod nas): exit 2, baza netaknuta,
     ::error:: i razlog u sažetku."""
     db = env["db"]
     assert load(env, env["full"], "2026-10-19") == 0
     mtime = db.stat().st_mtime
-    summary = env["tmp"] / "summary.md"
+    summary = step_summary
     monkeypatch.setenv("GITHUB_ACTIONS", "true")
-    monkeypatch.setenv("GITHUB_STEP_SUMMARY", str(summary))
     build_clean = update.build_clean
 
     def broken(con):
@@ -193,3 +189,23 @@ def test_drop_after_missing_day(env, capsys):
     assert load(env, tiny, "2026-10-22") == 0
     out = capsys.readouterr().out
     assert "  ~ lidl: redaka cijena 9 -> 1 (-89 %), preneseno " in out
+
+
+def test_tests_do_not_write_real_step_summary(env, step_summary, capsys):
+    """Kao test_update_cycle u Actionsu (prije conftest.step_summary je pisao "80 -> 21" i dm 1-8 dana u stvarni
+    sažetak workflowa): okolina testa nema GITHUB_ACTIONS, sažetak je privremena datoteka, run() ne piše ništa,
+    a stvarni sažetak (ako se testovi vrte u Actionsu) nije narastao."""
+    import os
+
+    from tests.conftest import REAL_STEP_SUMMARY, REAL_STEP_SUMMARY_SIZE
+
+    assert "GITHUB_ACTIONS" not in os.environ
+    assert os.environ["GITHUB_STEP_SUMMARY"] == str(step_summary) != REAL_STEP_SUMMARY
+    small = make_zip_custom(env["tmp"] / "small.zip", skip={"konzum", "lidl", "eurospin"})
+    assert load(env, env["full"], "2026-10-19") == 0
+    assert load(env, small, "2026-10-20") == 0
+    out = capsys.readouterr().out
+    assert "80 -> 21" in out and "::warning" not in out  # upozorenje u logu, ali ne kao GitHub naredba
+    assert not step_summary.exists()
+    if REAL_STEP_SUMMARY_SIZE is not None:
+        assert os.path.getsize(REAL_STEP_SUMMARY) == REAL_STEP_SUMMARY_SIZE
