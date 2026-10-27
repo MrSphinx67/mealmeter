@@ -1,5 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
+  "regions": ["fra1"],
   "functions": {
     "api/index.py": {
       "includeFiles": "{src/**,data/compact.duckdb,data/*.yaml}",
