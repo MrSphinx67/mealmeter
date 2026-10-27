@@ -1,4 +1,4 @@
-"""Zlatni izlazi (Korak 5P): 23 scenarija alata nad stvarnom bazom, spremljeni u tests/golden/*.json.
+"""Zlatni izlazi (Korak 5P, 9): scenariji alata nad stvarnom bazom, spremljeni u tests/golden/*.json.
 
     python scripts/golden.py --write [--db data/mealmeter.duckdb]   # spremi izlaze (prije promjena)
     python scripts/golden.py --check [--db data/compact.duckdb]     # usporedi; ispiše razlike po scenariju
@@ -75,6 +75,10 @@ SCENARIOS = {
     "basket_bolonjez_junece_osijek": ("plan_basket", {"ingredients": [
         {**i, "name": "juneće mljeveno meso"} if i["name"] == "mljeveno meso" else i for i in BOLONJEZ],
         "city": "Osijek"}),
+    # Korak 9: stvarni test 27.10.2026. (bolonjez, Osijek): "maslac" je u Plodinama bio kozji
+    "basket_maslac_plodine_osijek": ("plan_basket", {"ingredients": [{"name": "maslac", "amount": 50, "unit": "g"}],
+                                                     "city": "Osijek", "store": {"chain": "plodine",
+                                                                                 "address_contains": ""}}),
 }
 # lanci koji nikad ne smiju biti u izlazu plan_basketa: nepouzdani podaci (Lorenco) i veleprodaja (Metro)
 EXCLUDED_CHAINS = ("lorenco", "metro")

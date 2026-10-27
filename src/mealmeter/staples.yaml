@@ -293,7 +293,7 @@ maslinovo_ulje:
 
 maslac:
   name: maslac
-  synonyms: [maslac, puter, butter]
+  synonyms: [maslac, puter, butter, kravlji maslac, ghee, pročišćeni maslac]
   must_match: [maslac, puter\b, butter\b, markenbutter]
   must_not_match: [povrc, mjesavin, focacc, pistacij, toast, tikva, salata, tost, bombon, candie,
                    zacinsk, bilj, peanut, snickers, kikiriki, kokic, keks, croissant, kroasan, shea,
@@ -304,10 +304,32 @@ maslac:
   max_pack: 1000
   min_pack: 100
   plausible_per_unit: [6, 40]
+  # Korak 9: zadano kravlji maslac; kozji, ovčji, ghee i bez laktoze samo kad su izričito traženi
+  # (stvarni test 27.10.2026.: "maslac" u Plodinama je bio MASLAC KOZJI 125 G)
+  default_exclude_variants: [vrsta_mlijeka=kozje, vrsta_mlijeka=ovcje, vrsta_mlijeka=bivolje, laktoza=bez,
+                             vrsta=ghee]
   attributes:
     vrsta:
+      ghee: '\bghee|\bprociscen'
       slani: '\bslan|\bs morskom'
       neslani: '\bneslan'
+    # Korak 9: mlijeko koje nije kravlje (zajedničko za mliječne namirnice); Capra Domestica, Caprodur su kozji,
+    # paški sir je ovčji
+    vrsta_mlijeka: &vrsta_mlijeka
+      kozje: '\bkoz(?:j|ij|\.|\b)|\bcapr'
+      ovcje: '\bovc|\bpask'
+      bivolje: '\bbivol|\bbufal'
+    # "BEZ LAKT.", "LF", "LACTOSE FREE", Kauflandova linija K-free, Free Zone
+    laktoza: &laktoza
+      bez: 'bez lakt|\blf\b|lakto?z\w* free|lactose free|\bkfree|\bfree zone|\bfree from|\bzero lakt'
+  # riječi u nazivu sastojka ("kozji maslac", "maslac bez laktoze")
+  value_words: &mlijecne_rijeci
+    vrsta_mlijeka:
+      kozje: [kozji, kozja, kozje, kozjeg, kozjim, kozjem]
+      ovcje: [ovčji, ovčja, ovčje, ovčjeg, ovčjim, ovčjem]
+      bivolje: [bivolji, bivolja, bivolje, bivoljeg, bivoljim, bufala, bufale, buffalo]
+    laktoza:
+      bez: [bez laktoze, bezlaktozni, bezlaktozna, bezlaktozno]
   loose_produce: false
 
 margarin:
@@ -325,7 +347,7 @@ mlijeko:
   synonyms: [mlijeko, kravlje mlijeko]
   must_match: [mlijek]
   must_not_match: [loncic, cokolad, cok\b, kakao, sojin, soja, zob, rizin, riza\b, bademov, badem,
-                   kokos, kozje, vanilij, jagod, banan, kava\b, kave\b, napitak, napolitank, keks,
+                   kokos, vanilij, jagod, banan, kava\b, kave\b, napitak, napolitank, keks,
                    kras\b, bijela cokolada, prahu, zamjen, zamj\b, nan\b, junior, kiselo, jogurt,
                    sir\b, sladoled, puding, kroasan, croissant, bombon, cokoladic, med\b, sun\b,
                    suncanje, disney, dorina, ciste, cisti, pjena za, ukrasn, proteinsk, kefir, kondenz,
@@ -333,7 +355,7 @@ mlijeko:
                    # Korak 4B: šlag pjena s mlijekom
                    slag, pjen]
   unit: l
-  default_exclude_variants: [laktoza=bez]
+  default_exclude_variants: [laktoza=bez, vrsta_mlijeka=kozje, vrsta_mlijeka=ovcje, vrsta_mlijeka=bivolje]
   # zadano trajno 2,8 %; masnoća 2,8-3,8 % je zamjenjiva (svježe i trajno su zasebne vrste)
   default_attributes: {vrsta: trajno, mast: "2.8"}
   substitutes: {mast: ["2.8", "3.2", "3.5", "3.8"]}
@@ -353,8 +375,9 @@ mlijeko:
     vrsta:
       trajno: '\btrajn|\buht\b|\btr\b'
       svjeze: '\bsvjez|\bsvj\.|\bsv\.'
-    laktoza:
-      bez: 'bez laktoze|\blf\b|laktoze free'
+    laktoza: *laktoza
+    vrsta_mlijeka: *vrsta_mlijeka
+  value_words: *mlijecne_rijeci
   # Dukatova linija LAGANO JUTRO je mlijeko bez laktoze; naziv to rijetko izričito kaže
   inferred_attributes:
     laktoza:
@@ -369,7 +392,8 @@ jogurt:
                    sumsko, vanilij, smoothie, protein, cokolad, keks, musli, zitaric, kokos, breskv,
                    mango, banan, jabuk, ananas, lesnjak, kava\b, aroma, jogobella, frutek]
   unit: kg
-  default_exclude_variants: [laktoza=bez]
+  default_exclude_variants: [laktoza=bez, vrsta_mlijeka=kozje, vrsta_mlijeka=ovcje, vrsta_mlijeka=bivolje,
+                             vrsta_mlijeka=biljno]
   max_pack: 1000
   min_pack: 150
   attributes:
@@ -377,14 +401,26 @@ jogurt:
       grcki: '\bgrck'
       tekuci: '\btekuc|\btek\.'
       cvrsti: '\bcvrst'
-    laktoza:
-      bez: 'bez laktoze|\blf\b|laktoze free'
+    laktoza: *laktoza
+    vrsta_mlijeka: &vrsta_mlijeka_biljno
+      <<: *vrsta_mlijeka
+      # biljne zamjene (soja, zob, kokos; Alpro, Hopla) samo na zahtjev
+      biljno: '\bbiljn|\bsoj|\bzob|\bvegan|\bkokos|\bbadem|\balpro|\bhopla'
     mast:
       "0.1": '(?<![\d.])0?\.1\s*(%|mm)'
       "0.9": '(?<![\d.])0?\.9\s*(%|mm)'
       "1.5": '\b1\.5\s*(%|mm)'
       "2.8": '\b2\.8\s*(%|mm)'
       "3.2": '\b3\.2\s*(%|mm)'
+  value_words: &mlijecne_rijeci_biljno
+    vrsta_mlijeka:
+      kozje: [kozji, kozja, kozje, kozjeg, kozjim, kozjem]
+      ovcje: [ovčji, ovčja, ovčje, ovčjeg, ovčjim, ovčjem]
+      bivolje: [bivolji, bivolja, bivolje, bivoljeg, bivoljim, bufala, bufale, buffalo]
+      biljno: [biljni, biljna, biljno, biljnog, sojin, sojino, sojina, zobeni, zobeno, zobena, veganski, veganska,
+               vegansko]
+    laktoza:
+      bez: [bez laktoze, bezlaktozni, bezlaktozna, bezlaktozno]
   loose_produce: false
 
 kiselo_vrhnje:
@@ -393,12 +429,16 @@ kiselo_vrhnje:
   must_match: [kiselo vrhnje, vrhnje kiselo, kis vrhnje, vrhnje kis, mileram]
   must_not_match: [luk\b, vlasac, umak, namaz]
   unit: kg
+  default_exclude_variants: [laktoza=bez, vrsta_mlijeka=kozje, vrsta_mlijeka=ovcje, vrsta_mlijeka=bivolje, vrsta_mlijeka=biljno]
   max_pack: 1000
   min_pack: 150
   attributes:
+    laktoza: *laktoza
+    vrsta_mlijeka: *vrsta_mlijeka_biljno
     mast:
       "12": '\b12\s*(%|mm)'
       "20": '\b20\s*(%|mm)'
+  value_words: *mlijecne_rijeci_biljno
   loose_produce: false
 
 vrhnje_za_kuhanje:
@@ -407,8 +447,13 @@ vrhnje_za_kuhanje:
   must_match: [vrhnje za kuhanje, vrhnje za kuh, vrh za kuh, kuhinjsko vrhnje, vrhnje kuhanje, creme cuisine]
   must_not_match: [luk\b]
   unit: l
+  default_exclude_variants: [laktoza=bez, vrsta_mlijeka=kozje, vrsta_mlijeka=ovcje, vrsta_mlijeka=bivolje, vrsta_mlijeka=biljno]
   max_pack: 1000
   min_pack: 200
+  attributes:
+    laktoza: *laktoza
+    vrsta_mlijeka: *vrsta_mlijeka_biljno
+  value_words: *mlijecne_rijeci_biljno
   loose_produce: false
 
 slatko_vrhnje:
@@ -417,8 +462,13 @@ slatko_vrhnje:
   must_match: [slatko vrhnje, vrhnje slatko, vrhnje za slag, slag vrhnje, vrhnje za tuc]
   must_not_match: [pjena, sprej, prah, cokolad]
   unit: l
+  default_exclude_variants: [laktoza=bez, vrsta_mlijeka=kozje, vrsta_mlijeka=ovcje, vrsta_mlijeka=bivolje, vrsta_mlijeka=biljno]
   max_pack: 1000
   min_pack: 200
+  attributes:
+    laktoza: *laktoza
+    vrsta_mlijeka: *vrsta_mlijeka_biljno
+  value_words: *mlijecne_rijeci_biljno
   loose_produce: false
 
 svjezi_sir:
@@ -426,15 +476,19 @@ svjezi_sir:
   synonyms: [svježi sir, svjezi sir, kravlji sir]
   must_match: [svjezi sir, sir svjezi, svj sir, sir svj, zrnati sir, sirni namaz svjezi]
   must_not_match: [dukatino, voce, strukli, mascarpone, vrhnje, burek, strudl, pita, savijac, palacink,
-                   krem\b, sunka, luk\b, vlasac, paprik, bucin, sirni\b, snack,
+                   krem\b, sunka, luk\b, vlasac, paprik, bucin, sirni\b, snack, pripravak, fruit,
                    biljn, vegan, greenvie, green vie, zamjen]
   unit: kg
+  default_exclude_variants: [laktoza=bez, vrsta_mlijeka=kozje, vrsta_mlijeka=ovcje, vrsta_mlijeka=bivolje]
   max_pack: 1000
   min_pack: 150
   attributes:
+    laktoza: *laktoza
+    vrsta_mlijeka: *vrsta_mlijeka
     mast:
       posni: '\bposn|\blight'
       masni: '\bmasn|\bpunomas'
+  value_words: *mlijecne_rijeci
   loose_produce: false
 
 tvrdi_sir:
@@ -442,12 +496,15 @@ tvrdi_sir:
   synonyms: [tvrdi sir, gauda, gouda, trapist, edamac, edamer, polutvrdi sir]
   must_match: [gauda, gouda, trapist, edamac, edamer, tvrdi sir, sir tvrdi, polutvrdi, polutv\b, tilzit,
                leerdammer, emmental, maasdam, edam\b, cheddar]
-  must_not_match: [krem\b, topljen, namaz, cips, kreker, sunka, burek, pita, umak, sos\b, dip\b,
+  must_not_match: [krem\b, topljen, toplj\b, namaz, cips, kreker, sunka, burek, pita, umak, sos\b, dip\b,
                    biljn, vegan, greenvie, green vie, zamjen]
   unit: kg
+  default_exclude_variants: [laktoza=bez, vrsta_mlijeka=kozje, vrsta_mlijeka=ovcje, vrsta_mlijeka=bivolje]
   max_pack: 1000
   min_pack: 100
   attributes:
+    laktoza: *laktoza
+    vrsta_mlijeka: *vrsta_mlijeka
     vrsta:
       gauda: '\bgauda|\bgouda'
       trapist: '\btrapist'
@@ -456,6 +513,7 @@ tvrdi_sir:
     oblik:
       ribani: '\bribani|\bribanac|\brib\.'
       narezani: '\bnarez|\brez\.|\bslice|\bsnite'
+  value_words: *mlijecne_rijeci
   loose_produce: false
 
 mozzarella:
@@ -465,12 +523,16 @@ mozzarella:
   must_not_match: [krem\b, mozzarellom, pizza, stapic, panir, salata, sendvic, tost,
                    biljn, vegan, greenvie, green vie, zamjen]
   unit: kg
+  default_exclude_variants: [laktoza=bez, vrsta_mlijeka=kozje, vrsta_mlijeka=ovcje, vrsta_mlijeka=bivolje]
   max_pack: 1000
   min_pack: 100
   attributes:
+    laktoza: *laktoza
+    vrsta_mlijeka: *vrsta_mlijeka
     oblik:
       ribana: '\bribal|\bribani|\bgrated'
       kuglica: '\bmini|\bkuglic|\bperle'
+  value_words: *mlijecne_rijeci
   loose_produce: false
 
 tvrdi_sir_talijanski:

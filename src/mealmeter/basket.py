@@ -134,6 +134,10 @@ class Need:
     note_fn: object = None  # atributi -> napomena za alternativu izvan zadanog izbora ("kavezni, s")
 
 
+# riječi koje u nazivu sastojka ne nose značenje ("maslac od kozjeg mlijeka", "mozzarella di bufala")
+_CONNECTIVES = {"od", "di", "iz", "mlijeka"}
+
+
 def resolve_name(name: str) -> tuple[Staple, dict]:
     """Naziv sastojka -> (namirnica, atributi). Točan sinonim, ili sinonim + vrijednosti atributa
     ("glatko brašno" -> brasno, tip=glatko; "mljevena junetina" -> mljeveno_meso, vrsta=junece preko
@@ -159,11 +163,19 @@ def resolve_name(name: str) -> tuple[Staple, dict]:
                 rest = words[:i] + words[i + len(syn_words):]
                 attrs, ok = {}, True
                 # riječi iz sinonima iste namirnice ne smetaju ("mljeveno juneće meso": "meso")
-                filler = {x for s in st.synonyms for x in s.split()}
-                for w in rest:
-                    hit = [(a, v) for a, vals in st.attributes.items() for v in vals if norm_text(v.replace("_", " ")) == w]
-                    if not hit and w in st.value_words:  # "mljevena junetina": vrsta=junece
-                        hit = [st.value_words[w]]
+                filler = {x for s in st.synonyms for x in s.split()} | _CONNECTIVES
+                j = 0
+                while j < len(rest):
+                    # dvije riječi prije jedne: "bez laktoze", "s jajima", "sa spinatom" (Korak 9)
+                    for n in (2, 1):
+                        w = " ".join(rest[j:j + n])
+                        hit = [(a, v) for a, vals in st.attributes.items() for v in vals
+                               if norm_text(v.replace("_", " ")) == w]
+                        if not hit and w in st.value_words:  # "mljevena junetina": vrsta=junece
+                            hit = [st.value_words[w]]
+                        if hit or n == 1 or j + n > len(rest):
+                            break
+                    j += n
                     if not hit and w in filler:
                         continue
                     if len(hit) != 1:
