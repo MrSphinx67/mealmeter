@@ -346,6 +346,18 @@ margarin:
   min_pack: 200
   loose_produce: false
 
+svinjska_mast:
+  # Korak 10
+  name: svinjska mast
+  synonyms: [svinjska mast, mast, domaća mast, domaca mast]
+  must_match: [mast\b]
+  must_not_match: [biljn, bilj\b, kokos, vegan, cvarc, pripravak, prip\b, tek\b, masti\b, slag, vrhnje, sir\b, '[0-9]+ ?ml\b',
+                   kanta, jog\b, jogurt]
+  unit: kg
+  min_pack: 200
+  max_pack: 3000
+  loose_produce: false
+
 mlijeko:
   name: mlijeko
   synonyms: [mlijeko, kravlje mlijeko]
@@ -898,6 +910,79 @@ celer:
       korijen: [korijen, korjen, gomolj, glava]
   loose_produce: true
 
+# Korak 10: česti sastojci hrvatskih recepata koji nisu bili namirnice (popis u docs/10_STATUS.md)
+mahune:
+  name: mahune (zelene ili žute)
+  synonyms: [mahune, mahuna, grah mahune, grah mahunar, boranija]
+  must_match: ['mahun[ae]\b', mahun\b]
+  must_not_match: [mahunark, vanilij, puretin, piletin, cereali, zitar, mjesav, mix\b, poke, varivo, juha, salata,
+                   sjeme, hrana, bowl, rizoto, gulas, edamame, soja]
+  unit: kg
+  min_pack: 200
+  max_pack: 3000
+  # zadano svježe ili smrznute (ista količina u receptu); konzerva (ocijeđena masa) samo na zahtjev
+  default_exclude_variants: [oblik=konzerva]
+  attributes:
+    oblik:
+      konzerva: '\blim\.|\blimenk|\blim\b|\bkonz|\bocij|\bocj|\bstaklo|\bstaklenk|\bsteriliz|\d+\s*(?:g|gr)\.?\s*/\s*\d+|\d\s*ml\b'
+      smrznuto: '\bsmrz|\bledo\b|\bfrozen|\bfrozy|\bfresco|\bvapeur|\bzamrz'
+      _default: svjeze
+    boja:
+      zelena: '\bzel'
+      zuta: '\bzut'
+  value_words:
+    oblik:
+      smrznuto: [smrznute, smrznuta, smrznutih]
+      konzerva: [konzerva, konzervirane]
+    boja:
+      zelena: [zelene, zelena]
+      zuta: [žute, žuta, zute, zuta]
+  loose_produce: false
+
+poriluk:
+  name: poriluk
+  synonyms: [poriluk, praziluk, prasa]
+  must_match: [poriluk, praziluk]
+  must_not_match: [juha, krem\b, pita, porilukom, poriluka, tavu, sjeme, umak]
+  unit: kg
+  loose_produce: true
+
+cvjetaca:
+  name: cvjetača
+  synonyms: [cvjetača, cvjetaca, karfiol]
+  must_match: [cvjetac, karfiol, kaul\b]
+  must_not_match: [juha, krem\b, salata, salatu, medaljon, nugg, mjesav, mix\b, brokul, curry, gastro, povrc, sjeme, pire]
+  unit: kg
+  assume_piece: true  # glavica bez težine ("CVJETAČA KOM"): data/units.yaml
+  attributes:
+    oblik:
+      smrznuto: '\bsmrz|\bledo\b|\bfrozen|\bfrozy|\bzamrz'
+    vrsta:
+      romanesco: '\bromanesc'
+  default_exclude_variants: [vrsta=romanesco]
+  loose_produce: false
+
+brokula:
+  name: brokula
+  synonyms: [brokula, brokulu, brokule]
+  must_match: [brokul]
+  must_not_match: [juha, krem\b, klice, gratin, medaljon, heljd, mjesav, mix\b, cvjetac, karfiol, tjestenin, kasic,
+                   salata, pire, rizoto, sjeme, brokulom, aranc, crousti, filet, patate, nugg, brok\b]
+  unit: kg
+  assume_piece: true
+  attributes:
+    oblik:
+      smrznuto: '\bsmrz|\bledo\b|\bfrozen|\bfrozy|\bvapeur|\bzamrz|o.plant'
+  loose_produce: false
+
+patlidzan:
+  name: patlidžan
+  synonyms: [patlidžan, patlidzan, melancana, melanzana]
+  must_match: [patlidzan, melancan]
+  must_not_match: [ajvar, namaz, umak, filet, fil\b, ulju, pecen, salata, pasta, sjeme]
+  unit: kg
+  loose_produce: true
+
 persin:
   name: peršin
   synonyms: [peršin, persin]
@@ -1175,6 +1260,45 @@ kakao:
   unit: kg
   max_pack: 1000
   min_pack: 50
+  loose_produce: false
+
+orasi:
+  # Korak 10: jezgre oraha (cijele, polovice, mljevene); indijski, brazilski i pekan nisu orasi
+  name: orasi (jezgra)
+  synonyms: [orasi, orah, oraha, oraj, jezgra oraha, orahova jezgra]
+  must_match: [orah\b, orasi\b, oraha\b]
+  must_not_match: [indijsk, brazil, pekan, makadam, kokos, liker, orahovac, kobas, kolac, pita\b, savijac, twist,
+                   kiflic, ulje, nadjev, sladoled, haagen, baklav, cokolad, keks, sir\b, med\b, musli, muesli, krem\b,
+                   namaz, rolad, strudl, gibanic, kroasan, vafl, pecivo, kruh\b, punjen, sjeme, sadnic, mix\b,
+                   mjesav, studentsk, orasast, cajn, biljka, lokum, rahat, ratluk, ind\b, indij, indis, muskat, junec, but\b,
+                   drobil, kanta, bori\b, amur, giant, gric, bar\b, danac, dzepic, guzvar, lincer, ocat, londoner,
+                   kol\b, vino, juneci, lisnat, zob\b, coko, musk, napit, pek\b, mullermilch]
+  unit: kg
+  min_pack: 50
+  max_pack: 2000
+  attributes:
+    oblik:
+      mljeveni: '\bmljev|\bmlj\b|\bmlj\.|\briban'
+      _default: jezgra
+  value_words:
+    oblik:
+      mljeveni: [mljeveni, mljevenih, mljevene]
+  loose_produce: false
+
+kukuruzni_skrob:
+  # Korak 10
+  name: kukuruzni škrob (gustin)
+  synonyms: [gustin, kukuruzni škrob, kukuruzni skrob, škrob, skrob, gussnel, maizena]
+  must_match: [gustin, skrob, gussnel]
+  must_not_match: [tapiok, krumpir, rizin, psenic, za rublje, sprej, hrana, spek, skrobic]
+  unit: kg
+  min_pack: 50
+  max_pack: 1000
+  # gustin "za umake" (tamni, s aromom) i bez glutena samo na zahtjev
+  default_exclude_variants: [vrsta=za_umake]
+  attributes:
+    vrsta:
+      za_umake: 'za umak|\bbrzi\b'
   loose_produce: false
 
 cokolada_za_kuhanje:
@@ -1911,6 +2035,43 @@ lovorov_list:
   pantry: true
   min_pack: 2
   max_pack: 500
+  loose_produce: false
+
+cimet:
+  # Korak 10: zadano mljeveni; kora i štapići samo na zahtjev
+  name: cimet
+  synonyms: [cimet, mljeveni cimet, cimet u kori, štapić cimeta]
+  default_attributes: {oblik: mljeveni}
+  must_match: [cimet]
+  must_not_match: [caj\b, liker, red bull, zob, kasa, savijac, strud, keks, vafl, musli, muesli, jogurt, sirup,
+                   secer, sec\b, kolac, snack, cokolad, kolacic, jabuk, narancin, jabuka, med\b, napitak, kava, belriso,
+                   muffin, aroma, ar\b]
+  unit: kg
+  pantry: true
+  min_pack: 5
+  max_pack: 500
+  attributes:
+    oblik:
+      kora: '\bkor|\bstapic|\bcijel'
+      mljeveni: '\bmlj'
+      _default: mljeveni
+  value_words:
+    oblik:
+      kora: [kori, kora, štapić, stapic, štapići, stapici, štapića]
+  loose_produce: false
+
+ruzmarin:
+  # Korak 10
+  name: ružmarin
+  synonyms: [ružmarin, ruzmarin]
+  must_match: [ruzmarin]
+  must_not_match: [sir\b, med\b, kobas, grisin, grissin, kreker, kruh\b, caj\b, biljka, salam, ulje, sol\b, cips,
+                   chips, sapun, sampon, krem\b, ruzmarinom, ruzmarina, bolsius, mirisn, kob\b, histris, nam\b, namaz,
+                   crocchini, franck, ruzm\b, signal, zubn]
+  unit: kg
+  pantry: true
+  min_pack: 3
+  max_pack: 200
   loose_produce: false
 
 kobasica:

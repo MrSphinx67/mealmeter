@@ -16,3 +16,5 @@ secer: {amount: 10, unit: g, text: "10 g (žlica)"}
 persin: {amount: 1, unit: kom, text: "1 vezica"}
 cesnjak: {amount: 2, unit: kom, text: "2 češnja"}
 kocka_za_juhu: {amount: 1, unit: kom, text: "1 kocka (za 0,5 l)"}
+cimet: {amount: 2, unit: g, text: "2 g (žličica)"}
+ruzmarin: {amount: 2, unit: g, text: "2 g (žličica suhog)"}

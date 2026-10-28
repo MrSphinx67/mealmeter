@@ -120,3 +120,88 @@ celer, kocka za juhu, maslac…), cijeli Osijek. Nema `unmatched` ni pitanja.
 - Svaka pancetta je panceta, celer stabljika, kocka povrtna, vino crno, a maslac kravlji (`test_golden_bolonjez_osijek_10`).
 
 Ostalih 26 zlatnih izlaza je nepromijenjeno.
+
+## 2. Upute za neprepoznate sastojke i česti sastojci koji nisu bili namirnice
+
+### Upute: unmatched nije uračunat, bez procjene
+
+**Problem.** U testu je asistent za neprepoznate sastojke sam dodao „otprilike X €”. Pravilo 3 je zabranjivalo
+procjenu cijena općenito, a pravilo 6 je tražilo da se proizvod ne proglasi nepostojećim nakon jedne pretrage.
+Nijedno nije reklo što s cijenom sastojka iz `unmatched`.
+
+**Promjena** (`src/mealmeter/server.py`):
+- Pravilo 6: sastojak iz `unmatched` nije uračunat. Asistent to kaže i nikad mu ne procjenjuje cijenu (ni
+  „otprilike X €”). Odmah pokušava `find_products` ili `free_text` (i drugi naziv) i nudi `candidates`. Ostaje i
+  „ne zaključuj da proizvoda nema nakon jedne pretrage”. Engleski: „An unmatched ingredient is not counted: say so,
+  never estimate its price; at once try find_products or free_text and offer candidates.”
+- Opis `plan_basket`:
+  - `unmatched (nije uračunato, bez cijene; s prijedlozima / not counted, no price; with suggestions)`;
+  - `ask_user` je i za atribut (celer: stabljika ili korijen);
+  - `assumptions` su i pretpostavljene vrijednosti.
+
+Upute imaju 6514 znakova, a ograničenje iz Koraka 9 je 6547 (1,3 × 5036), pa ga nije trebalo dizati.
+
+### Česti sastojci
+
+Provjereni su sastojci iz tipičnih hrvatskih recepata. Svi koje je zadatak naveo već su bili namirnice:
+- lovor (`lovorov_list`) i peršin (`persin`);
+- vrhnje za kuhanje i kiselo vrhnje;
+- krušne mrvice, kvasac i prašak za pecivo;
+- šunka, paprika, tikvica i kupus.
+
+Iznimka su **mahune**: bile su samo u `must_not_match` graha.
+
+Popis od još ~60 čestih naziva (`resolve_name`) dao je ove nepoznate: mahune, poriluk, cvjetača/karfiol, brokula,
+patlidžan, svinjska mast, orasi, gustin/kukuruzni škrob, cimet, ružmarin, kopar, vlasac, timijan, muškatni
+oraščić, kurkuma, kumin, čili, đumbir, kus kus, jabučni ocat, puretina, teletina, hrenovke, losos, oslić, kruh
+(namirnica postoji, ali je `disabled`), tortilja, lisnato tijesto, kore za pitu, želatina, bademi, lješnjaci,
+grožđice, batat, cikla, rotkvica, limeta, soda bikarbona i „vrhnje” bez vrste.
+
+**Dodano** (deset najčešćih u kuhanju, svaka provjerena na stvarnim nazivima u Osijeku i Zagrebu):
+
+| namirnica | sinonimi | zadano / napomena |
+|---|---|---|
+| `mahune` | mahune, mahuna, grah mahune, grah mahunar, boranija | svježe ili smrznute; konzerva i staklenka (ml) samo na zahtjev; boja zelena/žuta iz naziva |
+| `poriluk` | poriluk, praziluk, prasa | svježe povrće (na vagu); komad 250 g |
+| `cvjetaca` | cvjetača, karfiol | i smrznuta; romanesco na zahtjev; glavica bez težine 800 g |
+| `brokula` | brokula | i smrznuta; glavica bez težine 500 g |
+| `patlidzan` | patlidžan, melancana | svježe povrće; komad 300 g |
+| `svinjska_mast` | svinjska mast, mast, domaća mast | bez biljne i kokosove masti, tekućih pripravaka i kanti za mast |
+| `orasi` | orasi, orah, jezgra oraha | jezgra ili mljeveni (i „ribani”); bez indijskog, brazilskog, pekana, muškatnog oraščića, lokuma, likera, juneće „orah” |
+| `kukuruzni_skrob` | gustin, kukuruzni škrob, škrob, gussnel | gustin „za umake” i „brzi” na zahtjev |
+| `cimet` | cimet, mljeveni cimet, cimet u kori, štapić cimeta | zadano mljeveni; kora na zahtjev (štapić 3 g); bez čajeva, šećera s cimetom, deserta |
+| `ruzmarin` | ružmarin | začin (do 200 g); bez grisina, kobasica, namaza, svijeća, paste za zube |
+
+`data/units.yaml`: gustoće (cimet 0,5; škrob 0,6; mast 0,9; orasi 0,45 g/ml) i komadi. `data/assumptions.yaml`:
+cimet i ružmarin 2 g kad recept ne kaže količinu.
+
+Primjeri, stvarna baza, Osijek:
+- mahune 500 g: Kaufland KLC narezane 1 kg 1,64 €, Konzum 1 kg 1,99 €, Lidl 600 g 2,19 €;
+- cvjetača 1 kom: Kaufland i Lidl ≈ 800 g 1,39 €;
+- orasi 100 g: Eurospin jezgra 1,59 €, Konzum mljeveni 200 g 1,99 € (prije ispravka su četiri lanca, a u Zagrebu šest, birala rahat lokum s orasima);
+- svinjska mast 50 g: Spar 500 g 1,55 € (u Zagrebu je prije ispravka Spar birao biljni pripravak „PRIP.TEK.BILJ.MAST”).
+
+**Nije dodano:** začini koje recepti rijetko kupuju posebno (kopar, vlasac, timijan, muškatni oraščić, kurkuma,
+kumin, čili, đumbir), meso i riba (puretina, teletina, losos, oslić, hrenovke: traže dijelove i oblike kao `junetina`),
+tijesta (lisnato, kore za pitu, tortilja), orašasti plodovi osim oraha, ostalo povrće i voće s popisa, soda
+bikarbona i želatina. „vrhnje” bez vrste nije spojeno ni s kiselim vrhnjem ni s vrhnjem za kuhanje, jer je to
+pitanje za korisnika. Sve to i dalje radi kao `free_text`.
+
+### Testovi
+
+`tests/test_step10.py`:
+- formulacija pravila 6 (hr i en) i opis `plan_basket`;
+- nazivi novih namirnica;
+- 22 stvarna naziva koji nisu članovi;
+- izbor u košarici: mahune bez konzerve, ali konzerva na zahtjev; orasi jezgra, ne lokum ni indijski; svinjska, ne
+  biljna mast; cimet mljeveni, a štapić na zahtjev.
+
+Bez promjene pada 42 testa. Zlatnih izlaza je 27 i svi su nepromijenjeni.
+
+## Završno
+
+- `pytest`: 1349 prolazi (+7 preskočenih, zlatni bez stvarne baze), exit 0.
+- Uz `MM_GOLDEN=1` i stvarnu bazu s novim namirnicama: 1356 prolazi, exit 0.
+- Zlatnih izlaza je 27 (+1: `basket_bolonjez_osijek_10`); postojećih 26 je nepromijenjeno.
+- Workflow ih pri sljedećem pokretanju ponovno zapisuje s punom bazom i uspoređuje sa sažetom.
+- Ništa nije deployano ručno.

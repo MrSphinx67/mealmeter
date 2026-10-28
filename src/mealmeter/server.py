@@ -75,9 +75,11 @@ Pravila / rules:
    u kojem je obliku količina iz recepta (suho, kuhano, smrznuto) i pitaj kad je to dvosmisleno.
    / Amounts in g, ml or kom (convert_units for spoons, cups); legumes: the ready amount. Tell the user the
    assumptions; state which form the recipe amount is in (dry, cooked, frozen) and ask when it is ambiguous.
-6. Ne izmišljaj cijene ni proizvode: koristi samo ono što alati vrate. Ne zaključuj da proizvoda nema nakon
-   jedne pretrage: pokušaj free_text, drugi naziv ili find_products, pa ponudi candidates.
-   / Never invent prices or products; do not conclude a product is missing after one search.
+6. Ne izmišljaj cijene ni proizvode: koristi samo ono što alati vrate. Sastojak iz unmatched nije uračunat: reci
+   to i nikad mu ne procjenjuj cijenu (ni "otprilike X €"); odmah pokušaj find_products ili free_text (i drugi
+   naziv) i ponudi candidates. Ne zaključuj da proizvoda nema nakon
+   jedne pretrage. / Never invent prices or products. An unmatched ingredient is not counted: say so, never
+   estimate its price; at once try find_products or free_text and offer candidates.
 7. Trgovina poznata: plan_basket zovi sa store, a odgovor je točan popis za tu trgovinu. Ostale lance ne
    nabrajaj, osim jedne rečenice ako je neki drugi lanac u gradu jeftiniji za više od 2 € (cheaper_elsewhere).
    Ako joj nešto nedostaje, uz ukupnu cijenu navedi što. / Known store: call with store, answer with its exact
@@ -423,8 +425,9 @@ chain, up to 6: chain, addresses, n_stores_city, total_to_buy, total_used), more
 further complete chains), price_spread (najjeftiniji i najskuplji potpuni lanac, difference_eur, small: <= 2 € / cheapest
 and dearest complete chain), incomplete (lanci kojima nešto nedostaje: missing / chains missing ingredients),
 cheaper_elsewhere (uz store: drugi lanac u gradu jeftiniji za > 2 € / with store: another chain in the
-city cheaper by > 2 €), assumptions (pretpostavljene količine / assumed amounts), ask_user,
-warnings, unmatched (s prijedlozima / with suggestions), date_hr. detail=true: sve trgovine i sva polja /
+city cheaper by > 2 €), assumptions (pretpostavljene količine i vrijednosti / assumed amounts and values), ask_user
+(oblik ili atribut, npr. celer: stabljika ili korijen / form or attribute), warnings, unmatched (nije uračunato, bez
+cijene; s prijedlozima / not counted, no price; with suggestions), date_hr. detail=true: sve trgovine i sva polja /
 all stores and fields.
 Primjer / example: {"ingredients": [{"name": "brašno glatko", "amount": 250, "unit": "g"},
 {"name": "mlijeko", "amount": 500, "unit": "ml"}, {"name": "jaja", "amount": 3, "unit": "kom"},

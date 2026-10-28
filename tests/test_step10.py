@@ -1,6 +1,8 @@
 """Korak 10: nalazi iz testa bolonjeza (Osijek, 28.10.2026.). "pancetta" (talijanski pravopis) nije bila prepoznata;
 namirnice celer (stabljika ili korijen; uz luk i mrkvu stabljika, inače pitanje) i kocka za juhu / temeljac (kocke i
-prah po kg, tekući temeljac po l; zadano povrtni)."""
+prah po kg, tekući temeljac po l; zadano povrtni). Upute: sastojak iz unmatched nije uračunat i nikad mu se ne
+procjenjuje cijena. Česti sastojci koji nisu bili namirnice: mahune, poriluk, cvjetača, brokula, patlidžan, svinjska mast,
+orasi, kukuruzni škrob, cimet i ružmarin."""
 
 import json
 import os
@@ -41,6 +43,17 @@ PRODUCTS = [
     ("T1", "TEMELJAC POVRTNI 1 L PODRAVKA", "ko", None, {K: 1.99}),
     ("T2", "JUŠNI TEMELJ.DESPAR POVRĆE 1 L", "ko", None, {SP: 1.69}),
     ("T3", "KLC.Goveđi temeljac 140ml", "ko", None, {K: 0.99}),  # tekući koncentrat: premalo pakiranje
+    ("N1", "MAHUNA ZELENA 400G LEDO", "ko", None, {K: 1.49}),
+    ("N2", "MAHUNA 400g LIM PODRAVKA", "ko", None, {K: 0.99}),  # konzerva: samo na zahtjev
+    ("N3", "HAK Zelene mahune 710ml", "ko", None, {K: 0.89}),  # staklenka
+    ("N4", "ORAH JEZGRA 100g", "ko", None, {K: 1.59}),
+    ("N5", "ORAH MLJEVENI 200g SWEET CHEF", "ko", None, {K: 1.99}),
+    ("N6", "RAHAT LOKUM ORAH 180g ADRIA", "ko", None, {K: 1.35}),  # stvarni Konzum (bio je "orasi")
+    ("N7", "INDIJSKI ORAH 150g NATURA", "ko", None, {K: 1.29}),
+    ("N8", "MAST SVINJSKA 500 g DR PIGLEY", "ko", None, {K: 1.6}),
+    ("N9", "PRIP.TEK.BILJ.MAST SB 500 ml", "ko", None, {K: 1.49}),  # stvarni Spar Zagreb (bio je "svinjska mast")
+    ("N10", "CIMET MLJEVENI 10g ŠAFRAM", "ko", None, {K: 0.39}),
+    ("N11", "CIMET KORA 17g VREĆ KOTANYI", "ko", None, {K: 0.29}),
     ("V1", "LUK CRVENI 1 kg", "ko", None, {K: 0.99, L: 0.99, SP: 0.99}),
     ("V2", "MRKVA 1 kg", "ko", None, {K: 0.89, L: 0.89, SP: 0.89}),
 ]
@@ -243,6 +256,85 @@ def test_liquid_stock(con10):
     assert pick(con10, "tekući temeljac", 500, "ml", "spar")["name"] == "JUŠNI TEMELJ.DESPAR POVRĆE 1 L"
     out = basket(con10, [{"name": "temeljac", "amount": 500, "unit": "ml", "form": "tekuci"}], "konzum")
     assert out["ingredients"][0]["staple"] == "tekuci_temeljac"
+
+
+# --- 5. upute: sastojak iz unmatched nije uračunat ----------------------------------------------------------------
+
+def _instructions() -> str:
+    from mealmeter.server import INSTRUCTIONS
+
+    return " ".join(INSTRUCTIONS.split())
+
+
+def test_rule_unmatched_never_estimated():
+    """Stvarni test: za neprepoznate sastojke asistent je dodao "otprilike X €". Pravilo 6: nije uračunato, bez
+    procjene, odmah find_products ili free_text i candidates."""
+    r6 = _instructions().split(" 6. ", 1)[1].split(" 7. ", 1)[0]
+    for phrase in ("Sastojak iz unmatched nije uračunat: reci to", 'nikad mu ne procjenjuj cijenu (ni "otprilike X €")',
+                   "odmah pokušaj find_products ili free_text", "ponudi candidates", "nakon jedne pretrage",
+                   "An unmatched ingredient is not counted", "never estimate its price"):
+        assert phrase in r6, phrase
+
+
+def test_plan_basket_description_unmatched_not_counted():
+    import asyncio
+
+    from mcp import Client
+
+    from mealmeter import server as srv
+
+    async def tools():
+        async with Client(srv.create_server()) as c:
+            return (await c.list_tools()).tools
+
+    desc = " ".join(next(t for t in asyncio.run(tools()) if t.name == "plan_basket").description.split())
+    assert "unmatched (nije uračunato, bez cijene" in desc and "not counted, no price" in desc
+    assert "celer: stabljika ili korijen" in desc
+
+
+# --- 6. česti sastojci koji nisu bili namirnice -------------------------------------------------------------------
+
+@pytest.mark.parametrize("name,staple,attrs", [
+    ("mahune", "mahune", {}), ("grah mahune", "mahune", {}), ("zelene mahune", "mahune", {"boja": "zelena"}),
+    ("smrznute mahune", "mahune", {"oblik": "smrznuto"}), ("poriluk", "poriluk", {}), ("cvjetača", "cvjetaca", {}),
+    ("karfiol", "cvjetaca", {}), ("brokula", "brokula", {}), ("patlidžan", "patlidzan", {}),
+    ("svinjska mast", "svinjska_mast", {}), ("mast", "svinjska_mast", {}), ("orasi", "orasi", {}),
+    ("mljeveni orasi", "orasi", {"oblik": "mljeveni"}), ("gustin", "kukuruzni_skrob", {}),
+    ("kukuruzni škrob", "kukuruzni_skrob", {}), ("cimet", "cimet", {}), ("ružmarin", "ruzmarin", {}),
+])
+def test_common_names(name, staple, attrs):
+    st, got = resolve_name(name)
+    assert st.key == staple and got == attrs
+
+
+@pytest.mark.parametrize("staple,name", [
+    ("mahune", "Ubena Mahuna vanilije 1,5g"), ("mahune", "MJEŠAVINA MAHUNARKI 500 g ZLAT"), ("mahune", "Edamame mahune SK 2"),
+    ("poriluk", "JUHA KREM PORILUK 60 g PODRAVKA"), ("cvjetaca", "JUHA KREM BROKULA I CVJETAČA 66g"),
+    ("brokula", "BIO KLICE BROKULE 70 g"), ("patlidzan", "AJVAR S PATLIDZANOM 300 G BAKINA TAJNA"),
+    ("svinjska_mast", "MAST BILJNA 500g ZVIJEZDA"), ("svinjska_mast", "PRIP.TEK.BILJ.MAST SB 500 ml"),
+    ("svinjska_mast", "KANTA ZA MAST 20 L"), ("orasi", "INDIJSKI ORAH PEČENI SLANI 100g NATURA"),
+    ("orasi", "IND.ORAH 100 g ULTRA"), ("orasi", "LIKER ORAHOVAC 1 L MARASKA"), ("orasi", "RAHAT LOKUM ORAH 180g ADRIA"),
+    ("orasi", "JUNEĆI ORAH VAC."), ("orasi", "MUSK.ORAH MLJ.15 G VR.MAESTRO VEGETA PODRAVKA"),
+    ("cimet", "ČAJ SPAR JABUKA CIMET 30 g"), ("cimet", "CIMET AROMA ŠEĆER 10G DR OETKER"),
+    ("ruzmarin", "GRISINI RUŽMARIN 125 g"), ("ruzmarin", "BOLSIUS MIRISNE LUCICE 18/1 RUZMARIN"),
+    ("ruzmarin", "SIGNAL 75 ML SODA/RUZMARIN"), ("kukuruzni_skrob", "TAPIOKA ŠKROB BIO 500 g NUTRIGOLD"),
+])
+def test_common_not_members(staple, name):
+    assert name_match(S[staple], name) in ("excluded", None)
+
+
+def test_common_basket_choice(con10):
+    """Mahune zadano smrznute ili svježe (konzerva i staklenka su jeftinije); orasi jezgra, ne lokum ni indijski;
+    svinjska, ne biljna mast; cimet zadano mljeveni, štapić na zahtjev (komad 3 g)."""
+    assert pick(con10, "mahune", 400, "g")["name"] == "MAHUNA ZELENA 400G LEDO"
+    out = basket(con10, [{"name": "mahune", "amount": 400, "unit": "g", "attributes": {"oblik": "konzerva"}}], "konzum")
+    assert out["best_store"]["items"][0]["name"] == "HAK Zelene mahune 710ml"
+    assert pick(con10, "orasi", 100, "g")["name"] == "ORAH JEZGRA 100g"
+    assert pick(con10, "mljeveni orasi", 200, "g")["name"] == "ORAH MLJEVENI 200g SWEET CHEF"
+    assert pick(con10, "svinjska mast", 50, "g")["name"] == "MAST SVINJSKA 500 g DR PIGLEY"
+    assert pick(con10, "cimet", 5, "g")["name"] == "CIMET MLJEVENI 10g ŠAFRAM"
+    out = basket(con10, [{"name": "cimet u kori", "amount": 2, "unit": "kom"}], "konzum")
+    assert out["best_store"]["items"][0]["name"] == "CIMET KORA 17g VREĆ KOTANYI" and out["ingredients"][0]["amount"] == 6
 
 
 # --- zlatni scenarij ---------------------------------------------------------------------------------------------

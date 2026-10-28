@@ -62,6 +62,10 @@ densities:  # g/ml; u komentaru: 1 žlica (15 ml) / 1 žličica (5 ml) / 1 šali
   # Korak 10: NIJE gustoća, nego g koncentrata po ml gotovog temeljca (kocka 10 g za 0,5 l, prah 20 g za 1 l);
   # "500 ml temeljca" = 10 g kocke. Žlica praha zato nije točna (≈ 0,3 g umjesto ≈ 8 g).
   kocka_za_juhu: {g_per_ml: 0.02, estimate: true}
+  cimet: {g_per_ml: 0.50, estimate: true}             # mljeveni; žličica ≈ 2,5 g
+  kukuruzni_skrob: {g_per_ml: 0.60, estimate: true}   # žlica ≈ 9 g
+  svinjska_mast: {g_per_ml: 0.90, estimate: true}     # žlica ≈ 13 g
+  orasi: {g_per_ml: 0.45, estimate: true}             # mljeveni; šalica ≈ 110 g
 
 pieces:  # g po komadu (srednje veliki, neočišćen, kakav se kupuje)
   persin: {g: 50, piece: vezica, estimate: true}  # vezica peršina bez težine
@@ -87,3 +91,8 @@ pieces:  # g po komadu (srednje veliki, neočišćen, kakav se kupuje)
   # jedna stabljika (komad bez vrste u receptu); proizvod na komad bez težine ("CELER LIST KOM") je svežanj
   celer: {g: 50, piece: stabljika, pack_g: 450, estimate: true}
   celer.korijen: {g: 400, estimate: true}  # srednji gomolj
+  cvjetaca: {g: 800, piece: glavica, estimate: true}
+  brokula: {g: 500, piece: glavica, estimate: true}
+  poriluk: {g: 250, estimate: true}
+  patlidzan: {g: 300, estimate: true}
+  cimet.kora: {g: 3, piece: štapić, estimate: true}
