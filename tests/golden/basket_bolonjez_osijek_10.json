@@ -1,0 +1,1140 @@
+{
+ "already_have": [],
+ "ambiguous": [],
+ "assumptions": [
+  {
+   "attributes": {
+    "vrsta": "stabljika"
+   },
+   "ingredient": "celer",
+   "text": "stabljika, jer recept ima i luk i mrkva; za drugo zadaj attributes.vrsta"
+  },
+  {
+   "amount": 40,
+   "ingredient": "parmezan",
+   "text": "40 g za posipanje",
+   "unit": "g"
+  },
+  {
+   "amount": 5,
+   "ingredient": "sol",
+   "text": "5 g (žličica) po ukusu",
+   "unit": "g"
+  },
+  {
+   "amount": 1,
+   "ingredient": "papar",
+   "text": "1 g (pola žličice) po ukusu",
+   "unit": "g"
+  }
+ ],
+ "best_store": {
+  "address": "Sjenjak 133",
+  "addresses": [
+   "Sjenjak 133",
+   "Trg Ante Starčevića 10",
+   "Ulica 3.Gardijske Brigade Kune 2"
+  ],
+  "chain": "konzum",
+  "city": "Osijek",
+  "data_quality": "ok",
+  "date": "2026-10-20",
+  "date_hr": "20.10.2026.",
+  "flagged_items": 0,
+  "from_stock_value": 0,
+  "items": [
+   {
+    "alternatives": [],
+    "attributes": {
+     "oblik": "tagliatelle",
+     "vrsta": "s_jajima"
+    },
+    "by_weight_fallback": false,
+    "cost_pack": 1.29,
+    "cost_used": 1.29,
+    "date": "2026-10-20",
+    "date_hr": "20.10.2026.",
+    "ean": "3850334154163",
+    "fallback": false,
+    "flags": [],
+    "food_unverified": false,
+    "have": false,
+    "ingredient": "tagliatelle",
+    "is_special": false,
+    "match_quality": "strong",
+    "n_packs": 1,
+    "name": "REZANCI ŠIROKI S JAJ 400g K PLUS",
+    "need": 400.0,
+    "need_unit": "g",
+    "notes": [],
+    "pack_qty": 400.0,
+    "pack_size": "400 g",
+    "pack_source": "name",
+    "pantry": false,
+    "per_unit": "kg",
+    "price_eff": 1.29,
+    "price_per_unit": 3.23,
+    "product_id": "90366164",
+    "stale_days": 0,
+    "staple": "tjestenina",
+    "unit_confidence": "high"
+   },
+   {
+    "alternatives": [
+     {
+      "cheaper": true,
+      "cost_pack": 2.22,
+      "cost_used": 2.06,
+      "delta_eur": -0.87,
+      "ean": "3850139540598",
+      "match_quality": "strong",
+      "n_packs": 1,
+      "name": "SV MLJEVENA 540G (MA)",
+      "note": "nije mijesano (svinjsko)",
+      "pack_size": "540 g",
+      "per_unit": "kg",
+      "price_eff": 2.22,
+      "price_per_unit": 4.11,
+      "product_id": "90276060",
+      "size_note": "usporedba za 500 g: pakiranje 540 g, odabrano 750 g"
+     }
+    ],
+    "attributes": {
+     "vrsta": "mijesano"
+    },
+    "by_weight_fallback": false,
+    "cost_pack": 4.39,
+    "cost_used": 2.93,
+    "date": "2026-10-20",
+    "date_hr": "20.10.2026.",
+    "ean": "3850139280371",
+    "fallback": false,
+    "flags": [],
+    "food_unverified": false,
+    "have": false,
+    "ingredient": "mljeveno meso",
+    "is_special": true,
+    "match_quality": "strong",
+    "n_packs": 1,
+    "name": "MIJEŠANO MLJEVENO MESO 750 g K PLUS",
+    "need": 500.0,
+    "need_unit": "g",
+    "notes": [],
+    "pack_qty": 750.0,
+    "pack_size": "750 g",
+    "pack_source": "name",
+    "pantry": false,
+    "per_unit": "kg",
+    "price_eff": 4.39,
+    "price_per_unit": 5.85,
+    "product_id": "90890228",
+    "stale_days": 0,
+    "staple": "mljeveno_meso",
+    "unit_confidence": "high"
+   },
+   {
+    "alternatives": [],
+    "attributes": {
+     "oblik": "kockice",
+     "vrsta": "panceta"
+    },
+    "by_weight_fallback": false,
+    "cost_pack": 2.59,
+    "cost_used": 1.85,
+    "date": "2026-10-20",
+    "date_hr": "20.10.2026.",
+    "ean": "80639749",
+    "fallback": false,
+    "flags": [],
+    "food_unverified": false,
+    "have": false,
+    "ingredient": "pancetta",
+    "is_special": false,
+    "match_quality": "strong",
+    "n_packs": 1,
+    "name": "PANCETA DIMLJ KOCKICE NAR 2X70g",
+    "need": 100.0,
+    "need_unit": "g",
+    "notes": [],
+    "pack_qty": 140.0,
+    "pack_size": "140 g",
+    "pack_source": "name",
+    "pantry": false,
+    "per_unit": "kg",
+    "price_eff": 2.59,
+    "price_per_unit": 18.5,
+    "product_id": "90240558",
+    "stale_days": 0,
+    "staple": "slanina",
+    "unit_confidence": "high"
+   },
+   {
+    "alternatives": [],
+    "attributes": {
+     "vrsta": "crveni"
+    },
+    "by_weight_fallback": false,
+    "cost_pack": 0.12,
+    "cost_used": 0.12,
+    "date": "2026-10-20",
+    "date_hr": "20.10.2026.",
+    "ean": "3850334386182",
+    "fallback": false,
+    "flags": [],
+    "food_unverified": false,
+    "have": false,
+    "ingredient": "luk",
+    "is_special": false,
+    "match_quality": "strong",
+    "n_packs": null,
+    "name": "LUK CRVENI",
+    "need": 150.0,
+    "need_unit": "g",
+    "notes": [
+     "na vagu"
+    ],
+    "pack_qty": null,
+    "pack_size": "na vagu",
+    "pack_source": "unit_price",
+    "pantry": false,
+    "per_unit": "kg",
+    "price_eff": 0.79,
+    "price_per_unit": 0.79,
+    "product_id": "01400528",
+    "stale_days": 0,
+    "staple": "luk",
+    "unit_confidence": "low"
+   },
+   {
+    "alternatives": [],
+    "attributes": {},
+    "by_weight_fallback": false,
+    "cost_pack": 0.06,
+    "cost_used": 0.06,
+    "date": "2026-10-20",
+    "date_hr": "20.10.2026.",
+    "ean": "3850334173126",
+    "fallback": false,
+    "flags": [],
+    "food_unverified": false,
+    "have": false,
+    "ingredient": "mrkva",
+    "is_special": true,
+    "match_quality": "strong",
+    "n_packs": null,
+    "name": "MRKVA",
+    "need": 100.0,
+    "need_unit": "g",
+    "notes": [
+     "na vagu"
+    ],
+    "pack_qty": null,
+    "pack_size": "na vagu",
+    "pack_source": "unit_price",
+    "pantry": false,
+    "per_unit": "kg",
+    "price_eff": 0.55,
+    "price_per_unit": 0.55,
+    "product_id": "01401501",
+    "stale_days": 0,
+    "staple": "mrkva",
+    "unit_confidence": "low"
+   },
+   {
+    "alternatives": [],
+    "attributes": {
+     "vrsta": "stabljika"
+    },
+    "by_weight_fallback": false,
+    "cost_pack": 0.2,
+    "cost_used": 0.2,
+    "date": "2026-10-20",
+    "date_hr": "20.10.2026.",
+    "ean": "3850334201690",
+    "fallback": false,
+    "flags": [],
+    "food_unverified": false,
+    "have": false,
+    "ingredient": "celer",
+    "is_special": false,
+    "match_quality": "strong",
+    "n_packs": null,
+    "name": "CELER LIST KOM",
+    "need": 50.0,
+    "need_unit": "g",
+    "notes": [
+     "na vagu"
+    ],
+    "pack_qty": null,
+    "pack_size": "na vagu",
+    "pack_source": "unit_price",
+    "pantry": false,
+    "per_unit": "kg",
+    "price_eff": 1.99,
+    "price_per_unit": 3.98,
+    "product_id": "90081704",
+    "stale_days": 0,
+    "staple": "celer",
+    "unit_confidence": "low"
+   },
+   {
+    "alternatives": [],
+    "attributes": {},
+    "by_weight_fallback": false,
+    "cost_pack": 0.04,
+    "cost_used": 0.04,
+    "date": "2026-10-20",
+    "date_hr": "20.10.2026.",
+    "ean": "3850334173287",
+    "fallback": false,
+    "flags": [],
+    "food_unverified": false,
+    "have": false,
+    "ingredient": "češnjak",
+    "is_special": false,
+    "match_quality": "strong",
+    "n_packs": null,
+    "name": "ČEŠNJAK RFZ",
+    "need": 10.0,
+    "need_unit": "g",
+    "notes": [
+     "na vagu"
+    ],
+    "pack_qty": null,
+    "pack_size": "na vagu",
+    "pack_source": "unit_price",
+    "pantry": false,
+    "per_unit": "kg",
+    "price_eff": 3.99,
+    "price_per_unit": 3.99,
+    "product_id": "01402186",
+    "stale_days": 0,
+    "staple": "cesnjak",
+    "unit_confidence": "low"
+   },
+   {
+    "alternatives": [
+     {
+      "cheaper": true,
+      "cost_pack": 1.18,
+      "cost_used": 0.83,
+      "delta_eur": -0.86,
+      "ean": "3858894142132",
+      "match_quality": "strong",
+      "n_packs": 2,
+      "name": "RAJČICA PASIRANA 500 g E BUONO",
+      "pack_size": "500 g",
+      "per_unit": "kg",
+      "price_eff": 0.59,
+      "price_per_unit": 1.18,
+      "product_id": "90976284",
+      "size_note": "usporedba za 700 g: pakiranje 500 g, odabrano 700 g"
+     },
+     {
+      "cheaper": true,
+      "cost_pack": 1.58,
+      "cost_used": 1.11,
+      "delta_eur": -0.58,
+      "ean": "3850334453556",
+      "match_quality": "strong",
+      "n_packs": 2,
+      "name": "RAJČICA PASIRANA 500 g",
+      "pack_size": "500 g",
+      "per_unit": "kg",
+      "price_eff": 0.79,
+      "price_per_unit": 1.58,
+      "product_id": "90991412",
+      "size_note": "usporedba za 700 g: pakiranje 500 g, odabrano 700 g"
+     }
+    ],
+    "attributes": {},
+    "by_weight_fallback": false,
+    "cost_pack": 1.69,
+    "cost_used": 1.69,
+    "date": "2026-10-20",
+    "date_hr": "20.10.2026.",
+    "ean": "3850334446794",
+    "fallback": false,
+    "flags": [],
+    "food_unverified": false,
+    "have": false,
+    "ingredient": "rajčica",
+    "is_special": false,
+    "match_quality": "strong",
+    "n_packs": 1,
+    "name": "RAJČICA PASIR GARDEN GOOD 700 g ST",
+    "need": 700.0,
+    "need_unit": "g",
+    "notes": [],
+    "pack_qty": 700.0,
+    "pack_size": "700 g",
+    "pack_source": "name",
+    "pantry": false,
+    "per_unit": "kg",
+    "price_eff": 1.69,
+    "price_per_unit": 2.41,
+    "product_id": "90970411",
+    "stale_days": 0,
+    "staple": "pasirana_rajcica",
+    "unit_confidence": "high"
+   },
+   {
+    "alternatives": [
+     {
+      "cheaper": true,
+      "cost_pack": 3.69,
+      "cost_used": 0.37,
+      "delta_eur": -0.22,
+      "ean": "3859893101755",
+      "match_quality": "strong",
+      "n_packs": 1,
+      "name": "VINO CABERNET SAUVIGNON 2 L PET",
+      "pack_size": "2 l",
+      "per_unit": "l",
+      "price_eff": 3.69,
+      "price_per_unit": 1.85,
+      "product_id": "90955524",
+      "size_note": "usporedba za 200 ml: pakiranje 2 l, odabrano 1 l"
+     },
+     {
+      "cheaper": true,
+      "cost_pack": 6.09,
+      "cost_used": 0.41,
+      "delta_eur": -0.18,
+      "ean": "3850334520944",
+      "match_quality": "strong",
+      "n_packs": 1,
+      "name": "VINO VRANAC TERRA VINEA BIB 3L",
+      "pack_size": "3 l",
+      "per_unit": "l",
+      "price_eff": 6.09,
+      "price_per_unit": 2.03,
+      "product_id": "90572114",
+      "size_note": "usporedba za 200 ml: pakiranje 3 l, odabrano 1 l"
+     }
+    ],
+    "attributes": {
+     "boja": "crno"
+    },
+    "by_weight_fallback": false,
+    "cost_pack": 2.95,
+    "cost_used": 0.59,
+    "date": "2026-10-20",
+    "date_hr": "20.10.2026.",
+    "ean": "3858882617079",
+    "fallback": false,
+    "flags": [],
+    "food_unverified": false,
+    "have": false,
+    "ingredient": "crno vino",
+    "is_special": false,
+    "match_quality": "strong",
+    "n_packs": 1,
+    "name": "Vina Vupik Vranac 1l",
+    "need": 200.0,
+    "need_unit": "ml",
+    "notes": [],
+    "pack_qty": 1000.0,
+    "pack_size": "1 l",
+    "pack_source": "name",
+    "pantry": false,
+    "per_unit": "l",
+    "price_eff": 2.95,
+    "price_per_unit": 2.95,
+    "product_id": "90331920",
+    "stale_days": 0,
+    "staple": "vino",
+    "unit_confidence": "high"
+   },
+   {
+    "alternatives": [],
+    "attributes": {
+     "okus": "povrtni",
+     "vrsta": "kocka"
+    },
+    "by_weight_fallback": false,
+    "cost_pack": 0.79,
+    "cost_used": 0.07,
+    "date": "2026-10-20",
+    "date_hr": "20.10.2026.",
+    "ean": "8012429003311",
+    "fallback": false,
+    "flags": [],
+    "food_unverified": false,
+    "have": false,
+    "ingredient": "kocka za juhu",
+    "is_special": false,
+    "match_quality": "strong",
+    "n_packs": 1,
+    "name": "KOCKA ZA JUHU POVRTNA 110g",
+    "need": 10.0,
+    "need_unit": "g",
+    "notes": [],
+    "pack_qty": 110.0,
+    "pack_size": "110 g",
+    "pack_source": "name",
+    "pantry": true,
+    "per_unit": "kg",
+    "price_eff": 0.79,
+    "price_per_unit": 7.18,
+    "product_id": "90344710",
+    "stale_days": 0,
+    "staple": "kocka_za_juhu",
+    "unit_confidence": "high"
+   },
+   {
+    "alternatives": [
+     {
+      "cheaper": true,
+      "cost_pack": 2.49,
+      "cost_used": 0.3,
+      "delta_eur": -0.06,
+      "ean": "3850334432278",
+      "match_quality": "strong",
+      "n_packs": 1,
+      "name": "MASLAC K PLUS 250 g",
+      "pack_size": "250 g",
+      "per_unit": "kg",
+      "price_eff": 2.49,
+      "price_per_unit": 9.96,
+      "product_id": "90869682",
+      "size_note": "usporedba za 30 g: pakiranje 250 g, odabrano 124,8 g"
+     },
+     {
+      "cheaper": true,
+      "cost_pack": 1.99,
+      "cost_used": 0.33,
+      "delta_eur": -0.03,
+      "ean": "3858885565612",
+      "match_quality": "strong",
+      "n_packs": 1,
+      "name": "PECIVO PUTER ŠTANGICE 3/1 180 g",
+      "pack_size": "180 g",
+      "per_unit": "kg",
+      "price_eff": 1.99,
+      "price_per_unit": 11.06,
+      "product_id": "90749652",
+      "size_note": "usporedba za 30 g: pakiranje 180 g, odabrano 124,8 g"
+     }
+    ],
+    "attributes": {},
+    "by_weight_fallback": false,
+    "cost_pack": 1.49,
+    "cost_used": 0.36,
+    "date": "2026-10-20",
+    "date_hr": "20.10.2026.",
+    "ean": "8003518102534",
+    "fallback": false,
+    "flags": [],
+    "food_unverified": false,
+    "have": false,
+    "ingredient": "maslac",
+    "is_special": false,
+    "match_quality": "strong",
+    "n_packs": 1,
+    "name": "MASLAC BURRO MINI 12X10.4 g AGRIFORM",
+    "need": 30.0,
+    "need_unit": "g",
+    "notes": [],
+    "pack_qty": 124.8,
+    "pack_size": "124,8 g",
+    "pack_source": "name",
+    "pantry": false,
+    "per_unit": "kg",
+    "price_eff": 1.49,
+    "price_per_unit": 11.94,
+    "product_id": "90976156",
+    "stale_days": 0,
+    "staple": "maslac",
+    "unit_confidence": "high"
+   },
+   {
+    "alternatives": [
+     {
+      "cheaper": true,
+      "cost_pack": 7.99,
+      "cost_used": 0.24,
+      "delta_eur": -0.24,
+      "ean": "80053835",
+      "match_quality": "strong",
+      "n_packs": 1,
+      "name": "ULJE MASLINOVO EX DJEV MONINI 1L",
+      "pack_size": "1 l",
+      "per_unit": "l",
+      "price_eff": 7.99,
+      "price_per_unit": 7.99,
+      "product_id": "03212202",
+      "size_note": "usporedba za 30 ml: pakiranje 1 l, odabrano 250 ml"
+     },
+     {
+      "cheaper": true,
+      "cost_pack": 7.99,
+      "cost_used": 0.24,
+      "delta_eur": -0.24,
+      "ean": "3859888906051",
+      "match_quality": "strong",
+      "n_packs": 1,
+      "name": "ULJE MASLINOVO 1 L TRENTON",
+      "pack_size": "1 l",
+      "per_unit": "l",
+      "price_eff": 7.99,
+      "price_per_unit": 7.99,
+      "product_id": "90110034",
+      "size_note": "usporedba za 30 ml: pakiranje 1 l, odabrano 250 ml"
+     }
+    ],
+    "attributes": {
+     "kvaliteta": "ekstra_djevicansko"
+    },
+    "by_weight_fallback": false,
+    "cost_pack": 3.99,
+    "cost_used": 0.48,
+    "date": "2026-10-20",
+    "date_hr": "20.10.2026.",
+    "ean": "3859890446026",
+    "fallback": false,
+    "flags": [],
+    "food_unverified": false,
+    "have": false,
+    "ingredient": "maslinovo ulje",
+    "is_special": false,
+    "match_quality": "strong",
+    "n_packs": 1,
+    "name": "ULJE MASLIN EX DJ TRAD 0.25L ORGULA",
+    "need": 30.0,
+    "need_unit": "ml",
+    "notes": [],
+    "pack_qty": 250.0,
+    "pack_size": "250 ml",
+    "pack_source": "name",
+    "pantry": false,
+    "per_unit": "l",
+    "price_eff": 3.99,
+    "price_per_unit": 15.96,
+    "product_id": "90395643",
+    "stale_days": 0,
+    "staple": "maslinovo_ulje",
+    "unit_confidence": "high"
+   },
+   {
+    "alternatives": [
+     {
+      "cheaper": true,
+      "cost_pack": 3.99,
+      "cost_used": 0.8,
+      "delta_eur": -0.34,
+      "ean": "3850334350756",
+      "match_quality": "strong",
+      "n_packs": 1,
+      "name": "SIR TVRDI GRANA PADANO K PLUS 200g",
+      "pack_size": "200 g",
+      "per_unit": "kg",
+      "price_eff": 3.99,
+      "price_per_unit": 19.95,
+      "product_id": "90070710",
+      "size_note": "usporedba za 40 g: pakiranje 200 g, odabrano 100 g"
+     }
+    ],
+    "attributes": {
+     "vrsta": "grana_padano"
+    },
+    "by_weight_fallback": false,
+    "cost_pack": 2.85,
+    "cost_used": 1.14,
+    "date": "2026-10-20",
+    "date_hr": "20.10.2026.",
+    "ean": "8003518100974",
+    "fallback": false,
+    "flags": [],
+    "food_unverified": false,
+    "have": false,
+    "ingredient": "parmezan",
+    "is_special": false,
+    "match_quality": "strong",
+    "n_packs": 1,
+    "name": "SIR TVRDI GRANA PADANO LISTIĆI 100g",
+    "need": 40.0,
+    "need_unit": "g",
+    "notes": [],
+    "pack_qty": 100.0,
+    "pack_size": "100 g",
+    "pack_source": "name",
+    "pantry": false,
+    "per_unit": "kg",
+    "price_eff": 2.85,
+    "price_per_unit": 28.5,
+    "product_id": "90083595",
+    "stale_days": 0,
+    "staple": "tvrdi_sir_talijanski",
+    "substitution": {
+     "chosen": "SIR TVRDI GRANA PADANO LISTIĆI 100g",
+     "note": "Grana Padano (sličan tvrdi sir), ne Parmigiano Reggiano",
+     "requested": "parmezan"
+    },
+    "unit_confidence": "high"
+   },
+   {
+    "alternatives": [],
+    "attributes": {
+     "vrsta": "kamena"
+    },
+    "by_weight_fallback": false,
+    "cost_pack": 0.49,
+    "cost_used": 0.0,
+    "date": "2026-10-20",
+    "date_hr": "20.10.2026.",
+    "ean": "3850334011305",
+    "fallback": false,
+    "flags": [],
+    "food_unverified": false,
+    "have": false,
+    "ingredient": "sol",
+    "is_special": false,
+    "match_quality": "strong",
+    "n_packs": 1,
+    "name": "SOL KAMENA VREĆ 1 kg SLOVA",
+    "need": 5.0,
+    "need_unit": "g",
+    "notes": [],
+    "pack_qty": 1000.0,
+    "pack_size": "1 kg",
+    "pack_source": "name",
+    "pantry": true,
+    "per_unit": "kg",
+    "price_eff": 0.49,
+    "price_per_unit": 0.49,
+    "product_id": "90648406",
+    "stale_days": 0,
+    "staple": "sol",
+    "unit_confidence": "high"
+   }
+  ],
+  "missing": [],
+  "n_ingredients": 15,
+  "n_matched": 15,
+  "n_stores": 3,
+  "scope": "local",
+  "stale_days": 0,
+  "store_id": "0903",
+  "total_to_buy": 23.73,
+  "total_used": 10.84,
+  "unit_confidence": "low"
+ },
+ "city": "Osijek",
+ "comparison": [
+  {
+   "addresses": [
+    "Sjenjak 133",
+    "Trg Ante Starčevića 10"
+   ],
+   "chain": "konzum",
+   "complete": true,
+   "n_ingredients": 15,
+   "n_matched": 15,
+   "n_stores_city": 7,
+   "total_to_buy": 23.73,
+   "total_used": 10.84
+  },
+  {
+   "addresses": [
+    "Huttlerova 30"
+   ],
+   "chain": "plodine",
+   "complete": true,
+   "n_ingredients": 15,
+   "n_matched": 15,
+   "n_stores_city": 2,
+   "total_to_buy": 25.44,
+   "total_used": 9.78
+  },
+  {
+   "addresses": [
+    "Svilajska 31A"
+   ],
+   "chain": "spar",
+   "complete": true,
+   "n_ingredients": 15,
+   "n_matched": 15,
+   "n_stores_city": 5,
+   "total_to_buy": 26.16,
+   "total_used": 13.6
+  },
+  {
+   "addresses": [
+    "Ulica Jablanova 27"
+   ],
+   "chain": "roto",
+   "complete": true,
+   "n_ingredients": 15,
+   "n_matched": 15,
+   "n_stores_city": 1,
+   "total_to_buy": 26.6,
+   "total_used": 11.6
+  },
+  {
+   "addresses": [
+    "Svetog Leopolda Bogdana Mandića 33 A",
+    "Ulica J. J. Strossmayera 350"
+   ],
+   "chain": "lidl",
+   "complete": true,
+   "n_ingredients": 15,
+   "n_matched": 15,
+   "n_stores_city": 3,
+   "total_to_buy": 27.37,
+   "total_used": 9.84
+  },
+  {
+   "addresses": [
+    "Josipa Reihl-Kira 40"
+   ],
+   "chain": "kaufland",
+   "complete": true,
+   "n_ingredients": 15,
+   "n_matched": 15,
+   "n_stores_city": 2,
+   "total_to_buy": 29.31,
+   "total_used": 11.88
+  }
+ ],
+ "date": "2026-10-20",
+ "date_hr": "20.10.2026.",
+ "incomplete": [
+  {
+   "chain": "eurospin",
+   "missing": [
+    "celer"
+   ],
+   "n_matched": 14,
+   "note": "nedostaje: celer",
+   "total_to_buy": 24.1
+  },
+  {
+   "chain": "ntl",
+   "missing": [
+    "celer"
+   ],
+   "n_matched": 14,
+   "note": "nedostaje: celer",
+   "total_to_buy": 27.46
+  },
+  {
+   "chain": "dm",
+   "missing": [
+    "mljeveno meso",
+    "pancetta",
+    "luk",
+    "mrkva",
+    "celer",
+    "češnjak",
+    "crno vino",
+    "maslac",
+    "parmezan",
+    "papar"
+   ],
+   "n_matched": 5,
+   "note": "nedostaje: mljeveno meso, pancetta, luk, mrkva, celer, češnjak, crno vino, maslac, parmezan, papar",
+   "total_to_buy": 18.35
+  },
+  {
+   "chain": "dukat",
+   "missing": [
+    "tagliatelle",
+    "mljeveno meso",
+    "pancetta",
+    "luk",
+    "mrkva",
+    "celer",
+    "češnjak",
+    "rajčica",
+    "crno vino",
+    "kocka za juhu",
+    "maslinovo ulje",
+    "sol",
+    "papar"
+   ],
+   "n_matched": 2,
+   "note": "nedostaje: tagliatelle, mljeveno meso, pancetta, luk, mrkva, celer, češnjak, rajčica, crno vino, kocka za juhu, maslinovo ulje, sol, papar",
+   "total_to_buy": 3.48
+  }
+ ],
+ "ingredients": [
+  {
+   "accepted_values": {},
+   "amount": 400.0,
+   "applied_attributes": {
+    "oblik": "tagliatelle"
+   },
+   "assumed_form": null,
+   "attributes": {
+    "oblik": "tagliatelle"
+   },
+   "form": null,
+   "name": "tagliatelle",
+   "pantry": false,
+   "staple": "tjestenina",
+   "unit": "g",
+   "warnings": []
+  },
+  {
+   "accepted_values": {
+    "vrsta": [
+     "mijesano",
+     "junece",
+     "svinjsko"
+    ]
+   },
+   "amount": 500.0,
+   "applied_attributes": {
+    "vrsta": [
+     "mijesano",
+     "junece",
+     "svinjsko"
+    ]
+   },
+   "assumed_form": null,
+   "attributes": {},
+   "form": null,
+   "name": "mljeveno meso",
+   "pantry": false,
+   "staple": "mljeveno_meso",
+   "unit": "g",
+   "warnings": []
+  },
+  {
+   "accepted_values": {},
+   "amount": 100.0,
+   "applied_attributes": {
+    "vrsta": "panceta"
+   },
+   "assumed_form": null,
+   "attributes": {
+    "vrsta": "panceta"
+   },
+   "form": null,
+   "name": "pancetta",
+   "pantry": false,
+   "staple": "slanina",
+   "unit": "g",
+   "warnings": []
+  },
+  {
+   "accepted_values": {},
+   "amount": 150.0,
+   "applied_attributes": {},
+   "assumed_form": null,
+   "attributes": {},
+   "form": null,
+   "name": "luk",
+   "pantry": false,
+   "staple": "luk",
+   "unit": "g",
+   "warnings": [
+    "1 kom ≈ 150 g (komad 150 g, procjena)"
+   ]
+  },
+  {
+   "accepted_values": {},
+   "amount": 100.0,
+   "applied_attributes": {},
+   "assumed_form": null,
+   "attributes": {},
+   "form": null,
+   "name": "mrkva",
+   "pantry": false,
+   "staple": "mrkva",
+   "unit": "g",
+   "warnings": [
+    "1 kom ≈ 100 g (komad 100 g, procjena)"
+   ]
+  },
+  {
+   "accepted_values": {},
+   "amount": 50.0,
+   "applied_attributes": {
+    "vrsta": "stabljika"
+   },
+   "assumed_form": null,
+   "attributes": {
+    "vrsta": "stabljika"
+   },
+   "form": null,
+   "name": "celer",
+   "pantry": false,
+   "staple": "celer",
+   "unit": "g",
+   "warnings": [
+    "1 kom ≈ 50 g (komad 50 g, procjena)"
+   ]
+  },
+  {
+   "accepted_values": {},
+   "amount": 10.0,
+   "applied_attributes": {},
+   "assumed_form": null,
+   "attributes": {},
+   "form": null,
+   "name": "češnjak",
+   "pantry": false,
+   "staple": "cesnjak",
+   "unit": "g",
+   "warnings": [
+    "2 kom ≈ 10 g (komad 5 g, procjena)"
+   ]
+  },
+  {
+   "accepted_values": {},
+   "amount": 700.0,
+   "applied_attributes": {},
+   "assumed_form": null,
+   "attributes": {},
+   "form": "pasirana",
+   "name": "rajčica",
+   "pantry": false,
+   "staple": "pasirana_rajcica",
+   "unit": "g",
+   "warnings": []
+  },
+  {
+   "accepted_values": {},
+   "amount": 200.0,
+   "applied_attributes": {
+    "boja": "crno"
+   },
+   "assumed_form": null,
+   "attributes": {
+    "boja": "crno"
+   },
+   "form": null,
+   "name": "crno vino",
+   "pantry": false,
+   "staple": "vino",
+   "unit": "ml",
+   "warnings": []
+  },
+  {
+   "accepted_values": {
+    "okus": [
+     "povrtni",
+     "kokosji",
+     "govedi",
+     "mesni",
+     "nepoznato"
+    ]
+   },
+   "amount": 10.0,
+   "applied_attributes": {
+    "okus": [
+     "povrtni",
+     "kokosji",
+     "govedi",
+     "mesni",
+     "nepoznato"
+    ]
+   },
+   "assumed_form": null,
+   "attributes": {},
+   "form": "koncentrat",
+   "name": "kocka za juhu",
+   "pantry": true,
+   "staple": "kocka_za_juhu",
+   "unit": "g",
+   "warnings": [
+    "1 kom ≈ 10 g (komad 10 g, procjena)"
+   ]
+  },
+  {
+   "accepted_values": {},
+   "amount": 30.0,
+   "applied_attributes": {},
+   "assumed_form": null,
+   "attributes": {},
+   "form": null,
+   "name": "maslac",
+   "pantry": false,
+   "staple": "maslac",
+   "unit": "g",
+   "warnings": []
+  },
+  {
+   "accepted_values": {},
+   "amount": 30.0,
+   "applied_attributes": {},
+   "assumed_form": null,
+   "attributes": {},
+   "form": null,
+   "name": "maslinovo ulje",
+   "pantry": false,
+   "staple": "maslinovo_ulje",
+   "unit": "ml",
+   "warnings": []
+  },
+  {
+   "accepted_values": {},
+   "amount": 40.0,
+   "applied_attributes": {},
+   "assumed_form": null,
+   "attributes": {},
+   "form": null,
+   "name": "parmezan",
+   "pantry": false,
+   "staple": "tvrdi_sir_talijanski",
+   "unit": "g",
+   "warnings": []
+  },
+  {
+   "accepted_values": {},
+   "amount": 5.0,
+   "applied_attributes": {},
+   "assumed_form": null,
+   "attributes": {},
+   "form": null,
+   "name": "sol",
+   "pantry": true,
+   "staple": "sol",
+   "unit": "g",
+   "warnings": []
+  },
+  {
+   "accepted_values": {},
+   "amount": 1.0,
+   "applied_attributes": {
+    "oblik": "mljeveni"
+   },
+   "assumed_form": null,
+   "attributes": {},
+   "form": null,
+   "name": "papar",
+   "pantry": true,
+   "staple": "papar",
+   "unit": "g",
+   "warnings": []
+  }
+ ],
+ "mode": "single_store",
+ "more_chains": [],
+ "note": "Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists (cijene.dev); in-store prices may differ, a price list is not stock, and promotions change. Podaci: cijene.dev (DobarKod), prema uvjetima korištenja (https://cijene.dev/uvjeti-koristenja). / Data: cijene.dev (DobarKod), under its terms of use (https://cijene.dev/uvjeti-koristenja).",
+ "price_spread": {
+  "cheapest": [
+   "konzum"
+  ],
+  "cheapest_total": 23.73,
+  "difference_eur": 5.58,
+  "most_expensive": [
+   "kaufland"
+  ],
+  "most_expensive_total": 29.31,
+  "small": false
+ },
+ "stores": [],
+ "summary_hr": "Za kupiti: 23,73 €. Stvarno utrošeno: 10,84 €.",
+ "truncated": true,
+ "unmatched": [],
+ "warnings": [
+  "1 kom ≈ 150 g (komad 150 g, procjena)",
+  "1 kom ≈ 100 g (komad 100 g, procjena)",
+  "1 kom ≈ 50 g (komad 50 g, procjena)",
+  "2 kom ≈ 10 g (komad 5 g, procjena)",
+  "1 kom ≈ 10 g (komad 10 g, procjena)"
+ ]
+}

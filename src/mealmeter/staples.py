@@ -10,7 +10,7 @@ import duckdb
 import yaml
 
 from mealmeter.normalize import norm_text, parse_multipack_unit
-from mealmeter.units import piece_weight
+from mealmeter.units import piece_weight, product_piece_weight
 
 STAPLES_PATH = Path(__file__).with_name("staples.yaml")
 ABBREV_PATH = Path(__file__).resolve().parents[2] / "data" / "abbrev.yaml"
@@ -95,6 +95,12 @@ class Staple:
     substitution_values: dict = field(default_factory=dict, hash=False, compare=False)
     # riječ u nazivu sastojka -> (atribut, vrijednost): {"junetina": ("vrsta", "junece")} (value_words)
     value_words: dict[str, tuple[str, str]] = field(default_factory=dict, hash=False, compare=False)
+    # riječ u nazivu sastojka -> oblik iz form_staples: {"kocka": "kocka", "tekuci": "tekuci"} (Korak 10)
+    form_words: dict[str, str] = field(default_factory=dict, hash=False, compare=False)
+    # atribut bez kojeg se ne pogađa (celer: vrsta stabljika ili korijen), Korak 10:
+    # {"attr": "vrsta", "values": (...), "default_with": {"stabljika": ("luk", "mrkva")}}; vrijednost iz
+    # default_with vrijedi kad recept ima sve navedene namirnice, inače se pita (ask_user)
+    ask_attribute: dict = field(default_factory=dict, hash=False, compare=False)
 
     def defaults(self) -> dict:
         """Zadani filtri atributa: vrijednost (default_attributes) ili n-torka redoslijeda (default_preference)."""
@@ -211,8 +217,11 @@ def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> d
             raise ValueError(f"{key}: must_match je obavezan")
         must_not = [_fold(p) for p in d.get("must_not_match") or []]
         if not d.get("no_defaults"):
-            must_not += [p for p in default_not if p not in must_not]
-        raw_attrs = d.get("attributes") or {}
+            # keep_defaults: zajednički uzorci koji za ovu namirnicu ne vrijede ("JUHA-KOCKA" je kocka za juhu)
+            keep = {_fold(p) for p in d.get("keep_defaults") or []}
+            must_not += [p for p in default_not if p not in must_not and p not in keep]
+        # kopija: YAML sidro (okus temeljca) dijele dvije namirnice, a "_default" se vadi iz rječnika
+        raw_attrs = {a: dict(v) for a, v in (d.get("attributes") or {}).items()}
         # "_default" je vrijednost atributa kad nijedan uzorak ne pogodi (npr. oblik=nepoznato)
         defaults = {a: str(v.pop("_default")) for a, v in raw_attrs.items() if "_default" in v}
         attrs = {a: {str(v): _fold(rx) for v, rx in values.items()} for a, values in raw_attrs.items()}
@@ -276,10 +285,21 @@ def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> d
                                   for t in d.get("preferred_tiers") or []),
             value_words={norm_text(w): (a, str(v)) for a, vals in (d.get("value_words") or {}).items()
                          for v, words in vals.items() for w in words},
+            form_words={norm_text(w): str(f) for f, words in (d.get("form_words") or {}).items() for w in words},
+            ask_attribute={"attr": d["ask_attribute"]["attr"],
+                           "values": tuple(str(v) for v in d["ask_attribute"]["values"]),
+                           "default_with": {str(v): tuple(ks) for v, ks in
+                                            (d["ask_attribute"].get("default_with") or {}).items()}}
+                          if d.get("ask_attribute") else {},
         )
         for a, v in st.value_words.values():
             if v not in attrs.get(a, {}):
                 raise ValueError(f"{key}: value_words {a}={v} nije definiran atribut")
+        if any(f not in st.form_staples for f in st.form_words.values()):
+            raise ValueError(f"{key}: form_words traži oblik iz form_staples")
+        if st.ask_attribute and any(v not in attrs.get(st.ask_attribute["attr"], {})
+                                    for v in (*st.ask_attribute["values"], *st.ask_attribute["default_with"])):
+            raise ValueError(f"{key}: ask_attribute: nedefinirana vrijednost atributa")
         for a, vals in st.default_preference.items():
             if any(v not in attrs.get(a, {}) for v in vals) or a in st.default_attributes:
                 raise ValueError(f"{key}: default_preference {a}={vals}: nedefinirana vrijednost ili i default_attributes")
@@ -542,9 +562,10 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
         assumed = None
         if st.assumed_pack_regex and amount is None and re.search(st.assumed_pack_regex, norm_text(name) or ""):
             assumed = st.assumed_pack_g
-        elif st.assume_piece and amount is None and hint != "kg":
-            # komad bez težine koji se ne prodaje na vagu (vezica peršina): procjena iz data/units.yaml
-            assumed = piece_weight(st.key)
+        elif st.assume_piece and (amount is None or pack_unit == "kom") and hint != "kg":
+            # komad bez težine koji se ne prodaje na vagu (vezica peršina; Lidl "Celer list" 1komad, Korak 10):
+            # procjena iz data/units.yaml
+            assumed = product_piece_weight(st.key)
         if n is not None or assumed is not None:
             unit_rows.append((chain, pid, key, n, assumed))
 

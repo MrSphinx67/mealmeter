@@ -51,6 +51,10 @@
 #                   je u rasponu, nema oznake konzerve/smrznutog (ni u stupcu unit), a unit ili naziv pogađa popis
 #                   (how = heuristic). Oznake konzerve i smrznutog provjeravaju se i u stupcu unit.
 #   form_staples    oblik namirnice je druga namirnica (rajčica: svjeze/konzerva/pasirana/koncentrat)
+#   keep_defaults   zajednički uzorci iz _defaults koji za ovu namirnicu ne vrijede (kocka za juhu: juha)
+#   form_words      {oblik: [riječi]}: riječ u nazivu sastojka zadaje oblik iz form_staples ("tekući temeljac")
+#   ask_attribute   {attr, values, default_with}: atribut bez kojeg se ne pogađa (celer: stabljika ili korijen);
+#                   default_with {vrijednost: [namirnice]} vrijedi kad recept ima sve te namirnice, inače ask_user
 #   loose_produce   svježe voće/povrće. Dodatno pravilo: riječ namirnice je prva ili druga riječ
 #                   naziva, a proizvod je bez globalnog EAN-a (vaga/PLU), bez gramature ili >= 500 g,
 #                   i nije tekućina (inače "banana" pogađa bombone i sokove s okusom banane)
@@ -867,6 +871,33 @@ spinat:
       baby: '\bbaby|\bmladi'
   loose_produce: true
 
+celer:
+  # Korak 10: stabljika ili korijen; bez vrste se ne pogađa. Uz luk i mrkvu (soffritto, bolonjez) zadano je
+  # stabljika, inače ask_user. "Celer list" u trgovinama je svežanj stabljika s lišćem (stabljika); "korijen +
+  # list" je korijen. Proizvod bez oznake ("Celer", "CELER 500g") samo kao rezerva, nije zadani izbor.
+  name: celer (stabljika ili korijen)
+  synonyms: [celer, celera]
+  must_match: [celer]
+  must_not_match: [sjeme, sok\b, salata, ribani, rezani, granul, zacin, liker, celery, ukis, kis\b, smrz, mix\b,
+                   povrce, sol\b, cips, chips]
+  unit: kg
+  default_exclude_variants: [vrsta=nepoznato]
+  assume_piece: true  # svežanj bez težine: 450 g (data/units.yaml, pieces.celer.pack_g)
+  ask_attribute:
+    attr: vrsta
+    values: [stabljika, korijen]
+    default_with: {stabljika: [luk, mrkva]}
+  attributes:
+    vrsta:
+      korijen: '\bkorijen|\bkorjen|\bkor\.|\bglava|\bgomolj'  # prije lista: "Celer korijen list" je korijen
+      stabljika: '\bstablj|\bstapic|\blist|\brebras'
+      _default: nepoznato
+  value_words:
+    vrsta:
+      stabljika: [stabljika, stabljike, stabljiku, stabljikama, rebraš, list]
+      korijen: [korijen, korjen, gomolj, glava]
+  loose_produce: true
+
 persin:
   name: peršin
   synonyms: [peršin, persin]
@@ -1290,16 +1321,28 @@ junetina:
 
 slanina:
   name: slanina / panceta
-  synonyms: [slanina, panceta, špek, spek, bacon]
+  # "pancetta" (talijanski pravopis) nije bila prepoznata, Korak 10
+  synonyms: [slanina, panceta, pancetta, špek, spek, bacon]
   must_match: [slanin, pancet, spek\b, bacon]
   must_not_match: [chips, cips, grah, kobas, pizza, kreker, umak, sir\b, krumpir, zacin, aroma, ulje,
                    # Korak 4B: carsko meso (i "PANCETA ... CARSKO PIK" u istoj EAN grupi)
-                   carsko]
+                   carsko,
+                   # Korak 10: s okusom ili s dodatkom slanine (kikiriki, štangica, pecivo)
+                   kikiriki, stangic, okus, slaninom, pancetom, pecivo, kroasan, pogac, kifl, kruh\b, perec, tortilj]
   unit: kg
+  # Korak 10: "panceta"/"pancetta" traži pancetu (sinonim je i vrijednost atributa); "slanina" je bilo koja
+  default_exclude_variants: [vrsta=pureca]
   attributes:
     oblik:
       narezana: '\bnarez|\brez\.|\brezan|\bslice'
       kockice: '\bkock'
+    vrsta:
+      panceta: '\bpancet'
+      pureca: '\bpurec|\bpilec|\bpuret'
+  value_words:
+    vrsta:
+      panceta: [pancetta, pančeta]
+      pureca: [pureća, pureca, pileća, pileca]
   loose_produce: false
 
 sunka:
@@ -1588,6 +1631,66 @@ dodatak_jelima:
   pantry: true
   max_pack: 2000
   min_pack: 50
+  loose_produce: false
+
+kocka_za_juhu:
+  # Korak 10: koncentrat temeljca (kocke, prah) po kg; recept u ml temeljca preračunava se preko "gustoće"
+  # 0,02 g/ml (kocka 10 g za 0,5 l, data/units.yaml), komad je kocka od 10 g. "temeljac" bez oblika bira
+  # najjeftiniji od koncentrata i tekućeg temeljca (form_staples), uz upozorenje.
+  name: kocka za juhu / temeljac (koncentrat)
+  synonyms: [kocka za juhu, kocke za juhu, jušna kocka, jusna kocka, juha kocka, bujon kocka, kocka, temeljac,
+             bujon, temeljac u prahu]
+  must_match: ['kock[a-z]* za (juh|jel)', 'juh[a-z]* kock', 'kock[a-z]* (goved|kokosj|pilec|pilet|povrt|kraljev|sa mes|s mes)',
+               '(goved|kokosj|pilec|pilet|povrt)[a-z]* kock', temeljac, temelj\b, bujon]
+  must_not_match: [tekuc, '[0-9]+ ?(ml|l)\b', riblj, skamp, plodov, kozic, rakov, morsk, fant\b, za gulas, za pecen,
+                   kotanyi, zacin, sprej, boja, umak, rizoto, tjesten, rezanc]
+  keep_defaults: [juha]  # "JUHA-KOCKA MAGGI GOVEĐA" (Spar) je kocka za juhu
+  unit: kg
+  pantry: true
+  min_pack: 40
+  max_pack: 1000
+  form_staples: {koncentrat: kocka_za_juhu, tekuci: tekuci_temeljac}
+  form_words: {koncentrat: [kocka, kocke, kocki, kockica, prah, prahu], tekuci: [tekuci, tekuceg, tekucim]}
+  # zadano povrtni; trgovina bez povrtnog: kokošji, goveđi, mesni, pa nepoznatog okusa (default_preference
+  # ograničava izbor na navedene vrijednosti, pa su navedene sve)
+  default_preference: {okus: [povrtni, kokosji, govedi, mesni, nepoznato]}
+  # gel (Podravka "za jela" 4 x 28 g za 0,5 l) treba skoro 3 puta više grama od kocke; samo na zahtjev
+  default_exclude_variants: [vrsta=gel, vrsta=nepoznato]
+  attributes:
+    okus: &okus_temeljca
+      povrtni: '\bpovrt|\bpovr\.|\bpovrc|\bvegetab'
+      kokosji: '\bkokosj|\bpilec|\bpilet|\bpil\.'
+      govedi: '\bgoved'
+      mesni: '\bmes[oa]\b|\bmesom'
+      _default: nepoznato
+    vrsta:
+      gel: '\bzelatin|za jela|4x28|\b112 ?g|\b28 ?g'
+      prah: '\bprah|\bgranul|\binstant'
+      kocka: '\bkock'
+      _default: nepoznato
+  value_words: &okus_rijeci
+    okus:
+      povrtni: [povrtni, povrtna, povrtne, povrtnog, povrća, povrca]
+      kokosji: [pileći, pileća, pilećeg, pilece, kokošja, kokošjeg, kokosja]
+      govedi: [goveđa, goveđeg, govedja, govedina, goveđe]
+      mesni: [mesni, mesna, mesa]
+  loose_produce: false
+
+tekuci_temeljac:
+  name: tekući temeljac
+  synonyms: [tekući temeljac, tekuci temeljac, jušni temeljac, jusni temeljac]
+  must_match: [temeljac, temelj\b, bujon]
+  require_any: [tekuc, '[0-9]+ ?(ml|l)\b']
+  must_not_match: [riblj, skamp, plodov, kozic, rakov, morsk, fant\b, kotanyi, zacin, sprej, boja, umak,
+                   temelj za, zeljez, tessarol]  # "TEMELJ ZA ŽELJEZO" je boja
+  unit: l
+  pantry: true
+  min_pack: 250  # manje boce (140 ml) su tekući koncentrat
+  max_pack: 2000
+  default_preference: {okus: [povrtni, kokosji, govedi, mesni, nepoznato]}
+  attributes:
+    okus: *okus_temeljca
+  value_words: *okus_rijeci
   loose_produce: false
 
 ocat:

@@ -15,3 +15,4 @@ maslinovo_ulje: {amount: 30, unit: ml, text: "30 ml (2 žlice)"}
 secer: {amount: 10, unit: g, text: "10 g (žlica)"}
 persin: {amount: 1, unit: kom, text: "1 vezica"}
 cesnjak: {amount: 2, unit: kom, text: "2 češnja"}
+kocka_za_juhu: {amount: 1, unit: kom, text: "1 kocka (za 0,5 l)"}

@@ -29,6 +29,15 @@ VARIVO = [{"name": "grašak", "amount": 800, "unit": "g", "form": "smrznuto"}, {
           {"name": "brašno glatko", "amount": 20, "unit": "g"}, {"name": "mljevena paprika", "amount": 5, "unit": "g"},
           {"name": "dimljena kobasica", "amount": 400, "unit": "g"}, {"name": "ulje", "amount": 30, "unit": "ml"},
           {"name": "sol", "amount": 5, "unit": "g"}, {"name": "papar", "amount": 1, "unit": "g"}]
+BOLONJEZ_10 = [{"name": "tagliatelle", "amount": 400, "unit": "g", "free_text": True},
+               {"name": "mljeveno meso", "amount": 500, "unit": "g"}, {"name": "pancetta", "amount": 100, "unit": "g"},
+               {"name": "luk", "amount": 1, "unit": "kom"}, {"name": "mrkva", "amount": 1, "unit": "kom"},
+               {"name": "celer", "amount": 1, "unit": "kom"}, {"name": "češnjak", "amount": 2, "unit": "kom"},
+               {"name": "rajčica", "amount": 700, "unit": "g", "form": "pasirana"},
+               {"name": "crno vino", "amount": 200, "unit": "ml", "free_text": True},
+               {"name": "kocka za juhu", "amount": 1, "unit": "kom"}, {"name": "maslac", "amount": 30, "unit": "g"},
+               {"name": "maslinovo ulje", "amount": 30, "unit": "ml"}, {"name": "parmezan"}, {"name": "sol"},
+               {"name": "papar"}]
 
 SCENARIOS = {
     # find_products
@@ -86,6 +95,8 @@ SCENARIOS = {
     # Korak 9: isti test, "crno vino" kao free_text; vina nije bilo (alkohol), osim desertnog u Kauflandu
     "basket_crno_vino_osijek": ("plan_basket", {
         "ingredients": [{"name": "crno vino", "amount": 200, "unit": "ml", "free_text": True}], "city": "Osijek"}),
+    # Korak 10: stvarni test 28.10.2026. (bolonjez, Osijek): "pancetta", "celer" i "kocka za juhu" nisu bili prepoznati
+    "basket_bolonjez_osijek_10": ("plan_basket", {"ingredients": BOLONJEZ_10, "city": "Osijek"}),
 }
 # lanci koji nikad ne smiju biti u izlazu plan_basketa: nepouzdani podaci (Lorenco) i veleprodaja (Metro)
 EXCLUDED_CHAINS = ("lorenco", "metro")

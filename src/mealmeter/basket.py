@@ -168,8 +168,9 @@ def resolve_name(name: str) -> tuple[Staple, dict]:
                 rest = words[:i] + words[i + len(syn_words):]
                 # sinonim koji je vrijednost ("zelene tagliatelle": oblik=tagliatelle i vrsta=sa_spinatom)
                 attrs, ok = dict(_value_of(st, syn)[:1]), True
-                # riječi iz sinonima iste namirnice ne smetaju ("mljeveno juneće meso": "meso")
-                filler = {x for s in st.synonyms for x in s.split()} | _CONNECTIVES
+                # riječi iz sinonima iste namirnice ne smetaju ("mljeveno juneće meso": "meso"), ni oblik
+                # ("tekući temeljac": oblik zadaje form_of)
+                filler = {x for s in st.synonyms for x in s.split()} | _CONNECTIVES | set(st.form_words)
                 j = 0
                 while j < len(rest):
                     # dvije riječi prije jedne: "bez laktoze", "s jajima", "sa spinatom" (Korak 9)
@@ -187,10 +188,25 @@ def resolve_name(name: str) -> tuple[Staple, dict]:
                     attrs[hit[0][0]] = hit[0][1]
                 if ok:
                     return st, attrs
+    # pravopis s udvojenim slovom ("pancetta" -> panceta, "mozzarela" -> mozzarella), Korak 10
+    vocab = {_squeeze(w): w for st in load_staples().values() for s in st.synonyms for w in s.split()}
+    fixed = [vocab.get(_squeeze(w), w) for w in words]
+    if fixed != words:
+        return resolve_name(" ".join(fixed))
     raise IngredientError(f"nepoznata namirnica '{name}' (nema je u staples.yaml)")
 
 
-def to_base(amount: float, unit: str, staple: Staple) -> tuple[float, str, list[str]]:
+def _squeeze(word: str) -> str:
+    """Riječ bez udvojenih slova ("pancetta" -> "panceta")."""
+    return re.sub(r"(.)\1+", r"\1", word)
+
+
+def form_of(name: str | None, staple: Staple) -> str | None:
+    """Oblik iz riječi naziva sastojka (form_words): "kocka za juhu" -> kocka, "tekući temeljac" -> tekuci."""
+    return next((staple.form_words[w] for w in (norm_text(name or "") or "").split() if w in staple.form_words), None)
+
+
+def to_base(amount: float, unit: str, staple: Staple, attributes: dict | None = None) -> tuple[float, str, list[str]]:
     """Količina iz recepta u osnovnu jedinicu namirnice: g, ml, kom ili vrecica."""
     if amount is None or amount <= 0:
         raise IngredientError("količina mora biti pozitivna")
@@ -219,7 +235,7 @@ def to_base(amount: float, unit: str, staple: Staple) -> tuple[float, str, list[
         warnings.append(f"{qty:g} {base} ≈ {out:g} {target} (procjena, {density:g} g/ml)")
         return out, target, warnings
     # masa komada: data/units.yaml (pieces, procjena), inače piece_g iz staples.yaml
-    piece = units.piece_weight(staple.key) or staple.piece_g
+    piece = units.piece_weight(staple.key, attributes) or staple.piece_g
     if base == "kom" and target in ("g", "ml") and piece:
         warnings.append(f"{qty:g} kom ≈ {qty * piece:g} g (komad {piece:g} g, procjena)")
         return qty * piece, "g" if target == "g" else "ml", warnings
@@ -525,6 +541,36 @@ def _resolve_form(con, need: Need, city: str, wholesale: bool = False) -> list[s
     others = ", ".join(f"{f} {prices[f]:.2f} €" for f in sorted(prices, key=prices.get) if f != form)
     return [f"'{need.input.get('name')}' bez oblika: pretpostavljen '{form}' (najjeftiniji za ovu količinu: "
             f"{prices[form]:.2f} €{'; ostali: ' + others if others else ''}). Zadaj 'form' za drugi oblik."]
+
+
+def _ask_attribute(con, need: Need, recipe_keys: set, city: str, wholesale: bool = False) -> list[dict]:
+    """Atribut bez kojeg se ne pogađa (ask_attribute, celer: stabljika ili korijen). Recept s namirnicama iz
+    default_with (luk i mrkva) ili samo jedna vrijednost dostupna u gradu: vrijednost se postavlja i vraća se
+    zapis za assumptions[]. Inače FormAmbiguity s cijenama po vrijednosti (ask_user)."""
+    rule, name = need.staple.ask_attribute, need.input.get("name")
+    attr = rule["attr"]
+    for value, keys in rule["default_with"].items():
+        if set(keys) <= recipe_keys:
+            need.attributes[attr] = value
+            return [{"ingredient": name, "attributes": {attr: value},
+                     "text": f"{value}, jer recept ima i {' i '.join(keys)}; za drugo zadaj attributes.{attr}"}]
+    prices, amounts = {}, {}
+    for value in rule["values"]:
+        probe = Need(need.input, need.staple, need.amount, need.unit, {**need.attributes, attr: value})
+        probe.amount, probe.unit, _ = to_base(*_input_amount(need.input), need.staple, probe.attributes)
+        costs = [pick["cost_used"] for rows in _prepare(con, probe, city, wholesale).values()
+                 if (pick := choose_product(rows, *_choose_args(probe))) and not pick["fallback"]]
+        if costs:
+            prices[value], amounts[value] = round(min(costs), 2), round(probe.amount, 1)
+    if len(prices) == 1:
+        (value,) = prices
+        need.attributes[attr] = value
+        return [{"ingredient": name, "attributes": {attr: value}, "text": f"{value}, jedino dostupno u gradu"}]
+    if not prices:
+        return []
+    values = list(prices)
+    raise FormAmbiguity({"attribute": attr, "form": values, "question": " ili ".join(values) + "?",
+                         "prices": prices, "amounts": amounts, "unit": need.unit})
 
 
 def apply_yield(need: "Need", form: str | None) -> list[str]:
@@ -888,6 +934,13 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
                 out["warnings"].append(f"already_have: nepoznata namirnica '{name}'")
     out["already_have"] = sorted(have | (have_text & free_names))
 
+    # namirnice cijelog recepta (celer uz luk i mrkvu je stabljika: ask_attribute.default_with)
+    recipe_keys = set()
+    for item in ingredients:
+        try:
+            recipe_keys.add(resolve_name(item.get("name", ""))[0].key)
+        except IngredientError:
+            pass
     needs = []
     for item in ingredients:
         try:
@@ -926,10 +979,15 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
             for a, v in attrs.items():
                 if v not in staple.attributes.get(a, {}):
                     raise IngredientError(f"nepoznat atribut {a}={v} za '{staple.name}'")
-            amount, unit, warns = to_base(*_input_amount(item), staple)
-            need = Need(item, staple, amount, unit, attrs, form=item.get("form"), warnings=warns,
-                        brand=brand_in(item.get("name")))
+            amount, unit, warns = to_base(*_input_amount(item), staple, attrs)
+            need = Need(item, staple, amount, unit, attrs, form=item.get("form") or form_of(item.get("name"), staple),
+                        warnings=warns, brand=brand_in(item.get("name")))
             need.input_staple = staple.key  # prije oblika (rajčica -> pasirana_rajcica), za already_have
+            if staple.ask_attribute and staple.ask_attribute["attr"] not in attrs:
+                out["assumptions"] += _ask_attribute(con, need, recipe_keys, resolved_city, include_wholesale)
+                # komad ovisi o vrijednosti (stabljika celera 50 g, korijen 400 g)
+                amount, unit, warns = to_base(*_input_amount(item), staple, need.attributes)
+                need.amount, need.unit, need.warnings = amount, unit, warns
             need.warnings += _resolve_form(con, need, city, include_wholesale)
             if need.staple is not staple:  # oblik je druga namirnica: količina u njezinoj jedinici
                 need.amount, need.unit, more = to_base(*_input_amount(item), need.staple)
@@ -947,14 +1005,18 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
             out["ambiguous"].append({"name": item.get("name"), "staple": staple.key, "amount": amount, "unit": unit,
                                      "ambiguity": e.ambiguity})
             # pitanje za korisnika; ostali sastojci se računaju bez ovoga
+            # oblik ("form") ili atribut bez kojeg se ne pogađa (celer: vrsta, Korak 10)
+            attr = e.ambiguity.get("attribute")
             out.setdefault("ask_user", []).append({
                 "ingredient": item.get("name"), "question": f"{item.get('name')}: {e.ambiguity['question']}",
-                "options": [{"form": f, "price_eur": e.ambiguity["prices"][f],
+                "options": [{**({"attributes": {attr: f}} if attr else {"form": f}), "price_eur": e.ambiguity["prices"][f],
                              "amount": e.ambiguity["amounts"][f], "unit": e.ambiguity["unit"],
-                             "price_note": "najjeftinije u gradu, za traženu količinu gotovog proizvoda"}
+                             "price_note": "najjeftinije u gradu, za traženu količinu"
+                                           + ("" if attr else " gotovog proizvoda")}
                             for f in e.ambiguity["form"]],
                 "genitive": staple.genitive or item.get("name")})
-            out["warnings"].append(f"'{item.get('name')}': {e.ambiguity['question']} (zadaj 'form'; nije uračunato)")
+            out["warnings"].append(f"'{item.get('name')}': {e.ambiguity['question']} "
+                                   f"(zadaj '{'attributes.' + attr if attr else 'form'}'; nije uračunato)")
 
     stores: dict[tuple, dict] = {}
     store_rows: dict[tuple, list] = {}  # (trgovina, sastojak) -> kandidati, za alternative
