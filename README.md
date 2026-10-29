@@ -26,15 +26,27 @@ Prijava nije potrebna.
 
 ### Primjer
 
-Pitanje:
+Stvarni razgovor (29.10.2026.), skraćen:
 
-> Radim grah varivo u Osijeku, treba mi 500 g kuhanog graha, a kupit ću suhi. Gdje je najjeftinije?
+> **Ti:** Koliko košta bolonjez za 4 osobe?
+>
+> **Claude:** U kojem si gradu, što već imaš doma i ideš li u određenu trgovinu ili da usporedim sve u gradu?
+>
+> **Ti:** Osijek, imam sol, papar i ulje, usporedi sve.
 
-Claude pozove `plan_basket` i odgovori otprilike ovako (cijene iz cjenika od 20.10.2026.):
+Claude pozove `plan_basket` (tagliatelle, mljeveno meso, panceta, luk, mrkva, celer, češnjak, pasirana rajčica,
+crno vino, kocka za juhu, maslac, parmezan) i odgovori otprilike ovako:
 
-> Za 500 g kuhanog graha treba oko 200 g suhog (procjena). Najjeftinije: Konzum (GRAH PINTO VEDRINI 500 g) i Spar,
-> 1,19 € za pakiranje; utrošak je 0,48 €. Kaufland i Lidl 1,49 €, Plodine 1,51 €, Eurospin 1,59 €, Roto 2,16 €,
-> NTL 2,69 €.
+> Sve možeš kupiti u:
+> - Plodine (J. J. Strossmayera 343; 2 trgovine): 17,87 €
+> - Konzum (Sjenjak 133, Trg Ante Starčevića 10; 7 trgovina): 18,83 €
+> - Lidl (Sv. Leopolda Bogdana Mandića 33 A, J. J. Strossmayera 350; 3 trgovine): 20,44 €
+> - Spar (Sv. Leopolda B. Mandića 7, Svilajska 31A; 5 trgovina): 21,60 €
+> - Kaufland (Josipa Reihl-Kira 40; 2 trgovine): 23,95 €
+>
+> Najjeftinije su Plodine, 6,08 € manje od Kauflanda; od toga se u jelu stvarno potroši oko 9,24 €.
+> Eurospin oko 18,85 €, nedostaje: celer. Umjesto parmezana je Grana Padano (sličan tvrdi sir).
+> Cijene iz cjenika od 28.10.2026.; u trgovini se mogu razlikovati.
 
 Točan tekst ovisi o asistentu; brojke dolaze iz alata.
 
@@ -124,15 +136,28 @@ No login is needed.
 
 ### Example
 
-Question:
+A real conversation (29 Oct 2026), shortened:
 
-> I'm making bean stew in Osijek and need 500 g of cooked beans; I'll buy dried. Where is it cheapest?
+> **You:** How much does a bolognese for 4 people cost?
+>
+> **Claude:** Which city are you in, what do you already have at home, and are you going to a particular store or
+> should I compare all of them?
+>
+> **You:** Osijek, I have salt, pepper and oil, compare everything.
 
-Claude calls `plan_basket` and answers roughly like this (prices from the 20 Oct 2026 price lists):
+Claude calls `plan_basket` (tagliatelle, minced meat, pancetta, onion, carrot, celery, garlic, passata, red wine,
+stock cube, butter, parmesan) and answers roughly like this:
 
-> 500 g of cooked beans is about 200 g dried (an estimate). Cheapest: Konzum (GRAH PINTO VEDRINI 500 g) and Spar,
-> €1.19 per pack; the amount used costs €0.48. Kaufland and Lidl €1.49, Plodine €1.51, Eurospin €1.59, Roto €2.16,
-> NTL €2.69.
+> You can buy everything at:
+> - Plodine (J. J. Strossmayera 343; 2 stores): €17.87
+> - Konzum (Sjenjak 133, Trg Ante Starčevića 10; 7 stores): €18.83
+> - Lidl (Sv. Leopolda Bogdana Mandića 33 A, J. J. Strossmayera 350; 3 stores): €20.44
+> - Spar (Sv. Leopolda B. Mandića 7, Svilajska 31A; 5 stores): €21.60
+> - Kaufland (Josipa Reihl-Kira 40; 2 stores): €23.95
+>
+> Plodine is cheapest, €6.08 less than Kaufland; about €9.24 of that is actually used in the dish.
+> Eurospin about €18.85, missing: celery. Grana Padano (a similar hard cheese) instead of parmesan.
+> Prices from the 28 Oct 2026 price lists; in-store prices may differ.
 
 The wording depends on the assistant; the numbers come from the tool.
 
