@@ -61,7 +61,7 @@ Kod: [MIT](LICENSE).
   prethodni (najviše 7 dana) i navodi se njegov datum.
 - **Točnost nije izmjerena.** Provjerena je samo ručno, na nekoliko recepata i trgovina; sustavne usporedbe s
   cijenama na polici nema.
-- **Oko 80 osnovnih namirnica** (`list_staples`), ne svi proizvodi. Ostalo se traži slobodnim tekstom, slabije.
+- **Oko 95 osnovnih namirnica** (`list_staples`), ne svi proizvodi. Ostalo se traži slobodnim tekstom, slabije.
 - **Procjene:** žlice, šalice, komadi i prinos suhih mahunarki pretvaraju se procjenom. Gubitak pri čišćenju i kuhanju
   (kora, kosti) se ne računa.
 - **Mahunarke:** ako se ne kaže je li grah, leća, slanutak ili grašak suh, iz konzerve ili smrznut, alat pita.
@@ -77,7 +77,7 @@ Potrebni su Python 3.12 i [uv](https://docs.astral.sh/uv/).
 
 ```sh
 uv sync
-uv run python scripts/update.py          # preuzme zadnju arhivu s cijene.dev i izgradi bazu (~1,1 GB, ~10 min)
+uv run python scripts/update.py          # preuzme zadnju arhivu s cijene.dev i izgradi bazu (~1,5 GB, ~10 min)
 uv run python -m mealmeter.server        # stdio, za Claude Desktop
 uv run python -m mealmeter.server --http --port 8000   # HTTP na http://127.0.0.1:8000/mcp
 uv run pytest -q                         # testovi
@@ -156,10 +156,10 @@ Code: [MIT](LICENSE).
 
 - **Prices come from price lists, not stock.** A price list does not say whether the product is on the shelf, and the
   in-store price may differ. Some chains publish one national price list. If a chain skips a day, the previous list
-  is used (at most 3 days old) and its date is shown.
+  is used (at most 7 days old) and its date is shown.
 - **Accuracy has not been measured.** It has only been checked by hand, on a few recipes and stores; there is no
   systematic comparison with shelf prices.
-- **About 80 basic staples** (`list_staples`), not every product. Anything else is searched as free text, less
+- **About 95 basic staples** (`list_staples`), not every product. Anything else is searched as free text, less
   reliably.
 - **Estimates:** spoons, cups, pieces and the yield of dried legumes are estimated. Losses from peeling and cooking
   (skins, bones) are not modelled.
@@ -176,7 +176,7 @@ You need Python 3.12 and [uv](https://docs.astral.sh/uv/).
 
 ```sh
 uv sync
-uv run python scripts/update.py          # downloads the latest cijene.dev archive and builds the database (~1.1 GB, ~10 min)
+uv run python scripts/update.py          # downloads the latest cijene.dev archive and builds the database (~1.5 GB, ~10 min)
 uv run python -m mealmeter.server        # stdio, for Claude Desktop
 uv run python -m mealmeter.server --http --port 8000   # HTTP at http://127.0.0.1:8000/mcp
 uv run pytest -q                         # tests
