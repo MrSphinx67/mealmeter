@@ -181,3 +181,50 @@ Podjela ne usporava (12.1 ≈ 12.2). Nova shema je ~4 % sporija na putu namirnic
 pozivu (`basket_bolonjez_osijek_10` 1,50 → 1,65 s), zbog izračuna izvedenih stupaca i datuma u view-u
 `staple_prices`. Free text i `basket_nepoznato` nisu sporiji (7,5 → 7,4 s). (U prijedlogu je 19,4 s izmjereno na
 simuliranom padu, a ondje je stara shema imala 564 k iznimaka više.)
+
+### 12.3 Ovisnosti u paketu: izmjereno, ništa nije izbačeno
+
+`vercel build --prod` (Vercel CLI 65.0.0, Python 3.14) nakon 12.2: **paket 180,8 MB**, od toga baza 88,1 MB
+(44,8 + 43,3), a ovisnosti i kod 92,7 MB:
+
+| MB | paket | učitava se? |
+|---:|---|---|
+| 57,7 | duckdb (`_duckdb…so`, već bez simbola: `file` kaže *stripped*) | da |
+| 14,2 | cryptography (+ `_cffi_backend` 0,3) | **da**: `mcp/server/request_state.py` ga importira na razini modula, a uvozi ga `mcp.server.mcpserver` |
+| 4,8 + 1,7 | pydantic_core, pydantic | da |
+| 2,7 | yaml | da |
+| 1,6 | vercel_runtime | da (Vercelov pokretač) |
+| 1,1 | mcp | da |
+| 1,0 | rpds | ne |
+| 0,44 / 0,10 / 0,04 | jsonschema / referencing / jsonschema_specifications | ne (samo `mcp.client.session`) |
+| 0,36 | cffi (Python paket; cryptography ga ne importira) | ne |
+| 0,36 | mealmeter (kopija u `_vendor`; uvozi se `src/`, jer ga `api/index.py` stavlja prvog na `sys.path`) | ne |
+| 0,26 / 0,05 | httpcore2 / truststore (httpx2 ih uvozi tek za odlazni zahtjev) | ne |
+| 0,19 | pycparser | ne |
+| 0,11 | jwt (samo `mcp.client.auth`) | ne |
+| 0,09 | h11 | ne na Vercelu (vercel_runtime ima svoj), da u lokalnom HTTP-u |
+| 0,68 | `*.dist-info` ukupno | (metapodaci) |
+
+**Kako je mjereno:** stvarni paket je složen iz `.vc-config.json` (`filePathMap`) u mapu i pokrenut Vercelovim
+pokretačem (`vc__handler__python.vc_handler`, bez `VERCEL_IPC_PATH` poslužitelj radi u dretvi) pod Pythonom 3.14,
+bez projektnog okruženja. Upiti: GET `/healthz` i `/`, a na `/mcp` initialize, tools/list i 9 poziva alata (svih 6
+alata; plan_basket u gradu, u trgovini s free_text, nepoznat grad). Svi su vratili 200 bez greške. Zatim su
+učitani moduli (`sys.modules`, putanje datoteka) uspoređeni sa sadržajem paketa. Isto su prošli stdio i lokalni
+HTTP (`python -m mealmeter.server [--http]`, isti pozivi, moduli zapisani pri izlazu).
+
+Nijedan način ne učitava `rpds`, `jsonschema`, `referencing`, `jsonschema_specifications`, `jwt`, `cffi`,
+`pycparser`, `httpcore2`, `truststore`, `adbc_driver_duckdb` ni kopiju `mealmeter`. Zajedno je to **~2,9 MB**.
+
+**Zašto nije izbačeno:**
+1. `excludeFiles` ne djeluje na vendorirane pakete. S `_vendor/rpds/**` su iz paketa nestali samo `.pyi` i
+   `py.typed` (njih builder ionako izostavlja), a `rpds…so` je ostao.
+2. `excludeFiles` smije imati najviše 256 znakova (`Invalid vercel.json … should NOT be longer than 256
+   characters`), a sada ih zauzima 247.
+3. Ekvivalent bi bio jedan od ova dva: brisanje iz `filePathMap` u `.vercel/output` nakon `vercel build`, što
+   mijenja interni format Vercelovog izlaza, ili `override-dependencies` u uv-u, koji bi izbacio `jsonschema` i iz
+   lokalnog okruženja, a `mcp.Client` u testovima ga lijeno uvozi. Za 2,9 MB (1,6 % paketa) to je rizik bez
+   dovoljne koristi.
+4. Jedini veliki kandidat, `cryptography` (14,2 MB), uvozi se pri svakom pokretanju poslužitelja.
+
+Usput: `src/**/__pycache__` (12 datoteka, ~0,3 MB) ulazi u paket unatoč `excludeFiles`. To nije novo i nisam ga
+dirao.
