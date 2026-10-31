@@ -120,7 +120,7 @@ _lock = threading.Lock()
 _db_path: str | None = None
 _shared_con: duckdb.DuckDBPyConnection | None = None
 _fixed_con = False  # veza zadana izvana (testovi): bez praćenja datoteke
-_db_key: tuple | None = None  # (inode, mtime_ns, veličina) otvorene datoteke baze
+_db_key: tuple | None = None  # (inode, mtime_ns, veličina) glavne datoteke i datoteke cijena otvorene baze
 
 
 def _file_key(path) -> tuple | None:
@@ -144,6 +144,12 @@ def _open(path) -> duckdb.DuckDBPyConnection:
         config.update(temp_directory=tmp, home_directory=tmp)
     con = duckdb.connect(":memory:", config=config)
     con.execute(f"ATTACH '{str(path).replace(chr(39), chr(39) * 2)}' AS {_DB_ALIAS} (READ_ONLY)")
+    try:
+        # sažeta baza u dvije datoteke (Korak 12): datoteka cijena i provjera oznake izgradnje
+        search.attach_prices(con, path, _DB_ALIAS)
+    except Exception:
+        con.close()
+        raise
     con.execute(f"USE {_DB_ALIAS}")
     return con
 
@@ -160,8 +166,9 @@ def _con() -> duckdb.DuckDBPyConnection:
     global _shared_con, _db_key
     with _lock:
         path = None if _fixed_con else (_db_path or search.DEFAULT_DB)  # MEALMETER_DB ili data/mealmeter.duckdb
-        key = _file_key(path) if path else None
-        if _shared_con is None or (key is not None and key != _db_key):
+        # glavna datoteka i datoteka cijena sažete baze (Korak 12): zamjena bilo koje otvara novu vezu
+        key = (_file_key(path), _file_key(search.prices_part(path))) if path else None
+        if _shared_con is None or (key is not None and key[0] is not None and key != _db_key):
             _shared_con = _open(path)
             _db_key = key
         shared, attached = _shared_con, not _fixed_con

@@ -16,8 +16,53 @@ DEFAULT_DB = Path(os.environ.get("MM_DB") or os.environ.get("MEALMETER_DB")
                   or Path(__file__).resolve().parents[2] / "data" / "mealmeter.duckdb")
 
 
+# sažeta baza u dvije datoteke (Korak 12): view-ovi cijena u glavnoj datoteci čitaju tablice iz datoteke cijena,
+# priključene pod ovim imenom; obje imaju clean.compact_build s istom oznakom izgradnje
+PRICES_ALIAS = "mm_prices"
+
+
+class CompactMismatch(RuntimeError):
+    """Datoteka cijena sažete baze nedostaje ili je iz druge izgradnje (ključevi pk/sk se ne bi slagali)."""
+
+
+def prices_part(path: str | Path) -> Path:
+    """Putanja datoteke cijena uz glavnu datoteku sažete baze (data/compact.duckdb -> data/compact_prices.duckdb)."""
+    path = Path(path)
+    return path.with_name(f"{path.stem}_prices{path.suffix}")
+
+
+def _sql_str(value) -> str:
+    return "'" + str(value).replace("'", "''") + "'"
+
+
+def attach_prices(con: duckdb.DuckDBPyConnection, path: str | Path, alias: str) -> None:
+    """Uz glavnu datoteku `path` (priključenu kao `alias`) priključi datoteku cijena i provjeri oznaku izgradnje.
+    Baza bez clean.compact_build (puna, fixture) ostaje kakva je. Pri neslaganju ili bez datoteke: CompactMismatch,
+    jer bi view-ovi inače vratili tuđe cijene."""
+    if not con.execute("""SELECT count(*) FROM duckdb_tables() WHERE database_name = ? AND schema_name = 'clean'
+                          AND table_name = 'compact_build'""", [alias]).fetchone()[0]:
+        return
+    build_id, part_file = con.execute(f"SELECT build_id, prices_file FROM {alias}.clean.compact_build").fetchone()
+    part = Path(path).with_name(part_file)
+    if not con.execute("SELECT count(*) FROM duckdb_databases() WHERE database_name = ?", [PRICES_ALIAS]).fetchone()[0]:
+        if not part.exists():
+            raise CompactMismatch(f"nema datoteke cijena {part} (sažeta baza {path}, izgradnja {build_id})")
+        con.execute(f"ATTACH {_sql_str(part)} AS {PRICES_ALIAS} (READ_ONLY)")
+    rows = con.execute(f"SELECT build_id FROM {PRICES_ALIAS}.clean.compact_build").fetchall()
+    if rows != [(build_id,)]:
+        raise CompactMismatch(f"{part} je iz izgradnje {rows[0][0] if rows else '?'}, a {path} iz {build_id}; "
+                              "obje datoteke moraju biti iz istog pokretanja build_compact.py")
+
+
 def connect(path: str | Path | None = None) -> duckdb.DuckDBPyConnection:
-    return duckdb.connect(str(path or DEFAULT_DB), read_only=True)
+    path = str(path or DEFAULT_DB)
+    con = duckdb.connect(path, read_only=True)
+    try:
+        attach_prices(con, path, con.execute("SELECT current_database()").fetchone()[0])
+    except Exception:
+        con.close()
+        raise
+    return con
 
 
 def _city_filter(city: str | None) -> tuple[str, list]:

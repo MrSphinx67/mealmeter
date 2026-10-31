@@ -8,8 +8,8 @@ a POST /mcp je dobivao 405 od Vercela). Omotač i dalje "/api/index/..." vraća 
 pa ga omotač pokreće sam: pri prvom zahtjevu u zasebnom dugotrajnom zadatku (ne u zadatku zahtjeva). Ako
 platforma ipak pošalje lifespan, omotač ga obrađuje isto.
 
-Baza: MM_DB (zadano data/compact.duckdb uz kod), samo za čitanje (ATTACH ... READ_ONLY); privremene datoteke DuckDB-a
-u /tmp (MM_DUCKDB_TEMP), jer je na Vercelu samo /tmp zapisiv.
+Baza: MM_DB (zadano data/compact.duckdb uz kod, uz nju data/compact_prices.duckdb, Korak 12), samo za čitanje
+(ATTACH ... READ_ONLY); privremene datoteke DuckDB-a u /tmp (MM_DUCKDB_TEMP), jer je na Vercelu samo /tmp zapisiv.
 """
 
 import os

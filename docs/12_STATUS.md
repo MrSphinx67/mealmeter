@@ -143,3 +143,41 @@ nijednu iznimku više od iste trgovine od danas; trgovina pola-pola ima iznimke 
 |---|---:|---:|
 | cjenik 28.10. | 92,8 MB | **89,5 MB** |
 | + simulirani NTL pad | 95,5 MB | **88,8 MB** (iznimaka 2 833 369, kao bez pada) |
+
+### 12.2 Dvije datoteke (b)
+
+- `build_compact.py` piše glavnu datoteku (izlaz) i datoteku cijena uz nju (`search.prices_part`:
+  `compact.duckdb` → `compact_prices.duckdb`) s `chain_prices_k`, `store_products_k` i `price_exceptions_k`. View
+  `clean.prices` ih čita kao `mm_prices.clean.*` (`search.PRICES_ALIAS`). Prvo se zamjenjuje datoteka cijena, pa
+  glavna.
+- **Oznaka izgradnje:** obje datoteke imaju `clean.compact_build` (`build_id` = vrijeme + slučajni dio; glavna i
+  `prices_file`). `search.attach_prices` priključuje datoteku cijena i uspoređuje oznake. Kad se razlikuju ili
+  datoteka cijena nedostaje, javlja `search.CompactMismatch`, a ne tuđe cijene. Pozivaju je oba mjesta koja otvaraju
+  bazu: `search.connect` i `server._open` (stdio, lokalni HTTP i Vercel idu kroz `_open`; `golden.py` kroz
+  poslužitelj). Puna baza nema `compact_build` i otvara se kao prije.
+- `server._con` prati obje datoteke (inode, mtime, veličina), pa zamjena bilo koje otvara novu vezu.
+- `vercel.json` `includeFiles`: `data/compact_prices.duckdb` (`*.tmp` je već u `excludeFiles`).
+- Testovi (`tests/test_step12.py`): obje datoteke imaju istu oznaku, a cijene su samo u datoteci cijena. Datoteka
+  cijena iz druge izgradnje daje `CompactMismatch` u `search.connect` i `server._open`, a kroz MCP odgovor je greška
+  (`is_error`, bez cijena). Isto vrijedi bez datoteke cijena, a i kad se datoteka cijena zamijeni dok poslužitelj radi.
+
+| | glavna | cijene |
+|---|---:|---:|
+| cjenik 28.10. | **45,5 MB** | **43,3 MB** |
+| + simulirani NTL pad | 44,8 MB | 43,3 MB |
+
+Golden 27/27 jednako punoj bazi. pytest: 1356 prošlo, 7 preskočeno.
+
+**Brzina** (24 scenarija find_products i plan_basket iz `golden.py`, medijan 3 topla poziva, isti cjenik 28.10.,
+dva ponavljanja):
+
+| baza | ukupno |
+|---|---:|
+| stara shema (jedna datoteka) | 19,2 / 19,4 s |
+| 12.1 (jedna datoteka) | 20,2 / 20,3 s |
+| 12.2 (dvije datoteke) | 20,3 / 19,8 s |
+
+Podjela ne usporava (12.1 ≈ 12.2). Nova shema je ~4 % sporija na putu namirnica: plan_basket +0,05 do 0,15 s po
+pozivu (`basket_bolonjez_osijek_10` 1,50 → 1,65 s), zbog izračuna izvedenih stupaca i datuma u view-u
+`staple_prices`. Free text i `basket_nepoznato` nisu sporiji (7,5 → 7,4 s). (U prijedlogu je 19,4 s izmjereno na
+simuliranom padu, a ondje je stara shema imala 564 k iznimaka više.)

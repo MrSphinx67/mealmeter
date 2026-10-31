@@ -72,6 +72,7 @@ def test_vercel_config():
     cfg = json.loads((ROOT / "vercel.json").read_text(encoding="utf-8"))
     fn = cfg["functions"]["api/index.py"]
     assert "data/compact.duckdb" in fn["includeFiles"] and "data/*.yaml" in fn["includeFiles"]
+    assert "data/compact_prices.duckdb" in fn["includeFiles"]  # Korak 12: datoteka cijena sažete baze
     for excluded in ("data/mealmeter.duckdb", "data/raw/**", "tests/**", "docs/**", ".env*", ".pytest_cache/**"):
         assert excluded in fn["excludeFiles"]
     # Korak 5V3: bez rewritea; Python backend dobiva sve putanje s izvornom putanjom (rewrite je slao /api/index)

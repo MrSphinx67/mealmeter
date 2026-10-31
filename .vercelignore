@@ -1,4 +1,4 @@
-# Ne šalje se na Vercel (vercel deploy bez --prebuilt); sažeta baza data/compact.duckdb SE šalje
+# Ne šalje se na Vercel (vercel deploy bez --prebuilt); sažeta baza data/compact.duckdb i data/compact_prices.duckdb SE šalje
 data/mealmeter.duckdb
 data/mealmeter.duckdb.*
 data/*.tmp*

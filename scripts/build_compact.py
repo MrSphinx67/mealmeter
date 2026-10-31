@@ -2,16 +2,22 @@
 
 Upotreba: python scripts/build_compact.py [puna_baza] [izlaz]   (zadano: data/mealmeter.duckdb -> data/compact.duckdb)
 
+Dvije datoteke (Korak 12; Vercel Hobby odbija datoteke veće od 100 MB): glavna (izlaz: proizvodi, trgovine,
+namirnice, view-ovi) i datoteka cijena uz nju (search.prices_part: compact_prices.duckdb, tablice chain_prices_k,
+store_products_k, price_exceptions_k). View clean.prices ih čita kao mm_prices.clean.* (search.PRICES_ALIAS), pa ju
+search.connect i server._open priključuju pod tim imenom (search.attach_prices). Obje imaju clean.compact_build s
+istom oznakom izgradnje; pri neslaganju otvaranje baze javlja grešku (CompactMismatch), a ne tuđe cijene.
+
 View clean.prices i clean.staple_prices te tablica clean.staple_items imaju ista imena i stupce koje alati čitaju, pa
 search.py i plan_basket rade bez promjena (baza se bira preko env MM_DB). Ispod njih su cjelobrojni ključevi
 (clean.products.pk INTEGER, clean.stores.sk SMALLINT) i tablice složene radi kompresije:
 - clean.stores.sk_date, sk_stale_days (Korak 12): datum cijena trgovine (najčešći datum njezinih redaka) i
   njegova starost; date i stale_days nisu među stupcima vrijednosti, pa preneseni redci (carry-forward, cijela
   trgovina "ista kao dan X") ostaju osnovni i ne povećavaju bazu;
-- clean.chain_prices_k (pk, vrijednosti): po paru (lanac, proizvod) najčešći redak cijene;
-- clean.store_products_k (sk, pk): trgovine čiji je redak jednak osnovnom i čiji je datum datum trgovine
+- [datoteka cijena] clean.chain_prices_k (pk, vrijednosti): po paru (lanac, proizvod) najčešći redak cijene;
+- [datoteka cijena] clean.store_products_k (sk, pk): trgovine čiji je redak jednak osnovnom i čiji je datum datum trgovine
   (trgovina nema svaki proizvod lanca, popunjenost ~46 %, pa se dostupnost čuva po trgovini);
-- clean.price_exceptions_k (sk, pk, vrijednosti, date): redci trgovina koji se razlikuju (cijena, akcija...);
+- [datoteka cijena] clean.price_exceptions_k (sk, pk, vrijednosti, date): redci trgovina koji se razlikuju (cijena, akcija...);
   date samo kad se razlikuje od datuma trgovine (trgovina s djelomičnim padom: preneseni i svježi redci), inače NULL;
 - clean.staple_prices_k: cijene namirnica samo sa stupcima koje čita upit kandidata (STAPLE_PRICE_COLS);
   price_per_unit, per_unit, unit_confidence i price_per_kg_drained view računa iz proizvoda kad se daju izračunati
@@ -26,6 +32,7 @@ import os
 import shutil
 import sys
 import time
+import uuid
 from pathlib import Path
 
 import duckdb
@@ -33,6 +40,7 @@ import duckdb
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from mealmeter.search import PRICES_ALIAS, prices_part  # noqa: E402
 from mealmeter.staples import BKEY_SQL  # noqa: E402
 
 KEYS = ("chain", "store_id", "product_id")
@@ -72,14 +80,23 @@ def _fingerprint(c, sql: str, cols: list[str]) -> tuple:
 def build(SRC: Path, OUT: Path) -> dict:
     t0 = time.time()
     tmp = OUT.with_name(OUT.name + ".tmp")
+    part = prices_part(OUT)
+    tmp_part = part.with_name(part.name + ".tmp")
     tmp_dir = OUT.with_name("compact_tmp")
-    for f in (tmp, tmp.with_name(tmp.name + ".wal")):
+    for f in (tmp, tmp.with_name(tmp.name + ".wal"), tmp_part, tmp_part.with_name(tmp_part.name + ".wal")):
         f.unlink(missing_ok=True)
     c = duckdb.connect(config={"memory_limit": "1500MB", "threads": 2, "temp_directory": str(tmp_dir),
                                "preserve_insertion_order": False})
     c.execute(f"ATTACH '{SRC}' AS src (READ_ONLY)")
     c.execute(f"ATTACH '{tmp}' AS dst")
     c.execute("CREATE SCHEMA dst.clean")
+    # P: datoteka cijena; view-ovi glavne datoteke je čitaju pod istim imenom pod kojim je priključuju alati
+    c.execute(f"ATTACH '{tmp_part}' AS {PRICES_ALIAS}")
+    c.execute(f"CREATE SCHEMA {PRICES_ALIAS}.clean")
+    P = f"{PRICES_ALIAS}.clean"
+    build_id = f"{time.strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:12]}"
+    c.execute("CREATE TABLE dst.clean.compact_build AS SELECT ? AS build_id, ? AS prices_file", [build_id, part.name])
+    c.execute(f"CREATE TABLE {P}.compact_build AS SELECT ? AS build_id", [build_id])
     for tb in [r[0] for r in c.execute("""SELECT table_name FROM duckdb_tables() WHERE database_name = 'src'
                                           AND schema_name = 'clean' ORDER BY 1""").fetchall()]:
         if tb not in SKIP:
@@ -114,7 +131,7 @@ def build(SRC: Path, OUT: Path) -> dict:
         SELECT chain, product_id, {v} FROM (
           SELECT chain, product_id, {v}, count(*) AS n FROM src.clean.prices GROUP BY ALL)
         QUALIFY row_number() OVER (PARTITION BY chain, product_id ORDER BY n DESC, price_eff, {v}) = 1""")
-    c.execute(f"""CREATE TABLE dst.clean.chain_prices_k AS
+    c.execute(f"""CREATE TABLE {P}.chain_prices_k AS
         SELECT p.pk, {", ".join(f"b.{x}" for x in vals)} FROM base b JOIN dst.clean.products p USING (chain, product_id)
         ORDER BY p.pk""")
     same = " AND ".join(f"r.{col} IS NOT DISTINCT FROM b.{col}" for col in vals)
@@ -123,9 +140,9 @@ def build(SRC: Path, OUT: Path) -> dict:
                CASE WHEN r.date IS DISTINCT FROM s.sk_date THEN r.date END AS date, {", ".join(f"r.{x}" for x in vals)}
         FROM src.clean.prices r JOIN base b USING (chain, product_id)
         JOIN dst.clean.products p USING (chain, product_id) JOIN dst.clean.stores s USING (chain, store_id)""")
-    c.execute("CREATE TABLE dst.clean.store_products_k AS SELECT sk, pk FROM marked WHERE is_base ORDER BY sk, pk")
+    c.execute(f"CREATE TABLE {P}.store_products_k AS SELECT sk, pk FROM marked WHERE is_base ORDER BY sk, pk")
     # iznimke po (proizvod, trgovina): cijene istog proizvoda u trgovinama su slične, pa se bolje sažimaju
-    c.execute(f"""CREATE TABLE dst.clean.price_exceptions_k AS
+    c.execute(f"""CREATE TABLE {P}.price_exceptions_k AS
         SELECT pk, sk, {v}, date FROM marked WHERE NOT is_base ORDER BY pk, sk""")
     c.execute("DROP TABLE marked")
     c.execute("DROP TABLE base")
@@ -138,10 +155,11 @@ def build(SRC: Path, OUT: Path) -> dict:
         return ", ".join(f"{expr[col]} AS {col}" if col in expr else f"{src}.{col}" for col in cols)
 
     c.execute(f"""CREATE VIEW dst.clean.prices AS
-        SELECT {out("x", False)} FROM clean.store_products_k a JOIN clean.chain_prices_k x USING (pk)
+        SELECT {out("x", False)} FROM {P}.store_products_k a JOIN {P}.chain_prices_k x USING (pk)
           JOIN clean.products p USING (pk) JOIN clean.stores s USING (sk)
         UNION ALL
-        SELECT {out("x", True)} FROM clean.price_exceptions_k x JOIN clean.products p USING (pk) JOIN clean.stores s USING (sk)""")
+        SELECT {out("x", True)} FROM {P}.price_exceptions_k x JOIN clean.products p USING (pk)
+          JOIN clean.stores s USING (sk)""")
 
     # predizračun za namirnice (kao staples.build_staple_prices, nad punom bazom), s ključevima
     staple_src = f"""SELECT DISTINCT sg.staple, c.* FROM src.clean.staple_groups sg
@@ -182,15 +200,21 @@ def build(SRC: Path, OUT: Path) -> dict:
         a, b = _fingerprint(c, want, kcols), _fingerprint(c, got, kcols)
         if a != b:
             raise SystemExit(f"{name}: view se razlikuje od pune baze ({a} != {b})")
-    counts = {t: c.execute(f"SELECT count(*) FROM dst.clean.{t}").fetchone()[0]
-              for t in ("chain_prices_k", "store_products_k", "price_exceptions_k", "staple_prices_k", "staple_items")}
+    counts = {t: c.execute(f"SELECT count(*) FROM {db}.{t}").fetchone()[0]
+              for db, tbs in ((P, ("chain_prices_k", "store_products_k", "price_exceptions_k")),
+                              ("dst.clean", ("staple_prices_k", "staple_items"))) for t in tbs}
     counts.update(store_products=counts["store_products_k"], price_exceptions=counts["price_exceptions_k"],
-                  exceptions_with_date=c.execute("SELECT count(date) FROM dst.clean.price_exceptions_k").fetchone()[0])
+                  exceptions_with_date=c.execute(f"SELECT count(date) FROM {P}.price_exceptions_k").fetchone()[0])
     c.execute("CHECKPOINT dst")
+    c.execute(f"CHECKPOINT {PRICES_ALIAS}")
     c.close()
     shutil.rmtree(tmp_dir, ignore_errors=True)
-    os.replace(tmp, OUT)  # atomarno: poslužitelj s MM_DB primijeti novu datoteku
-    print(f"{OUT}: {OUT.stat().st_size / 2**20:.1f} MB; {counts}; provjera view-ova OK; {time.time() - t0:.0f} s")
+    # prvo datoteka cijena, pa glavna: poslužitelj koji između otvori staru glavnu i novu datoteku cijena dobije
+    # CompactMismatch (ne tuđe cijene), a nova glavna datoteka promijeni ključ i otvori se nova veza
+    os.replace(tmp_part, part)
+    os.replace(tmp, OUT)
+    print(f"{OUT}: {OUT.stat().st_size / 2**20:.1f} MB, {part.name}: {part.stat().st_size / 2**20:.1f} MB; "
+          f"izgradnja {build_id}; {counts}; provjera view-ova OK; {time.time() - t0:.0f} s")
     return counts
 
 
