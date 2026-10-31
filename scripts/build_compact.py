@@ -1,16 +1,22 @@
-"""Sažeta baza (Korak 5P, 5V2): data/compact.duckdb iz pune baze, bez povijesti cijena i sirovih tablica.
+"""Sažeta baza (Korak 5P, 5V2, 12): data/compact.duckdb iz pune baze, bez povijesti cijena i sirovih tablica.
 
 Upotreba: python scripts/build_compact.py [puna_baza] [izlaz]   (zadano: data/mealmeter.duckdb -> data/compact.duckdb)
 
-View clean.prices i tablice clean.staple_prices i clean.staple_items imaju ista imena i stupce koje alati čitaju, pa
+View clean.prices i clean.staple_prices te tablica clean.staple_items imaju ista imena i stupce koje alati čitaju, pa
 search.py i plan_basket rade bez promjena (baza se bira preko env MM_DB). Ispod njih su cjelobrojni ključevi
 (clean.products.pk INTEGER, clean.stores.sk SMALLINT) i tablice složene radi kompresije:
+- clean.stores.sk_date, sk_stale_days (Korak 12): datum cijena trgovine (najčešći datum njezinih redaka) i
+  njegova starost; date i stale_days nisu među stupcima vrijednosti, pa preneseni redci (carry-forward, cijela
+  trgovina "ista kao dan X") ostaju osnovni i ne povećavaju bazu;
 - clean.chain_prices_k (pk, vrijednosti): po paru (lanac, proizvod) najčešći redak cijene;
-- clean.store_products_k (sk, pk): trgovine čiji je redak jednak osnovnom (trgovina nema svaki proizvod lanca,
-  popunjenost ~46 %, pa se dostupnost čuva po trgovini);
-- clean.price_exceptions_k (sk, pk, vrijednosti): redci trgovina koji se razlikuju (cijena, akcija, datum...);
-- clean.staple_prices: cijene namirnica samo sa stupcima koje čita upit kandidata (STAPLE_PRICE_COLS);
-  clean.staple_items: proizvodi namirnice (bez izostavljenih stupaca).
+- clean.store_products_k (sk, pk): trgovine čiji je redak jednak osnovnom i čiji je datum datum trgovine
+  (trgovina nema svaki proizvod lanca, popunjenost ~46 %, pa se dostupnost čuva po trgovini);
+- clean.price_exceptions_k (sk, pk, vrijednosti, date): redci trgovina koji se razlikuju (cijena, akcija...);
+  date samo kad se razlikuje od datuma trgovine (trgovina s djelomičnim padom: preneseni i svježi redci), inače NULL;
+- clean.staple_prices_k: cijene namirnica samo sa stupcima koje čita upit kandidata (STAPLE_PRICE_COLS);
+  price_per_unit, per_unit, unit_confidence i price_per_kg_drained view računa iz proizvoda kad se daju izračunati
+  (pakiranje g/ml/kom, ocijeđena masa), inače su spremljeni (*_x); clean.staple_items: proizvodi namirnice.
+  U clean.prices su ti stupci spremljeni: izračun nad cijelim view-om bio je 2,5-3,5x sporiji (free_text, Korak 12).
 Izostavljeni su stupci koje alati ne čitaju (DROP_PRICE_COLS, DROP_PRODUCT_COLS); ostali su isti. Na kraju se
 provjerava da svaki view vraća točno iste retke kao puna baza (broj redaka i zbroj hash-eva redaka).
 DuckDB je ograničen na 1,5 GB memorije (privremene datoteke u data/compact_tmp).
@@ -37,6 +43,18 @@ DROP_PRICE_COLS = ("price", "unit_price", "price_date")
 # stupci cijena koje čita upit kandidata za namirnicu (search._candidates, STAPLE_PPU_SQL)
 STAPLE_PRICE_COLS = ("chain", "store_id", "product_id", "date", "stale_days", "price_eff", "is_special",
                      "price_per_unit", "per_unit", "unit_confidence", "price_per_kg_drained")
+# datum i starost cijene: iz clean.stores (sk_date, sk_stale_days), a u iznimkama samo kad se razlikuju
+DATE_COLS = ("date", "stale_days")
+# izvedeni stupci cijena namirnica (kao u build.build_clean): izračunavi kad proizvod ima pakiranje g/ml/kom
+DERIVABLE = "(p.pack_unit IN ('g', 'ml', 'kom') AND p.pack_amount > 0)"
+DERIVED = {
+    "price_per_unit": f"""CASE WHEN {DERIVABLE} THEN round(CASE p.pack_unit WHEN 'kom' THEN x.price_eff / p.pack_amount
+                           ELSE x.price_eff / p.pack_amount * 1000 END, 2)::DECIMAL(10,2) ELSE x.price_per_unit_x END""",
+    "per_unit": f"""CASE WHEN {DERIVABLE} THEN CASE p.pack_unit WHEN 'g' THEN 'kg' WHEN 'ml' THEN 'l' ELSE 'kom' END
+                     ELSE x.per_unit_x END""",
+    "unit_confidence": f"CASE WHEN {DERIVABLE} THEN 'high' ELSE x.unit_confidence_x END",
+    "price_per_kg_drained": "round(x.price_eff / nullif(p.drained_amount, 0) * 1000, 2)::DECIMAL(10,2)",
+}
 DROP_PRODUCT_COLS = ("barcode", "ean_valid", "match_norm", "category", "unit", "quantity", "unit_hint", "ean_note",
                      "ean_incoherent", "hard_nonfood")
 
@@ -72,38 +90,58 @@ def build(SRC: Path, OUT: Path) -> dict:
     c.execute(f"""CREATE TABLE dst.clean.products AS
         SELECT {", ".join(pcols)}, (row_number() OVER (ORDER BY chain, product_id))::INTEGER AS pk
         FROM src.clean.products ORDER BY chain, product_id""")
-    c.execute("""CREATE TABLE dst.clean.stores AS
-        SELECT *, (row_number() OVER (ORDER BY chain, store_id))::SMALLINT AS sk
-        FROM src.clean.stores ORDER BY chain, store_id""")
+    # datum cjenika: date + stale_days je isti za sve retke (build_clean: max(date) - date)
+    snaps = c.execute("""SELECT DISTINCT date + stale_days::INTEGER FROM src.clean.prices""").fetchall()
+    if len(snaps) > 1:
+        raise SystemExit(f"date + stale_days nije jednak za sve cijene: {sorted(snaps)}")
+    snap = f"DATE '{snaps[0][0]}'" if snaps else "NULL::DATE"
+    # datum trgovine: najčešći datum njezinih cijena (pri jednakom broju noviji)
+    c.execute(f"""CREATE TABLE dst.clean.stores AS
+        SELECT s.*, (row_number() OVER (ORDER BY s.chain, s.store_id))::SMALLINT AS sk, d.sk_date,
+               {snap} - d.sk_date AS sk_stale_days
+        FROM src.clean.stores s LEFT JOIN (
+          SELECT chain, store_id, date AS sk_date FROM (
+            SELECT chain, store_id, date, count(*) AS n FROM src.clean.prices GROUP BY ALL)
+          QUALIFY row_number() OVER (PARTITION BY chain, store_id ORDER BY n DESC, date DESC) = 1) d
+          ON d.chain = s.chain AND d.store_id = s.store_id
+        ORDER BY s.chain, s.store_id""")
 
     cols = [col for col in _cols(c, "prices") if col not in DROP_PRICE_COLS]
-    vals = [col for col in cols if col not in KEYS]
+    vals = [col for col in cols if col not in KEYS + DATE_COLS]
     v = ", ".join(vals)
-    # osnovni redak para: najčešći redak (bez izostavljenih stupaca); pri jednakom broju najniža cijena, pa novi datum
+    # osnovni redak para: najčešći redak (bez izostavljenih stupaca i datuma); pri jednakom broju najniža cijena
     c.execute(f"""CREATE TEMP TABLE base AS
         SELECT chain, product_id, {v} FROM (
           SELECT chain, product_id, {v}, count(*) AS n FROM src.clean.prices GROUP BY ALL)
-        QUALIFY row_number() OVER (PARTITION BY chain, product_id ORDER BY n DESC, price_eff, date DESC, {v}) = 1""")
+        QUALIFY row_number() OVER (PARTITION BY chain, product_id ORDER BY n DESC, price_eff, {v}) = 1""")
     c.execute(f"""CREATE TABLE dst.clean.chain_prices_k AS
         SELECT p.pk, {", ".join(f"b.{x}" for x in vals)} FROM base b JOIN dst.clean.products p USING (chain, product_id)
         ORDER BY p.pk""")
     same = " AND ".join(f"r.{col} IS NOT DISTINCT FROM b.{col}" for col in vals)
     c.execute(f"""CREATE TEMP TABLE marked AS
-        SELECT s.sk, p.pk, {same} AS is_base, {", ".join(f"r.{x}" for x in vals)}
+        SELECT s.sk, p.pk, {same} AND r.date IS NOT DISTINCT FROM s.sk_date AS is_base,
+               CASE WHEN r.date IS DISTINCT FROM s.sk_date THEN r.date END AS date, {", ".join(f"r.{x}" for x in vals)}
         FROM src.clean.prices r JOIN base b USING (chain, product_id)
         JOIN dst.clean.products p USING (chain, product_id) JOIN dst.clean.stores s USING (chain, store_id)""")
     c.execute("CREATE TABLE dst.clean.store_products_k AS SELECT sk, pk FROM marked WHERE is_base ORDER BY sk, pk")
     # iznimke po (proizvod, trgovina): cijene istog proizvoda u trgovinama su slične, pa se bolje sažimaju
     c.execute(f"""CREATE TABLE dst.clean.price_exceptions_k AS
-        SELECT pk, sk, {v} FROM marked WHERE NOT is_base ORDER BY pk, sk""")
+        SELECT pk, sk, {v}, date FROM marked WHERE NOT is_base ORDER BY pk, sk""")
     c.execute("DROP TABLE marked")
     c.execute("DROP TABLE base")
-    out_cols = ", ".join(["s.chain", "s.store_id", "p.product_id"] + [f"x.{col}" for col in vals])
+
+    def out(src: str, exc: bool) -> str:
+        """Stupci view-a redom kao u punoj bazi; datum iz trgovine, u iznimci njezin ako ga ima."""
+        expr = {"chain": "s.chain", "store_id": "s.store_id", "product_id": "p.product_id",
+                "date": f"coalesce({src}.date, s.sk_date)" if exc else "s.sk_date",
+                "stale_days": f"coalesce({snap} - {src}.date, s.sk_stale_days)" if exc else "s.sk_stale_days"}
+        return ", ".join(f"{expr[col]} AS {col}" if col in expr else f"{src}.{col}" for col in cols)
+
     c.execute(f"""CREATE VIEW dst.clean.prices AS
-        SELECT {out_cols} FROM clean.store_products_k a JOIN clean.chain_prices_k x USING (pk)
+        SELECT {out("x", False)} FROM clean.store_products_k a JOIN clean.chain_prices_k x USING (pk)
           JOIN clean.products p USING (pk) JOIN clean.stores s USING (sk)
         UNION ALL
-        SELECT {out_cols} FROM clean.price_exceptions_k x JOIN clean.products p USING (pk) JOIN clean.stores s USING (sk)""")
+        SELECT {out("x", True)} FROM clean.price_exceptions_k x JOIN clean.products p USING (pk) JOIN clean.stores s USING (sk)""")
 
     # predizračun za namirnice (kao staples.build_staple_prices, nad punom bazom), s ključevima
     staple_src = f"""SELECT DISTINCT sg.staple, c.* FROM src.clean.staple_groups sg
@@ -111,13 +149,20 @@ def build(SRC: Path, OUT: Path) -> dict:
         JOIN src.clean.prices c USING (chain, product_id) WHERE sg.status IN ('member', 'ambiguous')"""
     # cijene namirnica kao tablica s tekstualnim ključevima, ali samo sa stupcima koje čita upit kandidata
     # (search._candidates); view nad ključevima bio je ~20 % sporiji (spajanje s products i chain_prices_k)
-    staple_vals = [col for col in STAPLE_PRICE_COLS if col not in KEYS]
+    # izvedeni stupci se ne spremaju kad se daju izračunati iz proizvoda (DERIVED), datum kao u iznimkama
+    stored = {"price_per_unit": "price_per_unit_x", "per_unit": "per_unit_x", "unit_confidence": "unit_confidence_x"}
+    staple_vals = [col for col in STAPLE_PRICE_COLS if col not in KEYS + DATE_COLS + ("price_per_kg_drained",)]
+    sel = ", ".join(f"CASE WHEN {DERIVABLE} THEN NULL ELSE x.{col} END AS {stored[col]}" if col in stored else f"x.{col}"
+                    for col in staple_vals)
     c.execute(f"""CREATE TABLE dst.clean.staple_prices_k AS
-        SELECT x.staple, s.sk, p.pk, {", ".join(f"x.{col}" for col in staple_vals)} FROM ({staple_src}) x
+        SELECT x.staple, s.sk, p.pk, {sel}, CASE WHEN x.date IS DISTINCT FROM s.sk_date THEN x.date END AS date
+        FROM ({staple_src}) x
         JOIN dst.clean.products p USING (chain, product_id) JOIN dst.clean.stores s USING (chain, store_id)
         ORDER BY x.staple, p.pk, s.sk""")
+    sexpr = {"chain": "s.chain", "store_id": "s.store_id", "product_id": "p.product_id",
+             "date": "coalesce(x.date, s.sk_date)", "stale_days": f"coalesce({snap} - x.date, s.sk_stale_days)", **DERIVED}
     c.execute(f"""CREATE VIEW dst.clean.staple_prices AS
-        SELECT x.staple, s.chain, s.store_id, p.product_id, {", ".join(f"x.{col}" for col in staple_vals)}
+        SELECT x.staple, {", ".join(f"{sexpr[col]} AS {col}" if col in sexpr else f"x.{col}" for col in STAPLE_PRICE_COLS)}
         FROM clean.staple_prices_k x JOIN clean.products p USING (pk) JOIN clean.stores s USING (sk)""")
     # proizvodi namirnice kao tablica (ne view): view nad products bi pri svakom upitu čitao cijelu tablicu proizvoda
     c.execute("""CREATE TABLE dst.clean.staple_items AS
@@ -139,7 +184,8 @@ def build(SRC: Path, OUT: Path) -> dict:
             raise SystemExit(f"{name}: view se razlikuje od pune baze ({a} != {b})")
     counts = {t: c.execute(f"SELECT count(*) FROM dst.clean.{t}").fetchone()[0]
               for t in ("chain_prices_k", "store_products_k", "price_exceptions_k", "staple_prices_k", "staple_items")}
-    counts.update(store_products=counts["store_products_k"], price_exceptions=counts["price_exceptions_k"])
+    counts.update(store_products=counts["store_products_k"], price_exceptions=counts["price_exceptions_k"],
+                  exceptions_with_date=c.execute("SELECT count(date) FROM dst.clean.price_exceptions_k").fetchone()[0])
     c.execute("CHECKPOINT dst")
     c.close()
     shutil.rmtree(tmp_dir, ignore_errors=True)
