@@ -91,6 +91,7 @@ def test_update_workflow():
     on = wf[True] if True in wf else wf["on"]  # PyYAML čita ključ "on" kao True
     assert len(on["schedule"]) == 1 and len(on["schedule"][0]["cron"].split()[1].split(",")) == 2  # 2x dnevno
     runs = "\n".join(s.get("run", "") for s in wf["jobs"]["update"]["steps"])
+    assert "--max-mb 220 --max-file-mb 95 --warn-mb 190 --warn-file-mb 65" in runs  # Korak 12
     order = ["scripts/update.py", "scripts/build_compact.py", "golden.py --check", "vercel build",
              "vercel deploy --prebuilt --prod"]
     assert [runs.index(x) for x in order] == sorted(runs.index(x) for x in order)
@@ -150,6 +151,14 @@ def test_bundle_size_script(tmp_path):
     too_big_file = run("--max-mb", "10", "--max-file-mb", "2")
     assert too_big_file.returncode == 1 and "data/compact.duckdb ima 3.0 MB" in too_big_file.stdout
     assert run("--max-mb", "3.5", "--max-file-mb", "5").returncode == 1
+    # Korak 12: upozorenje iznad --warn-mb / --warn-file-mb, izlazni kod 0; iznad granice i dalje greška
+    warn = run("--max-mb", "10", "--max-file-mb", "5", "--warn-mb", "3.5", "--warn-file-mb", "2")
+    assert warn.returncode == 0 and "::warning::paket python.func ima 4.0 MB, više od 3.5 MB" in warn.stdout
+    assert "::warning::data/compact.duckdb ima 3.0 MB, više od 2 MB" in warn.stdout
+    assert "::warning::_vendor/x.so" not in warn.stdout
+    quiet = run("--max-mb", "10", "--max-file-mb", "5", "--warn-mb", "5", "--warn-file-mb", "4")
+    assert quiet.returncode == 0 and "::warning::" not in quiet.stdout
+    assert run("--max-file-mb", "2", "--warn-file-mb", "1").returncode == 1
 
 
 # --- Korak 5V3: putanje i metode kroz Vercel omotač ---------------------------------------------------------

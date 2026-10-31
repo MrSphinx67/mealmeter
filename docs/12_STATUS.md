@@ -228,3 +228,11 @@ Nijedan način ne učitava `rpds`, `jsonschema`, `referencing`, `jsonschema_spec
 
 Usput: `src/**/__pycache__` (12 datoteka, ~0,3 MB) ulazi u paket unatoč `excludeFiles`. To nije novo i nisam ga
 dirao.
+
+### 12.4 Upozorenja u workflowu
+
+`scripts/vercel_bundle_size.py` ima nove opcije `--warn-mb` i `--warn-file-mb`. Iznad njih ispisuje
+`::warning::` (paket ili datoteka, s preostalom rezervom) i izlazi s kodom 0. Workflow ih zove s
+`--max-mb 220 --max-file-mb 95 --warn-mb 190 --warn-file-mb 65`, dakle blokada ostaje na 220 / 95, a upozorenje
+dolazi kad rezerva padne ispod 30 MB. Testovi: upozorenje uz izlazni kod 0, bez upozorenja ispod praga, iznad
+granice i dalje greška, te poziv u `update.yml`.

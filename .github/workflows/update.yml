@@ -97,8 +97,9 @@ jobs:
           vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
           # stvarna veličina (filePathMap); builder iznad 225 MB pokušava instalaciju pri pokretanju, a duckdb
           # bez manylinux 2.17 wheela ostaje u paketu, pa build pada (Korak 5V2)
-          # i nijedna datoteka > 95 MB (Hobby: vercel deploy odbija datoteke > 100 MB)
-          if ! uv run python scripts/vercel_bundle_size.py --max-mb 220 --max-file-mb 95; then
+          # i nijedna datoteka > 95 MB (Hobby: vercel deploy odbija datoteke > 100 MB); iznad 190 / 65 MB samo
+          # ::warning:: (rezerva 30 MB, Korak 12), blokada ostaje na 220 / 95
+          if ! uv run python scripts/vercel_bundle_size.py --max-mb 220 --max-file-mb 95 --warn-mb 190 --warn-file-mb 65; then
             echo "::error::paket > 220 MB ili datoteka > 95 MB; ne deployam"
             exit 4
           fi
