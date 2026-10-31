@@ -236,3 +236,18 @@ dirao.
 `--max-mb 220 --max-file-mb 95 --warn-mb 190 --warn-file-mb 65`, dakle blokada ostaje na 220 / 95, a upozorenje
 dolazi kad rezerva padne ispod 30 MB. Testovi: upozorenje uz izlazni kod 0, bez upozorenja ispod praga, iznad
 granice i dalje greška, te poziv u `update.yml`.
+
+### Očekivane veličine i rezerva (nakon 12.1–12.4)
+
+Izmjereno lokalno (`build_compact.py` na cjeniku 28.10. i `vercel build --prod`), završni golden 27/27:
+
+| | sada | rezerva do granice | za ~6 mj. (+15 % baze, pretpostavka) | rezerva tada |
+|---|---:|---:|---:|---:|
+| `data/compact.duckdb` | 44,8 MB | 50,2 do 95 | ~51,5 | ~43 ✓ |
+| `data/compact_prices.duckdb` | 43,3 MB | 51,7 do 95 | ~50 | ~45 ✓ |
+| paket | 180,8 MB | 39,2 do 220 | ~194 | **~26** (cilj 30 ✗) |
+
+Veličina datoteke malo varira između izgradnji istog cjenika (glavna datoteka 44,8–45,5 MB). Dan s
+carry-forwardom velikog lanca više ne povećava bazu (simulirani NTL pad: 44,8 + 43,3 MB). Paket dolazi do
+upozorenja (190 MB) kad baza naraste ~9 MB (~10 %). Tada su na raspolaganju `staple_items` po ključu (~3,5 MB) ili
+Parquet za datoteku cijena (c).
