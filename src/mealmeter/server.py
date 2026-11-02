@@ -299,7 +299,7 @@ def plan_basket(
     return _fit(compact_basket(res), ("incomplete", "comparison", "best_store.items"))
 
 
-_ITEM_KEYS = ("ingredient", "staple", "name", "pack_size", "n_packs", "cost_pack", "cost_used")
+_ITEM_KEYS = ("ingredient", "staple", "name", "brand", "pack_size", "n_packs", "cost_pack", "cost_used")
 _ITEM_OPTIONAL = ("have", "user_provided", "computed_cost_pack", "substitution", "needs_confirmation", "candidates")
 _ALT_KEYS = ("name", "pack_size", "cost_pack", "cost_used", "delta_eur", "cheaper", "size_note", "note", "brand",
              "other_store", "chain", "address")
@@ -318,7 +318,9 @@ def _compact_item(it: dict) -> dict:
     if notes:
         out["notes"] = notes
     if "alternatives" in it:
-        out["alternatives"] = [{k: a[k] for k in _ALT_KEYS if a.get(k) is not None} for a in it["alternatives"]]
+        # brand je uvijek tu (null kad marka nije poznata, Korak 13); ostala polja samo kad imaju vrijednost
+        out["alternatives"] = [{k: a.get(k) for k in _ALT_KEYS if a.get(k) is not None or k == "brand"}
+                               for a in it["alternatives"]]
     return out
 
 

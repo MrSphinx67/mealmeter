@@ -7,6 +7,7 @@ from pathlib import Path
 
 import duckdb
 
+from mealmeter.brands import display_brand, group_brand
 from mealmeter.build import NATIONAL_NOTE
 from mealmeter.normalize import canonical_city, date_hr, norm_text, normalize_ean
 from mealmeter.staples import BKEY_SQL, STAPLE_PPU_SQL, load_staples, resolve_ingredient, staple_suspect_sql
@@ -396,7 +397,8 @@ def find_products(
           -- pri jednakoj ocjeni i jednakom broju abecedno prvi (Korak 5P: isti izlaz pri svakom pozivu)
           arg_max(x.name, x.name_hit::INT * 1000
                           + coalesce(x.pack_source = 'name', false)::INT * 500 + length(x.name) ORDER BY x.name) AS name,
-          mode(x.brand ORDER BY x.brand) AS brand,
+          -- marka za prikaz (Korak 13, brands.group_brand): sirovi stupac, naziv i lanac proizvoda u grupi
+          list(DISTINCT [x.brand, x.name, x.chain, x.product_id]) AS brand,
           mode(CASE WHEN x.pack_unit IS NOT NULL THEN x.pack_amount::VARCHAR || '|' || x.pack_unit END
                ORDER BY x.pack_amount, x.pack_unit) AS pack,
           count(DISTINCT x.chain) AS n_chains,
@@ -441,6 +443,9 @@ def find_products(
         row = {c: _clean(v) for c, v in zip(cols, r)}
         row.pop("_starts")
         row.pop("_tier")
+        # klasa namirnice (jaja:m:podni) spaja proizvode više proizvođača: marka samo kad je jedna
+        row["brand"] = group_brand([(b, n, c) for b, n, c, _ in row["brand"] or []],
+                                   unique=bool(staple and staple.group_by and row["_gkey"].startswith(staple.key + ":")))
         if row["pack"]:
             amount, unit = row["pack"].split("|")
             row["pack"] = format_pack(float(amount), unit)
@@ -557,7 +562,7 @@ def get_prices(
     city_sql, city_params = _city_filter(city)
     cur = con.execute(
         f"""
-        SELECT p.chain, s.store_id, s.address, s.city, s.scope, p.product_id, p.ean_norm AS ean, p.name,
+        SELECT p.chain, s.store_id, s.address, s.city, s.scope, p.product_id, p.ean_norm AS ean, p.name, p.brand,
                c.price_eff, c.is_special, c.special_price, c.anchor_price, c.best_price_30,
                c.price_per_unit, c.per_unit, c.unit_confidence,
                CASE WHEN c.unit_confidence = 'low' THEN 'unit_price'
@@ -581,6 +586,7 @@ def get_prices(
     out = []
     for r in cur.fetchall():
         row = {c: _clean(v) for c, v in zip(cols, r)}
+        row["brand"] = display_brand(row["brand"], row["name"], row["chain"])
         if row["scope"] == "national":
             row["note"] = NATIONAL_NOTE
         out.append(_with_date(row))

@@ -45,3 +45,91 @@ Preko svih lanaca: 60 146 vrijednosti s „d.o.o.”, 7 168 s „d.d.”, 1 930 
 **Zaključak.** Stupac postoji i nije izbačen, ali „marka” je u njemu samo kod dijela lanaca. Pet lanaca ga nema
 (bure, djelo_vodice, jadranka_trgovina, lorenco, zabac), a gavranovic, ktc, ntl i trgovina-krk u njega upisuju
 dobavljača ili distributera (Orbico za Nutellu, Koopman), pa ga se ne smije prikazati kao marku bez čišćenja.
+
+## 13.2 Polje `brand` u izlazima alata
+
+Novi modul `src/mealmeter/brands.py` (`load_brands` i `BRANDS_PATH` premješteni iz `basket.py`, koji ih i dalje
+izvozi). Marka se računa pri odgovoru, iz stupca koji je već u sažetoj bazi, pa se baza ne mijenja.
+
+**Redoslijed** (`display_brand(brand, name, chain)`):
+1. stupac `brand` iz cjenika, očišćen (`clean_brand`):
+   - vrijednost koja sadrži marku iz `data/brands.yaml` daje tu marku: „PODRAVKA d.d. KOPRIVNICA”, „PODRAVKA-FOOD”
+     → Podravka, „VINDIJA D.O.O.” → Vindija, „DR.OETKER” → Dr. Oetker, „PIK VRBOVEC PLUS D.O.O.” → PIK;
+   - **null**: prazno, samo interpunkcija („-”, „#”), „N/A”, „NO BRAND”, „OSTALO”, „ROBNA MARKA”, „NEPOZNAT”,
+     „… - UNOS/UVOZ”, „SKLADIŠTE …”; pravni oblik tvrtke (d.o.o., d.d., B.V., GmbH, S.p.A., SRL, Ltd, obrt…), jer je
+     to dobavljač ili distributer (Orbico za Nutellu, Koopman); poznati distributeri i bez pravnog oblika (Orbico,
+     AWT, Atlantic Trade, IRA Commerce, Koopman, Eurocom, Nird, Ultra, VM2…); cijeli stupac Stanića (skupine robe);
+     odjel ili vrsta robe („Crveno meso”, „Povrće svježe”); naziv lanca, osim kad je to vlastita marka toga lanca
+     (SPAR u Sparu, Plodine u Plodinama, Metro Chef u Metrou; „NTL” u Bosu, „NTL - Voće i povrće”, „Boso voće” su
+     null); vrijednost jednaka nazivu proizvoda („Krumpir”);
+   - ostalo ostaje kako piše u cjeniku; vrijednost pisana samo velikim slovima dobiva velika početna slova
+     („K PLUS” → K Plus, „S-BUDGET” → S-Budget, „METRO CHEF” → Metro Chef, „TRE MULINI” → Tre Mulini);
+2. ako stupac nije marka iz `brands.yaml`, a naziv proizvoda njome počinje, vrijedi marka iz naziva
+   („EUROCOM” uz „NUTELLA 400 g” → Nutella);
+3. stupac prazan ili očišćen u null: marka iz naziva preko `brands.yaml` („BRAŠNO GLATKO T-550 1kg MLINETA” →
+   Mlineta), osim kad je ispred nje „s”, „sa”, „i”, „okus”, „punjen…”, „za”, „od” („keksi s Nutellom” → null);
+4. inače **null**. Marka se ne pogađa.
+
+`data/brands.yaml`: 30 → 98 marki (Mlineta, Belje, Cekin, Z bregov, Président, Šafram, Perutnina Ptuj, Čakovečki
+mlinovi, Giana, Jamnica, Solana Pag, Thomy, Heinz, De Cecco, Rummo, Nestlé…) i vlastite marke lanaca (K Plus,
+K-Classic, K-Bio, S-Budget, Despar, Milbona, Pilos, Favorina, Italiamo, Belbake, Chef Select, Solevita, Freshona,
+Vitasia, Metro Chef, ARO, dmBio). Isti popis i dalje daje marku iz naziva sastojka u `plan_basket` (Korak 4C:
+„mlineta brašno” sada preferira Mlinetu); u zlatnim scenarijima nijedan sastojak ne sadrži novu marku.
+
+**Gdje je polje:**
+- `plan_basket`: svaka stavka (`best_store.items[].brand`, uvijek prisutno, null kad nije poznato), svaka
+  alternativa (`alternatives[].brand`, uvijek prisutno; alternativa tražene marke iz druge trgovine i dalje nosi
+  traženu marku), kandidati slobodne pretrage (`candidates[].brand`) i `unmatched[].candidates[].brand`;
+  `detail=true` u svim trgovinama;
+- `find_products`: `results[].brand` (prije sirova najčešća vrijednost stupca, npr. „ORBICO D.O.O.”, sada
+  očišćena). Grupa s istim EAN-om: najčešća marka proizvoda u grupi. Klasa namirnice (`jaja:m:podni`), koja spaja
+  proizvode više proizvođača, ima marku samo kad je svim proizvodima ista;
+- `get_prices`: `stores[].brand` po proizvodu u trgovini.
+
+**Pokrivenost** na proizvodima namirnica (`clean.staple_items`, 60 357 proizvoda, cjenik 28.10.): stupac
+neprazan 75,4 %, marka u izlazu **70,1 %**, od toga 7,8 % iz naziva.
+
+| lanac | proizvoda | stupac neprazan | marka u izlazu | od toga iz naziva |
+|---|---:|---:|---:|---:|
+| boso | 967 | 98.9 % | 84.8 % | 0.0 % |
+| bure | 1 805 | 0.0 % | 22.7 % | 22.7 % |
+| djelo_vodice | 2 196 | 0.0 % | 32.1 % | 32.1 % |
+| dm | 240 | 100.0 % | 100.0 % | 0.0 % |
+| dukat | 229 | 93.4 % | 93.9 % | 5.7 % |
+| eurospin | 906 | 100.0 % | 39.4 % | 0.7 % |
+| gavranovic | 1 656 | 99.3 % | 59.4 % | 3.9 % |
+| jadranka_trgovina | 1 867 | 0.0 % | 47.7 % | 47.7 % |
+| kaufland | 3 363 | 99.6 % | 96.8 % | 0.3 % |
+| konzum | 3 719 | 97.8 % | 97.7 % | 0.0 % |
+| ktc | 2 490 | 100.0 % | 77.7 % | 1.4 % |
+| lidl | 1 321 | 58.1 % | 72.9 % | 15.6 % |
+| lorenco | 2 843 | 0.0 % | 27.5 % | 27.5 % |
+| metro | 2 974 | 86.8 % | 86.8 % | 0.0 % |
+| ntl | 1 982 | 99.5 % | 60.8 % | 5.4 % |
+| plodine | 5 606 | 94.3 % | 90.0 % | 0.4 % |
+| ribola | 2 934 | 74.7 % | 74.7 % | 4.6 % |
+| spar | 4 305 | 62.4 % | 66.2 % | 3.9 % |
+| stanic | 632 | 100.0 % | 34.5 % | 34.5 % |
+| stridon | 2 573 | 84.1 % | 86.8 % | 3.5 % |
+| studenac | 3 060 | 90.0 % | 79.2 % | 2.4 % |
+| tommy | 3 685 | 99.7 % | 72.3 % | 0.8 % |
+| trgocentar | 2 026 | 45.9 % | 63.0 % | 21.0 % |
+| trgovina-krk | 3 428 | 97.4 % | 51.5 % | 3.1 % |
+| vrutak | 3 073 | 100.0 % | 83.2 % | 2.4 % |
+| zabac | 477 | 0.0 % | 24.9 % | 24.9 % |
+
+U zlatnim izlazima: 146 stavki/alternativa s markom i 27 bez (svježe povrće na vagu, mljeveno meso bez oznake,
+Lidlovi proizvodi s „-”), find_products 57/8, get_prices 135/27.
+
+**Veličina odgovora.** Zadani (sažeti) odgovori plan_basket i find_products su 1,4–16,4 kB, ispod granice
+`MAX_RESPONSE_BYTES` (20 000), pa se ne skraćuju. Odgovori koji su već bili skraćeni (`truncated: true`) sada stanu
+jedan element manje: get_prices s 50 trgovina (`prices_ean_osijek` 32 → 31 trgovina, `prices_class_jaja_m` 33 → 32)
+i `detail=true` (`basket_store_konzum_osijek` 2 → 1 trgovina u `stores`, `basket_bolonjez_osijek_10`
+`best_store.items` 13 → 12; taj je već prije bio iznad granice, nepostavljeni `detail` daje svih 15 sastojaka u 9,6 kB).
+Granicu nisam mijenjao.
+
+**Provjere.** Golden zapisan s pune baze (28.10.) prije i poslije promjene: osim polja `brand` jednak je u 23/27
+scenarija, a u preostala 4 razlika je samo gore navedeno skraćivanje. Provjera nad sažetom bazom: **27/27 jednako**.
+pytest: 1405 prošlo, 7 preskočeno (izlazni kod 0). Novi `tests/test_step13.py` (49 testova): smeće i dobavljači
+su null, vlastite marke lanaca ostaju, marka iz naziva i nikad iz sastojka, grupe i klase, polje u stavkama,
+alternativama, detail, find_products i get_prices.

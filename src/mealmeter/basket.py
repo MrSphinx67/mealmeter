@@ -11,6 +11,7 @@ from pathlib import Path
 import duckdb
 
 from mealmeter import units
+from mealmeter.brands import BRANDS_PATH, display_brand, load_brands  # noqa: F401 (load_brands, BRANDS_PATH: javno)
 from mealmeter.build import NATIONAL_NOTE
 from mealmeter.build import SUSPECT_CHAINS, WHOLESALE_CHAINS
 from mealmeter.normalize import date_hr, norm_text, parse_multipack_unit
@@ -40,7 +41,6 @@ FLAG_TEXT = {
 }
 
 
-BRANDS_PATH = Path(__file__).resolve().parents[2] / "data" / "brands.yaml"
 SYNONYMS_PATH = Path(__file__).resolve().parents[2] / "data" / "synonyms.yaml"
 FREE_SYNONYMS = 3  # najviše toliko sinonima prije zaključka da proizvoda nema
 ASSUMPTIONS_PATH = Path(__file__).resolve().parents[2] / "data" / "assumptions.yaml"
@@ -79,17 +79,6 @@ def load_synonyms(path: Path = SYNONYMS_PATH) -> dict[str, tuple[str, ...]]:
         return {}
     raw = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
     return {norm_text(k): tuple(v) for k, v in raw.items()}
-
-
-@lru_cache(maxsize=2)
-def load_brands(path: Path = BRANDS_PATH) -> tuple[tuple[str, str], ...]:
-    """Marke iz data/brands.yaml kao (naziv, regex na početku riječi normaliziranog teksta)."""
-    import yaml
-
-    if not Path(path).exists():
-        return ()
-    raw = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
-    return tuple((name, "(^| )(?:" + "|".join(pats) + ")") for name, pats in raw.items())
 
 
 def brand_in(name: str | None) -> tuple[str, str] | None:
@@ -694,6 +683,7 @@ def _alternatives(rows: list[dict], need: "Need", item: dict, n: int = 2) -> lis
     out = []
     for p in cheaper + same:
         alt = {"product_id": p["product_id"], "ean": p["ean_norm"], "name": p["name"],
+               "brand": display_brand(p.get("brand"), p["name"], p.get("chain")),
                "pack_size": pack_size(p, need.unit), "n_packs": p["n_packs"], "price_eff": p["price_eff"],
                "cost_pack": p["cost_pack"], "cost_used": p["cost_used"],
                **alt_delta(p["cost_used"], p.get("pack_size") or pack_size(p, need.unit), item),
@@ -803,7 +793,8 @@ def free_candidates(rows: list[dict], need: "Need", n: int = 3) -> list[dict]:
         if r["name"] not in seen and (p := choose_product([r], *_choose_args(need))):
             seen.add(r["name"])
             picks.append(p)
-    return [{"product_id": p["product_id"], "name": p["name"], "pack_size": pack_size(p, need.unit),
+    return [{"product_id": p["product_id"], "name": p["name"],
+             "brand": display_brand(p.get("brand"), p["name"], p.get("chain")), "pack_size": pack_size(p, need.unit),
              "n_packs": p["n_packs"], "cost_pack": p["cost_pack"]}
             for p in sorted(picks, key=lambda p: (p["cost_pack"], p["name"]))[:n]]
 
@@ -832,7 +823,8 @@ def near_candidates(con, name: str, city: str | None, n: int = 3) -> list[dict]:
                 reason = "drugi okus ili grickalica"
             else:
                 reason = "riječi naziva nisu među prve tri riječi proizvoda"
-            out.append({"name": r["name"], "price_min": r.get("price_min"), "reason": reason, "_score": len(has)})
+            out.append({"name": r["name"], "brand": r.get("brand"), "price_min": r.get("price_min"), "reason": reason,
+                        "_score": len(has)})
     out.sort(key=lambda c: -c["_score"])
     for c in out:
         c.pop("_score")
@@ -1249,7 +1241,8 @@ def _add_item(stores: dict, key: tuple, rows: list[dict], need: Need, idx: int, 
     store["items"][idx] = {
         "ingredient": need.input.get("name"), "staple": need.staple.key if need.staple else None,
         "need": round(need.amount, 3), "need_unit": need.unit, "product_id": pick["product_id"],
-        "ean": pick["ean_norm"], "name": pick["name"], "attributes": chosen,
+        "ean": pick["ean_norm"], "name": pick["name"],
+        "brand": display_brand(pick.get("brand"), pick["name"], pick.get("chain")), "attributes": chosen,
         "pack_size": pack_size(pick, need.unit), "pack_qty": pick["qty"], "n_packs": pick["n_packs"],
         "price_eff": pick["price_eff"], "cost_pack": pick["cost_pack"], "cost_used": pick["cost_used"],
         "have": have, "pantry": bool(need.staple and need.staple.pantry),
