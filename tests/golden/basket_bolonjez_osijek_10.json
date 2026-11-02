@@ -38,22 +38,41 @@
   "chain": "konzum",
   "city": "Osijek",
   "data_quality": "ok",
-  "date": "2026-10-20",
-  "date_hr": "20.10.2026.",
+  "date": "2026-10-28",
+  "date_hr": "28.10.2026.",
   "flagged_items": 0,
   "from_stock_value": 0,
   "items": [
    {
-    "alternatives": [],
+    "alternatives": [
+     {
+      "brand": "Koleda",
+      "cheaper": true,
+      "cost_pack": 1.79,
+      "cost_used": 1.19,
+      "delta_eur": -0.1,
+      "ean": "3859888433632",
+      "match_quality": "strong",
+      "n_packs": 1,
+      "name": "TIJEST REZANCI JAJ MAXX 600 g KOLEDA",
+      "pack_size": "600 g",
+      "per_unit": "kg",
+      "price_eff": 1.79,
+      "price_per_unit": 2.98,
+      "product_id": "90955712",
+      "size_note": "usporedba za 400 g: pakiranje 600 g, odabrano 400 g"
+     }
+    ],
     "attributes": {
      "oblik": "tagliatelle",
      "vrsta": "s_jajima"
     },
+    "brand": "K Plus",
     "by_weight_fallback": false,
     "cost_pack": 1.29,
     "cost_used": 1.29,
-    "date": "2026-10-20",
-    "date_hr": "20.10.2026.",
+    "date": "2026-10-28",
+    "date_hr": "28.10.2026.",
     "ean": "3850334154163",
     "fallback": false,
     "flags": [],
@@ -82,10 +101,11 @@
    {
     "alternatives": [
      {
+      "brand": "PIK",
       "cheaper": true,
       "cost_pack": 2.22,
       "cost_used": 2.06,
-      "delta_eur": -0.87,
+      "delta_eur": -1.6,
       "ean": "3850139540598",
       "match_quality": "strong",
       "n_packs": 1,
@@ -97,23 +117,41 @@
       "price_per_unit": 4.11,
       "product_id": "90276060",
       "size_note": "usporedba za 500 g: pakiranje 540 g, odabrano 750 g"
+     },
+     {
+      "brand": "PIK",
+      "cheaper": true,
+      "cost_pack": 5.79,
+      "cost_used": 3.41,
+      "delta_eur": -0.25,
+      "ean": "3850139435917",
+      "match_quality": "strong",
+      "n_packs": 1,
+      "name": "MIJEŠ MLJEV MESO 850g MA PIK VRBOVEC",
+      "pack_size": "850 g",
+      "per_unit": "kg",
+      "price_eff": 5.79,
+      "price_per_unit": 6.81,
+      "product_id": "02404336",
+      "size_note": "usporedba za 500 g: pakiranje 850 g, odabrano 750 g"
      }
     ],
     "attributes": {
      "vrsta": "mijesano"
     },
+    "brand": "K Plus",
     "by_weight_fallback": false,
-    "cost_pack": 4.39,
-    "cost_used": 2.93,
-    "date": "2026-10-20",
-    "date_hr": "20.10.2026.",
+    "cost_pack": 5.49,
+    "cost_used": 3.66,
+    "date": "2026-10-28",
+    "date_hr": "28.10.2026.",
     "ean": "3850139280371",
     "fallback": false,
     "flags": [],
     "food_unverified": false,
     "have": false,
     "ingredient": "mljeveno meso",
-    "is_special": true,
+    "is_special": false,
     "match_quality": "strong",
     "n_packs": 1,
     "name": "MIJEŠANO MLJEVENO MESO 750 g K PLUS",
@@ -125,45 +163,81 @@
     "pack_source": "name",
     "pantry": false,
     "per_unit": "kg",
-    "price_eff": 4.39,
-    "price_per_unit": 5.85,
+    "price_eff": 5.49,
+    "price_per_unit": 7.32,
     "product_id": "90890228",
     "stale_days": 0,
     "staple": "mljeveno_meso",
     "unit_confidence": "high"
    },
    {
-    "alternatives": [],
+    "alternatives": [
+     {
+      "brand": "Montorsi",
+      "cheaper": true,
+      "cost_pack": 2.59,
+      "cost_used": 1.85,
+      "delta_eur": -0.44,
+      "ean": "80639749",
+      "match_quality": "strong",
+      "n_packs": 1,
+      "name": "PANCETA DIMLJ KOCKICE NAR 2X70g",
+      "pack_size": "140 g",
+      "per_unit": "kg",
+      "price_eff": 2.59,
+      "price_per_unit": 18.5,
+      "product_id": "90240558",
+      "size_note": "usporedba za 100 g: pakiranje 140 g, odabrano 100 g"
+     },
+     {
+      "brand": "Pivac",
+      "cheaper": true,
+      "cost_pack": 3.99,
+      "cost_used": 2.0,
+      "delta_eur": -0.29,
+      "ean": "3858884998985",
+      "match_quality": "strong",
+      "n_packs": 1,
+      "name": "DALMATINSKA PANCETA NAREZ 200 g PIV",
+      "pack_size": "200 g",
+      "per_unit": "kg",
+      "price_eff": 3.99,
+      "price_per_unit": 19.95,
+      "product_id": "91014973",
+      "size_note": "usporedba za 100 g: pakiranje 200 g, odabrano 100 g"
+     }
+    ],
     "attributes": {
-     "oblik": "kockice",
+     "oblik": "narezana",
      "vrsta": "panceta"
     },
+    "brand": null,
     "by_weight_fallback": false,
-    "cost_pack": 2.59,
-    "cost_used": 1.85,
-    "date": "2026-10-20",
-    "date_hr": "20.10.2026.",
-    "ean": "80639749",
+    "cost_pack": 2.29,
+    "cost_used": 2.29,
+    "date": "2026-10-28",
+    "date_hr": "28.10.2026.",
+    "ean": "3859892323110",
     "fallback": false,
     "flags": [],
     "food_unverified": false,
     "have": false,
     "ingredient": "pancetta",
-    "is_special": false,
+    "is_special": true,
     "match_quality": "strong",
     "n_packs": 1,
-    "name": "PANCETA DIMLJ KOCKICE NAR 2X70g",
+    "name": "PANCETA DALM BARIĆ NAR 100g",
     "need": 100.0,
     "need_unit": "g",
     "notes": [],
-    "pack_qty": 140.0,
-    "pack_size": "140 g",
+    "pack_qty": 100.0,
+    "pack_size": "100 g",
     "pack_source": "name",
     "pantry": false,
     "per_unit": "kg",
-    "price_eff": 2.59,
-    "price_per_unit": 18.5,
-    "product_id": "90240558",
+    "price_eff": 2.29,
+    "price_per_unit": 22.9,
+    "product_id": "90428251",
     "stale_days": 0,
     "staple": "slanina",
     "unit_confidence": "high"
@@ -173,11 +247,12 @@
     "attributes": {
      "vrsta": "crveni"
     },
+    "brand": null,
     "by_weight_fallback": false,
     "cost_pack": 0.12,
     "cost_used": 0.12,
-    "date": "2026-10-20",
-    "date_hr": "20.10.2026.",
+    "date": "2026-10-28",
+    "date_hr": "28.10.2026.",
     "ean": "3850334386182",
     "fallback": false,
     "flags": [],
@@ -208,18 +283,19 @@
    {
     "alternatives": [],
     "attributes": {},
+    "brand": null,
     "by_weight_fallback": false,
-    "cost_pack": 0.06,
-    "cost_used": 0.06,
-    "date": "2026-10-20",
-    "date_hr": "20.10.2026.",
+    "cost_pack": 0.09,
+    "cost_used": 0.09,
+    "date": "2026-10-28",
+    "date_hr": "28.10.2026.",
     "ean": "3850334173126",
     "fallback": false,
     "flags": [],
     "food_unverified": false,
     "have": false,
     "ingredient": "mrkva",
-    "is_special": true,
+    "is_special": false,
     "match_quality": "strong",
     "n_packs": null,
     "name": "MRKVA",
@@ -233,8 +309,8 @@
     "pack_source": "unit_price",
     "pantry": false,
     "per_unit": "kg",
-    "price_eff": 0.55,
-    "price_per_unit": 0.55,
+    "price_eff": 0.85,
+    "price_per_unit": 0.85,
     "product_id": "01401501",
     "stale_days": 0,
     "staple": "mrkva",
@@ -245,11 +321,12 @@
     "attributes": {
      "vrsta": "stabljika"
     },
+    "brand": null,
     "by_weight_fallback": false,
     "cost_pack": 0.2,
     "cost_used": 0.2,
-    "date": "2026-10-20",
-    "date_hr": "20.10.2026.",
+    "date": "2026-10-28",
+    "date_hr": "28.10.2026.",
     "ean": "3850334201690",
     "fallback": false,
     "flags": [],
@@ -280,11 +357,12 @@
    {
     "alternatives": [],
     "attributes": {},
+    "brand": "Kora",
     "by_weight_fallback": false,
     "cost_pack": 0.04,
     "cost_used": 0.04,
-    "date": "2026-10-20",
-    "date_hr": "20.10.2026.",
+    "date": "2026-10-28",
+    "date_hr": "28.10.2026.",
     "ean": "3850334173287",
     "fallback": false,
     "flags": [],
@@ -315,22 +393,24 @@
    {
     "alternatives": [
      {
+      "brand": "Podravka",
       "cheaper": true,
-      "cost_pack": 1.18,
-      "cost_used": 0.83,
-      "delta_eur": -0.86,
-      "ean": "3858894142132",
+      "cost_pack": 1.58,
+      "cost_used": 1.11,
+      "delta_eur": -0.58,
+      "ean": "3850104073656",
       "match_quality": "strong",
       "n_packs": 2,
-      "name": "RAJČICA PASIRANA 500 g E BUONO",
+      "name": "RAJČICA PASIRANA 500g PODRAVKA",
       "pack_size": "500 g",
       "per_unit": "kg",
-      "price_eff": 0.59,
-      "price_per_unit": 1.18,
-      "product_id": "90976284",
+      "price_eff": 0.79,
+      "price_per_unit": 1.58,
+      "product_id": "01570044",
       "size_note": "usporedba za 700 g: pakiranje 500 g, odabrano 700 g"
      },
      {
+      "brand": "Slova",
       "cheaper": true,
       "cost_pack": 1.58,
       "cost_used": 1.11,
@@ -348,11 +428,12 @@
      }
     ],
     "attributes": {},
+    "brand": "Garden Good",
     "by_weight_fallback": false,
     "cost_pack": 1.69,
     "cost_used": 1.69,
-    "date": "2026-10-20",
-    "date_hr": "20.10.2026.",
+    "date": "2026-10-28",
+    "date_hr": "28.10.2026.",
     "ean": "3850334446794",
     "fallback": false,
     "flags": [],
@@ -381,26 +462,11 @@
    {
     "alternatives": [
      {
-      "cheaper": true,
-      "cost_pack": 3.69,
-      "cost_used": 0.37,
-      "delta_eur": -0.22,
-      "ean": "3859893101755",
-      "match_quality": "strong",
-      "n_packs": 1,
-      "name": "VINO CABERNET SAUVIGNON 2 L PET",
-      "pack_size": "2 l",
-      "per_unit": "l",
-      "price_eff": 3.69,
-      "price_per_unit": 1.85,
-      "product_id": "90955524",
-      "size_note": "usporedba za 200 ml: pakiranje 2 l, odabrano 1 l"
-     },
-     {
+      "brand": "Terra Vinea",
       "cheaper": true,
       "cost_pack": 6.09,
       "cost_used": 0.41,
-      "delta_eur": -0.18,
+      "delta_eur": -0.09,
       "ean": "3850334520944",
       "match_quality": "strong",
       "n_packs": 1,
@@ -411,23 +477,41 @@
       "price_per_unit": 2.03,
       "product_id": "90572114",
       "size_note": "usporedba za 200 ml: pakiranje 3 l, odabrano 1 l"
+     },
+     {
+      "brand": "Carsko",
+      "cheaper": true,
+      "cost_pack": 4.39,
+      "cost_used": 0.44,
+      "delta_eur": -0.06,
+      "ean": "3859892866839",
+      "match_quality": "strong",
+      "n_packs": 1,
+      "name": "VINO VRANAC CARSKO 2 L PET",
+      "pack_size": "2 l",
+      "per_unit": "l",
+      "price_eff": 4.39,
+      "price_per_unit": 2.19,
+      "product_id": "90814796",
+      "size_note": "usporedba za 200 ml: pakiranje 2 l, odabrano 1 l"
      }
     ],
     "attributes": {
      "boja": "crno"
     },
+    "brand": "Vupik",
     "by_weight_fallback": false,
-    "cost_pack": 2.95,
-    "cost_used": 0.59,
-    "date": "2026-10-20",
-    "date_hr": "20.10.2026.",
+    "cost_pack": 2.49,
+    "cost_used": 0.5,
+    "date": "2026-10-28",
+    "date_hr": "28.10.2026.",
     "ean": "3858882617079",
     "fallback": false,
     "flags": [],
     "food_unverified": false,
     "have": false,
     "ingredient": "crno vino",
-    "is_special": false,
+    "is_special": true,
     "match_quality": "strong",
     "n_packs": 1,
     "name": "Vina Vupik Vranac 1l",
@@ -439,8 +523,8 @@
     "pack_source": "name",
     "pantry": false,
     "per_unit": "l",
-    "price_eff": 2.95,
-    "price_per_unit": 2.95,
+    "price_eff": 2.49,
+    "price_per_unit": 2.49,
     "product_id": "90331920",
     "stale_days": 0,
     "staple": "vino",
@@ -452,11 +536,12 @@
      "okus": "povrtni",
      "vrsta": "kocka"
     },
+    "brand": "Fattoria Italia",
     "by_weight_fallback": false,
     "cost_pack": 0.79,
     "cost_used": 0.07,
-    "date": "2026-10-20",
-    "date_hr": "20.10.2026.",
+    "date": "2026-10-28",
+    "date_hr": "28.10.2026.",
     "ean": "8012429003311",
     "fallback": false,
     "flags": [],
@@ -485,6 +570,7 @@
    {
     "alternatives": [
      {
+      "brand": "K Plus",
       "cheaper": true,
       "cost_pack": 2.49,
       "cost_used": 0.3,
@@ -501,6 +587,7 @@
       "size_note": "usporedba za 30 g: pakiranje 250 g, odabrano 124,8 g"
      },
      {
+      "brand": "Pet Minuta",
       "cheaper": true,
       "cost_pack": 1.99,
       "cost_used": 0.33,
@@ -518,11 +605,12 @@
      }
     ],
     "attributes": {},
+    "brand": "Agriform",
     "by_weight_fallback": false,
     "cost_pack": 1.49,
     "cost_used": 0.36,
-    "date": "2026-10-20",
-    "date_hr": "20.10.2026.",
+    "date": "2026-10-28",
+    "date_hr": "28.10.2026.",
     "ean": "8003518102534",
     "fallback": false,
     "flags": [],
@@ -551,22 +639,7 @@
    {
     "alternatives": [
      {
-      "cheaper": true,
-      "cost_pack": 7.99,
-      "cost_used": 0.24,
-      "delta_eur": -0.24,
-      "ean": "80053835",
-      "match_quality": "strong",
-      "n_packs": 1,
-      "name": "ULJE MASLINOVO EX DJEV MONINI 1L",
-      "pack_size": "1 l",
-      "per_unit": "l",
-      "price_eff": 7.99,
-      "price_per_unit": 7.99,
-      "product_id": "03212202",
-      "size_note": "usporedba za 30 ml: pakiranje 1 l, odabrano 250 ml"
-     },
-     {
+      "brand": "Trenton",
       "cheaper": true,
       "cost_pack": 7.99,
       "cost_used": 0.24,
@@ -581,16 +654,34 @@
       "price_per_unit": 7.99,
       "product_id": "90110034",
       "size_note": "usporedba za 30 ml: pakiranje 1 l, odabrano 250 ml"
+     },
+     {
+      "brand": "K Plus",
+      "cheaper": true,
+      "cost_pack": 8.99,
+      "cost_used": 0.27,
+      "delta_eur": -0.21,
+      "ean": "3850334441881",
+      "match_quality": "strong",
+      "n_packs": 1,
+      "name": "ULJE MASLINOVO EX DJEV 1L K PLUS",
+      "pack_size": "1 l",
+      "per_unit": "l",
+      "price_eff": 8.99,
+      "price_per_unit": 8.99,
+      "product_id": "90077664",
+      "size_note": "usporedba za 30 ml: pakiranje 1 l, odabrano 250 ml"
      }
     ],
     "attributes": {
      "kvaliteta": "ekstra_djevicansko"
     },
+    "brand": "Orgula",
     "by_weight_fallback": false,
     "cost_pack": 3.99,
     "cost_used": 0.48,
-    "date": "2026-10-20",
-    "date_hr": "20.10.2026.",
+    "date": "2026-10-28",
+    "date_hr": "28.10.2026.",
     "ean": "3859890446026",
     "fallback": false,
     "flags": [],
@@ -615,98 +706,6 @@
     "stale_days": 0,
     "staple": "maslinovo_ulje",
     "unit_confidence": "high"
-   },
-   {
-    "alternatives": [
-     {
-      "cheaper": true,
-      "cost_pack": 3.99,
-      "cost_used": 0.8,
-      "delta_eur": -0.34,
-      "ean": "3850334350756",
-      "match_quality": "strong",
-      "n_packs": 1,
-      "name": "SIR TVRDI GRANA PADANO K PLUS 200g",
-      "pack_size": "200 g",
-      "per_unit": "kg",
-      "price_eff": 3.99,
-      "price_per_unit": 19.95,
-      "product_id": "90070710",
-      "size_note": "usporedba za 40 g: pakiranje 200 g, odabrano 100 g"
-     }
-    ],
-    "attributes": {
-     "vrsta": "grana_padano"
-    },
-    "by_weight_fallback": false,
-    "cost_pack": 2.85,
-    "cost_used": 1.14,
-    "date": "2026-10-20",
-    "date_hr": "20.10.2026.",
-    "ean": "8003518100974",
-    "fallback": false,
-    "flags": [],
-    "food_unverified": false,
-    "have": false,
-    "ingredient": "parmezan",
-    "is_special": false,
-    "match_quality": "strong",
-    "n_packs": 1,
-    "name": "SIR TVRDI GRANA PADANO LISTIĆI 100g",
-    "need": 40.0,
-    "need_unit": "g",
-    "notes": [],
-    "pack_qty": 100.0,
-    "pack_size": "100 g",
-    "pack_source": "name",
-    "pantry": false,
-    "per_unit": "kg",
-    "price_eff": 2.85,
-    "price_per_unit": 28.5,
-    "product_id": "90083595",
-    "stale_days": 0,
-    "staple": "tvrdi_sir_talijanski",
-    "substitution": {
-     "chosen": "SIR TVRDI GRANA PADANO LISTIĆI 100g",
-     "note": "Grana Padano (sličan tvrdi sir), ne Parmigiano Reggiano",
-     "requested": "parmezan"
-    },
-    "unit_confidence": "high"
-   },
-   {
-    "alternatives": [],
-    "attributes": {
-     "vrsta": "kamena"
-    },
-    "by_weight_fallback": false,
-    "cost_pack": 0.49,
-    "cost_used": 0.0,
-    "date": "2026-10-20",
-    "date_hr": "20.10.2026.",
-    "ean": "3850334011305",
-    "fallback": false,
-    "flags": [],
-    "food_unverified": false,
-    "have": false,
-    "ingredient": "sol",
-    "is_special": false,
-    "match_quality": "strong",
-    "n_packs": 1,
-    "name": "SOL KAMENA VREĆ 1 kg SLOVA",
-    "need": 5.0,
-    "need_unit": "g",
-    "notes": [],
-    "pack_qty": 1000.0,
-    "pack_size": "1 kg",
-    "pack_source": "name",
-    "pantry": true,
-    "per_unit": "kg",
-    "price_eff": 0.49,
-    "price_per_unit": 0.49,
-    "product_id": "90648406",
-    "stale_days": 0,
-    "staple": "sol",
-    "unit_confidence": "high"
    }
   ],
   "missing": [],
@@ -716,8 +715,8 @@
   "scope": "local",
   "stale_days": 0,
   "store_id": "0903",
-  "total_to_buy": 23.73,
-  "total_used": 10.84,
+  "total_to_buy": 24.1,
+  "total_used": 11.95,
   "unit_confidence": "low"
  },
  "city": "Osijek",
@@ -732,8 +731,8 @@
    "n_ingredients": 15,
    "n_matched": 15,
    "n_stores_city": 7,
-   "total_to_buy": 23.73,
-   "total_used": 10.84
+   "total_to_buy": 24.1,
+   "total_used": 11.95
   },
   {
    "addresses": [
@@ -744,32 +743,8 @@
    "n_ingredients": 15,
    "n_matched": 15,
    "n_stores_city": 2,
-   "total_to_buy": 25.44,
-   "total_used": 9.78
-  },
-  {
-   "addresses": [
-    "Svilajska 31A"
-   ],
-   "chain": "spar",
-   "complete": true,
-   "n_ingredients": 15,
-   "n_matched": 15,
-   "n_stores_city": 5,
-   "total_to_buy": 26.16,
-   "total_used": 13.6
-  },
-  {
-   "addresses": [
-    "Ulica Jablanova 27"
-   ],
-   "chain": "roto",
-   "complete": true,
-   "n_ingredients": 15,
-   "n_matched": 15,
-   "n_stores_city": 1,
-   "total_to_buy": 26.6,
-   "total_used": 11.6
+   "total_to_buy": 24.7,
+   "total_used": 9.59
   },
   {
    "addresses": [
@@ -781,8 +756,21 @@
    "n_ingredients": 15,
    "n_matched": 15,
    "n_stores_city": 3,
-   "total_to_buy": 27.37,
-   "total_used": 9.84
+   "total_to_buy": 26.57,
+   "total_used": 9.01
+  },
+  {
+   "addresses": [
+    "Sv. Leopolda B. Mandica 7",
+    "Svilajska 31A"
+   ],
+   "chain": "spar",
+   "complete": true,
+   "n_ingredients": 15,
+   "n_matched": 15,
+   "n_stores_city": 5,
+   "total_to_buy": 27.07,
+   "total_used": 13.8
   },
   {
    "addresses": [
@@ -793,12 +781,12 @@
    "n_ingredients": 15,
    "n_matched": 15,
    "n_stores_city": 2,
-   "total_to_buy": 29.31,
-   "total_used": 11.88
+   "total_to_buy": 29.39,
+   "total_used": 13.04
   }
  ],
- "date": "2026-10-20",
- "date_hr": "20.10.2026.",
+ "date": "2026-10-28",
+ "date_hr": "28.10.2026.",
  "incomplete": [
   {
    "chain": "eurospin",
@@ -807,7 +795,7 @@
    ],
    "n_matched": 14,
    "note": "nedostaje: celer",
-   "total_to_buy": 24.1
+   "total_to_buy": 24.52
   },
   {
    "chain": "ntl",
@@ -816,7 +804,7 @@
    ],
    "n_matched": 14,
    "note": "nedostaje: celer",
-   "total_to_buy": 27.46
+   "total_to_buy": 26.81
   },
   {
    "chain": "dm",
@@ -1118,16 +1106,16 @@
   "cheapest": [
    "konzum"
   ],
-  "cheapest_total": 23.73,
-  "difference_eur": 5.58,
+  "cheapest_total": 24.1,
+  "difference_eur": 5.29,
   "most_expensive": [
    "kaufland"
   ],
-  "most_expensive_total": 29.31,
+  "most_expensive_total": 29.39,
   "small": false
  },
  "stores": [],
- "summary_hr": "Za kupiti: 23,73 €. Stvarno utrošeno: 10,84 €.",
+ "summary_hr": "Za kupiti: 24,10 €. Stvarno utrošeno: 11,95 €.",
  "truncated": true,
  "unmatched": [],
  "warnings": [

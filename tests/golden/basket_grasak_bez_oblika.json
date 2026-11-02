@@ -14,7 +14,7 @@
      "smrznuto"
     ],
     "prices": {
-     "konzerva": 1.58,
+     "konzerva": 2.7,
      "smrznuto": 1.59,
      "suho": 0.64
     },
@@ -41,7 +41,7 @@
     {
      "amount": 800.0,
      "form": "konzerva",
-     "price_eur": 1.58,
+     "price_eur": 2.7,
      "price_note": "najjeftinije u gradu, za traženu količinu gotovog proizvoda",
      "unit": "g"
     },
@@ -60,7 +60,7 @@
  "best_store": null,
  "city": "Osijek",
  "comparison": [],
- "date": "2026-10-20",
+ "date": "2026-10-28",
  "incomplete": [
   {
    "chain": "eurospin",

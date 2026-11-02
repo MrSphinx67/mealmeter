@@ -23,14 +23,15 @@
   "chain": "tommy",
   "city": "Sesvete",
   "data_quality": "ok",
-  "date": "2026-10-20",
-  "date_hr": "20.10.2026.",
+  "date": "2026-10-28",
+  "date_hr": "28.10.2026.",
   "flagged_items": 0,
   "from_stock_value": 0,
   "items": [
    {
     "alternatives": [
      {
+      "brand": "Coop",
       "cheaper": true,
       "cost_pack": 1.05,
       "cost_used": 0.84,
@@ -47,6 +48,7 @@
       "size_note": "usporedba za 400 g: pakiranje 500 g, odabrano 400 g"
      },
      {
+      "brand": "Coop",
       "cheaper": true,
       "cost_pack": 1.05,
       "cost_used": 0.84,
@@ -66,11 +68,12 @@
     "attributes": {
      "oblik": "spageti"
     },
+    "brand": "T!",
     "by_weight_fallback": false,
     "cost_pack": 0.85,
     "cost_used": 0.85,
-    "date": "2026-10-20",
-    "date_hr": "20.10.2026.",
+    "date": "2026-10-28",
+    "date_hr": "28.10.2026.",
     "ean": "3858892941461",
     "fallback": false,
     "flags": [],
@@ -99,6 +102,7 @@
    {
     "alternatives": [
      {
+      "brand": null,
       "cheaper": true,
       "cost_pack": 1.59,
       "cost_used": 1.59,
@@ -118,11 +122,12 @@
     "attributes": {
      "vrsta": "mijesano"
     },
+    "brand": null,
     "by_weight_fallback": false,
     "cost_pack": 1.99,
     "cost_used": 1.99,
-    "date": "2026-10-20",
-    "date_hr": "20.10.2026.",
+    "date": "2026-10-28",
+    "date_hr": "28.10.2026.",
     "ean": null,
     "fallback": false,
     "flags": [],
@@ -153,6 +158,7 @@
    {
     "alternatives": [
      {
+      "brand": "T!",
       "cheaper": true,
       "cost_pack": 1.78,
       "cost_used": 1.25,
@@ -169,6 +175,7 @@
       "size_note": "usporedba za 700 g: pakiranje 500 g, odabrano 700 g"
      },
      {
+      "brand": "T!",
       "cheaper": true,
       "cost_pack": 1.98,
       "cost_used": 1.39,
@@ -186,11 +193,12 @@
      }
     ],
     "attributes": {},
+    "brand": "Coop",
     "by_weight_fallback": false,
     "cost_pack": 1.69,
     "cost_used": 1.69,
-    "date": "2026-10-20",
-    "date_hr": "20.10.2026.",
+    "date": "2026-10-28",
+    "date_hr": "28.10.2026.",
     "ean": "8001120751218",
     "fallback": false,
     "flags": [],
@@ -221,11 +229,12 @@
     "attributes": {
      "vrsta": "zuti"
     },
+    "brand": null,
     "by_weight_fallback": false,
     "cost_pack": 0.12,
     "cost_used": 0.12,
-    "date": "2026-10-20",
-    "date_hr": "20.10.2026.",
+    "date": "2026-10-28",
+    "date_hr": "28.10.2026.",
     "ean": null,
     "fallback": false,
     "flags": [],
@@ -256,6 +265,24 @@
    {
     "alternatives": [
      {
+      "brand": "Monini",
+      "cheaper": true,
+      "cost_pack": 7.99,
+      "cost_used": 0.24,
+      "delta_eur": -0.24,
+      "ean": "80053835",
+      "match_quality": "strong",
+      "n_packs": 1,
+      "name": "ULJE MASL.EX.DJ.1 L MONINI",
+      "pack_size": "1 l",
+      "per_unit": "l",
+      "price_eff": 7.99,
+      "price_per_unit": 7.99,
+      "product_id": "10000142",
+      "size_note": "usporedba za 30 ml: pakiranje 1 l, odabrano 250 ml"
+     },
+     {
+      "brand": "Trenton",
       "cheaper": true,
       "cost_pack": 7.99,
       "cost_used": 0.24,
@@ -270,32 +297,17 @@
       "price_per_unit": 7.99,
       "product_id": "10001388",
       "size_note": "usporedba za 30 ml: pakiranje 1 l, odabrano 250 ml"
-     },
-     {
-      "cheaper": true,
-      "cost_pack": 7.99,
-      "cost_used": 0.24,
-      "delta_eur": -0.24,
-      "ean": "3858892943380",
-      "match_quality": "strong",
-      "n_packs": 1,
-      "name": "ULJE MASLINOVO 1 L T!",
-      "pack_size": "1 l",
-      "per_unit": "l",
-      "price_eff": 7.99,
-      "price_per_unit": 7.99,
-      "product_id": "10408111",
-      "size_note": "usporedba za 30 ml: pakiranje 1 l, odabrano 250 ml"
      }
     ],
     "attributes": {
      "kvaliteta": "djevicansko"
     },
+    "brand": null,
     "by_weight_fallback": false,
     "cost_pack": 3.99,
     "cost_used": 0.48,
-    "date": "2026-10-20",
-    "date_hr": "20.10.2026.",
+    "date": "2026-10-28",
+    "date_hr": "28.10.2026.",
     "ean": "3859890446026",
     "fallback": false,
     "flags": [],
@@ -324,6 +336,7 @@
    {
     "alternatives": [
      {
+      "brand": "Zanetti",
       "cheaper": true,
       "cost_pack": 5.29,
       "cost_used": 1.06,
@@ -340,6 +353,7 @@
       "size_note": "usporedba za 40 g: pakiranje 200 g, odabrano 50 g"
      },
      {
+      "brand": "Lsm",
       "cheaper": true,
       "cost_pack": 5.49,
       "cost_used": 1.1,
@@ -360,11 +374,12 @@
      "oblik": "ribani",
      "vrsta": "grana_padano"
     },
+    "brand": "Zanetti",
     "by_weight_fallback": false,
     "cost_pack": 1.39,
     "cost_used": 1.11,
-    "date": "2026-10-20",
-    "date_hr": "20.10.2026.",
+    "date": "2026-10-28",
+    "date_hr": "28.10.2026.",
     "ean": "8002710410027",
     "fallback": false,
     "flags": [],
@@ -396,37 +411,70 @@
     "unit_confidence": "high"
    },
    {
-    "alternatives": [],
-    "attributes": {
-     "vrsta": "morska",
-     "zrno": "sitna"
-    },
+    "alternatives": [
+     {
+      "brand": "Paška Sol",
+      "cheaper": true,
+      "cost_pack": 0.89,
+      "cost_used": 0.0,
+      "delta_eur": -0.04,
+      "ean": "3859888155114",
+      "match_quality": "strong",
+      "n_packs": 1,
+      "name": "SOL SITNA 1 kg PAG",
+      "pack_size": "1 kg",
+      "per_unit": "kg",
+      "price_eff": 0.89,
+      "price_per_unit": 0.89,
+      "product_id": "10000496",
+      "size_note": "usporedba za 5 g: pakiranje 1 kg, odabrano 80 g"
+     },
+     {
+      "brand": "Paška Sol",
+      "cheaper": true,
+      "cost_pack": 0.89,
+      "cost_used": 0.0,
+      "delta_eur": -0.04,
+      "ean": "3859888155107",
+      "match_quality": "strong",
+      "n_packs": 1,
+      "name": "SOL KRUPNA 1 kg PAG",
+      "pack_size": "1 kg",
+      "per_unit": "kg",
+      "price_eff": 0.89,
+      "price_per_unit": 0.89,
+      "product_id": "10002497",
+      "size_note": "usporedba za 5 g: pakiranje 1 kg, odabrano 80 g"
+     }
+    ],
+    "attributes": {},
+    "brand": "Tuc",
     "by_weight_fallback": false,
-    "cost_pack": 0.89,
-    "cost_used": 0.0,
-    "date": "2026-10-20",
-    "date_hr": "20.10.2026.",
-    "ean": "3859888155114",
+    "cost_pack": 0.59,
+    "cost_used": 0.04,
+    "date": "2026-10-28",
+    "date_hr": "28.10.2026.",
+    "ean": "7622202317958",
     "fallback": false,
     "flags": [],
     "food_unverified": false,
     "have": false,
     "ingredient": "sol",
-    "is_special": false,
+    "is_special": true,
     "match_quality": "strong",
     "n_packs": 1,
-    "name": "SOL SITNA 1 kg PAG",
+    "name": "BAKE ROLLS SLANI 80 g TUC",
     "need": 5.0,
     "need_unit": "g",
     "notes": [],
-    "pack_qty": 1000.0,
-    "pack_size": "1 kg",
+    "pack_qty": 80.0,
+    "pack_size": "80 g",
     "pack_source": "name",
     "pantry": true,
     "per_unit": "kg",
-    "price_eff": 0.89,
-    "price_per_unit": 0.89,
-    "product_id": "10000496",
+    "price_eff": 0.59,
+    "price_per_unit": 7.38,
+    "product_id": "10518140",
     "stale_days": 0,
     "staple": "sol",
     "unit_confidence": "high"
@@ -439,8 +487,8 @@
   "scope": "local",
   "stale_days": 0,
   "store_id": "10351",
-  "total_to_buy": 10.92,
-  "total_used": 6.24,
+  "total_to_buy": 10.62,
+  "total_used": 6.28,
   "unit_confidence": "low"
  },
  "city": "Zagreb",
@@ -454,8 +502,8 @@
    "n_ingredients": 7,
    "n_matched": 7,
    "n_stores_city": 2,
-   "total_to_buy": 10.92,
-   "total_used": 6.24
+   "total_to_buy": 10.62,
+   "total_used": 6.28
   },
   {
    "addresses": [
@@ -471,29 +519,41 @@
   },
   {
    "addresses": [
-    "Dubrava 241",
-    "Rudeška Cesta 169A"
-   ],
-   "chain": "konzum",
-   "complete": true,
-   "n_ingredients": 7,
-   "n_matched": 7,
-   "n_stores_city": 38,
-   "total_to_buy": 12.53,
-   "total_used": 5.42
-  },
-  {
-   "addresses": [
-    "Ljubljanska Avenija 2",
-    "Slavenskog 1"
+    "Aleja Javora 3",
+    "Donje Svetice 46"
    ],
    "chain": "lidl",
    "complete": true,
    "n_ingredients": 7,
    "n_matched": 7,
    "n_stores_city": 19,
-   "total_to_buy": 13.99,
-   "total_used": 6.21
+   "total_to_buy": 13.69,
+   "total_used": 5.55
+  },
+  {
+   "addresses": [
+    "Velimira Skorpika 11"
+   ],
+   "chain": "plodine",
+   "complete": true,
+   "n_ingredients": 7,
+   "n_matched": 7,
+   "n_stores_city": 7,
+   "total_to_buy": 14.49,
+   "total_used": 6.57
+  },
+  {
+   "addresses": [
+    "Dubrava 241",
+    "Gračanska Cesta 208"
+   ],
+   "chain": "konzum",
+   "complete": true,
+   "n_ingredients": 7,
+   "n_matched": 7,
+   "n_stores_city": 38,
+   "total_to_buy": 14.53,
+   "total_used": 6.69
   },
   {
    "addresses": [
@@ -505,25 +565,12 @@
    "n_ingredients": 7,
    "n_matched": 7,
    "n_stores_city": 4,
-   "total_to_buy": 14.65,
-   "total_used": 5.96
-  },
-  {
-   "addresses": [
-    "Ljubljanska Avenija 2B",
-    "Mije Haleusa 1"
-   ],
-   "chain": "plodine",
-   "complete": true,
-   "n_ingredients": 7,
-   "n_matched": 7,
-   "n_stores_city": 7,
-   "total_to_buy": 15.19,
-   "total_used": 6.72
+   "total_to_buy": 15.05,
+   "total_used": 6.36
   }
  ],
- "date": "2026-10-20",
- "date_hr": "20.10.2026.",
+ "date": "2026-10-28",
+ "date_hr": "28.10.2026.",
  "incomplete": [
   {
    "chain": "vrutak",
@@ -546,14 +593,12 @@
   },
   {
    "chain": "stanic",
-   "date_hr": "19.10.2026.",
    "missing": [
     "mljeveno meso",
     "luk"
    ],
    "n_matched": 5,
    "note": "nedostaje: mljeveno meso, luk",
-   "stale_days": 1,
    "total_to_buy": 12.65
   },
   {
@@ -697,51 +742,39 @@
  "more_chains": [
   {
    "addresses": [
-    "Antuna Soljana 43",
-    "Vile Velebita 6"
-   ],
-   "chain": "kaufland",
-   "n_matched": 7,
-   "n_stores_city": 12,
-   "total_to_buy": 15.47
-  },
-  {
-   "addresses": [
     "Soblinecka 55, Soblinec"
    ],
    "chain": "ntl",
    "n_matched": 7,
    "n_stores_city": 4,
-   "total_to_buy": 16.1
+   "total_to_buy": 15.29
   },
   {
    "addresses": [
-    "Kovinska 1"
+    "Ul Karela Zahradnika 16A"
    ],
-   "chain": "roto",
+   "chain": "kaufland",
    "n_matched": 7,
-   "n_stores_city": 1,
-   "total_to_buy": 16.14
+   "n_stores_city": 12,
+   "total_to_buy": 16.18
   },
   {
    "addresses": [
-    "Kolakova 14 Dubrava",
-    "Slavonska Avenija 11D"
+    "Avenija V. Holjevca 62"
    ],
    "chain": "spar",
    "n_matched": 7,
    "n_stores_city": 52,
-   "total_to_buy": 17.95
+   "total_to_buy": 17.92
   },
   {
    "addresses": [
-    "Cakovecka 17",
-    "Gospodska 28"
+    "Ulica 9. maja 1"
    ],
    "chain": "gavranovic",
    "n_matched": 7,
-   "n_stores_city": 17,
-   "total_to_buy": 21.13
+   "n_stores_city": 26,
+   "total_to_buy": 19.99
   }
  ],
  "note": "Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists (cijene.dev); in-store prices may differ, a price list is not stock, and promotions change. Podaci: cijene.dev (DobarKod), prema uvjetima korištenja (https://cijene.dev/uvjeti-koristenja). / Data: cijene.dev (DobarKod), under its terms of use (https://cijene.dev/uvjeti-koristenja).",
@@ -749,16 +782,16 @@
   "cheapest": [
    "tommy"
   ],
-  "cheapest_total": 10.92,
-  "difference_eur": 10.21,
+  "cheapest_total": 10.62,
+  "difference_eur": 9.37,
   "most_expensive": [
    "gavranovic"
   ],
-  "most_expensive_total": 21.13,
+  "most_expensive_total": 19.99,
   "small": false
  },
  "stores": [],
- "summary_hr": "Za kupiti: 10,92 €. Stvarno utrošeno: 6,24 €.",
+ "summary_hr": "Za kupiti: 10,62 €. Stvarno utrošeno: 6,28 €.",
  "truncated": true,
  "unmatched": [],
  "warnings": [

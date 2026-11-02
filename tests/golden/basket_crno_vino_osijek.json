@@ -10,14 +10,15 @@
   "chain": "kaufland",
   "city": "Osijek",
   "data_quality": "ok",
-  "date": "2026-10-20",
-  "date_hr": "20.10.2026.",
+  "date": "2026-10-28",
+  "date_hr": "28.10.2026.",
   "flagged_items": 0,
   "from_stock_value": 0,
   "items": [
    {
     "alternatives": [
      {
+      "brand": "Vinko",
       "cheaper": true,
       "cost_pack": 2.99,
       "cost_used": 0.3,
@@ -34,6 +35,7 @@
       "size_note": "usporedba za 200 ml: pakiranje 2 l, odabrano 250 ml"
      },
      {
+      "brand": "StoneCastle",
       "cheaper": true,
       "cost_pack": 3.49,
       "cost_used": 0.35,
@@ -53,11 +55,12 @@
     "attributes": {
      "boja": "crno"
     },
+    "brand": "Uff",
     "by_weight_fallback": false,
     "cost_pack": 1.79,
     "cost_used": 1.43,
-    "date": "2026-10-20",
-    "date_hr": "20.10.2026.",
+    "date": "2026-10-28",
+    "date_hr": "28.10.2026.",
     "ean": "3858892650097",
     "fallback": false,
     "flags": [],
@@ -149,6 +152,19 @@
   },
   {
    "addresses": [
+    "Ive Tijardovića 4A",
+    "Opatijska 26F"
+   ],
+   "chain": "konzum",
+   "complete": true,
+   "n_ingredients": 1,
+   "n_matched": 1,
+   "n_stores_city": 7,
+   "total_to_buy": 2.49,
+   "total_used": 0.5
+  },
+  {
+   "addresses": [
     "A.KANIZLICA 31",
     "Anina 83, Osijek"
    ],
@@ -159,22 +175,10 @@
    "n_stores_city": 34,
    "total_to_buy": 2.49,
    "total_used": 0.5
-  },
-  {
-   "addresses": [
-    "Ulica Jablanova 27"
-   ],
-   "chain": "roto",
-   "complete": true,
-   "n_ingredients": 1,
-   "n_matched": 1,
-   "n_stores_city": 1,
-   "total_to_buy": 2.61,
-   "total_used": 0.52
   }
  ],
- "date": "2026-10-20",
- "date_hr": "20.10.2026.",
+ "date": "2026-10-28",
+ "date_hr": "28.10.2026.",
  "incomplete": [],
  "ingredients": [
   {
@@ -206,16 +210,6 @@
    "n_matched": 1,
    "n_stores_city": 2,
    "total_to_buy": 2.89
-  },
-  {
-   "addresses": [
-    "Ive Tijardovića 4A",
-    "Opatijska 26F"
-   ],
-   "chain": "konzum",
-   "n_matched": 1,
-   "n_stores_city": 7,
-   "total_to_buy": 2.95
   }
  ],
  "note": "Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists (cijene.dev); in-store prices may differ, a price list is not stock, and promotions change. Podaci: cijene.dev (DobarKod), prema uvjetima korištenja (https://cijene.dev/uvjeti-koristenja). / Data: cijene.dev (DobarKod), under its terms of use (https://cijene.dev/uvjeti-koristenja).",
@@ -224,11 +218,11 @@
    "kaufland"
   ],
   "cheapest_total": 1.79,
-  "difference_eur": 1.16,
+  "difference_eur": 1.1,
   "most_expensive": [
-   "konzum"
+   "eurospin"
   ],
-  "most_expensive_total": 2.95,
+  "most_expensive_total": 2.89,
   "small": true
  },
  "stores": [
@@ -240,14 +234,15 @@
    "chain": "kaufland",
    "city": "Osijek",
    "data_quality": "ok",
-   "date": "2026-10-20",
-   "date_hr": "20.10.2026.",
+   "date": "2026-10-28",
+   "date_hr": "28.10.2026.",
    "flagged_items": 0,
    "from_stock_value": 0,
    "items": [
     {
      "alternatives": [
       {
+       "brand": "Vinko",
        "cheaper": true,
        "cost_pack": 2.99,
        "cost_used": 0.3,
@@ -264,6 +259,7 @@
        "size_note": "usporedba za 200 ml: pakiranje 2 l, odabrano 250 ml"
       },
       {
+       "brand": "StoneCastle",
        "cheaper": true,
        "cost_pack": 3.49,
        "cost_used": 0.35,
@@ -283,11 +279,12 @@
      "attributes": {
       "boja": "crno"
      },
+     "brand": "Uff",
      "by_weight_fallback": false,
      "cost_pack": 1.79,
      "cost_used": 1.43,
-     "date": "2026-10-20",
-     "date_hr": "20.10.2026.",
+     "date": "2026-10-28",
+     "date_hr": "28.10.2026.",
      "ean": "3858892650097",
      "fallback": false,
      "flags": [],
@@ -333,8 +330,8 @@
    "chain": "plodine",
    "city": "Osijek",
    "data_quality": "ok",
-   "date": "2026-10-20",
-   "date_hr": "20.10.2026.",
+   "date": "2026-10-28",
+   "date_hr": "28.10.2026.",
    "flagged_items": 0,
    "from_stock_value": 0,
    "items": [
@@ -342,11 +339,12 @@
      "attributes": {
       "boja": "crno"
      },
+     "brand": "Kadarita",
      "by_weight_fallback": false,
      "cost_pack": 1.99,
      "cost_used": 0.27,
-     "date": "2026-10-20",
-     "date_hr": "20.10.2026.",
+     "date": "2026-10-28",
+     "date_hr": "28.10.2026.",
      "ean": "5905466029150",
      "fallback": false,
      "flags": [],
@@ -392,8 +390,8 @@
    "chain": "kaufland",
    "city": "Osijek",
    "data_quality": "ok",
-   "date": "2026-10-20",
-   "date_hr": "20.10.2026.",
+   "date": "2026-10-28",
+   "date_hr": "28.10.2026.",
    "flagged_items": 0,
    "from_stock_value": 0,
    "items": [
@@ -401,11 +399,12 @@
      "attributes": {
       "boja": "crno"
      },
+     "brand": "El Carisma",
      "by_weight_fallback": false,
      "cost_pack": 2.15,
      "cost_used": 0.43,
-     "date": "2026-10-20",
-     "date_hr": "20.10.2026.",
+     "date": "2026-10-28",
+     "date_hr": "28.10.2026.",
      "ean": "4063367003257",
      "fallback": false,
      "flags": [],

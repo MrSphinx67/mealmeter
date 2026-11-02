@@ -5,7 +5,7 @@
  "best_store": null,
  "city": "Osijek",
  "comparison": [],
- "date": "2026-10-20",
+ "date": "2026-10-28",
  "incomplete": [
   {
    "chain": "eurospin",
@@ -64,16 +64,19 @@
   {
    "candidates": [
     {
+     "brand": "Freshona",
      "name": "Voće za smoothie",
      "price_min": 2.4,
      "reason": "ima: voce; nema: zmajevo"
     },
     {
+     "brand": "SPAR enjoy",
      "name": "Klementina s voćem",
      "price_min": 4.64,
      "reason": "ima: voce; nema: zmajevo"
     },
     {
+     "brand": "SPAR enjoy",
      "name": "Mandarina s voćem",
      "price_min": 4.79,
      "reason": "ima: voce; nema: zmajevo"

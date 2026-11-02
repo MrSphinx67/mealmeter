@@ -3,60 +3,48 @@
  "ambiguous": [],
  "assumptions": [],
  "best_store": {
-  "address": "Kukuljanovo 350",
+  "address": "Bartola Kasica 7",
   "addresses": [
-   "Kukuljanovo 350"
+   "Bartola Kasica 7",
+   "Labinska 51A",
+   "Osjecka 50"
   ],
-  "chain": "eurospin",
+  "chain": "plodine",
   "city": "Rijeka",
   "data_quality": "ok",
-  "date": "2026-10-20",
-  "date_hr": "20.10.2026.",
+  "date": "2026-10-28",
+  "date_hr": "28.10.2026.",
   "flagged_items": 0,
   "from_stock_value": 0,
   "items": [
    {
     "alternatives": [
      {
+      "brand": null,
       "cheaper": true,
-      "cost_pack": 3.69,
-      "cost_used": 0.74,
-      "delta_eur": -0.15,
-      "ean": "3859891443208",
+      "cost_pack": 3.49,
+      "cost_used": 0.7,
+      "delta_eur": -0.1,
+      "ean": "3857500091000",
       "match_quality": "strong",
       "n_packs": 1,
-      "name": "KRUMPIR 5kg",
+      "name": "KRUMPIR 5 KG",
       "pack_size": "5 kg",
       "per_unit": "kg",
-      "price_eff": 3.69,
-      "price_per_unit": 0.74,
-      "product_id": "080220301",
+      "price_eff": 3.49,
+      "price_per_unit": 0.7,
+      "product_id": "110405",
       "size_note": "usporedba za 1000 g: pakiranje 5 kg, odabrano na vagu"
-     },
-     {
-      "cheaper": true,
-      "cost_pack": 1.69,
-      "cost_used": 0.84,
-      "delta_eur": -0.05,
-      "ean": "9999999999994",
-      "match_quality": "strong",
-      "n_packs": 1,
-      "name": "KRUMPIR 2kg",
-      "pack_size": "2 kg",
-      "per_unit": "kg",
-      "price_eff": 1.69,
-      "price_per_unit": 0.85,
-      "product_id": "080085201",
-      "size_note": "usporedba za 1000 g: pakiranje 2 kg, odabrano na vagu"
      }
     ],
     "attributes": {},
+    "brand": null,
     "by_weight_fallback": false,
-    "cost_pack": 0.89,
-    "cost_used": 0.89,
-    "date": "2026-10-20",
-    "date_hr": "20.10.2026.",
-    "ean": null,
+    "cost_pack": 0.8,
+    "cost_used": 0.8,
+    "date": "2026-10-28",
+    "date_hr": "28.10.2026.",
+    "ean": "3859889293129",
     "fallback": false,
     "flags": [],
     "food_unverified": false,
@@ -65,7 +53,7 @@
     "is_special": false,
     "match_quality": "strong",
     "n_packs": null,
-    "name": "KRUMPIR RFS",
+    "name": "KRUMPIR-OGULINSKI 5/1",
     "need": 1000.0,
     "need_unit": "g",
     "notes": [
@@ -76,9 +64,9 @@
     "pack_source": "unit_price",
     "pantry": false,
     "per_unit": "kg",
-    "price_eff": 0.89,
-    "price_per_unit": 0.89,
-    "product_id": "080059201",
+    "price_eff": 3.99,
+    "price_per_unit": 0.8,
+    "product_id": "110415",
     "stale_days": 0,
     "staple": "krumpir",
     "unit_confidence": "low"
@@ -87,16 +75,29 @@
   "missing": [],
   "n_ingredients": 1,
   "n_matched": 1,
-  "n_stores": 1,
+  "n_stores": 6,
   "scope": "local",
   "stale_days": 0,
-  "store_id": "310038",
-  "total_to_buy": 0.89,
-  "total_used": 0.89,
+  "store_id": "050",
+  "total_to_buy": 0.8,
+  "total_used": 0.8,
   "unit_confidence": "low"
  },
  "city": "Rijeka",
  "comparison": [
+  {
+   "addresses": [
+    "Bartola Kasica 7",
+    "Labinska 51A"
+   ],
+   "chain": "plodine",
+   "complete": true,
+   "n_ingredients": 1,
+   "n_matched": 1,
+   "n_stores_city": 11,
+   "total_to_buy": 0.8,
+   "total_used": 0.8
+  },
   {
    "addresses": [
     "Kukuljanovo 350"
@@ -137,19 +138,6 @@
   },
   {
    "addresses": [
-    "Osjecka 50",
-    "Ruziceva 29"
-   ],
-   "chain": "plodine",
-   "complete": true,
-   "n_ingredients": 1,
-   "n_matched": 1,
-   "n_stores_city": 12,
-   "total_to_buy": 0.89,
-   "total_used": 0.89
-  },
-  {
-   "addresses": [
     "Franje Candeka 8A",
     "Janka Polica Kamova 81A"
    ],
@@ -175,8 +163,8 @@
    "total_used": 0.89
   }
  ],
- "date": "2026-10-20",
- "date_hr": "20.10.2026.",
+ "date": "2026-10-28",
+ "date_hr": "28.10.2026.",
  "incomplete": [],
  "ingredients": [
   {
@@ -208,15 +196,10 @@
  "note": "Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists (cijene.dev); in-store prices may differ, a price list is not stock, and promotions change. Podaci: cijene.dev (DobarKod), prema uvjetima korištenja (https://cijene.dev/uvjeti-koristenja). / Data: cijene.dev (DobarKod), under its terms of use (https://cijene.dev/uvjeti-koristenja).",
  "price_spread": {
   "cheapest": [
-   "eurospin",
-   "kaufland",
-   "lidl",
-   "plodine",
-   "spar",
-   "tommy"
+   "plodine"
   ],
-  "cheapest_total": 0.89,
-  "difference_eur": 0.59,
+  "cheapest_total": 0.8,
+  "difference_eur": 0.68,
   "most_expensive": [
    "konzum"
   ],
@@ -225,6 +208,87 @@
  },
  "stores": [
   {
+   "address": "Bartola Kasica 7",
+   "addresses": [
+    "Bartola Kasica 7",
+    "Labinska 51A",
+    "Osjecka 50"
+   ],
+   "chain": "plodine",
+   "city": "Rijeka",
+   "data_quality": "ok",
+   "date": "2026-10-28",
+   "date_hr": "28.10.2026.",
+   "flagged_items": 0,
+   "from_stock_value": 0,
+   "items": [
+    {
+     "alternatives": [
+      {
+       "brand": null,
+       "cheaper": true,
+       "cost_pack": 3.49,
+       "cost_used": 0.7,
+       "delta_eur": -0.1,
+       "ean": "3857500091000",
+       "match_quality": "strong",
+       "n_packs": 1,
+       "name": "KRUMPIR 5 KG",
+       "pack_size": "5 kg",
+       "per_unit": "kg",
+       "price_eff": 3.49,
+       "price_per_unit": 0.7,
+       "product_id": "110405",
+       "size_note": "usporedba za 1000 g: pakiranje 5 kg, odabrano na vagu"
+      }
+     ],
+     "attributes": {},
+     "brand": null,
+     "by_weight_fallback": false,
+     "cost_pack": 0.8,
+     "cost_used": 0.8,
+     "date": "2026-10-28",
+     "date_hr": "28.10.2026.",
+     "ean": "3859889293129",
+     "fallback": false,
+     "flags": [],
+     "food_unverified": false,
+     "have": false,
+     "ingredient": "krumpir",
+     "is_special": false,
+     "match_quality": "strong",
+     "n_packs": null,
+     "name": "KRUMPIR-OGULINSKI 5/1",
+     "need": 1000.0,
+     "need_unit": "g",
+     "notes": [
+      "na vagu"
+     ],
+     "pack_qty": null,
+     "pack_size": "na vagu",
+     "pack_source": "unit_price",
+     "pantry": false,
+     "per_unit": "kg",
+     "price_eff": 3.99,
+     "price_per_unit": 0.8,
+     "product_id": "110415",
+     "stale_days": 0,
+     "staple": "krumpir",
+     "unit_confidence": "low"
+    }
+   ],
+   "missing": [],
+   "n_ingredients": 1,
+   "n_matched": 1,
+   "n_stores": 6,
+   "scope": "local",
+   "stale_days": 0,
+   "store_id": "050",
+   "total_to_buy": 0.8,
+   "total_used": 0.8,
+   "unit_confidence": "low"
+  },
+  {
    "address": "Kukuljanovo 350",
    "addresses": [
     "Kukuljanovo 350"
@@ -232,52 +296,19 @@
    "chain": "eurospin",
    "city": "Rijeka",
    "data_quality": "ok",
-   "date": "2026-10-20",
-   "date_hr": "20.10.2026.",
+   "date": "2026-10-28",
+   "date_hr": "28.10.2026.",
    "flagged_items": 0,
    "from_stock_value": 0,
    "items": [
     {
-     "alternatives": [
-      {
-       "cheaper": true,
-       "cost_pack": 3.69,
-       "cost_used": 0.74,
-       "delta_eur": -0.15,
-       "ean": "3859891443208",
-       "match_quality": "strong",
-       "n_packs": 1,
-       "name": "KRUMPIR 5kg",
-       "pack_size": "5 kg",
-       "per_unit": "kg",
-       "price_eff": 3.69,
-       "price_per_unit": 0.74,
-       "product_id": "080220301",
-       "size_note": "usporedba za 1000 g: pakiranje 5 kg, odabrano na vagu"
-      },
-      {
-       "cheaper": true,
-       "cost_pack": 1.69,
-       "cost_used": 0.84,
-       "delta_eur": -0.05,
-       "ean": "9999999999994",
-       "match_quality": "strong",
-       "n_packs": 1,
-       "name": "KRUMPIR 2kg",
-       "pack_size": "2 kg",
-       "per_unit": "kg",
-       "price_eff": 1.69,
-       "price_per_unit": 0.85,
-       "product_id": "080085201",
-       "size_note": "usporedba za 1000 g: pakiranje 2 kg, odabrano na vagu"
-      }
-     ],
      "attributes": {},
+     "brand": null,
      "by_weight_fallback": false,
      "cost_pack": 0.89,
      "cost_used": 0.89,
-     "date": "2026-10-20",
-     "date_hr": "20.10.2026.",
+     "date": "2026-10-28",
+     "date_hr": "28.10.2026.",
      "ean": null,
      "fallback": false,
      "flags": [],
@@ -326,18 +357,19 @@
    "chain": "kaufland",
    "city": "Rijeka",
    "data_quality": "ok",
-   "date": "2026-10-20",
-   "date_hr": "20.10.2026.",
+   "date": "2026-10-28",
+   "date_hr": "28.10.2026.",
    "flagged_items": 0,
    "from_stock_value": 0,
    "items": [
     {
      "attributes": {},
+     "brand": null,
      "by_weight_fallback": false,
      "cost_pack": 0.89,
      "cost_used": 0.89,
-     "date": "2026-10-20",
-     "date_hr": "20.10.2026.",
+     "date": "2026-10-28",
+     "date_hr": "28.10.2026.",
      "ean": null,
      "fallback": false,
      "flags": [],
@@ -376,68 +408,9 @@
    "total_to_buy": 0.89,
    "total_used": 0.89,
    "unit_confidence": "low"
-  },
-  {
-   "address": "Osječka 67 A",
-   "addresses": [
-    "Osječka 67 A",
-    "Petra Jurčića 2A",
-    "Radnička 35"
-   ],
-   "chain": "lidl",
-   "city": "Rijeka",
-   "data_quality": "ok",
-   "date": "2026-10-20",
-   "date_hr": "20.10.2026.",
-   "flagged_items": 0,
-   "from_stock_value": 0,
-   "items": [
-    {
-     "attributes": {},
-     "by_weight_fallback": false,
-     "cost_pack": 0.89,
-     "cost_used": 0.89,
-     "date": "2026-10-20",
-     "date_hr": "20.10.2026.",
-     "ean": null,
-     "fallback": false,
-     "flags": [],
-     "food_unverified": false,
-     "have": false,
-     "ingredient": "krumpir",
-     "is_special": false,
-     "match_quality": "strong",
-     "n_packs": 1,
-     "name": "Krumpir",
-     "need": 1000.0,
-     "need_unit": "g",
-     "notes": [],
-     "pack_qty": 1000.0,
-     "pack_size": "1 kg",
-     "pack_source": "unit",
-     "pantry": false,
-     "per_unit": "kg",
-     "price_eff": 0.89,
-     "price_per_unit": 0.89,
-     "product_id": "0083215",
-     "stale_days": 0,
-     "staple": "krumpir",
-     "unit_confidence": "high"
-    }
-   ],
-   "missing": [],
-   "n_ingredients": 1,
-   "n_matched": 1,
-   "n_stores": 3,
-   "scope": "local",
-   "stale_days": 0,
-   "store_id": "180",
-   "total_to_buy": 0.89,
-   "total_used": 0.89,
-   "unit_confidence": "high"
   }
  ],
- "summary_hr": "Za kupiti: 0,89 €. Stvarno utrošeno: 0,89 €.",
+ "summary_hr": "Za kupiti: 0,80 €. Stvarno utrošeno: 0,80 €.",
  "unmatched": [],
  "warnings": []
 }

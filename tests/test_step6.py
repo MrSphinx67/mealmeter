@@ -43,7 +43,8 @@ GOLD = Path(__file__).parent / "golden" / "basket_grah_suho_osijek.json"
 def test_golden_grah_suho_all_chains():
     out = json.loads(GOLD.read_text(encoding="utf-8"))
     chains = {r["chain"] for r in out["comparison"]} | {r["chain"] for r in out["more_chains"]}
-    assert {"lidl", "eurospin", "ntl", "roto"} <= chains
+    # Korak 13: zlatni izlaz s cjenika 28.10.2026., u čijoj arhivi Rota nema (docs/13_STATUS.md, 13.1)
+    assert {"lidl", "eurospin", "ntl"} <= chains
     assert not out["incomplete"]
 
 

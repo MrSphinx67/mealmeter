@@ -161,3 +161,14 @@ sažeta baza ne mijenjaju. Izmjereno lokalno (`vercel build --prod`, Vercel CLI,
 Paket je veći za ~27 KB: novi `brands.py` (9,2 KB) i njegov `.pyc` (14,6 KB), `brands.yaml` +1,7 KB, `search.py`
 i `server.py` +1,2 KB. Rezerva ostaje kao nakon Koraka 12 (12.5: ~26 MB do 220 nakon pretpostavljenog rasta), nijedna
 vrijednost nije iznad upozorenja (65 MB po datoteci, 190 MB paket), pa nije bilo razloga za zaustavljanje.
+
+## 13.5 Zlatni izlazi s poljem `brand`
+
+`tests/golden/*.json` ponovno zapisani s pune baze (`golden.py --write --db data/mealmeter.duckdb`, cjenik
+28.10.2026.; prije su bili s 20.10.). Polje `brand` je u 26/27 datoteka; `basket_grasak_bez_oblika` samo pita za
+oblik i nema proizvoda. Provjera: puna baza **27/27**, sažeta **27/27**. Granica odgovora `MAX_RESPONSE_BYTES`
+(20 000) ostaje, pa zlatni izlazi bilježe i skraćivanje iz 13.2.
+
+`tests/test_step6.py::test_golden_grah_suho_all_chains` (samo uz `MM_GOLDEN=1`) više ne traži Roto: u arhivi
+28.10. ga nema (13.1). Lidl, Eurospin i NTL su i dalje obvezni, a `incomplete` je i dalje prazan. pytest:
+1406 prošlo, 7 preskočeno; uz `MM_GOLDEN=1` 1413 prošlo (oba izlazni kod 0).

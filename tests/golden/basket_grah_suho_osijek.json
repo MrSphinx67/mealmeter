@@ -12,14 +12,15 @@
   "chain": "konzum",
   "city": "Osijek",
   "data_quality": "ok",
-  "date": "2026-10-20",
-  "date_hr": "20.10.2026.",
+  "date": "2026-10-28",
+  "date_hr": "28.10.2026.",
   "flagged_items": 0,
   "from_stock_value": 0,
   "items": [
    {
     "alternatives": [
      {
+      "brand": "Garden Good",
       "cheaper": true,
       "cost_pack": 1.89,
       "cost_used": 0.38,
@@ -36,6 +37,7 @@
       "size_note": "usporedba za 200 g: pakiranje 1 kg, odabrano 500 g"
      },
      {
+      "brand": "Garden Good",
       "cheaper": true,
       "cost_pack": 1.99,
       "cost_used": 0.4,
@@ -56,11 +58,12 @@
      "oblik": "suho",
      "vrsta": "sareni"
     },
+    "brand": "Vedrini",
     "by_weight_fallback": false,
     "cost_pack": 1.19,
     "cost_used": 0.48,
-    "date": "2026-10-20",
-    "date_hr": "20.10.2026.",
+    "date": "2026-10-28",
+    "date_hr": "28.10.2026.",
     "ean": "3858889334269",
     "fallback": false,
     "flags": [],
@@ -177,8 +180,8 @@
    "total_used": 0.64
   }
  ],
- "date": "2026-10-20",
- "date_hr": "20.10.2026.",
+ "date": "2026-10-28",
+ "date_hr": "28.10.2026.",
  "incomplete": [],
  "ingredients": [
   {
@@ -201,22 +204,13 @@
  "more_chains": [
   {
    "addresses": [
-    "Ulica Jablanova 27"
-   ],
-   "chain": "roto",
-   "n_matched": 1,
-   "n_stores_city": 1,
-   "total_to_buy": 2.16
-  },
-  {
-   "addresses": [
     "A.KANIZLICA 31",
     "Anina 83, Osijek"
    ],
    "chain": "ntl",
    "n_matched": 1,
    "n_stores_city": 34,
-   "total_to_buy": 2.69
+   "total_to_buy": 2.29
   }
  ],
  "note": "Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists (cijene.dev); in-store prices may differ, a price list is not stock, and promotions change. Podaci: cijene.dev (DobarKod), prema uvjetima korištenja (https://cijene.dev/uvjeti-koristenja). / Data: cijene.dev (DobarKod), under its terms of use (https://cijene.dev/uvjeti-koristenja).",
@@ -226,11 +220,11 @@
    "spar"
   ],
   "cheapest_total": 1.19,
-  "difference_eur": 1.5,
+  "difference_eur": 1.1,
   "most_expensive": [
    "ntl"
   ],
-  "most_expensive_total": 2.69,
+  "most_expensive_total": 2.29,
   "small": true
  },
  "stores": [
@@ -244,14 +238,15 @@
    "chain": "konzum",
    "city": "Osijek",
    "data_quality": "ok",
-   "date": "2026-10-20",
-   "date_hr": "20.10.2026.",
+   "date": "2026-10-28",
+   "date_hr": "28.10.2026.",
    "flagged_items": 0,
    "from_stock_value": 0,
    "items": [
     {
      "alternatives": [
       {
+       "brand": "Garden Good",
        "cheaper": true,
        "cost_pack": 1.89,
        "cost_used": 0.38,
@@ -268,6 +263,7 @@
        "size_note": "usporedba za 200 g: pakiranje 1 kg, odabrano 500 g"
       },
       {
+       "brand": "Garden Good",
        "cheaper": true,
        "cost_pack": 1.99,
        "cost_used": 0.4,
@@ -288,11 +284,12 @@
       "oblik": "suho",
       "vrsta": "sareni"
      },
+     "brand": "Vedrini",
      "by_weight_fallback": false,
      "cost_pack": 1.19,
      "cost_used": 0.48,
-     "date": "2026-10-20",
-     "date_hr": "20.10.2026.",
+     "date": "2026-10-28",
+     "date_hr": "28.10.2026.",
      "ean": "3858889334269",
      "fallback": false,
      "flags": [],
@@ -340,8 +337,8 @@
    "chain": "spar",
    "city": "Osijek",
    "data_quality": "ok",
-   "date": "2026-10-20",
-   "date_hr": "20.10.2026.",
+   "date": "2026-10-28",
+   "date_hr": "28.10.2026.",
    "flagged_items": 0,
    "from_stock_value": 0,
    "items": [
@@ -350,11 +347,12 @@
       "oblik": "suho",
       "vrsta": "sareni"
      },
+     "brand": null,
      "by_weight_fallback": false,
      "cost_pack": 1.19,
      "cost_used": 0.48,
-     "date": "2026-10-20",
-     "date_hr": "20.10.2026.",
+     "date": "2026-10-28",
+     "date_hr": "28.10.2026.",
      "ean": "3859893124938",
      "fallback": false,
      "flags": [],
@@ -400,8 +398,8 @@
    "chain": "konzum",
    "city": "Osijek",
    "data_quality": "ok",
-   "date": "2026-10-20",
-   "date_hr": "20.10.2026.",
+   "date": "2026-10-28",
+   "date_hr": "28.10.2026.",
    "flagged_items": 0,
    "from_stock_value": 0,
    "items": [
@@ -410,11 +408,12 @@
       "oblik": "suho",
       "vrsta": "bijeli"
      },
+     "brand": "Garden Good",
      "by_weight_fallback": false,
      "cost_pack": 1.29,
      "cost_used": 0.52,
-     "date": "2026-10-20",
-     "date_hr": "20.10.2026.",
+     "date": "2026-10-28",
+     "date_hr": "28.10.2026.",
      "ean": "3838900957004",
      "fallback": false,
      "flags": [],
