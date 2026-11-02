@@ -145,3 +145,19 @@ Upute su sada 6 702 znaka; granica u `tests/test_step7.py` je 1,3 → **1,35** �
 6 798), jer je pri 1,3 ostalo samo 33 znaka. Test fraza pravila 9 (`test_rule_list_not_table`) prati novu
 formulaciju; novi `test_instructions_brand_rule`. pytest: 1406 prošlo, 7 preskočeno (izlazni kod 0). Golden puna →
 sažeta 27/27.
+
+## 13.4 Veličina: sažete datoteke i paket
+
+Marka se računa pri odgovoru iz stupca `brand`, koji je u sažetoj bazi već bio (13.1), pa se `build_compact.py` i
+sažeta baza ne mijenjaju. Izmjereno lokalno (`vercel build --prod`, Vercel CLI, i
+`scripts/vercel_bundle_size.py`, MB = MiB kao u skripti), cjenik 28.10., bez deploya:
+
+| | prije (afc1822) | poslije (13.3) | upozorenje | rezerva do upozorenja |
+|---|---:|---:|---:|---:|
+| `compact.duckdb` | 44,8 MB (46 936 064 B) | 44,8 MB (46 936 064 B) | 65 | 20,2 |
+| `compact_prices.duckdb` | 43,3 MB (45 363 200 B) | 43,3 MB (45 363 200 B) | 65 | 21,7 |
+| paket `python.func` | 180,8 MB | 180,8 MB (189 605 497 B) | 190 | 9,2 |
+
+Paket je veći za ~27 KB: novi `brands.py` (9,2 KB) i njegov `.pyc` (14,6 KB), `brands.yaml` +1,7 KB, `search.py`
+i `server.py` +1,2 KB. Rezerva ostaje kao nakon Koraka 12 (12.5: ~26 MB do 220 nakon pretpostavljenog rasta), nijedna
+vrijednost nije iznad upozorenja (65 MB po datoteci, 190 MB paket), pa nije bilo razloga za zaustavljanje.
