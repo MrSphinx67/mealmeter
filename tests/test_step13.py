@@ -123,3 +123,17 @@ def test_find_products_and_get_prices_brand(con13):
     stores = srv.get_prices(product_id="konzum:B1", city="Osijek")["stores"]
     assert stores and all(s["brand"] == "Mlineta" for s in stores)
     assert all(s["brand"] is None for s in srv.get_prices(product_id="lidl:B3", city="Osijek")["stores"])
+
+
+# --- upute ----------------------------------------------------------------------------------------------------
+
+def test_instructions_brand_rule():
+    import re
+
+    from mealmeter.server import DESCRIPTIONS, INSTRUCTIONS
+
+    rule9 = re.search(r"(?ms)^9\. (.*?)(?=^10\. )", INSTRUCTIONS).group(1)
+    assert "marka (brand) kad je poznata" in rule9 and '"Brašno glatko T-550, Mlineta, 1 kg"' in rule9
+    assert "brand null" in rule9 and "ne\n   izmišljaj" in rule9 and "never guess" in rule9
+    for tool in ("find_products", "get_prices", "plan_basket"):
+        assert "brand" in DESCRIPTIONS[tool] and "brand or null" in DESCRIPTIONS[tool]

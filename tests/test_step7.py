@@ -227,8 +227,10 @@ def test_rule_no_store():
 
 def test_rule_list_not_table():
     text = _instructions()
-    for phrase in ("Stavke prikaži kao popis: proizvod, veličina pakiranja (pack_size), cijena pakiranja (cost_pack)",
-                   "tablicu koristi samo ako je korisnik traži", "Usporedbu lanaca također kao popis, jedan lanac po retku",
+    # Korak 13: marka uz proizvod (pravilo 9)
+    for phrase in ("Stavke prikaži kao popis: proizvod, marka (brand) kad je poznata, veličina pakiranja (pack_size), "
+                   "cijena pakiranja (cost_pack)",
+                   "Tablicu koristi samo ako je korisnik traži", "Usporedbu lanaca također kao popis, jedan lanac po retku",
                    "a table only if asked"):
         assert phrase in text, phrase
     assert "Tablica stavki ima stupce" not in text and "Item table columns" not in text
@@ -255,8 +257,9 @@ def test_instructions_length_and_numbering():
 
     from mealmeter.server import INSTRUCTIONS
 
-    # Korak 9: 1,2 -> 1,3 za "nedostaje" uz cijenu nepotpunog lanca (pravila 7, 8) i cheaper = false (pravilo 11)
-    assert len(INSTRUCTIONS) <= OLD_INSTRUCTIONS_LEN * 1.3
+    # Korak 9: 1,2 -> 1,3 za "nedostaje" uz cijenu nepotpunog lanca (pravila 7, 8) i cheaper = false (pravilo 11);
+    # Korak 13: 1,3 -> 1,35 za marku uz proizvod (pravilo 9)
+    assert len(INSTRUCTIONS) <= OLD_INSTRUCTIONS_LEN * 1.35
     assert [int(n) for n in re.findall(r"(?m)^(\d+)\. ", INSTRUCTIONS)] == list(range(1, 14))
     # svako pravilo je dvojezično (hr / en)
     for n in range(1, 14):

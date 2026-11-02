@@ -133,3 +133,15 @@ scenarija, a u preostala 4 razlika je samo gore navedeno skraćivanje. Provjera 
 pytest: 1405 prošlo, 7 preskočeno (izlazni kod 0). Novi `tests/test_step13.py` (49 testova): smeće i dobavljači
 su null, vlastite marke lanaca ostaju, marka iz naziva i nikad iz sastojka, grupe i klase, polje u stavkama,
 alternativama, detail, find_products i get_prices.
+
+## 13.3 Upute
+
+Pravilo 9 (`server.INSTRUCTIONS`): „Stavke prikaži kao popis: proizvod, marka (brand) kad je poznata, veličina
+pakiranja (pack_size), cijena pakiranja (cost_pack), npr. "Brašno glatko T-550, Mlineta, 1 kg"; kad je brand null,
+marku izostavi i ne izmišljaj je.” (i engleski dio: „brand when known … brand null: omit it, never guess one”).
+Opisi alata `find_products`, `get_prices` i `plan_basket` navode polje `brand` („marka ili null / brand or null”).
+
+Upute su sada 6 702 znaka; granica u `tests/test_step7.py` je 1,3 → **1,35** × upute prije Koraka 7 (5 036, dakle
+6 798), jer je pri 1,3 ostalo samo 33 znaka. Test fraza pravila 9 (`test_rule_list_not_table`) prati novu
+formulaciju; novi `test_instructions_brand_rule`. pytest: 1406 prošlo, 7 preskočeno (izlazni kod 0). Golden puna →
+sažeta 27/27.

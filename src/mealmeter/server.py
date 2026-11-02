@@ -94,9 +94,11 @@ Pravila / rules:
    / No store or "any": start with "Sve možeš kupiti u:", complete chains by price to buy (max 2 own addresses,
    number of stores; never merge chains); one sentence on cheapest vs dearest (price_spread; small: go where it is
    convenient); incomplete chains last, always with what is missing next to their price; offer the exact list.
-9. Stavke prikaži kao popis: proizvod, veličina pakiranja (pack_size), cijena pakiranja (cost_pack); tablicu
-   koristi samo ako je korisnik traži. Usporedbu lanaca također kao popis, jedan lanac po retku.
-   / Items and chains as lists (product, pack size, pack price; one chain per line); a table only if asked.
+9. Stavke prikaži kao popis: proizvod, marka (brand) kad je poznata, veličina pakiranja (pack_size), cijena
+   pakiranja (cost_pack), npr. "Brašno glatko T-550, Mlineta, 1 kg"; kad je brand null, marku izostavi i ne
+   izmišljaj je. Tablicu koristi samo ako je korisnik traži. Usporedbu lanaca također kao popis, jedan lanac po retku.
+   / Items and chains as lists (product, brand when known, pack size, pack price; brand null: omit it, never guess
+   one; one chain per line); a table only if asked.
 10. Piši prirodnim jezikom, bez internih naziva polja (stale_days, total_to_buy, total_used, match_quality,
    cheaper, delta_eur); utrošak (total_used) i from_stock_value su samo informativni. Datum piši kao "cijene iz
    cjenika od 20.10.2026." (date_hr); ako je cijena iz starijeg cjenika (stale_days > 0, i kod lanca u
@@ -404,11 +406,13 @@ Kada / when: korisnik pita što postoji i koliko košta / the user asks what exi
 Parametri / parameters: query (slobodan tekst / free text), city (grad / city), ingredient (ključ ili
 sinonim iz list_staples / staple key or synonym), attributes (npr. {"tip": "glatko"}), include_weak
 (slabija podudaranja / weaker matches, zadano false), limit (1-30).
+Vraća / returns: results (id, name, brand: marka ili null / brand or null, pack, raspon cijena / price range).
 Primjer / example: {"ingredient": "brašno", "attributes": {"tip": "glatko"}, "city": "Osijek"}""",
     "get_prices": """\
 Cijene jednog proizvoda po trgovinama, od najjeftinije. / Prices of one product per store, cheapest first.
 Kada / when: nakon find_products, za detalje / after find_products, for details.
 Parametri / parameters: product_id = EAN, "lanac:product_id" ili id klase (npr. "jaja:m"); city.
+Vraća / returns: stores (lanac, adresa, name, brand: marka ili null / brand or null, price_eff).
 Primjer / example: {"product_id": "3850104223624", "city": "Osijek"}""",
     "plan_basket": """\
 Košarica za recept: cijena svih sastojaka po trgovini u gradu i najbolja trgovina.
@@ -427,8 +431,8 @@ alternatives (zadano true: do 2 druga proizvoda po stavci s delta_eur i cheaper 
 per item with delta_eur and cheaper).
 best_store: najviše sastojaka, pa najmanji total_to_buy; total_used i from_stock_value (already_have) su
 informativni. / best_store: most ingredients, then lowest total_to_buy; total_used, from_stock_value informative.
-Vraća / returns (sažeto / compact): summary_hr (zbroj za best_store / totals of best_store), best_store (items s pack_size,
-cost_pack, cost_used, alternatives; trgovine istog lanca s istim proizvodima spojene: n_stores, addresses),
+Vraća / returns (sažeto / compact): summary_hr (zbroj za best_store / totals of best_store), best_store (items s brand
+(marka ili null / brand or null), pack_size, cost_pack, cost_used, alternatives; trgovine istog lanca s istim proizvodima spojene: n_stores, addresses),
 comparison (lanci sa svim sastojcima, po lancu jedan redak, do 6 / chains with every ingredient, one row per
 chain, up to 6: chain, addresses, n_stores_city, total_to_buy, total_used), more_chains (ostali potpuni lanci /
 further complete chains), price_spread (najjeftiniji i najskuplji potpuni lanac, difference_eur, small: <= 2 € / cheapest
