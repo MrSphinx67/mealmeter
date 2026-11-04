@@ -88,7 +88,7 @@ jobs:
 
       - name: Vercel CLI
         if: steps.update.outputs.changed == 'true'
-        run: npm install --global vercel@latest
+        run: npm install --global vercel@65.11.0  # fiksno (Korak 14): zadnja verzija s uspješnim deployem 4.11.2026
 
       - name: vercel build
         if: steps.update.outputs.changed == 'true'

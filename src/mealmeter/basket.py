@@ -1149,8 +1149,11 @@ def plan_basket(ingredients: list[dict], city: str, mode: str = "single_store",
 def _brand_substitutions(stores: dict, idx: int, need: Need, branded: set) -> None:
     """Trgovine bez tražene marke: stavka dobiva substitution {"requested", "chosen"}, a najjeftiniji proizvod
     marke iz druge trgovine u gradu ide kao alternativa (_brand_alt, vidi plan_basket)."""
-    offers = [(stores[k]["items"][idx], stores[k]) for k in branded]
-    best = min(offers, key=lambda o: o[0]["cost_pack"]) if offers else None
+    # jednaka cijena pakiranja: manji utrošak (veće pakiranje), pa lanac, trgovina i proizvod; bez toga je izbor
+    # ovisio o redoslijedu skupa `branded` (hash seed procesa), pa su se puna i sažeta baza razilazile (Korak 14)
+    offers = [(stores[k]["items"][idx], stores[k], k) for k in branded if idx in stores[k]["items"]]
+    best = min(offers, key=lambda o: (o[0]["cost_pack"], o[0]["cost_used"], o[2], str(o[0]["product_id"]))
+               )[:2] if offers else None
     for key, store in stores.items():
         it = store["items"].get(idx)
         if it is None or key in branded:
