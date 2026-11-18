@@ -15,7 +15,7 @@
     ],
     "prices": {
      "konzerva": 1.58,
-     "smrznuto": 1.06,
+     "smrznuto": 0.9,
      "suho": 0.58
     },
     "question": "suho ili konzerva ili smrznuto?",
@@ -48,7 +48,7 @@
     {
      "amount": 800.0,
      "form": "smrznuto",
-     "price_eur": 1.06,
+     "price_eur": 0.9,
      "price_note": "najjeftinije u gradu, za traženu količinu gotovog proizvoda",
      "unit": "g"
     }

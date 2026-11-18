@@ -342,18 +342,6 @@
   },
   {
    "addresses": [
-    "J J Strossmayera 343"
-   ],
-   "chain": "plodine",
-   "complete": true,
-   "n_ingredients": 7,
-   "n_matched": 7,
-   "n_stores_city": 2,
-   "total_to_buy": 8.55,
-   "total_used": 5.39
-  },
-  {
-   "addresses": [
     "Ulica Jablanova 27"
    ],
    "chain": "roto",
@@ -363,6 +351,19 @@
    "n_stores_city": 1,
    "total_to_buy": 8.58,
    "total_used": 4.86
+  },
+  {
+   "addresses": [
+    "A.KANIZLICA 31",
+    "Cvrsnicka 64"
+   ],
+   "chain": "ntl",
+   "complete": true,
+   "n_ingredients": 7,
+   "n_matched": 7,
+   "n_stores_city": 34,
+   "total_to_buy": 8.66,
+   "total_used": 4.9
   }
  ],
  "date": "2026-11-17",
@@ -514,13 +515,13 @@
  "more_chains": [
   {
    "addresses": [
-    "A.KANIZLICA 31",
-    "Cvrsnicka 64"
+    "Huttlerova 30",
+    "J J Strossmayera 343"
    ],
-   "chain": "ntl",
+   "chain": "plodine",
    "n_matched": 7,
-   "n_stores_city": 34,
-   "total_to_buy": 8.66
+   "n_stores_city": 2,
+   "total_to_buy": 9.09
   },
   {
    "addresses": [

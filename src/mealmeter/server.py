@@ -110,7 +110,8 @@ Pravila / rules:
    cheaper = true (same needed amount); cheaper = false never is.
 12. Kod nesigurnog izbora pitaj: ask_user (oblik, cijene po obliku su za traženu količinu), needs_confirmation
    (free_text, kobasica bez dimljene), substitution (druga marka ili Grana Padano). Prenesi i warnings,
-   assumed_form i slabije podudaranje (match_quality = 'weak'), običnim riječima. / When a choice is uncertain,
+   assumed_form i slabije podudaranje (match_quality = 'weak'), običnim riječima; unit_uncertain: cijena je
+   možda po komadu, neka je provjeri na polici. / When a choice is uncertain,
    ask: ask_user / ambiguity, needs_confirmation, substitution; pass on warnings, assumed_form, weaker matches.
 13. Uz cijene uvijek dodaj: cijene su iz cjenika, u trgovini se mogu razlikovati, cjenik nije zaliha,
    a akcije se mijenjaju. / Always add: prices come from price lists, may differ in store, a price list is not
@@ -307,6 +308,10 @@ _ALT_KEYS = ("name", "pack_size", "cost_pack", "cost_used", "delta_eur", "cheape
              "other_store", "chain", "address")
 
 
+# napomene stavke koje ostaju u sažetom odgovoru (Korak 17: nesigurna jedinica, cijena za komad)
+_NOTE_PREFIXES = ("izvan zadanog", "rinfuza", "nacionalna", "na vagu", "jedinica nesigurna", "cijena za komad")
+
+
 def _compact_item(it: dict) -> dict:
     out = {k: it[k] for k in _ITEM_KEYS}
     out.update({k: it[k] for k in _ITEM_OPTIONAL if it.get(k)})
@@ -316,7 +321,7 @@ def _compact_item(it: dict) -> dict:
         out["flags"] = it["flags"]
     if it.get("stale_days"):
         out["date_hr"], out["stale_days"] = it["date_hr"], it["stale_days"]
-    notes = [n for n in it.get("notes") or [] if n.startswith(("izvan zadanog", "rinfuza", "nacionalna", "na vagu"))]
+    notes = [n for n in it.get("notes") or [] if n.startswith(_NOTE_PREFIXES)]
     if notes:
         out["notes"] = notes
     if "alternatives" in it:

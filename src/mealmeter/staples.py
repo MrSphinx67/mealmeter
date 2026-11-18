@@ -621,6 +621,8 @@ def build_staples(con: duckdb.DuckDBPyConnection, staples: dict[str, Staple] | N
           AND ps.drop_reason IS NULL AND NOT ps.excluded AND NOT {unit_compatible_sql()}
     """)
     flag_unit_suspects(con)
+    flag_two_words(con, staples)
+    flag_unit_uncertain(con, staples)
     auto_ranges = set_auto_ranges(con)  # granice prije grupa: slabi član traži cijenu u granicama
     groups = build_staple_groups(con)
     return {
@@ -802,6 +804,48 @@ def staple_suspect_sql(ppu: str, n_units: str, ps: str | None = None) -> str:
     hi = f"coalesce({ps}.ppu_max, r.ppu_max)" if ps else "r.ppu_max"
     # range_source 'pack' (vrećice): ppu je cijena po vrećici, i za višestruka pakiranja
     return f"""(NOT (({ppu}) BETWEEN {lo} AND {hi}))"""
+
+
+def flag_two_words(con: duckdb.DuckDBPyConnection, staples: dict[str, "Staple"]) -> int:
+    """product_staples.two_words (Korak 17): riječ namirnice je prva ili druga riječ naziva (Staple.loose_regex).
+    Proizvod bez kategorije (is_food NULL) ulazi u košaricu za namirnicu samo uz to (search._food_filter
+    "staple_strict"): "TROKUT S MASLACEM" nije maslac, "KUTIJA ZA JAJA" nisu jaja. Vraća broj označenih."""
+    con.execute("ALTER TABLE clean.product_staples ADD COLUMN two_words BOOLEAN DEFAULT false")
+    cols = {r[0] for r in con.execute("DESCRIBE clean.products").fetchall()}
+    norm_col = "match_norm" if "match_norm" in cols else "name_norm"  # sintetske tablice u testovima
+    for st in staples.values():
+        con.execute(f"""
+            UPDATE clean.product_staples ps SET two_words = true FROM clean.products p
+            WHERE p.chain = ps.chain AND p.product_id = ps.product_id AND ps.staple = ?
+              AND regexp_matches(trim(p.{norm_col}), ?)""", [st.key, st.loose_regex])
+    return con.execute("SELECT count(*) FROM clean.product_staples WHERE two_words").fetchone()[0]
+
+
+# naziv kaže komad ili vezicu (Korak 17, unit_uncertain)
+PIECE_NAME_REGEX = r"(^| )(kom|komad|komada|komadno|vezica|vez)( |$)"
+
+
+def flag_unit_uncertain(con: duckdb.DuckDBPyConnection, staples: dict[str, "Staple"]) -> int:
+    """product_staples.unit_uncertain (Korak 17): svježe voće i povrće (loose_produce) čiji naziv kaže komad ili
+    vezicu ("LUK MLADI VEZICA KOM"), bez gramature, a cijena po kg je lančev unit_price jednak samoj cijeni (lanac
+    nije dao masu komada). Cijena može biti po komadu ili po kg: plan_basket stavku označi (zastavica i napomena,
+    uzima je samo kad trgovina nema druge), a Claude kaže korisniku da je provjeri na polici. Svježe meso
+    ("SVINJSKI VRAT KOMAD", cijena po kg) se ne označava. Vraća broj označenih."""
+    con.execute("ALTER TABLE clean.product_staples ADD COLUMN unit_uncertain BOOLEAN DEFAULT false")
+    loose = [k for k, st in staples.items() if st.loose_produce]
+    if not loose:
+        return 0
+    con.execute(f"""
+        UPDATE clean.product_staples ps SET unit_uncertain = true
+        FROM (
+          SELECT c.chain, c.product_id FROM clean.prices c JOIN clean.products p USING (chain, product_id)
+          WHERE p.pack_amount IS NULL AND regexp_matches(p.name_norm, '{PIECE_NAME_REGEX}')
+            AND c.per_unit = 'kg' AND c.unit_confidence = 'low'
+          GROUP BY ALL HAVING avg((abs(c.price_per_unit - c.price_eff) <= 0.01)::int) >= 0.5
+        ) u
+        WHERE ps.chain = u.chain AND ps.product_id = u.product_id
+          AND ps.staple IN ({", ".join(f"'{k}'" for k in loose)})""")
+    return con.execute("SELECT count(*) FROM clean.product_staples WHERE unit_uncertain").fetchone()[0]
 
 
 # unit_suspect (Korak 4): omjer prema medijanu istog EAN-a u drugim lancima izvan ovog raspona

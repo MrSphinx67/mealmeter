@@ -95,19 +95,6 @@
   },
   {
    "addresses": [
-    "Labinska 51A",
-    "Osjecka 50"
-   ],
-   "chain": "plodine",
-   "complete": true,
-   "n_ingredients": 1,
-   "n_matched": 1,
-   "n_stores_city": 11,
-   "total_to_buy": 0.8,
-   "total_used": 0.8
-  },
-  {
-   "addresses": [
     "Kukuljanovo 350"
    ],
    "chain": "eurospin",
@@ -141,6 +128,19 @@
    "n_ingredients": 1,
    "n_matched": 1,
    "n_stores_city": 3,
+   "total_to_buy": 0.89,
+   "total_used": 0.89
+  },
+  {
+   "addresses": [
+    "Osjecka 50",
+    "Zvonimirova 3"
+   ],
+   "chain": "plodine",
+   "complete": true,
+   "n_ingredients": 1,
+   "n_matched": 1,
+   "n_stores_city": 11,
    "total_to_buy": 0.89,
    "total_used": 0.89
   }
@@ -207,6 +207,7 @@
    "eurospin",
    "kaufland",
    "lidl",
+   "plodine",
    "spar",
    "studenac",
    "tommy"

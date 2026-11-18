@@ -70,7 +70,7 @@
       "price_eff": 1.95,
       "price_per_unit": 0.39,
       "product_id": "83335",
-      "size_note": "usporedba za 150 g: pakiranje 5 kg, odabrano 1 kg"
+      "size_note": "usporedba za 150 g: pakiranje 5 kg, odabrano na vagu"
      }
     ],
     "attributes": {
@@ -78,7 +78,7 @@
     },
     "brand": null,
     "by_weight_fallback": false,
-    "cost_pack": 0.79,
+    "cost_pack": 0.12,
     "cost_used": 0.12,
     "date": "2026-11-17",
     "date_hr": "17.11.2026.",
@@ -90,14 +90,16 @@
     "ingredient": "luk",
     "is_special": false,
     "match_quality": "strong",
-    "n_packs": 1,
+    "n_packs": null,
     "name": "Luk crveni rinfuza",
     "need": 150.0,
     "need_unit": "g",
-    "notes": [],
-    "pack_qty": 1000.0,
-    "pack_size": "1 kg",
-    "pack_source": "unit",
+    "notes": [
+     "na vagu"
+    ],
+    "pack_qty": null,
+    "pack_size": "na vagu",
+    "pack_source": "unit_price",
     "pantry": false,
     "per_unit": "kg",
     "price_eff": 0.79,
@@ -105,14 +107,14 @@
     "product_id": "83325",
     "stale_days": 0,
     "staple": "luk",
-    "unit_confidence": "high"
+    "unit_confidence": "low"
    },
    {
     "alternatives": [],
     "attributes": {},
     "brand": null,
     "by_weight_fallback": false,
-    "cost_pack": 0.79,
+    "cost_pack": 0.16,
     "cost_used": 0.16,
     "date": "2026-11-17",
     "date_hr": "17.11.2026.",
@@ -124,14 +126,16 @@
     "ingredient": "mrkva",
     "is_special": false,
     "match_quality": "strong",
-    "n_packs": 1,
+    "n_packs": null,
     "name": "Mrkva rinfuza",
     "need": 200.0,
     "need_unit": "g",
-    "notes": [],
-    "pack_qty": 1000.0,
-    "pack_size": "1 kg",
-    "pack_source": "unit",
+    "notes": [
+     "na vagu"
+    ],
+    "pack_qty": null,
+    "pack_size": "na vagu",
+    "pack_source": "unit_price",
     "pantry": false,
     "per_unit": "kg",
     "price_eff": 0.79,
@@ -139,7 +143,7 @@
     "product_id": "82755",
     "stale_days": 0,
     "staple": "mrkva",
-    "unit_confidence": "high"
+    "unit_confidence": "low"
    },
    {
     "alternatives": [
@@ -492,9 +496,9 @@
   "scope": "local",
   "stale_days": 0,
   "store_id": "246",
-  "total_to_buy": 14.71,
+  "total_to_buy": 13.41,
   "total_used": 6.43,
-  "unit_confidence": "high"
+  "unit_confidence": "low"
  },
  "city": "Zagreb",
  "comparison": [
@@ -508,7 +512,7 @@
    "n_ingredients": 10,
    "n_matched": 10,
    "n_stores_city": 19,
-   "total_to_buy": 14.71,
+   "total_to_buy": 13.41,
    "total_used": 6.43
   }
  ],
@@ -681,7 +685,7 @@
  "more_chains": [],
  "note": "Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists (cijene.dev); in-store prices may differ, a price list is not stock, and promotions change. Podaci: cijene.dev (DobarKod), prema uvjetima korištenja (https://cijene.dev/uvjeti-koristenja). / Data: cijene.dev (DobarKod), under its terms of use (https://cijene.dev/uvjeti-koristenja).",
  "stores": [],
- "summary_hr": "Za kupiti: 14,71 €. Stvarno utrošeno: 6,43 €.",
+ "summary_hr": "Za kupiti: 13,41 €. Stvarno utrošeno: 6,43 €.",
  "truncated": true,
  "unmatched": [],
  "warnings": [

@@ -39,6 +39,25 @@ NONFOOD_WORDS = [
     (r"garn\b|depozit|otvarac|vadicep|clip\b", "kucanstvo"),
 ]
 _NONFOOD_RX = [(re.compile(r"(^| )(?:" + p + ")"), g) for p, g in NONFOOD_WORDS]
+# Korak 17: puni izrazi za proizvode bez kategorije (novi proizvodi od 17.11.2026.). Samo izrazi s kvalifikatorom,
+# ne same riječi ("ulje", "sol", "mlijeko", "kvasac" su i hrana); provjereno nad punom bazom 17.11.: nijedan
+# ne pogađa stvarnu hranu (10 pogodaka s is_food = true su neprehrana s krivom kategorijom lanca: sol za ceste,
+# hrana za pse, plastična jaja). Vrijede samo kad lanac nema kategoriju (words_group), kao i NONFOOD_WORDS.
+NONFOOD_PHRASES = [
+    (r"motorno ulje|ulje motorno|mot ulje|ulje za (?:motor|lance|lanac|mjenjac|meh mjenjac|svjetiljk|lamp|drv|"
+     r"zastitu drv|kosilic|pil[ue]\b|tijelo|masazu|sunc|kosu|bebe)|parafinsko ulje|ulje parafinsko|vazelinsko ulje|"
+     r"ulje vazelinsko|hidraulicno ulje|testerol|\d{1,2}w \d{2}\b", "ostalo"),  # 10W-40 (SAE)
+    (r"sol za (?:perilic|posud|kupanj|omeksiv|ceste|odmrz)|stocna sol|sol stocna|sol nejod stocna|mirisna sol|"
+     r"sol mirisna", "kucanstvo"),
+    (r"mlijeko za (?:tijelo|lice|sunc|ciscenje|skidanje)", "kozmetika"),
+    (r"hrana za (?:pse|psa|macke|macku|ptice|ribe|ribice|glodavce|kunice|kokos|svinje|perad|stoku|kornjace)",
+     "kucni_ljubimci"),
+    (r"vinsk\w* kvasac|kvasac vinski|kvasac za vino|uvaferm", "ostalo"),
+    (r"kutija za jaja|plasticn\w* jaja|jaja plasticn", "kucanstvo"),
+    # "SVRDLO SDS" (svrdlo za bušilicu); tjestenina "svrdla"/"svrdlići" ostaje
+    (r"svrdlo\b|maziva mast|mast za (?:lezaj|lance|zglob|podmaz)|kanta za mlijeko|boca za (?:ocat|ulje)", "ostalo"),
+]
+_NONFOOD_RX += [(re.compile(r"(^| )(?:" + p + ")"), g) for p, g in NONFOOD_PHRASES]
 # Hrana za ljubimce u lančevoj kategoriji "Hrana" ("HRANA ZA PSE FRISK.VITAL."): naziv ima prednost
 _PET_RX = re.compile(r"(^| )(?:hrana za (?:pse|macke|ptice|ribice|glodavce)|za pse\b|za macke|poslastic\w* za (?:pse|macke)|"
                      r"whiskas|friskies|pedigree|kitekat|purina|gourmet gold|dreamies|brit care)")
@@ -294,18 +313,23 @@ def build_food(con: duckdb.DuckDBPyConnection) -> dict:
           WHERE p.ean_global AND f.chain_group <> 'unknown' GROUP BY ALL
         ),
         inherit AS (
-          SELECT ean_norm, arg_max(grp, n) AS grp, max(n) / sum(n) AS share FROM votes GROUP BY ean_norm
+          -- one_side (Korak 17): skupine se razilaze, ali su svi glasovi hrana ili svi neprehrana; tada se
+          -- preuzima većinska skupina (is_food je isti), npr. kucanstvo 1 : ostalo 1
+          SELECT ean_norm, arg_max(grp, n) AS grp, max(n) / sum(n) AS share,
+                 count(*) FILTER (WHERE grp IN ({food})) = 0 OR count(*) FILTER (WHERE grp IN ({nonfood})) = 0
+                   AS one_side
+          FROM votes GROUP BY ean_norm
         )
         SELECT p.chain, p.product_id,
                CASE WHEN f.chain_group <> 'unknown' THEN f.chain_group
-                    WHEN i.share > 0.5 THEN i.grp
+                    WHEN i.share > 0.5 OR i.one_side THEN i.grp
                     WHEN f.words_group IS NOT NULL THEN f.words_group
                     ELSE 'unknown' END AS food_group,
                CASE WHEN f.refined THEN 'words' WHEN f.chain_group <> 'unknown' THEN 'chain'
-                    WHEN i.share > 0.5 THEN 'ean_inherited'
+                    WHEN i.share > 0.5 OR i.one_side THEN 'ean_inherited'
                     WHEN f.words_group IS NOT NULL THEN 'words'
                     ELSE 'none' END AS category_source,
-               i.share IS NOT NULL AND i.share <= 0.5 AS ean_conflict, f.hard_nonfood
+               i.share IS NOT NULL AND i.share <= 0.5 AND NOT i.one_side AS ean_conflict, f.hard_nonfood
         FROM clean.products p JOIN food_tmp f USING (chain, product_id)
         -- inherit sadrži samo globalne EAN-ove (globalnost ovisi samo o kodu)
         LEFT JOIN inherit i ON i.ean_norm = p.ean_norm

@@ -303,7 +303,9 @@ maslac:
                    zacinsk, bilj, peanut, snickers, kikiriki, kokic, keks, croissant, kroasan, shea,
                    kakao, namaz, mikrovaln, smokic, caj\b, pop\b, crunchy, bobi, buttons, slani stapic,
                    biskvit, popcorn, tijest,
-                   biljn, vegan, greenvie, green vie, zamjen]
+                   biljn, vegan, greenvie, green vie, zamjen,
+                   # Korak 17: proizvodi s maslacem (proizvodi bez kategorije: "TROKUT S MASLACEM", "KIKIRKI MASLACEM")
+                   s maslacem, sa maslacem, kikirki, maslacem]
   unit: kg
   max_pack: 1000
   min_pack: 100
@@ -584,7 +586,9 @@ jaja:
                    kalup, prah, ljesnjak, kokos\b, sorini, socado, jajima, pasta, majonez, tj\b, tjest,
                    fidelin, fuz, surl, keks, misura, polje\b, klara\b, bez\b, od svj, liker, puding,
                    krem\b, sendvic, salata, pasteta, namaz, jaja s\b, sa jajima, s jajima,
-                   obuc, folij, termoskup, stolic, glazben, igr]
+                   obuc, folij, termoskup, stolic, glazben, igr,
+                   # Korak 17: ambalaža i ukrasi bez kategorije ("KUTIJA ZA JAJA PVC", "PLASTIČNA JAJA")
+                   kutij, pvc, plastic]
   unit: kom
   # granice po uzgoju (Korak 2D, vlasnik): bio 0,30-1,00 €/kom; ostali 0,08-0,55 €/kom (Korak 4B/4C: Lidlova
   # jaja S i kavezna po 0,09-0,14 €/kom su stvarne cijene; cijena po komadu se ne zaokružuje na cent)
@@ -1071,7 +1075,10 @@ tjestenina:
                    cappasante, pral\b, pralin, sokn, carap, noz\b, pjescanik, pijescanik, zitn, chocapic, cok\b,
                    za tj\b, argan, bolog, meso\b, zamrz, ricott, krupica durum,
                    # Korak 9: stroj za rezance, kadaif (tijesto za kolače), smrznute gotove lazanje (Condeli)
-                   stroj, kadaif, condeli]
+                   stroj, kadaif, condeli,
+                   # Korak 17: svrdla za bušilicu bez kategorije ("SVRDLO SDS+ 10 X 260", "SVRDLO HSS"); tjestenina je
+                   # "svrdla"/"svrdlići"
+                   svrdlo\b, sds\b, hss\b]
   unit: kg
   # Korak 9: zadano obična tjestenina; ostale vrste samo na zahtjev (stvarni test 27.10.2026.: "tagliatelle" su u
   # Plodinama bile TAGLIATELLE VERDI, u Konzumu od pira, u Eurospinu i Kauflandu s jajima)

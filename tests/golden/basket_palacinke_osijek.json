@@ -347,27 +347,16 @@
   },
   {
    "addresses": [
-    "Vladimira Nazora 12"
+    "Ive Tijardovića 4A",
+    "Opatijska 26F"
    ],
    "chain": "konzum",
    "complete": true,
    "n_ingredients": 7,
    "n_matched": 7,
    "n_stores_city": 12,
-   "total_to_buy": 6.44,
-   "total_used": 1.22
-  },
-  {
-   "addresses": [
-    "J J Strossmayera 343"
-   ],
-   "chain": "plodine",
-   "complete": true,
-   "n_ingredients": 7,
-   "n_matched": 7,
-   "n_stores_city": 2,
-   "total_to_buy": 6.67,
-   "total_used": 1.29
+   "total_to_buy": 6.05,
+   "total_used": 1.34
   },
   {
    "addresses": [
@@ -380,6 +369,19 @@
    "n_stores_city": 1,
    "total_to_buy": 6.96,
    "total_used": 1.33
+  },
+  {
+   "addresses": [
+    "Huttlerova 30",
+    "J J Strossmayera 343"
+   ],
+   "chain": "plodine",
+   "complete": true,
+   "n_ingredients": 7,
+   "n_matched": 7,
+   "n_stores_city": 2,
+   "total_to_buy": 6.97,
+   "total_used": 1.45
   },
   {
    "addresses": [

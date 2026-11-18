@@ -3,6 +3,7 @@
 Sve vrijednosti su procjene; convert() zato uvijek vraća i upozorenje s korištenom vrijednošću.
 """
 
+import re
 from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
@@ -67,6 +68,30 @@ def piece_weight(staple_key: str, attributes: dict | None = None) -> float | Non
 def product_piece_weight(staple_key: str) -> float | None:
     """Masa proizvoda koji se prodaje na komad bez težine (assume_piece): pack_g, inače masa komada."""
     return load_units().packs.get(staple_key) or piece_weight(staple_key)
+
+
+@dataclass(frozen=True)
+class Bunch:
+    """Povrće koje se prodaje u svežnju (Korak 17): kupnja na vagu je najmanje jedan svežanj od `g` grama (procjena).
+    Vrijedi za proizvod čiji name_norm pogađa `pattern`, a ne pogađa `exclude` (python re)."""
+    g: float
+    pattern: str
+    exclude: str | None = None
+
+    def matches(self, name_norm: str | None) -> bool:
+        text = name_norm or ""
+        return bool(re.search(self.pattern, text)) and not (self.exclude and re.search(self.exclude, text))
+
+
+@lru_cache(maxsize=2)
+def load_bunches(path: Path = UNITS_PATH) -> dict[str, Bunch]:
+    raw = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+    return {k: Bunch(float(v["g"]), v["pattern"], v.get("exclude")) for k, v in (raw.get("bunches") or {}).items()}
+
+
+def bunch_rule(staple_key: str) -> Bunch | None:
+    """Pravilo svežnja za namirnicu (data/units.yaml, bunches), ili None."""
+    return load_bunches().get(staple_key)
 
 
 def is_measure(unit: str | None) -> bool:

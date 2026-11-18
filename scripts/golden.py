@@ -98,6 +98,14 @@ SCENARIOS = {
         "ingredients": [{"name": "crno vino", "amount": 200, "unit": "ml", "free_text": True}], "city": "Osijek"}),
     # Korak 10: stvarni test 28.10.2026. (bolonjez, Osijek): "pancetta", "celer" i "kocka za juhu" nisu bili prepoznati
     "basket_bolonjez_osijek_10": ("plan_basket", {"ingredients": BOLONJEZ_10, "city": "Osijek"}),
+    # Korak 17: prije popravka Konzum 13,55 € samo zbog "CELER LIST KOM" od 0,20 € (50 g na vagu po 3,98 €/kg, a cijena
+    # 1,99 € je za komad od 0,5 kg); Plodine 13,97 €
+    "basket_bolonjez_celer_zagreb": ("plan_basket", {"ingredients": [
+        {"name": "juneće mljeveno meso", "amount": 500, "unit": "g"}, {"name": "luk", "amount": 1, "unit": "kom"},
+        {"name": "mrkva", "amount": 1, "unit": "kom"}, {"name": "celer", "amount": 1, "unit": "kom"},
+        {"name": "pasirana rajčica", "amount": 700, "unit": "g"}, {"name": "špageti", "amount": 400, "unit": "g"},
+        {"name": "pancetta", "amount": 100, "unit": "g"}, {"name": "parmezan", "amount": 40, "unit": "g"}],
+        "city": "Zagreb", "already_have": ["sol", "papar", "ulje"]}),
 }
 # lanci koji nikad ne smiju biti u izlazu plan_basketa: nepouzdani podaci (Lorenco) i veleprodaja (Metro)
 EXCLUDED_CHAINS = ("lorenco", "metro")

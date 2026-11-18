@@ -109,12 +109,17 @@ def _with_date(row: dict) -> dict:
     return row
 
 
+# zamjenjuje se uvjetom "cijena u granicama namirnice" u _candidates (ovisi o izrazima cijene po jedinici)
+UNVERIFIED_PRICE_OK = "__UNVERIFIED_PRICE_OK__"
+
+
 def _food_filter(include_nonfood: bool = False, include_alcohol: bool = False, unverified: str = "no") -> str:
     """SQL uvjet nad clean.products (alias p) za filtar hrane (food.py).
 
     Zadano samo is_food = true i bez alkohola. `unverified`: "no" (food_group 'unknown' ne ulazi),
     "yes" (ulazi) ili "staple" (ulazi samo proizvod koji je sam povezan s namirnicom, psu; za
-    loose_produce u košarici, gdje naziv već prolazi strogo pravilo prve ili druge riječi).
+    loose_produce u košarici, gdje naziv već prolazi strogo pravilo prve ili druge riječi) ili "staple_strict"
+    (ostale namirnice u košarici, Korak 17: uz to jak član, prva ili druga riječ i cijena u granicama).
     """
     allowed = ["p.is_food"]
     if include_nonfood:
@@ -123,6 +128,11 @@ def _food_filter(include_nonfood: bool = False, include_alcohol: bool = False, u
         allowed.append("p.is_food IS NULL")
     elif unverified == "staple":
         allowed.append("(p.is_food IS NULL AND psu.staple IS NOT NULL AND NOT psu.excluded)")
+    elif unverified == "staple_strict":
+        # Korak 17: proizvod bez kategorije je hrana samo za tu namirnicu: jak član grupe, riječ namirnice prva ili
+        # druga riječ naziva, cijena po jedinici u granicama (UNVERIFIED_PRICE_OK zamjenjuje _candidates)
+        allowed.append("(p.is_food IS NULL AND psu.staple IS NOT NULL AND NOT psu.excluded AND psu.drop_reason IS NULL"
+                       " AND psu.two_words AND sg.match_quality = 'strong' AND " + UNVERIFIED_PRICE_OK + ")")
     sql = "(" + " OR ".join(f"coalesce({a}, false)" for a in allowed) + ")"
     if not include_alcohol:
         sql += " AND p.food_group <> 'alkohol'"
@@ -240,6 +250,7 @@ def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | 
                          LEFT JOIN clean.staple_groups sg ON sg.staple = '{staple.key}' AND sg.bkey = p.bkey"""
         quality_sql = "sg.match_quality"
         unit_suspect_sql = "coalesce(psu.unit_suspect, false)"
+        unit_uncertain_sql = "coalesce(psu.unit_uncertain, false)"
         ppu_sql = STAPLE_PPU_SQL.replace("ps.", "psu.")
         per_unit_sql = """CASE WHEN r.compare_by IN ('pack', 'count') THEN CASE WHEN psu.n_units > 0 THEN r.compare_unit END
                                WHEN psu.assumed_g > 0 THEN r.unit ELSE c.per_unit END"""
@@ -263,10 +274,15 @@ def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | 
         coverage_params = likes
         cov_col = "cov.cov_max"
         drop_sql, rules_join, quality_sql, unit_suspect_sql = "TRUE", "", "NULL::VARCHAR", "false"
+        unit_uncertain_sql = "false"
         ppu_sql, per_unit_sql, conf_sql = "c.price_per_unit", "c.per_unit", "c.unit_confidence"
         source_sql = "CASE WHEN c.unit_confidence = 'low' THEN 'unit_price' ELSE p.pack_source END"
         suspect_sql, n_units_sql, assumed_sql, clearance_sql = "false", "NULL::DOUBLE", "NULL::DOUBLE", "TRUE"
 
+    if UNVERIFIED_PRICE_OK in food_sql:
+        price_ok = (f"coalesce(({per_unit_sql}) = r.compare_unit AND ({ppu_sql}) BETWEEN coalesce(psu.ppu_min, r.ppu_min) "
+                    f"AND coalesce(psu.ppu_max, r.ppu_max), false)") if staple else "false"
+        food_sql = food_sql.replace(UNVERIFIED_PRICE_OK, price_ok)
     gkey_expr, gkey_join = _gkey_sql(staple)
     # cijene namirnice iz clean.staple_prices (samo njezin dio, složen po namirnici) umjesto svih cijena
     prices_sql = (f"(SELECT * EXCLUDE (staple) FROM clean.staple_prices WHERE staple = '{staple.key}')"
@@ -297,7 +313,7 @@ def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | 
                  c.price_per_kg_drained, p.variable_weight, p.clearance,
                  c.is_special, c.date, c.stale_days, s.scope, s.address, s.city, ch.data_quality,
                  p.is_food, p.food_group, p.category_source, p.bkey, {quality_sql} AS match_quality,
-                 {unit_suspect_sql} AS unit_suspect
+                 {unit_suspect_sql} AS unit_suspect, {unit_uncertain_sql} AS unit_uncertain
           FROM g p
           JOIN hit USING (bkey)
           JOIN {prices_sql} c USING (chain, product_id)

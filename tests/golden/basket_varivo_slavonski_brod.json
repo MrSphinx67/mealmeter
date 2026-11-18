@@ -448,15 +448,15 @@
   },
   {
    "addresses": [
-    "Trg Hrvatskog Proljeća 9"
+    "Osječka Ulica 280C"
    ],
    "chain": "lidl",
    "complete": true,
    "n_ingredients": 10,
    "n_matched": 10,
    "n_stores_city": 2,
-   "total_to_buy": 15.71,
-   "total_used": 6.49
+   "total_to_buy": 14.72,
+   "total_used": 6.42
   },
   {
    "addresses": [
@@ -469,18 +469,6 @@
    "n_stores_city": 6,
    "total_to_buy": 16.22,
    "total_used": 9.8
-  },
-  {
-   "addresses": [
-    "Sjeverna Vezna Cesta 31"
-   ],
-   "chain": "plodine",
-   "complete": true,
-   "n_ingredients": 10,
-   "n_matched": 10,
-   "n_stores_city": 1,
-   "total_to_buy": 18.84,
-   "total_used": 9.85
   },
   {
    "addresses": [
@@ -503,8 +491,20 @@
    "n_ingredients": 10,
    "n_matched": 10,
    "n_stores_city": 6,
-   "total_to_buy": 19.97,
-   "total_used": 8.56
+   "total_to_buy": 19.22,
+   "total_used": 8.4
+  },
+  {
+   "addresses": [
+    "Sjeverna Vezna Cesta 31"
+   ],
+   "chain": "plodine",
+   "complete": true,
+   "n_ingredients": 10,
+   "n_matched": 10,
+   "n_stores_city": 1,
+   "total_to_buy": 19.65,
+   "total_used": 9.82
   }
  ],
  "date": "2026-11-17",

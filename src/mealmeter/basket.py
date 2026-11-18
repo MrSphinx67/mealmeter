@@ -38,7 +38,10 @@ FLAG_TEXT = {
     "chain_suspect": "lanac sa sumnjivim podacima",
     "unit_suspect": "gramatura iz stupca unit izgleda krivo (cijena izvan granica ili daleko od drugih lanaca)",
     "portion_pack": "porcijsko pakiranje (>= 20 komada po <= 20 g)",
+    "unit_uncertain": "jedinica nesigurna: cijena može biti po komadu ili po kg",
 }
+# napomena stavke s unit_uncertain (Korak 17); Claude je prenosi korisniku (upute, pravilo 12)
+UNIT_UNCERTAIN_NOTE = "jedinica nesigurna: {price} € može biti cijena komada ili kg, provjeri cijenu na polici"
 
 
 SYNONYMS_PATH = Path(__file__).resolve().parents[2] / "data" / "synonyms.yaml"
@@ -273,6 +276,8 @@ def flags_of(row: dict) -> list[str]:
         out.append("unit_suspect")
     if row.get("portion_pack"):
         out.append("portion_pack")
+    if row.get("unit_uncertain"):
+        out.append("unit_uncertain")
     return out
 
 
@@ -309,7 +314,12 @@ def choose_product(rows: list[dict], need: float, need_unit: str, by_weight_unit
             options.append({**r, "qty": qty, "notes": notes, "flags": flags_of(r), "by_weight": False})
         elif (by_weight_unit and r.get("price_per_unit") and r.get("per_unit") == by_weight_unit
               and (loose or r.get("variable_weight"))):
-            options.append({**r, "qty": None, "notes": ["na vagu"], "flags": flags_of(r), "by_weight": True})
+            # povrće u svežnju (Korak 17, units.yaml bunches): na vagu najmanje jedan svežanj
+            buy = max(need, r["bunch_g"]) if r.get("bunch_g") and need_unit in ("g", "ml") else need
+            notes = ["na vagu" + (f", najmanje jedan svežanj (≈ {r['bunch_g']:g} g, procjena)" if buy > need else "")]
+            if r.get("unit_uncertain"):
+                notes.append(UNIT_UNCERTAIN_NOTE.format(price=f"{r['price_eff']:.2f}".replace(".", ",")))
+            options.append({**r, "qty": None, "buy": buy, "notes": notes, "flags": flags_of(r), "by_weight": True})
     if not options:
         return None
     fallback_weight = False
@@ -330,13 +340,13 @@ def choose_product(rows: list[dict], need: float, need_unit: str, by_weight_unit
     if covering:
         # najjeftinije pakiranje koje pokriva količinu (apsolutna cijena); uz jednaku cijenu VEĆE (Korak 5V6: Nutella
         # 600 g umjesto 400 g za isti novac), a uz jednaku cijenu i količinu prvo po redoslijedu redaka (product_id)
-        best = min(covering, key=lambda o: (o["price_per_unit"] * need / 1000 if o["by_weight"] else o["price_eff"],
-                                            -(need if o["by_weight"] else o["qty"])))
+        best = min(covering, key=lambda o: (o["price_per_unit"] * o["buy"] / 1000 if o["by_weight"] else o["price_eff"],
+                                            -(o["buy"] if o["by_weight"] else o["qty"])))
     else:
         best = min(pool, key=per_unit_cost)
     if best["by_weight"]:
-        n_packs, cost_pack = None, round(best["price_per_unit"] * need / 1000, 2)
-        cost_used = cost_pack
+        n_packs, cost_pack = None, round(best["price_per_unit"] * best["buy"] / 1000, 2)
+        cost_used = round(best["price_per_unit"] * need / 1000, 2)
     else:
         n_packs = max(1, math.ceil(need / best["qty"] - 1e-9))
         cost_pack = round(n_packs * best["price_eff"], 2)
@@ -353,14 +363,21 @@ def _rows_for(con, staple: Staple, attributes: dict, city: str, wholesale: bool 
     # tek kad trgovina nema snažnog). Samo provjerena hrana bez alkohola (osim namirnice s alcohol: true, vino za
     # kuhanje); proizvod nepoznate skupine (food_group 'unknown', npr. Plodine) samo za svježe voće i povrće, gdje
     # naziv prolazi pravilo prve ili druge riječi.
-    food_sql = _food_filter(include_alcohol=staple.alcohol, unverified="staple" if staple.loose_produce else "no")
+    # Korak 17: i ostale namirnice, ali samo strogo (jak član, prva ili druga riječ, cijena u granicama)
+    food_sql = _food_filter(include_alcohol=staple.alcohol,
+                            unverified="staple" if staple.loose_produce else "staple_strict")
     sql, params, _ = _candidates(staple, [], attributes, city, include_clearance=True, food_sql=food_sql,
                                  include_wholesale=wholesale, required=required, weak="early",
                                  staple_prices=has_staple_prices(con))
     # redoslijed je zadan, da izbor pri jednakoj cijeni (min u choose_product) bude uvijek isti
     cur = con.execute(sql + " SELECT * FROM x ORDER BY chain, store_id, product_id", params)
     cols = [d[0] for d in cur.description]
-    return [dict(zip(cols, r)) for r in cur.fetchall()]
+    rows = [dict(zip(cols, r)) for r in cur.fetchall()]
+    if (bunch := units.bunch_rule(staple.key)):
+        for r in rows:
+            if bunch.matches(r["name_norm"]):
+                r["bunch_g"] = bunch.g
+    return rows
 
 
 def _product_attrs(con, staple: Staple) -> tuple[dict[tuple, dict], dict[str, dict]]:
@@ -650,7 +667,7 @@ def alt_eligible(row: dict, staple: Staple | None) -> bool:
     robe promjenjive težine ("GRANA PADANO cca 1KG"), cijene ili gramature izvan granica, porcijskih
     pakiranja i slabih članova namirnice."""
     return not (row["chain"] in WHOLESALE_CHAINS or row.get("variable_weight") or row.get("price_suspect")
-                or row.get("unit_suspect") or row.get("clearance") or portion_pack(row, staple)
+                or row.get("unit_suspect") or row.get("unit_uncertain") or row.get("clearance") or portion_pack(row, staple)
                 or row.get("match_quality") == "weak" or row.get("data_quality") == "suspect")
 
 
@@ -1252,6 +1269,9 @@ def _add_item(stores: dict, key: tuple, rows: list[dict], need: Need, idx: int, 
         "price_per_unit": pick["price_per_unit"], "per_unit": pick["per_unit"],
         "unit_confidence": pick["unit_confidence"], "pack_source": pick["pack_source"],
         "is_special": pick["is_special"], "flags": pick["flags"], "notes": pick["notes"] + notes + (
+            # Korak 17: komad s masom iz stupca quantity lanca (CELER LIST KOM 0,50 kg): cijena je za komad
+            [f"cijena za komad (≈ {format_pack(pick['pack_amount'], pick['pack_unit'])} prema lancu, procjena)"]
+            if pick.get("pack_source") == "quantity" and not pick.get("by_weight") else []) + (
             [f"rinfuza {format_pack(pick['pack_amount'], 'g')} (gramatura iz: {pick['pack_source']}): utrošak je udio "
              f"{need.amount * pick['bulk_sachet_g']:g} g od {pick['pack_amount']:g} g"] if pick.get("bulk_sachet_g") else []),
         "fallback": pick["fallback"], "food_unverified": pick["is_food"] is None,

@@ -3,6 +3,7 @@
 import csv
 import difflib
 import os
+import re
 import tempfile
 from pathlib import Path
 
@@ -41,6 +42,9 @@ WHOLESALE_CHAINS = {"metro"}
 # košaricu; sirove tablice ih zadržavaju. Novi tip poslovnice koji nije ovdje ostaje u bazi (vidi docs/15_STATUS.md).
 NONFOOD_STORE_TYPES = ("ljekarn", "apotek", "benzin", "crpk", "praon", "salon", "frizer", "kozmet", "servis",
                        "vulkaniz")
+
+# roba na vagu u nazivu (Korak 17): "rinfuza", "rinfuzo"
+LOOSE_NAME_RX = re.compile(r"(^| )rinfuz")
 
 NATIONAL_NOTE = "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu."
 
@@ -151,9 +155,13 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
                 # tekućina: stupac unit kaže l/ml, a naziv daje grame ("Suncokretovo ulje 20g Lidla", unit 1l):
                 # vrijedi unit (Korak 5A, docs/lidl_raw_check.md)
                 pack, source, confidence = by_unit, "unit", "high"
+            hint = unit_hint(unit, quantity)
+            if source == "unit" and pack == (1000.0, "g") and LOOSE_NAME_RX.search(norm_text(name) or ""):
+                # Korak 17: Lidl "Mrkva rinfuza", unit "1kg": roba na vagu, cijena je po kg, a ne pakiranje od 1 kg
+                pack, variable, hint, confidence = None, True, "kg", None
             amount, pack_unit = pack or (None, None)
             yield (chain, pid, ean, valid, glob, norm_text(name), match_text(name), amount, pack_unit,
-                   source if pack else None, unit_hint(unit, quantity),
+                   source if pack else None, hint,
                    drained, variable, is_clearance(name), confidence)
 
     _temp_table(con, "product_derived", {
@@ -201,6 +209,7 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
         FROM prices r
         WHERE NOT EXISTS (SELECT 1 FROM nonfood_stores n WHERE n.chain = r.chain AND n.store_id = r.store_id)
     """)
+    quantity_packs(con)
     # Duplikati (chain, store, product): zadržava se red s najnižom price_eff
     con.execute("""
         CREATE OR REPLACE TABLE clean.prices AS
@@ -272,6 +281,53 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
         FROM clean.prices GROUP BY chain ORDER BY chain
     """).fetchall()
     return stats
+
+
+# Korak 17: pakiranje iz stupca quantity. Proizvod bez gramature u nazivu ("CELER LIST KOM", quantity "0.50 kg",
+# cijena 1,99 €, unit_price 3,98 €/kg) prodaje se na komad: cijena je za komad mase quantity, a unit_price lanca je
+# cijena / quantity. Bez toga ga košarica računa na vagu (50 g x 3,98 €/kg = 0,20 €). Vrijedi samo kad quantity ima
+# jedinicu mase ili volumena (ili je jedinica cijene kg/l) i kad je u većini cijena cijena / unit_price = quantity
+# (±5 %); quantity od 1 kg/l je i "cijena po kg", pa se preskače. Broj komada ("10.00" kod jaja) i boce bez jedinice
+# ("0,7500") se ne čitaju.
+QUANTITY_PACK_TOLERANCE = 0.05
+
+
+def quantity_packs(con: duckdb.DuckDBPyConnection) -> int:
+    """pack_amount/pack_unit iz quantity (pack_source 'quantity') za proizvode bez gramature; treba prices_nz.
+    Vraća broj proizvoda."""
+    num = r"^\s*([0-9]*[.,]?[0-9]+)\s*[a-zA-Z]*\s*$"
+    unit = r"^\s*[0-9]*[.,]?[0-9]+\s*([a-zA-Z]*)\s*$"
+    con.execute(f"""
+        CREATE OR REPLACE TEMP TABLE quantity_pack AS
+        WITH q AS (
+          SELECT chain, product_id, unit_hint,
+                 try_cast(replace(regexp_extract(quantity, '{num}', 1), ',', '.') AS DOUBLE) AS qn,
+                 lower(regexp_extract(quantity, '{unit}', 1)) AS qu
+          FROM clean.products WHERE pack_amount IS NULL AND quantity IS NOT NULL
+        ),
+        w AS (
+          SELECT chain, product_id,
+                 CASE WHEN qu IN ('g', 'gr', 'ml') THEN qn
+                      WHEN qu IN ('kg', 'l') OR (qu = '' AND unit_hint IN ('kg', 'l')) THEN qn * 1000 END AS amount,
+                 CASE WHEN qu IN ('ml', 'l') OR (qu = '' AND unit_hint = 'l') THEN 'ml'
+                      WHEN qu IN ('g', 'gr', 'kg') OR (qu = '' AND unit_hint = 'kg') THEN 'g' END AS unit
+          FROM q
+        ),
+        r AS (
+          SELECT w.chain, w.product_id, w.amount, w.unit,
+                 abs(coalesce(p.price, p.price_eff) / p.unit_price - w.amount / 1000)
+                   <= {QUANTITY_PACK_TOLERANCE} * w.amount / 1000 AS ok
+          FROM w JOIN prices_nz p USING (chain, product_id)
+          WHERE w.amount > 0 AND w.unit IS NOT NULL AND abs(w.amount - 1000) > 10 AND p.unit_price > 0
+            AND coalesce(p.price, p.price_eff) > 0
+        )
+        SELECT chain, product_id, amount, unit FROM r GROUP BY ALL HAVING avg(ok::int) > 0.5
+    """)
+    con.execute("""
+        UPDATE clean.products p SET pack_amount = q.amount, pack_unit = q.unit, pack_source = 'quantity',
+                                    pack_confidence = 'high'
+        FROM quantity_pack q WHERE p.chain = q.chain AND p.product_id = q.product_id""")
+    return con.execute("SELECT count(*) FROM quantity_pack").fetchone()[0]
 
 
 DUMMY_EANS_PATH = Path(__file__).resolve().parents[2] / "data" / "dummy_eans.yaml"

@@ -1,0 +1,793 @@
+{
+ "already_have": [
+  "papar",
+  "sol",
+  "ulje"
+ ],
+ "ambiguous": [],
+ "assumptions": [
+  {
+   "attributes": {
+    "vrsta": "stabljika"
+   },
+   "ingredient": "celer",
+   "text": "stabljika, jer recept ima i luk i mrkva; za drugo zadaj attributes.vrsta"
+  }
+ ],
+ "best_store": {
+  "address": "Mije Haleusa 1",
+  "addresses": [
+   "Mije Haleusa 1"
+  ],
+  "chain": "plodine",
+  "city": "Zagreb",
+  "data_quality": "ok",
+  "date": "2026-11-17",
+  "date_hr": "17.11.2026.",
+  "flagged_items": 0,
+  "from_stock_value": 0,
+  "items": [
+   {
+    "alternatives": [
+     {
+      "brand": null,
+      "cheaper": true,
+      "cost_pack": 8.98,
+      "cost_used": 4.99,
+      "delta_eur": -1.0,
+      "ean": "3858881613805",
+      "match_quality": "strong",
+      "n_packs": 2,
+      "name": "JUN.MLJEV.MESO E450 G",
+      "pack_size": "450 g",
+      "per_unit": "kg",
+      "price_eff": 4.49,
+      "price_per_unit": 9.98,
+      "product_id": "185672",
+      "size_note": "usporedba za 500 g: pakiranje 450 g, odabrano 500 g"
+     }
+    ],
+    "attributes": {
+     "vrsta": "junece"
+    },
+    "brand": null,
+    "by_weight_fallback": false,
+    "cost_pack": 5.99,
+    "cost_used": 5.99,
+    "date": "2026-11-17",
+    "date_hr": "17.11.2026.",
+    "ean": "3856031235891",
+    "fallback": false,
+    "flags": [],
+    "food_unverified": false,
+    "have": false,
+    "ingredient": "juneće mljeveno meso",
+    "is_special": false,
+    "match_quality": "strong",
+    "n_packs": 1,
+    "name": "JUNECE MLJEVENO MESO E500 G",
+    "need": 500.0,
+    "need_unit": "g",
+    "notes": [],
+    "pack_qty": 500.0,
+    "pack_size": "500 g",
+    "pack_source": "name",
+    "pantry": false,
+    "per_unit": "kg",
+    "price_eff": 5.99,
+    "price_per_unit": 11.98,
+    "product_id": "185730",
+    "stale_days": 0,
+    "staple": "mljeveno_meso",
+    "unit_confidence": "high"
+   },
+   {
+    "alternatives": [
+     {
+      "brand": null,
+      "cheaper": true,
+      "cost_pack": 2.49,
+      "cost_used": 0.07,
+      "delta_eur": -0.05,
+      "ean": "3858893060413",
+      "match_quality": "strong",
+      "n_packs": 1,
+      "name": "LUK ZUTI 5 KG",
+      "pack_size": "5 kg",
+      "per_unit": "kg",
+      "price_eff": 2.49,
+      "price_per_unit": 0.5,
+      "product_id": "625558",
+      "size_note": "usporedba za 150 g: pakiranje 5 kg, odabrano na vagu"
+     }
+    ],
+    "attributes": {
+     "vrsta": "zuti"
+    },
+    "brand": null,
+    "by_weight_fallback": false,
+    "cost_pack": 0.12,
+    "cost_used": 0.12,
+    "date": "2026-11-17",
+    "date_hr": "17.11.2026.",
+    "ean": "3856022674227",
+    "fallback": false,
+    "flags": [],
+    "food_unverified": false,
+    "have": false,
+    "ingredient": "luk",
+    "is_special": false,
+    "match_quality": "strong",
+    "n_packs": null,
+    "name": "LUK ZUTI",
+    "need": 150.0,
+    "need_unit": "g",
+    "notes": [
+     "na vagu"
+    ],
+    "pack_qty": null,
+    "pack_size": "na vagu",
+    "pack_source": "unit_price",
+    "pantry": false,
+    "per_unit": "kg",
+    "price_eff": 0.79,
+    "price_per_unit": 0.79,
+    "product_id": "110703",
+    "stale_days": 0,
+    "staple": "luk",
+    "unit_confidence": "low"
+   },
+   {
+    "alternatives": [
+     {
+      "brand": null,
+      "cheaper": true,
+      "cost_pack": 1.6,
+      "cost_used": 0.08,
+      "delta_eur": -0.01,
+      "ean": "8032732449378",
+      "match_quality": "strong",
+      "n_packs": 1,
+      "name": "MRKVA PAKIRANA 2 KG",
+      "pack_size": "2 kg",
+      "per_unit": "kg",
+      "price_eff": 1.6,
+      "price_per_unit": 0.8,
+      "product_id": "111840",
+      "size_note": "usporedba za 100 g: pakiranje 2 kg, odabrano na vagu"
+     }
+    ],
+    "attributes": {},
+    "brand": null,
+    "by_weight_fallback": false,
+    "cost_pack": 0.09,
+    "cost_used": 0.09,
+    "date": "2026-11-17",
+    "date_hr": "17.11.2026.",
+    "ean": null,
+    "fallback": false,
+    "flags": [],
+    "food_unverified": false,
+    "have": false,
+    "ingredient": "mrkva",
+    "is_special": false,
+    "match_quality": "strong",
+    "n_packs": null,
+    "name": "MRKVA RINFUZO",
+    "need": 100.0,
+    "need_unit": "g",
+    "notes": [
+     "na vagu"
+    ],
+    "pack_qty": null,
+    "pack_size": "na vagu",
+    "pack_source": "unit_price",
+    "pantry": false,
+    "per_unit": "kg",
+    "price_eff": 0.89,
+    "price_per_unit": 0.89,
+    "product_id": "111801",
+    "stale_days": 0,
+    "staple": "mrkva",
+    "unit_confidence": "low"
+   },
+   {
+    "alternatives": [],
+    "attributes": {
+     "vrsta": "stabljika"
+    },
+    "brand": null,
+    "by_weight_fallback": false,
+    "cost_pack": 1.29,
+    "cost_used": 0.13,
+    "date": "2026-11-17",
+    "date_hr": "17.11.2026.",
+    "ean": "4052963160020",
+    "fallback": false,
+    "flags": [],
+    "food_unverified": false,
+    "have": false,
+    "ingredient": "celer",
+    "is_special": false,
+    "match_quality": "strong",
+    "n_packs": 1,
+    "name": "CELER LIST 500 G.",
+    "need": 50.0,
+    "need_unit": "g",
+    "notes": [],
+    "pack_qty": 500.0,
+    "pack_size": "500 g",
+    "pack_source": "name",
+    "pantry": false,
+    "per_unit": "kg",
+    "price_eff": 1.29,
+    "price_per_unit": 2.58,
+    "product_id": "112206",
+    "stale_days": 0,
+    "staple": "celer",
+    "unit_confidence": "high"
+   },
+   {
+    "alternatives": [
+     {
+      "brand": "Oho!",
+      "cheaper": true,
+      "cost_pack": 1.58,
+      "cost_used": 1.11,
+      "delta_eur": -0.28,
+      "ean": "3856031220811",
+      "match_quality": "strong",
+      "n_packs": 2,
+      "name": "PASIRANA RAJCICA 500 G OHO!",
+      "pack_size": "500 g",
+      "per_unit": "kg",
+      "price_eff": 0.79,
+      "price_per_unit": 1.58,
+      "product_id": "623362",
+      "size_note": "usporedba za 700 g: pakiranje 500 g, odabrano 750 ml"
+     },
+     {
+      "brand": "Fresh Garden",
+      "cheaper": true,
+      "cost_pack": 1.6,
+      "cost_used": 1.12,
+      "delta_eur": -0.27,
+      "ean": "3856018209044",
+      "match_quality": "strong",
+      "n_packs": 2,
+      "name": "PASIRANA RAJCICA 500 G PLODINE (M)",
+      "pack_size": "500 g",
+      "per_unit": "kg",
+      "price_eff": 0.8,
+      "price_per_unit": 1.6,
+      "product_id": "768062",
+      "size_note": "usporedba za 700 g: pakiranje 500 g, odabrano 750 ml"
+     }
+    ],
+    "attributes": {},
+    "brand": "Fructal Pasirana Rajcica",
+    "by_weight_fallback": false,
+    "cost_pack": 1.49,
+    "cost_used": 1.39,
+    "date": "2026-11-17",
+    "date_hr": "17.11.2026.",
+    "ean": "3838945042505",
+    "fallback": false,
+    "flags": [],
+    "food_unverified": false,
+    "have": false,
+    "ingredient": "pasirana rajčica",
+    "is_special": false,
+    "match_quality": "strong",
+    "n_packs": 1,
+    "name": "PASIRANA RAJCICA CLASSIC 750 ML FRUCTAL",
+    "need": 700.0,
+    "need_unit": "g",
+    "notes": [
+     "ml uzeto kao g"
+    ],
+    "pack_qty": 750.0,
+    "pack_size": "750 ml",
+    "pack_source": "name",
+    "pantry": false,
+    "per_unit": "l",
+    "price_eff": 1.49,
+    "price_per_unit": null,
+    "product_id": "604094",
+    "stale_days": 0,
+    "staple": "pasirana_rajcica",
+    "unit_confidence": "high"
+   },
+   {
+    "alternatives": [],
+    "attributes": {
+     "oblik": "spageti"
+    },
+    "brand": "Oho!",
+    "by_weight_fallback": false,
+    "cost_pack": 0.66,
+    "cost_used": 0.66,
+    "date": "2026-11-17",
+    "date_hr": "17.11.2026.",
+    "ean": "3856031213691",
+    "fallback": false,
+    "flags": [],
+    "food_unverified": true,
+    "have": false,
+    "ingredient": "špageti",
+    "is_special": false,
+    "match_quality": "strong",
+    "n_packs": 1,
+    "name": "TJESTENINA SPAGHETTI 400 G OHO",
+    "need": 400.0,
+    "need_unit": "g",
+    "notes": [],
+    "pack_qty": 400.0,
+    "pack_size": "400 g",
+    "pack_source": "name",
+    "pantry": false,
+    "per_unit": "kg",
+    "price_eff": 0.66,
+    "price_per_unit": 1.65,
+    "product_id": "623667",
+    "stale_days": 0,
+    "staple": "tjestenina",
+    "unit_confidence": "high"
+   },
+   {
+    "alternatives": [],
+    "attributes": {
+     "oblik": "kockice",
+     "vrsta": "panceta"
+    },
+    "brand": "Salumificio Beretta",
+    "by_weight_fallback": false,
+    "cost_pack": 1.46,
+    "cost_used": 0.97,
+    "date": "2026-11-17",
+    "date_hr": "17.11.2026.",
+    "ean": "8007660482100",
+    "fallback": false,
+    "flags": [],
+    "food_unverified": false,
+    "have": false,
+    "ingredient": "pancetta",
+    "is_special": false,
+    "match_quality": "strong",
+    "n_packs": 1,
+    "name": "PANCETA KOCKICE 150 G BERETTA",
+    "need": 100.0,
+    "need_unit": "g",
+    "notes": [],
+    "pack_qty": 150.0,
+    "pack_size": "150 g",
+    "pack_source": "name",
+    "pantry": false,
+    "per_unit": "kg",
+    "price_eff": 1.46,
+    "price_per_unit": 9.73,
+    "product_id": "178776",
+    "stale_days": 0,
+    "staple": "slanina",
+    "unit_confidence": "high"
+   },
+   {
+    "alternatives": [],
+    "attributes": {
+     "vrsta": "grana_padano"
+    },
+    "brand": "Zanetti",
+    "by_weight_fallback": false,
+    "cost_pack": 1.33,
+    "cost_used": 0.67,
+    "date": "2026-11-17",
+    "date_hr": "17.11.2026.",
+    "ean": "8002710412700",
+    "fallback": false,
+    "flags": [],
+    "food_unverified": true,
+    "have": false,
+    "ingredient": "parmezan",
+    "is_special": false,
+    "match_quality": "strong",
+    "n_packs": 1,
+    "name": "SIR GRANA PADANO LISTICI 80 G ZANETTI",
+    "need": 40.0,
+    "need_unit": "g",
+    "notes": [],
+    "pack_qty": 80.0,
+    "pack_size": "80 g",
+    "pack_source": "name",
+    "pantry": false,
+    "per_unit": "kg",
+    "price_eff": 1.33,
+    "price_per_unit": 16.63,
+    "product_id": "958644",
+    "stale_days": 0,
+    "staple": "tvrdi_sir_talijanski",
+    "substitution": {
+     "chosen": "SIR GRANA PADANO LISTICI 80 G ZANETTI",
+     "note": "Grana Padano (sličan tvrdi sir), ne Parmigiano Reggiano",
+     "requested": "parmezan"
+    },
+    "unit_confidence": "high"
+   }
+  ],
+  "missing": [],
+  "n_ingredients": 8,
+  "n_matched": 8,
+  "n_stores": 1,
+  "scope": "local",
+  "stale_days": 0,
+  "store_id": "055",
+  "total_to_buy": 12.43,
+  "total_used": 10.02,
+  "unit_confidence": "low"
+ },
+ "city": "Zagreb",
+ "comparison": [
+  {
+   "addresses": [
+    "Mije Haleusa 1"
+   ],
+   "chain": "plodine",
+   "complete": true,
+   "n_ingredients": 8,
+   "n_matched": 8,
+   "n_stores_city": 7,
+   "total_to_buy": 12.43,
+   "total_used": 10.02
+  },
+  {
+   "addresses": [
+    "Dubrava 241",
+    "Gračanska Cesta 208"
+   ],
+   "chain": "konzum",
+   "complete": true,
+   "n_ingredients": 8,
+   "n_matched": 8,
+   "n_stores_city": 100,
+   "total_to_buy": 15.34,
+   "total_used": 10.89
+  },
+  {
+   "addresses": [
+    "Ilica 201",
+    "Lastovska Ulica 42"
+   ],
+   "chain": "lidl",
+   "complete": true,
+   "n_ingredients": 8,
+   "n_matched": 8,
+   "n_stores_city": 19,
+   "total_to_buy": 17.23,
+   "total_used": 10.41
+  },
+  {
+   "addresses": [
+    "Kovinska 1"
+   ],
+   "chain": "roto",
+   "complete": true,
+   "n_ingredients": 8,
+   "n_matched": 8,
+   "n_stores_city": 1,
+   "total_to_buy": 17.44,
+   "total_used": 11.77
+  },
+  {
+   "addresses": [
+    "Avenija V. Holjevca 62"
+   ],
+   "chain": "spar",
+   "complete": true,
+   "n_ingredients": 8,
+   "n_matched": 8,
+   "n_stores_city": 52,
+   "total_to_buy": 19.08,
+   "total_used": 12.03
+  },
+  {
+   "addresses": [
+    "Antuna Soljana 43",
+    "Barutanski Jarak 54"
+   ],
+   "chain": "kaufland",
+   "complete": true,
+   "n_ingredients": 8,
+   "n_matched": 8,
+   "n_stores_city": 12,
+   "total_to_buy": 19.8,
+   "total_used": 11.17
+  }
+ ],
+ "date": "2026-11-17",
+ "date_hr": "17.11.2026.",
+ "incomplete": [
+  {
+   "chain": "gavranovic",
+   "missing": [
+    "juneće mljeveno meso"
+   ],
+   "n_matched": 7,
+   "note": "nedostaje: juneće mljeveno meso",
+   "total_to_buy": 10.44
+  },
+  {
+   "chain": "eurospin",
+   "missing": [
+    "celer"
+   ],
+   "n_matched": 7,
+   "note": "nedostaje: celer",
+   "total_to_buy": 10.56
+  },
+  {
+   "chain": "stridon",
+   "missing": [
+    "juneće mljeveno meso"
+   ],
+   "n_matched": 7,
+   "note": "nedostaje: juneće mljeveno meso",
+   "total_to_buy": 11.35
+  },
+  {
+   "chain": "tommy",
+   "missing": [
+    "celer"
+   ],
+   "n_matched": 7,
+   "note": "nedostaje: celer",
+   "total_to_buy": 13.48
+  },
+  {
+   "chain": "ntl",
+   "missing": [
+    "juneće mljeveno meso",
+    "celer"
+   ],
+   "n_matched": 6,
+   "note": "nedostaje: juneće mljeveno meso, celer",
+   "total_to_buy": 6.78
+  },
+  {
+   "chain": "vrutak",
+   "date_hr": "16.11.2026.",
+   "missing": [
+    "mrkva",
+    "celer"
+   ],
+   "n_matched": 6,
+   "note": "nedostaje: mrkva, celer",
+   "stale_days": 1,
+   "total_to_buy": 16.61
+  },
+  {
+   "chain": "boso",
+   "missing": [
+    "juneće mljeveno meso",
+    "celer",
+    "parmezan"
+   ],
+   "n_matched": 5,
+   "note": "nedostaje: juneće mljeveno meso, celer, parmezan",
+   "total_to_buy": 7.25
+  },
+  {
+   "chain": "zabac",
+   "missing": [
+    "juneće mljeveno meso",
+    "luk",
+    "mrkva",
+    "celer"
+   ],
+   "n_matched": 4,
+   "note": "nedostaje: juneće mljeveno meso, luk, mrkva, celer",
+   "total_to_buy": 5.96
+  },
+  {
+   "chain": "stanic",
+   "missing": [
+    "juneće mljeveno meso",
+    "luk",
+    "mrkva",
+    "celer"
+   ],
+   "n_matched": 4,
+   "note": "nedostaje: juneće mljeveno meso, luk, mrkva, celer",
+   "total_to_buy": 8.06
+  },
+  {
+   "chain": "dm",
+   "missing": [
+    "juneće mljeveno meso",
+    "luk",
+    "mrkva",
+    "celer",
+    "pancetta",
+    "parmezan"
+   ],
+   "n_matched": 2,
+   "note": "nedostaje: juneće mljeveno meso, luk, mrkva, celer, pancetta, parmezan",
+   "total_to_buy": 2.95
+  },
+  {
+   "chain": "dukat",
+   "missing": [
+    "juneće mljeveno meso",
+    "luk",
+    "mrkva",
+    "celer",
+    "pasirana rajčica",
+    "špageti",
+    "pancetta"
+   ],
+   "n_matched": 1,
+   "note": "nedostaje: juneće mljeveno meso, luk, mrkva, celer, pasirana rajčica, špageti, pancetta",
+   "total_to_buy": 1.59
+  }
+ ],
+ "ingredients": [
+  {
+   "accepted_values": {},
+   "amount": 500.0,
+   "applied_attributes": {
+    "vrsta": "junece"
+   },
+   "assumed_form": null,
+   "attributes": {
+    "vrsta": "junece"
+   },
+   "form": null,
+   "name": "juneće mljeveno meso",
+   "pantry": false,
+   "staple": "mljeveno_meso",
+   "unit": "g",
+   "warnings": []
+  },
+  {
+   "accepted_values": {},
+   "amount": 150.0,
+   "applied_attributes": {},
+   "assumed_form": null,
+   "attributes": {},
+   "form": null,
+   "name": "luk",
+   "pantry": false,
+   "staple": "luk",
+   "unit": "g",
+   "warnings": [
+    "1 kom ≈ 150 g (komad 150 g, procjena)"
+   ]
+  },
+  {
+   "accepted_values": {},
+   "amount": 100.0,
+   "applied_attributes": {},
+   "assumed_form": null,
+   "attributes": {},
+   "form": null,
+   "name": "mrkva",
+   "pantry": false,
+   "staple": "mrkva",
+   "unit": "g",
+   "warnings": [
+    "1 kom ≈ 100 g (komad 100 g, procjena)"
+   ]
+  },
+  {
+   "accepted_values": {},
+   "amount": 50.0,
+   "applied_attributes": {
+    "vrsta": "stabljika"
+   },
+   "assumed_form": null,
+   "attributes": {
+    "vrsta": "stabljika"
+   },
+   "form": null,
+   "name": "celer",
+   "pantry": false,
+   "staple": "celer",
+   "unit": "g",
+   "warnings": [
+    "1 kom ≈ 50 g (komad 50 g, procjena)"
+   ]
+  },
+  {
+   "accepted_values": {},
+   "amount": 700.0,
+   "applied_attributes": {},
+   "assumed_form": null,
+   "attributes": {},
+   "form": null,
+   "name": "pasirana rajčica",
+   "pantry": false,
+   "staple": "pasirana_rajcica",
+   "unit": "g",
+   "warnings": []
+  },
+  {
+   "accepted_values": {},
+   "amount": 400.0,
+   "applied_attributes": {
+    "oblik": "spageti"
+   },
+   "assumed_form": null,
+   "attributes": {
+    "oblik": "spageti"
+   },
+   "form": null,
+   "name": "špageti",
+   "pantry": false,
+   "staple": "tjestenina",
+   "unit": "g",
+   "warnings": []
+  },
+  {
+   "accepted_values": {},
+   "amount": 100.0,
+   "applied_attributes": {
+    "vrsta": "panceta"
+   },
+   "assumed_form": null,
+   "attributes": {
+    "vrsta": "panceta"
+   },
+   "form": null,
+   "name": "pancetta",
+   "pantry": false,
+   "staple": "slanina",
+   "unit": "g",
+   "warnings": []
+  },
+  {
+   "accepted_values": {},
+   "amount": 40.0,
+   "applied_attributes": {},
+   "assumed_form": null,
+   "attributes": {},
+   "form": null,
+   "name": "parmezan",
+   "pantry": false,
+   "staple": "tvrdi_sir_talijanski",
+   "unit": "g",
+   "warnings": []
+  }
+ ],
+ "mode": "single_store",
+ "more_chains": [
+  {
+   "addresses": [
+    "Ulica Marije Radić 14"
+   ],
+   "chain": "studenac",
+   "n_matched": 8,
+   "n_stores_city": 141,
+   "total_to_buy": 22.41
+  }
+ ],
+ "note": "Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists (cijene.dev); in-store prices may differ, a price list is not stock, and promotions change. Podaci: cijene.dev (DobarKod), prema uvjetima korištenja (https://cijene.dev/uvjeti-koristenja). / Data: cijene.dev (DobarKod), under its terms of use (https://cijene.dev/uvjeti-koristenja).",
+ "price_spread": {
+  "cheapest": [
+   "plodine"
+  ],
+  "cheapest_total": 12.43,
+  "difference_eur": 9.98,
+  "most_expensive": [
+   "studenac"
+  ],
+  "most_expensive_total": 22.41,
+  "small": false
+ },
+ "stores": [],
+ "summary_hr": "Za kupiti: 12,43 €. Stvarno utrošeno: 10,02 €.",
+ "truncated": true,
+ "unmatched": [],
+ "warnings": [
+  "1 kom ≈ 150 g (komad 150 g, procjena)",
+  "1 kom ≈ 100 g (komad 100 g, procjena)",
+  "1 kom ≈ 50 g (komad 50 g, procjena)"
+ ]
+}

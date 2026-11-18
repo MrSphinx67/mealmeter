@@ -51,8 +51,13 @@ def test_golden_outputs():
 def test_golden_files_present():
     from pathlib import Path
 
+    import importlib.util
+
+    spec = importlib.util.spec_from_file_location("golden", Path(__file__).parents[1] / "scripts" / "golden.py")
+    golden = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(golden)
     files = sorted((Path(__file__).parent / "golden").glob("*.json"))
-    assert len(files) == 27
+    assert {f.stem for f in files} == set(golden.SCENARIOS)  # Korak 17: 28 (+ basket_bolonjez_celer_zagreb)
     kinds = {f.name.split("_")[0] for f in files}
     assert kinds == {"find", "prices", "basket"}
 

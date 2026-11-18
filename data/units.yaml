@@ -96,3 +96,13 @@ pieces:  # g po komadu (srednje veliki, neočišćen, kakav se kupuje)
   poriluk: {g: 250, estimate: true}
   patlidzan: {g: 300, estimate: true}
   cimet.kora: {g: 3, piece: štapić, estimate: true}
+
+# Korak 17: povrće koje se prodaje u svežnju. Kad se kupuje na vagu (cijena po kg), u košaricu ide najmanje jedan
+# svežanj (g), ne samo grami iz recepta ("1 stabljika celera" = 50 g, a na polici je svežanj od ≈ 450 g).
+# pattern / exclude: regex na name_norm proizvoda (mala slova, bez dijakritika). SVE MASE SU PROCJENE.
+# Kopar nije namirnica (staples.yaml), pa ide kao free_text i pravilo se na njega ne primjenjuje.
+bunches:
+  celer: {g: 450, pattern: '\blist|stablj|rebras', exclude: 'korijen|korjen|\bkor\b|gomolj', estimate: true}  # celer list (= pieces.celer.pack_g)
+  persin: {g: 50, pattern: 'persin', exclude: 'korijen|korjen|berlinsk', estimate: true}  # vezica peršina (= pieces.persin)
+  luk: {g: 150, pattern: '\bmlad', estimate: true}  # vezica mladog luka (lanci: 0,12-0,30 kg)
+  spinat: {g: 500, pattern: '\bblitv', exclude: 'smrz|ledo|briket', estimate: true}  # vezana blitva (Konzum, Kaufland 0,5 kg)
