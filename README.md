@@ -53,7 +53,7 @@ Točan tekst ovisi o asistentu; brojke dolaze iz alata.
 ### Izvor podataka i zahvale
 
 Cijene dolaze iz službenih cjenika koje trgovci moraju javno objavljivati
-(NN 75/25; od 17. 11. 2026. NN 101/26 i 110/26).
+(NN 101/26, 110/26).
 Mealmeter koristi pročišćene dnevne arhive s **[cijene.dev](https://cijene.dev)**,
 koje izrađuje i održava Senko Rašić ([DobarKod](https://dobarkod.hr)).
 Bez tog posla ovaj projekt ne bi postojao, hvala!
@@ -164,7 +164,7 @@ The wording depends on the assistant; the numbers come from the tool.
 ### Data source and acknowledgements
 
 Prices come from the official price lists that Croatian retailers are required to publish
-(NN 75/25; from 17 Nov 2026, NN 101/26 and 110/26).
+(NN 101/26, 110/26).
 Mealmeter uses the cleaned daily archives from **[cijene.dev](https://cijene.dev)**,
 built and maintained by Senko Rašić ([DobarKod](https://dobarkod.hr)).
 This project would not exist without that work, thank you!

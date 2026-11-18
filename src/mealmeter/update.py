@@ -21,6 +21,7 @@ from pathlib import Path
 import duckdb
 
 from mealmeter.build import build_clean, load_raw
+from mealmeter.normalize import PRICE_REF_UNIT_RX
 
 LIST_URL = "https://api.cijene.dev/v0/list"
 ARCHIVE_URL = "https://api.cijene.dev/v0/archive/{date}.zip"
@@ -31,6 +32,18 @@ MAX_DROP = 0.20
 # (clean.price_history) ostaje i vraća se sama kad se ponovno pojavi u arhivi
 CARRY_DROP = 0.10
 CARRY_DAYS = 7
+# memorija polja proizvoda (Korak 15): od 16./17.11.2026. (NN 101/26, 110/26) dio lanaca objavljuje praznu kategoriju
+# (konzum, lidl, dm, boso, branka, jadranka_trgovina, trgocentar, djelo_vodice, vrutak, nove šifre kauflanda), prazan
+# quantity/unit (boso, jadranka_trgovina, trgocentar) ili Lidl umjesto veličine pakiranja ("500g") jedinicu cijene
+# ("g (1kg)"). Prazna (ili kod unit nova "x (osnova)") vrijednost dobiva zadnju poznatu za isti (lanac, šifra), a bez
+# šifre za isti (lanac, barkod); is_food i pakiranje postojećih proizvoda tako se ne mijenjaju. Memorija živi u
+# clean.product_fields, zapis koji se FIELD_KEEP_DAYS dana ne pojavi ispada. Baza bez memorije puni se iz prethodnih
+# sirovih proizvoda i arhive SEED_DATE (zadnji dan na kojem su svi lanci imali kategorije).
+FIELD_KEEP_DAYS = 90
+SEED_DATE = "2026-11-13"
+FIELDS = ("category", "unit", "quantity")
+# Lidl od 17.11.2026.: "g (1kg)", "bez (1 kom.)", "ml (1 L)" (jedinica cijene, bez veličine pakiranja)
+NO_PACK_UNIT_RX = PRICE_REF_UNIT_RX
 
 SCHEDULE = """\
 # Dva pokretanja dnevno (15:30 i 23:30). Najnovija arhiva uzima se iz /v0/list, a ne po satu: 20.10. je
@@ -300,6 +313,110 @@ def carry_forward(con, old_db: Path, date: str, max_drop: float = CARRY_DROP, ma
         con.execute("DETACH prev")
 
 
+def _empty(col: str) -> str:
+    return f"trim(coalesce({col}, '')) = ''"
+
+
+def _no_info(field: str, col: str) -> str:
+    """SQL: vrijednost polja ne nosi podatak (prazna; kod unit i Lidlov oblik "g (1kg)")."""
+    if field == "unit":
+        return f"({_empty(col)} OR regexp_full_match({col}, '{NO_PACK_UNIT_RX}'))"
+    return _empty(col)
+
+
+def extract_products(zip_path: Path, dest: Path) -> Path:
+    """Samo <lanac>/products.csv iz arhive (za memoriju polja); vraća mapu s mapama lanaca."""
+    if dest.exists():
+        shutil.rmtree(dest)
+    dest.mkdir(parents=True)
+    with zipfile.ZipFile(zip_path) as z:
+        for member in z.namelist():
+            parts = Path(member).parts
+            if parts and parts[-1] == "products.csv" and len(parts) <= 3 and ".." not in parts:
+                target = dest / parts[-2]
+                target.mkdir(exist_ok=True)
+                with z.open(member) as src, open(target / "products.csv", "wb") as out:
+                    shutil.copyfileobj(src, out)
+    return dest
+
+
+def remember_fields(con, old_db: Path | None, date: str, seed_root: Path | None = None,
+                    keep_days: int = FIELD_KEEP_DAYS) -> list[tuple]:
+    """Popuni prazna polja (FIELDS) sirove tablice products iz memorije i zapiši novu memoriju u
+    clean.product_fields. Memorija: clean.product_fields stare baze; bez nje (prvi put) sirovi proizvodi stare baze i
+    proizvodi arhive `seed_root`. Vraća (lanac, polje, popunjeno) za ispis."""
+    con.execute("""CREATE OR REPLACE TEMP TABLE mem (chain VARCHAR, product_id VARCHAR, barcode VARCHAR,
+                   category VARCHAR, unit VARCHAR, quantity VARCHAR, last_seen DATE, prio INTEGER)""")
+    cutoff = (dt.date.fromisoformat(date) - dt.timedelta(days=keep_days)).isoformat()
+    attached = False
+    if old_db is not None and old_db.exists():
+        con.execute(f"ATTACH '{old_db}' AS fprev (READ_ONLY)")
+        attached = True
+    try:
+        tables = {r[0] for r in con.execute(
+            "SELECT schema_name || '.' || table_name FROM duckdb_tables() WHERE database_name = 'fprev'").fetchall()}
+        if "clean.product_fields" in tables:
+            con.execute(f"""INSERT INTO mem SELECT chain, product_id, barcode, category, unit, quantity, last_seen, 0
+                            FROM fprev.clean.product_fields WHERE last_seen >= DATE '{cutoff}'""")
+        else:
+            if "main.products" in tables:
+                prev = con.execute("SELECT max(date) FROM fprev.main.prices").fetchone()[0] if "main.prices" in tables else None
+                con.execute(f"""INSERT INTO mem SELECT chain, product_id, barcode, category, unit, quantity,
+                                {f"DATE '{prev}'" if prev else f"DATE '{date}'"}, 0 FROM fprev.main.products""")
+            if seed_root is not None:
+                for chain_dir in sorted(p for p in Path(seed_root).iterdir() if (p / "products.csv").exists()):
+                    con.execute(f"""INSERT INTO mem SELECT '{chain_dir.name}', product_id, barcode, category, unit,
+                                    quantity, DATE '{date}', 1
+                                    FROM read_csv('{chain_dir / "products.csv"}', header=true, all_varchar=true)""")
+    finally:
+        if attached:
+            con.execute("DETACH fprev")
+    # po (lanac, šifra) za svako polje prva vrijednost s podatkom (prethodna baza prije arhive SEED_DATE)
+    agg = ", ".join(f"arg_min({f}, prio) FILTER (WHERE NOT {_no_info(f, f)}) AS {f}" for f in FIELDS)
+    con.execute(f"""CREATE OR REPLACE TEMP TABLE mem1 AS
+        SELECT chain, product_id, arg_min(barcode, prio) AS barcode, {agg}, max(last_seen) AS last_seen
+        FROM mem GROUP BY chain, product_id""")
+    # zamjenska šifra (Lidl je 17.11. promijenio dio šifri): isti barkod lanca, samo kad je jednoznačan
+    con.execute(f"""CREATE OR REPLACE TEMP TABLE mem_bc AS
+        SELECT chain, barcode, {", ".join(f"any_value({f}) AS {f}" for f in FIELDS)} FROM mem1
+        WHERE NOT {_empty("barcode")} GROUP BY chain, barcode
+        HAVING {" AND ".join(f"count(DISTINCT {f}) <= 1" for f in FIELDS)}""")
+    # šifra bez vodećih nula (Lidl 17.11.: "0083215" -> "83215", često uz drukčiji barkod), samo kad je jednoznačna
+    con.execute(f"""CREATE OR REPLACE TEMP TABLE mem_z AS
+        SELECT chain, ltrim(product_id, '0') AS pid_z, {", ".join(f"any_value({f}) AS {f}" for f in FIELDS)} FROM mem1
+        GROUP BY chain, pid_z
+        HAVING {" AND ".join(f"count(DISTINCT {f}) <= 1" for f in FIELDS)}""")
+    con.execute(f"""CREATE OR REPLACE TEMP TABLE fill AS
+        SELECT p.chain, p.product_id, {", ".join(
+            f"CASE WHEN {_no_info(f, 'p.' + f)} AND coalesce(m.{f}, b.{f}, z.{f}) IS NOT NULL "
+            f"THEN coalesce(m.{f}, b.{f}, z.{f}) END AS {f}"
+            for f in FIELDS)}
+        FROM (SELECT DISTINCT chain, product_id, barcode, {", ".join(FIELDS)} FROM products) p
+        LEFT JOIN mem1 m USING (chain, product_id)
+        -- zamjene po polju, kad ista šifra za to polje nema vrijednost (i kad je nova šifra već u memoriji s praznim
+        -- poljima, npr. drugo učitavanje istog dana ili dan poslije)
+        LEFT JOIN mem_bc b ON b.chain = p.chain AND b.barcode = p.barcode
+        LEFT JOIN mem_z z ON z.chain = p.chain AND z.pid_z = ltrim(p.product_id, '0')
+        QUALIFY row_number() OVER (PARTITION BY p.chain, p.product_id) = 1""")
+    filled = con.execute(f"""SELECT chain, field, n FROM (
+        SELECT chain, {", ".join(f"count({f}) AS {f}" for f in FIELDS)} FROM fill GROUP BY chain)
+        UNPIVOT (n FOR field IN ({", ".join(FIELDS)})) WHERE n > 0 ORDER BY chain, field""").fetchall()
+    con.execute(f"""UPDATE products p SET {", ".join(f"{f} = coalesce(f.{f}, p.{f})" for f in FIELDS)} FROM fill f
+                    WHERE p.chain = f.chain AND p.product_id = f.product_id
+                      AND ({" OR ".join(f"f.{f} IS NOT NULL" for f in FIELDS)})""")
+    con.execute("CREATE SCHEMA IF NOT EXISTS clean")
+    con.execute(f"""CREATE OR REPLACE TABLE clean.product_fields AS
+        SELECT chain, product_id, any_value(barcode) AS barcode, {", ".join(f"any_value({f}) AS {f}" for f in FIELDS)},
+               DATE '{date}' AS last_seen
+        FROM products GROUP BY chain, product_id
+        UNION ALL
+        SELECT m.chain, m.product_id, m.barcode, {", ".join(f"m.{f}" for f in FIELDS)}, m.last_seen FROM mem1 m
+        WHERE NOT EXISTS (SELECT 1 FROM products p WHERE p.chain = m.chain AND p.product_id = m.product_id)""")
+    for t in ("mem", "mem1", "mem_bc", "mem_z", "fill"):
+        con.execute(f"DROP TABLE {t}")
+    return filled
+
+
 # --- izgradnja i zamjena ---------------------------------------------------------------
 
 def compare_stats(new: list[tuple], old: list[tuple]) -> list[tuple]:
@@ -372,7 +489,7 @@ def _clean_count(db_path: Path) -> int | None:
 
 
 def build_database(root: Path, date: str, db_path: Path, keep_days: int = KEEP_DAYS,
-                   max_drop: float = MAX_DROP, info: dict | None = None) -> dict:
+                   max_drop: float = MAX_DROP, info: dict | None = None, seed_root: Path | None = None) -> dict:
     """Izgradi novu bazu u privremenu datoteku, provjeri je, prenese povijest cijena i atomarno
     zamijeni `db_path`. Pri bilo kojoj grešci stara baza ostaje netaknuta."""
     prev_date, prev_stats = _previous(db_path)
@@ -389,7 +506,9 @@ def build_database(root: Path, date: str, db_path: Path, keep_days: int = KEEP_D
         # učitava ponovno (ponovno objavljena arhiva u 23:30, --force): inače prenesene cijene nestanu iz sirovih
         # tablica i sutra ih nema odakle prenijeti (branka 27.10.2026.: izostaje 4. dan, preneseno 0 cijena)
         carried = carry_forward(con, db_path, date) if prev_date else []
-        build_clean(con)
+        # prazna polja proizvoda iz memorije (Korak 15), prije čistih tablica: food_group, pakiranje
+        filled = remember_fields(con, db_path if prev_date else None, date, seed_root)
+        build_stats = build_clean(con)
         # jedina blokada: što alat stvarno vidi (nakon carry-forwarda); hvata kvar u našoj izgradnji, a nestanak
         # lanca iz izvora pokriva carry-forward
         n_clean = con.execute("SELECT count(*) FROM clean.prices").fetchone()[0]
@@ -438,7 +557,7 @@ def build_database(root: Path, date: str, db_path: Path, keep_days: int = KEEP_D
             "price_rows": sum(r[3] for r in stats),
             "price_rows_previous": sum(r[3] for r in prev_stats) if prev_stats else None,
             "diff": compare_stats(stats, prev_stats) if prev_stats and prev_date != date else [],
-            "carried": carried,
+            "carried": carried, "fields_filled": filled, "nonfood_stores": (build_stats or {}).get("nonfood_stores", []),
             "clean_prices": n_clean, "clean_prices_previous": prev_clean,
             "history_days": [d.isoformat() for (d,) in con.execute(
                 "SELECT DISTINCT date FROM clean.price_history ORDER BY date").fetchall()],
@@ -457,6 +576,27 @@ def build_database(root: Path, date: str, db_path: Path, keep_days: int = KEEP_D
         raise
 
 
+def _seed(db_path: Path, date: str, seed_date: str | None, data_dir: Path, list_url: str) -> Path | None:
+    """Proizvodi arhive seed_date za prvo punjenje memorije polja: samo kad postojeća baza još nema
+    clean.product_fields i učitava se kasniji dan (zip se preuzima jednom i ostaje u data_dir)."""
+    if not seed_date or date <= seed_date or not db_path.exists():
+        return None
+    con = duckdb.connect(str(db_path), read_only=True)
+    try:
+        if con.execute("SELECT count(*) FROM duckdb_tables() WHERE schema_name = 'clean' "
+                       "AND table_name = 'product_fields'").fetchone()[0]:
+            return None
+    finally:
+        con.close()
+    zip_path = data_dir / f"{seed_date}.zip"
+    if not zip_path.exists():
+        info = latest_archive(list_url, seed_date)
+        log(f"memorija polja proizvoda: preuzimam {info['url']}")
+        download(info["url"], zip_path, info.get("size"))
+    log(f"memorija polja proizvoda: prvo punjenje iz {zip_path}")
+    return extract_products(zip_path, data_dir / f"{seed_date}-products")
+
+
 def run(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Dnevno ažuriranje Mealmeter baze iz cijene.dev")
     ap.add_argument("--db", default="data/mealmeter.duckdb")
@@ -467,6 +607,8 @@ def run(argv: list[str] | None = None) -> int:
     ap.add_argument("--keep-days", type=int, default=KEEP_DAYS)
     ap.add_argument("--max-drop", type=float, default=MAX_DROP)
     ap.add_argument("--force", action="store_true", help="ponovno učitaj i ako je arhiva već u bazi")
+    ap.add_argument("--seed-date", default=SEED_DATE,
+                    help="arhiva za prvo punjenje memorije polja proizvoda (prazno: bez nje)")
     ap.add_argument("--print-schedule", action="store_true", help="ispiši naredbu za cron/systemd i izađi")
     args = ap.parse_args(argv)
 
@@ -506,8 +648,9 @@ def run(argv: list[str] | None = None) -> int:
                 log(f"preuzimam {info['url']}")
                 download(info["url"], zip_path, info.get("size"))
         root = extract(zip_path, data_dir / date)
+        seed_root = _seed(db_path, date, args.seed_date, data_dir, args.list_url)
         log(f"gradim bazu za {date} (prethodna: {prev_date or '-'})")
-        summary = build_database(root, date, db_path, args.keep_days, args.max_drop, info)
+        summary = build_database(root, date, db_path, args.keep_days, args.max_drop, info, seed_root)
     except ValidationError as e:
         log(f"PROVJERA NIJE PROŠLA: {e}; baza nije promijenjena")
         github_report([], str(e))
@@ -537,6 +680,15 @@ def run(argv: list[str] | None = None) -> int:
         n_rows = sum(r[4] for r in summary["carried"])
         chains = sorted({r[0] for r in summary["carried"]})
         print(f"  carry-forward:   {len(summary['carried'])} trgovina, {n_rows} cijena ({', '.join(chains)})")
+    if summary["nonfood_stores"]:
+        parts = [f"{chain} {typ} {n}" for chain, typ, n in summary["nonfood_stores"]]
+        print(f"  neprehrambene poslovnice (izvan alata): {', '.join(parts)}")
+    if summary["fields_filled"]:
+        by_field: dict[str, list[str]] = {}
+        for chain, field, n in summary["fields_filled"]:
+            by_field.setdefault(field, []).append(f"{chain} {n}")
+        for field, parts in by_field.items():
+            print(f"  zadnji poznati {field}: {', '.join(parts)}")
     if summary["diff"]:
         print(f"\n  razlike naspram {summary['previous_date']} (sirove tablice):")
         print(f"  {'lanac':<28}{'trgovina':>9}{'Δ':>6}{'proizvoda':>11}{'Δ':>8}{'cijena':>11}{'Δ':>9}")

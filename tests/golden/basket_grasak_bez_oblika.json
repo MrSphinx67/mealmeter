@@ -14,9 +14,9 @@
      "smrznuto"
     ],
     "prices": {
-     "konzerva": 2.7,
-     "smrznuto": 1.59,
-     "suho": 0.64
+     "konzerva": 1.58,
+     "smrznuto": 1.06,
+     "suho": 0.58
     },
     "question": "suho ili konzerva ili smrznuto?",
     "unit": "g"
@@ -34,21 +34,21 @@
     {
      "amount": 320.0,
      "form": "suho",
-     "price_eur": 0.64,
+     "price_eur": 0.58,
      "price_note": "najjeftinije u gradu, za traženu količinu gotovog proizvoda",
      "unit": "g"
     },
     {
      "amount": 800.0,
      "form": "konzerva",
-     "price_eur": 2.7,
+     "price_eur": 1.58,
      "price_note": "najjeftinije u gradu, za traženu količinu gotovog proizvoda",
      "unit": "g"
     },
     {
      "amount": 800.0,
      "form": "smrznuto",
-     "price_eur": 1.59,
+     "price_eur": 1.06,
      "price_note": "najjeftinije u gradu, za traženu količinu gotovog proizvoda",
      "unit": "g"
     }
@@ -60,7 +60,7 @@
  "best_store": null,
  "city": "Osijek",
  "comparison": [],
- "date": "2026-10-28",
+ "date": "2026-11-17",
  "incomplete": [
   {
    "chain": "eurospin",
@@ -94,6 +94,12 @@
   },
   {
    "chain": "spar",
+   "missing": [],
+   "n_matched": 0,
+   "note": "nedostaje: "
+  },
+  {
+   "chain": "studenac",
    "missing": [],
    "n_matched": 0,
    "note": "nedostaje: "

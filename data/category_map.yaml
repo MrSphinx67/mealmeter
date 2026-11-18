@@ -1367,3 +1367,168 @@ _chain_verify:
 "mita bozicni asortiman": unknown  # 1, zabac
 "mix suho": unknown  # 1, djelo_vodice
 "uredaji": unknown  # 1, vrutak
+
+# --- Korak 15: nove kategorije KTC-a od 17.11.2026. (NN 101/26, 110/26: sav asortiman, poljoprivreda,
+# gorivo, tehnika); sve su neprehrambene. Pravila bi neke svrstala u hranu ("VRTNI PROGRAM, LJESTVE", "ULJA, MAZIVA",
+# "LCD, PLAZMA, LED", sjeme za sadnju), pa su ovdje izričito; skupina iz pravila ako je neprehrambena, inače ostalo
+"skolski i uredski pr": ostalo  # 1337, ktc
+"sezona bozic": ostalo  # 1233, ktc
+"plasticna galanter": ostalo  # 1127, ktc
+"kucanski tekstil": ostalo  # 1107, ktc
+"vrtni program ljestve": ostalo  # 1080, ktc
+"staklo": ostalo  # 1067, ktc
+"metalno posude": kucanstvo  # 1005, ktc
+"odevni tekstil": ostalo  # 977, ktc
+"metalna galanterija": ostalo  # 929, ktc
+"mali kuc ap sat vage termomet toplomj": ostalo  # 815, ktc
+"keramika i porculan": ostalo  # 773, ktc
+"auto kozmetika pribor za auto": kozmetika  # 766, ktc
+"elektromaterijal antene adapteri receiv": ostalo  # 676, ktc
+"informaticka oprema": kucanstvo  # 616, ktc
+"oprema za bebe": djeca  # 596, ktc
+"poljoprivredna pomagala": ostalo  # 526, ktc
+"carape": ostalo  # 484, ktc
+"sezona ljeto": ostalo  # 476, ktc
+"alati": ostalo  # 468, ktc
+"ukrasne vrecice masne ukrasni papiri": ostalo  # 458, ktc
+"party program": ostalo  # 448, ktc
+"umjetno cvijece": ostalo  # 416, ktc
+"loncanice i sobno bilje": ostalo  # 415, ktc
+"kupaona": ostalo  # 399, ktc
+"obuca": ostalo  # 377, ktc
+"donje rublje": kucanstvo  # 364, ktc
+"gift program": ostalo  # 302, ktc
+"skolski ruksaci torbe pernice": ostalo  # 291, ktc
+"ulja maziva": ostalo  # 290, ktc
+"torbe novcanici remeni": ostalo  # 287, ktc
+"bijela tehnika": ostalo  # 277, ktc
+"hulahopke": ostalo  # 262, ktc
+"audio video fotoaparati telefoni": ostalo  # 255, ktc
+"pribor za kucne ljubimce": kucni_ljubimci  # 255, ktc
+"biljeznice": ostalo  # 252, ktc
+"drvena galanterija": ostalo  # 218, ktc
+"sjemenske kartice povrca i cvijeca": ostalo  # 218, ktc
+"nakit kozmeticka galanterija": kozmetika  # 215, ktc
+"vinski program": ostalo  # 213, ktc
+"svijece i lampasi": kucanstvo  # 202, ktc
+"oprema zastite na radu i radne rukavice": kucanstvo  # 201, ktc
+"rostilji i kolinje": ostalo  # 196, ktc
+"pleteno": ostalo  # 195, ktc
+"enoloski pribor": ostalo  # 175, ktc
+"enoloska sredstva": ostalo  # 170, ktc
+"gnojiva za fertigaciju": ostalo  # 166, ktc
+"sezona sesvete": ostalo  # 157, ktc
+"keramicke tegle": ostalo  # 151, ktc
+"tisak": ostalo  # 143, ktc
+"tricikli guralice role velika vozila": ostalo  # 143, ktc
+"ribicki pribor": ostalo  # 135, ktc
+"mirisne svijece": kucanstvo  # 133, ktc
+"smjesa": ostalo  # 131, ktc
+"tekuca gnojiva i prihrana": ostalo  # 131, ktc
+"zastita bilja amaterska primjena": ostalo  # 128, ktc
+"pcelarska oprema": kucanstvo  # 127, ktc
+"uskrs": ostalo  # 127, ktc
+"telefoni mobiteli": ostalo  # 122, ktc
+"peci kruta goriva": ostalo  # 118, ktc
+"stolnjaci pvc": ostalo  # 118, ktc
+"slikovnice cestitke naljepnice": ostalo  # 112, ktc
+"cigarete": ostalo  # 111, ktc
+"knjige": ostalo  # 106, ktc
+"vrecice za usisavace": ostalo  # 102, ktc
+"biciklisticka oprema": kucanstvo  # 96, ktc
+"kosilice": ostalo  # 92, ktc
+"elektronicke cigarete": ostalo  # 91, ktc
+"lcd plazma led": ostalo  # 91, ktc
+"sibice upaljaci": ostalo  # 91, ktc
+"pribor za pusenje": ostalo  # 90, ktc
+"skare za rezidbu": ostalo  # 90, ktc
+"otiraci": ostalo  # 83, ktc
+"travne smjese i krmno bilje": ostalo  # 80, ktc
+"konop kud vezice lastika ulosci za obuc": ostalo  # 79, ktc
+"termos ulosci i torbe putne torbe": higijena  # 79, ktc
+"tapete podne obloge sagovi prostirke": ostalo  # 78, ktc
+"zastita bilja chromos agro": ostalo  # 76, ktc
+"zastita bilja ostali": ostalo  # 73, ktc
+"video audio kazete dvd cd filmovi igrice": ostalo  # 72, ktc
+"zastita bilja agrochem maks": ostalo  # 71, ktc
+"organsko gnojivo": ostalo  # 70, ktc
+"zastita bilja sygenta": ostalo  # 64, ktc
+"kisobrani i kabanice": ostalo  # 61, ktc
+"termos boce": ostalo  # 61, ktc
+"rashladna tijela": ostalo  # 58, ktc
+"sjemenski jecam psenica": ostalo  # 56, ktc
+"bonovi": ostalo  # 55, ktc
+"rodenticidi": ostalo  # 55, ktc
+"niti za kosnju": ostalo  # 52, ktc
+"enoloski kvasci": ostalo  # 51, ktc
+"zastita bilja orchem": ostalo  # 51, ktc
+"sadnice kontejnirane": ostalo  # 47, ktc
+"karneval": ostalo  # 45, ktc
+"lukovice": ostalo  # 43, ktc
+"mrezaste vrece": kucanstvo  # 42, ktc
+"pp vezivo": ostalo  # 42, ktc
+"bicikli": ostalo  # 41, ktc
+"satovi": ostalo  # 41, ktc
+"elektricne grijalice": ostalo  # 40, ktc
+"zastita bilja bayer": ostalo  # 40, ktc
+"folija za silazu": kucanstvo  # 37, ktc
+"ugradbena bijela tehnika": ostalo  # 36, ktc
+"piroteh sredstva i klase": ostalo  # 35, ktc
+"bica": ostalo  # 34, ktc
+"kreme i lastila za cipele": ostalo  # 34, ktc
+"zemlja za cvijece": ostalo  # 34, ktc
+"bazeni": ostalo  # 33, ktc
+"inox posude": kucanstvo  # 31, ktc
+"sprave za vjezbanje": ostalo  # 31, ktc
+"ljetnice i presadnice": ostalo  # 29, ktc
+"ostali lovacki pribor": ostalo  # 29, ktc
+"mineralna gnojiva": ostalo  # 26, ktc
+"prijenosna racunala tableti": ostalo  # 26, ktc
+"sjeme povrca profi": ostalo  # 26, ktc
+"zavjese": ostalo  # 26, ktc
+"daske za peglanje": ostalo  # 25, ktc
+"flasteri": ostalo  # 25, ktc
+"grijani duhan": ostalo  # 22, ktc
+"gume za auto": ostalo  # 21, ktc
+"pur pjene ljepila silikonski kit": ostalo  # 21, ktc
+"zastita bilja agroavant": ostalo  # 21, ktc
+"mreze za baliranje": ostalo  # 18, ktc
+"agril folije": kucanstvo  # 16, ktc
+"sjemenska lucica": ostalo  # 16, ktc
+"duhan": ostalo  # 15, ktc
+"zastita bilja genera": ostalo  # 15, ktc
+"skuteri": ostalo  # 14, ktc
+"supstrati": ostalo  # 14, ktc
+"zastita bilja okvasivaci": ostalo  # 14, ktc
+"cvijece sezona sesvete": ostalo  # 12, ktc
+"ljepila za miseve": ostalo  # 11, ktc
+"lopate za snijeg": ostalo  # 11, ktc
+"stiroporni kontejneri": ostalo  # 11, ktc
+"vrece za odecu": kucanstvo  # 11, ktc
+"zavjese pvc i komusina": ostalo  # 11, ktc
+"zitarice za stoku": ostalo  # 11, ktc
+"printeri": ostalo  # 10, ktc
+"sadnice golog korijena": ostalo  # 10, ktc
+"zastita bilja basf": ostalo  # 10, ktc
+"gnojiva za kalcizaciju": ostalo  # 8, ktc
+"kamping oprema": kucanstvo  # 7, ktc
+"prijenosni hladnjaci": ostalo  # 6, ktc
+"suncane i dioptrijske naocale": ostalo  # 6, ktc
+"skolski udzbenici": ostalo  # 6, ktc
+"ad blue": ostalo  # 5, ktc
+"akumulatori": ostalo  # 5, ktc
+"naftni derivati": ostalo  # 5, ktc
+"prva pomoc": ostalo  # 5, ktc
+"sjemenski kukuruz": ostalo  # 5, ktc
+"zive zivotinje": ostalo  # 5, ktc
+"cvijece sezona bozic": ostalo  # 4, ktc
+"obuca za lov": ostalo  # 4, ktc
+"odeca za lov": ostalo  # 4, ktc
+"dekorativne kore": kozmetika  # 3, ktc
+"sjem soja uljana repica suncokret sirak": ostalo  # 3, ktc
+"sjemenski krumpir": ostalo  # 3, ktc
+"autoplin": ostalo  # 1, ktc
+"kulir kamen za groblje": ostalo  # 1, ktc
+"lozni cijepovi": ostalo  # 1, ktc
+"plin": ostalo  # 1, ktc
+"super card": ostalo  # 1, ktc

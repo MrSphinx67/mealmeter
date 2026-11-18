@@ -99,7 +99,9 @@ def test_compact_db_same_outputs(tmp_path):
             outs.append([json.loads(srv._dumps(getattr(srv, name)(**args))) for name, args in calls])
     finally:
         srv._shared_con, srv._fixed_con, srv._db_path, srv._db_key = state
-    assert outs[0] == outs[1]
+    # sažeta baza: anchor_price uvijek null (Korak 15), ostalo jednako
+    assert all(r.get("anchor_price") is None for res in outs[1] if isinstance(res, dict) for r in res.get("stores", []))
+    assert _without_anchor(outs[0]) == _without_anchor(outs[1])
 
 
 # --- 4. predizračunate cijene po namirnici: isti rezultat kao preko svih cijena ----------------------------
@@ -120,3 +122,11 @@ def test_staple_prices_same_as_full_scan(con5b, monkeypatch):  # noqa: F811
     slow = (basket.plan_basket(ing, "Osijek", con=con5b, alternatives=True),
             search.find_products(ingredient="jaja", city="Osijek", con=con5b))
     assert fast == slow
+
+
+def _without_anchor(out: list) -> list:
+    """Izlazi alata bez anchor_price (sažeta baza ga ne čuva, build_compact.NULL_PRICE_COLS, Korak 15)."""
+    for res in out:
+        for row in res.get("stores", []) if isinstance(res, dict) else []:
+            row.pop("anchor_price", None)
+    return out

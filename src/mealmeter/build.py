@@ -35,8 +35,20 @@ SUSPECT_CHAINS = {"lorenco"}
 # Veleprodaja (cash & carry): clean.stores.store_type = 'cash_and_carry'. Prodaje kartone i ugostiteljska
 # pakiranja ("10/1 JAJA" je deset kutija), pa je izvan zadanog izbora i košarice (include_wholesale).
 WHOLESALE_CHAINS = {"metro"}
+# Neprehrambene poslovnice (Korak 15): od 17.11.2026. (NN 101/26, 110/26) cjenike objavljuju i usluge i druge
+# djelatnosti lanca (KTC: poljoljekarne, benzinske, autopraona, frizerski i kozmetički salon). Prepoznaju se po
+# tipu poslovnice (norm_text, bilo gdje u tekstu) i ne ulaze u clean.stores ni clean.prices, pa ni u alate i
+# košaricu; sirove tablice ih zadržavaju. Novi tip poslovnice koji nije ovdje ostaje u bazi (vidi docs/15_STATUS.md).
+NONFOOD_STORE_TYPES = ("ljekarn", "apotek", "benzin", "crpk", "praon", "salon", "frizer", "kozmet", "servis",
+                       "vulkaniz")
 
 NATIONAL_NOTE = "Nacionalna cijena (web/sve poslovnice); provjeri dostupnost u svom gradu."
+
+
+def nonfood_store_type(store_type: str | None) -> bool:
+    """Tip poslovnice je usluga ili neprehrambena djelatnost (NONFOOD_STORE_TYPES)."""
+    t = norm_text(store_type) or ""
+    return any(w in t for w in NONFOOD_STORE_TYPES)
 
 
 def load_raw(con: duckdb.DuckDBPyConnection, root: Path, archive_date: str) -> list[str]:
@@ -97,15 +109,19 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
     con.executemany("INSERT INTO clean.city_alias VALUES (?, ?)", list(CITY_ALIASES.items()))
 
     def store_rows():
-        for chain, store_id, city in con.execute("SELECT chain, store_id, city FROM stores").fetchall():
+        for chain, store_id, city, typ in con.execute("SELECT chain, store_id, city, type FROM stores").fetchall():
             city = (city or "").strip() or CITY_FIXES.get((chain, store_id))
             canonical = canonical_city(city)
-            yield chain, store_id, city, norm_text(city), canonical, norm_text(canonical)
+            yield (chain, store_id, city, norm_text(city), canonical, norm_text(canonical),
+                   nonfood_store_type(typ))
 
     _temp_table(con, "store_derived", {
         "chain": "VARCHAR", "store_id": "VARCHAR", "city": "VARCHAR", "city_norm": "VARCHAR",
-        "city_canonical": "VARCHAR", "city_key": "VARCHAR",
+        "city_canonical": "VARCHAR", "city_key": "VARCHAR", "nonfood": "BOOLEAN",
     }, store_rows())
+    con.execute("""CREATE OR REPLACE TEMP TABLE nonfood_stores AS
+                   SELECT DISTINCT r.chain, r.store_id, r.type FROM stores r JOIN store_derived d USING (chain, store_id)
+                   WHERE d.nonfood""")
     wholesale = ", ".join(f"'{c}'" for c in sorted(WHOLESALE_CHAINS))
     con.execute(f"""
         CREATE OR REPLACE TABLE clean.stores AS
@@ -118,6 +134,7 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
                d.city_norm, d.city_canonical, d.city_key,
                CASE WHEN r.chain IN ({wholesale}) THEN 'cash_and_carry' ELSE 'retail' END AS store_type
         FROM stores r JOIN store_derived d USING (chain, store_id)
+        WHERE NOT d.nonfood
     """)
 
     # --- proizvodi ---
@@ -181,7 +198,8 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
         CREATE OR REPLACE TEMP TABLE prices_nz AS
         SELECT chain, store_id, product_id, date, {nz},
                coalesce(nullif(special_price, 0), nullif(price, 0)) AS price_eff
-        FROM prices
+        FROM prices r
+        WHERE NOT EXISTS (SELECT 1 FROM nonfood_stores n WHERE n.chain = r.chain AND n.store_id = r.store_id)
     """)
     # Duplikati (chain, store, product): zadržava se red s najnižom price_eff
     con.execute("""
@@ -224,7 +242,9 @@ def build_clean(con: duckdb.DuckDBPyConnection) -> dict:
         FROM clean.stores s GROUP BY s.chain
     """)
 
-    stats = {"food": food_stats, "dummy_eans": stats_dummy, "ean_incoherent": stats_incoherent}
+    stats = {"food": food_stats, "dummy_eans": stats_dummy, "ean_incoherent": stats_incoherent,
+             "nonfood_stores": con.execute("""SELECT chain, type, count(*) FROM nonfood_stores
+                                              GROUP BY ALL ORDER BY chain, type""").fetchall()}
     stats["quality"] = chain_quality_report(con)
     stats["staples"] = build_staples(con)
     stats["staple_prices"] = build_staple_prices(con)  # cijene po namirnici za brze kandidate (Korak 5P)

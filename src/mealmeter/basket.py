@@ -764,7 +764,7 @@ def _free_rows(con, need: "Need", city: str, wholesale: bool = False) -> dict[tu
     query = norm_text(need.input.get("name") or "") or ""
     tokens = _free_tokens(query)
     sql, params, _ = _candidates(None, tokens, None, city, include_clearance=False, food_sql=_food_filter(),
-                                 include_wholesale=wholesale)
+                                 include_wholesale=wholesale, con=con)
     early = " AND ".join("regexp_matches(name_norm, ?)" for _ in tokens)
     cur = con.execute(sql + f" SELECT * FROM x WHERE {early} ORDER BY chain, store_id, product_id",
                       params + ["^(?:[^ ]+ ){0,2}" + re.escape(t) for t in tokens])

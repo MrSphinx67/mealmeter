@@ -5,7 +5,7 @@
  "best_store": null,
  "city": "Osijek",
  "comparison": [],
- "date": "2026-10-28",
+ "date": "2026-11-17",
  "incomplete": [
   {
    "chain": "eurospin",
@@ -42,6 +42,12 @@
    "missing": [],
    "n_matched": 0,
    "note": "nedostaje: "
+  },
+  {
+   "chain": "studenac",
+   "missing": [],
+   "n_matched": 0,
+   "note": "nedostaje: "
   }
  ],
  "ingredients": [],
@@ -64,9 +70,9 @@
   {
    "candidates": [
     {
-     "brand": "Freshona",
-     "name": "Voće za smoothie",
-     "price_min": 2.4,
+     "brand": "Ledo",
+     "name": "ZAMRZ LEDO 300 g ŠUMSKO VOĆE",
+     "price_min": 3.49,
      "reason": "ima: voce; nema: zmajevo"
     },
     {
@@ -86,7 +92,7 @@
    "name": "zmajevo voće",
    "reason": "nijedan prehrambeni proizvod s nazivom 'zmajevo voće' u gradu",
    "suggestions": [
-    "Voće za smoothie",
+    "ZAMRZ LEDO 300 g ŠUMSKO VOĆE",
     "Klementina s voćem",
     "Mandarina s voćem"
    ],

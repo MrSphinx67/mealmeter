@@ -250,11 +250,20 @@ def is_clearance(name: str | None) -> bool:
     return bool(name) and bool(re.search(r"(^| )snizen", norm_text(name) or ""))
 
 
+# Lidl od 17.11.2026. (Korak 15): u stupcu unit jedinica cijene, ne veličina pakiranja ("g (1kg)", "bez (1 kom.)",
+# "ml (1 L)"); iz nje se pakiranje ne čita (inače 1 kg / 1 L za svaki proizvod bez veličine u nazivu). Isti izraz
+# koristi update.py (memorija polja) u DuckDB-u.
+PRICE_REF_UNIT_RX = r"\s*[^\s(]+\s*\(.*\)\s*"
+
+
 def parse_pack_unit_field(unit: str | None) -> tuple[float, str] | None:
     """Gramatura iz stupca `unit` kad lanac tamo upisuje veličinu pakiranja (Lidl: "80g", "10x1kg").
 
-    Više različitih veličina ("123g,200g,77g") znači miks varijanti, pa vraća None.
+    Više različitih veličina ("123g,200g,77g") znači miks varijanti, pa vraća None. Jedinica cijene
+    ("g (1kg)", PRICE_REF_UNIT_RX) nije pakiranje: None.
     """
+    if unit and re.fullmatch(PRICE_REF_UNIT_RX, unit):
+        return None
     if not unit or not any(c.isdigit() for c in unit) or len(_SINGLE.findall(unit)) > 1 and not _MULTI.search(unit):
         return None
     return parse_pack(unit)

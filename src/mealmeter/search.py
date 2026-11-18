@@ -153,10 +153,18 @@ def has_staple_prices(con) -> bool:
                                AND table_name = 'staple_prices' AND table_catalog = current_database()""").fetchone()[0])
 
 
+# proizvodi koje sažeta baza zadržava (build_compact, Korak 15): bez sigurno neprehrambenih; list_stores po istom
+# uvjetu broji cijene trgovine (n_prices), da puna i sažeta baza daju isto
+STORE_PRODUCTS_SQL = "is_food IS DISTINCT FROM false"
+# najviše šifri u filtru c.product_id IN (...) kandidata (_candidates); iznad toga upit bez filtra
+PRICE_KEYS_MAX = 20000
+
+
 def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | None,
                 include_clearance: bool, food_sql: str | None = None,
                 include_ambiguous: bool = False, include_wholesale: bool = False,
-                required: dict | None = None, weak: str = "all", staple_prices: bool = False) -> tuple[str, list, str]:
+                required: dict | None = None, weak: str = "all", staple_prices: bool = False,
+                con: duckdb.DuckDBPyConnection | None = None) -> tuple[str, list, str]:
     """SQL (CTE-ovi g, hit, x) za kandidate: jedan redak po (trgovina, proizvod).
 
     x sadrži sve proizvode iz grupa koje odgovaraju upitu/namirnici, s cijenom po jedinici u
@@ -170,6 +178,9 @@ def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | 
     grupe s riječju namirnice među prve tri riječi barem jednog naziva (staple_groups.early_name).
     `required`: izričito traženi atributi ("špageti" -> oblik=spageti). Proizvod ih mora imati u svom
     nazivu (product_attrs.how nije 'default'), inače ispada, i kad ih grupa (isti EAN) ima.
+    `con`: uz cijene iz clean.prices najprije se dohvate šifre proizvoda pogođenih grupa i dodaju kao
+    `c.product_id IN (...)` (PRICE_KEYS_MAX); uvjet je već sadržan u spoju, ali ga DuckDB tako gura do skeniranja
+    view-a sažete baze, umjesto da spoji sve trgovine (Korak 15: free text 1,6 s -> 0,3 s s 30 M cijena).
     Vraća (sql, parametri, stupac relevantnosti za razinu grupe).
     """
     food_sql = food_sql or _food_filter()
@@ -262,11 +273,19 @@ def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | 
                   if staple and staple_prices else "clean.prices")
     products_sql = (f"(SELECT * EXCLUDE (staple) FROM clean.staple_items WHERE staple = '{staple.key}')"
                     if staple and staple_prices else "clean.products")
-    sql = f"""
+    g_hit_sql = f"""
         WITH g AS (
           SELECT p.*, {gkey_expr} AS gkey, {BKEY_SQL} AS bkey FROM {products_sql} p {gkey_join}
         ),
-        hit AS ({hit_sql}),
+        hit AS ({hit_sql})"""
+    keys_sql = "TRUE"
+    if con is not None and prices_sql == "clean.prices":
+        pids = [r[0] for r in con.execute(f"{g_hit_sql} SELECT DISTINCT product_id FROM g JOIN hit USING (bkey)",
+                                          hit_params).fetchall()]
+        if len(pids) <= PRICE_KEYS_MAX:
+            keys_sql = ("c.product_id IN (" + ", ".join("'" + str(x).replace("'", "''") + "'" for x in pids) + ")"
+                        if pids else "FALSE")
+    sql = f"""{g_hit_sql},
         x AS (
           SELECT p.gkey, p.chain, p.product_id, p.name, p.name_norm, p.brand,
                  p.pack_amount, p.pack_unit, p.pack_confidence, p.drained_amount, p.ean_norm, p.ean_global,
@@ -285,7 +304,7 @@ def _candidates(staple, tokens: list[str], attributes: dict | None, city: str | 
           JOIN clean.stores s USING (chain, store_id)
           JOIN clean.chains ch USING (chain)
           {rules_join}
-          WHERE {city_sql} AND {drop_sql} AND {clearance_sql} AND {food_sql} AND {required_sql}
+          WHERE {keys_sql} AND {city_sql} AND {drop_sql} AND {clearance_sql} AND {food_sql} AND {required_sql}
             AND {"TRUE" if include_wholesale else "s.store_type <> 'cash_and_carry'"}
         )"""
     return sql, hit_params + name_hit_params + coverage_params + city_params, cov_col
@@ -367,7 +386,7 @@ def find_products(
                             "yes" if include_unverified else "no")
     cand_sql, cand_params, cov_col = _candidates(staple, tokens, attributes, city, include_clearance, food_sql,
                                                  include_ambiguous, include_wholesale, required,
-                                                 "all" if include_weak else "none", has_staple_prices(con))
+                                                 "all" if include_weak else "none", has_staple_prices(con), con=con)
     best = "x.unit_confidence = pick.conf AND x.per_unit = pick.per_unit AND NOT x.price_suspect"
     sql = f"""
         {cand_sql},
@@ -543,9 +562,13 @@ def get_prices(
         if len(values) > len(st.group_by) or any(v not in st.attributes[a] for a, v in zip(st.group_by, values)):
             options = "; ".join(f"{a}: {', '.join(st.attributes[a])}" for a in st.group_by)
             raise ValueError(f"'{identifier}': nepoznata klasa; moguće ({':'.join(st.group_by)}): {options}")
-        prod_sql = " AND ".join(f"""EXISTS (SELECT 1 FROM clean.product_attrs pa JOIN clean.product_staples ps USING (chain, product_id, staple)
-                              WHERE pa.chain = p.chain AND pa.product_id = p.product_id AND pa.staple = ?
-                                AND pa.attr = ? AND pa.value = ? AND NOT ps.excluded AND ps.drop_reason IS NULL)"""
+        # IN (podupit), ne korelirani EXISTS: EXISTS postaje delim join pa se cijeli view cijena (sve trgovine)
+        # spaja prije filtra proizvoda; od 17.11.2026. (~30 M cijena) jaja:m 30 s umjesto 0,6 s (Korak 15)
+        prod_sql = " AND ".join("""(p.chain, p.product_id) IN (
+                              SELECT pa.chain, pa.product_id FROM clean.product_attrs pa
+                              JOIN clean.product_staples ps USING (chain, product_id, staple)
+                              WHERE pa.staple = ? AND pa.attr = ? AND pa.value = ? AND NOT ps.excluded
+                                AND ps.drop_reason IS NULL)"""
                                 for _ in values)
         prod_params = [x for a, v in zip(st.group_by, values) for x in (st.key, a, v)]
     elif ":" in ident:

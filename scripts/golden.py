@@ -50,7 +50,8 @@ SCENARIOS = {
     # get_prices
     "prices_ean_osijek": ("get_prices", {"product_id": "3850104223624", "city": "Osijek"}),
     "prices_class_jaja_m": ("get_prices", {"product_id": "jaja:m", "city": "Zagreb"}),
-    "prices_lidl_brasno": ("get_prices", {"product_id": "lidl:0002225", "city": "Osijek"}),
+    # Korak 15: Lidl je 17.11.2026. šiframa skinuo vodeće nule (0002225 -> 2225)
+    "prices_lidl_brasno": ("get_prices", {"product_id": "lidl:2225", "city": "Osijek"}),
     # plan_basket
     "basket_palacinke_osijek": ("plan_basket", {"ingredients": PALACINKE, "city": "Osijek"}),
     "basket_bolonjez_zagreb": ("plan_basket", {"ingredients": BOLONJEZ, "city": "Zagreb"}),
@@ -113,6 +114,10 @@ def run(db: str | None) -> dict:
         fn = getattr(srv, tool)
         res = fn(**args, detail=True) if tool == "plan_basket" else fn(**args)
         out[name] = json.loads(srv._dumps(res))
+        # sažeta baza ne čuva anchor_price (build_compact.NULL_PRICE_COLS, Korak 15): zapis s pune i provjera na
+        # sažetoj usporeduju get_prices bez njega
+        for row in out[name].get("stores", []) if tool == "get_prices" else []:
+            row.pop("anchor_price", None)
     return out
 
 

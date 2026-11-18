@@ -367,7 +367,8 @@ def list_stores(
         SELECT s.chain, s.store_id, s.address, s.city, s.scope, s.store_type,
                max(c.date) AS date, min(c.stale_days) AS stale_days, count(*) AS n_prices
         FROM clean.stores s JOIN clean.prices c USING (chain, store_id)
-        WHERE {city_sql} {chain_sql}
+        JOIN clean.products p USING (chain, product_id)
+        WHERE {city_sql} {chain_sql} AND p.{search.STORE_PRODUCTS_SQL}
         GROUP BY ALL ORDER BY s.scope DESC, s.chain, s.address""",
                        params + ([chain.strip().lower()] if chain else [])).fetchall()
     stores = [{"chain": ch, "store_id": sid, "address": addr, "city": c, "scope": scope, "store_type": st,

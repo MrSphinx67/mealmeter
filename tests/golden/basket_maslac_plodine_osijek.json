@@ -11,8 +11,8 @@
   "chain": "plodine",
   "city": "Osijek",
   "data_quality": "ok",
-  "date": "2026-10-28",
-  "date_hr": "28.10.2026.",
+  "date": "2026-11-17",
+  "date_hr": "17.11.2026.",
   "flagged_items": 0,
   "from_stock_value": 0,
   "items": [
@@ -41,8 +41,8 @@
     "by_weight_fallback": false,
     "cost_pack": 1.99,
     "cost_used": 0.4,
-    "date": "2026-10-28",
-    "date_hr": "28.10.2026.",
+    "date": "2026-11-17",
+    "date_hr": "17.11.2026.",
     "ean": "4006496012028",
     "fallback": false,
     "flags": [],
@@ -96,8 +96,8 @@
    "total_used": 0.4
   }
  ],
- "date": "2026-10-28",
- "date_hr": "28.10.2026.",
+ "date": "2026-11-17",
+ "date_hr": "17.11.2026.",
  "incomplete": [],
  "ingredients": [
   {
@@ -127,8 +127,8 @@
    "chain": "plodine",
    "city": "Osijek",
    "data_quality": "ok",
-   "date": "2026-10-28",
-   "date_hr": "28.10.2026.",
+   "date": "2026-11-17",
+   "date_hr": "17.11.2026.",
    "flagged_items": 0,
    "from_stock_value": 0,
    "items": [
@@ -157,8 +157,8 @@
      "by_weight_fallback": false,
      "cost_pack": 1.99,
      "cost_used": 0.4,
-     "date": "2026-10-28",
-     "date_hr": "28.10.2026.",
+     "date": "2026-11-17",
+     "date_hr": "17.11.2026.",
      "ean": "4006496012028",
      "fallback": false,
      "flags": [],

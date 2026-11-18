@@ -3,68 +3,33 @@
  "ambiguous": [],
  "assumptions": [],
  "best_store": {
-  "address": "Ive Tijardovića 4A",
+  "address": "Bednjanska Ulica 8",
   "addresses": [
-   "Ive Tijardovića 4A",
-   "Opatijska 26F",
-   "Sjenjak 133"
+   "Bednjanska Ulica 8",
+   "Franje Markovića 1",
+   "Josipa Jurja Strossmayera 1"
   ],
-  "chain": "konzum",
+  "chain": "studenac",
   "city": "Osijek",
   "data_quality": "ok",
-  "date": "2026-10-28",
-  "date_hr": "28.10.2026.",
+  "date": "2026-11-17",
+  "date_hr": "17.11.2026.",
   "flagged_items": 0,
   "from_stock_value": 0,
   "items": [
    {
-    "alternatives": [
-     {
-      "brand": "Garden Good",
-      "cheaper": true,
-      "cost_pack": 1.89,
-      "cost_used": 0.38,
-      "delta_eur": -0.1,
-      "ean": "3838900957035",
-      "match_quality": "strong",
-      "n_packs": 1,
-      "name": "GRAH GARDEN GOOD PINTO 1000g",
-      "pack_size": "1 kg",
-      "per_unit": "kg",
-      "price_eff": 1.89,
-      "price_per_unit": 1.89,
-      "product_id": "90363735",
-      "size_note": "usporedba za 200 g: pakiranje 1 kg, odabrano 500 g"
-     },
-     {
-      "brand": "Garden Good",
-      "cheaper": true,
-      "cost_pack": 1.99,
-      "cost_used": 0.4,
-      "delta_eur": -0.08,
-      "ean": "3838900957011",
-      "match_quality": "strong",
-      "n_packs": 1,
-      "name": "GRAH GARDEN GOOD ŠARENI 1000g",
-      "pack_size": "1 kg",
-      "per_unit": "kg",
-      "price_eff": 1.99,
-      "price_per_unit": 1.99,
-      "product_id": "90363728",
-      "size_note": "usporedba za 200 g: pakiranje 1 kg, odabrano 500 g"
-     }
-    ],
+    "alternatives": [],
     "attributes": {
      "oblik": "suho",
      "vrsta": "sareni"
     },
-    "brand": "Vedrini",
+    "brand": null,
     "by_weight_fallback": false,
-    "cost_pack": 1.19,
-    "cost_used": 0.48,
-    "date": "2026-10-28",
-    "date_hr": "28.10.2026.",
-    "ean": "3858889334269",
+    "cost_pack": 0.99,
+    "cost_used": 0.4,
+    "date": "2026-11-17",
+    "date_hr": "17.11.2026.",
+    "ean": "3858893733690",
     "fallback": false,
     "flags": [],
     "food_unverified": false,
@@ -73,7 +38,7 @@
     "is_special": false,
     "match_quality": "strong",
     "n_packs": 1,
-    "name": "GRAH PINTO VEDRINI 500 g",
+    "name": "GRAH ŠARENI VERDEAMO 500 g",
     "need": 200.0,
     "need_unit": "g",
     "notes": [],
@@ -82,9 +47,9 @@
     "pack_source": "name",
     "pantry": false,
     "per_unit": "kg",
-    "price_eff": 1.19,
-    "price_per_unit": 2.38,
-    "product_id": "91005172",
+    "price_eff": 0.99,
+    "price_per_unit": 1.98,
+    "product_id": "118390",
     "stale_days": 0,
     "staple": "grah",
     "unit_confidence": "high"
@@ -93,16 +58,29 @@
   "missing": [],
   "n_ingredients": 1,
   "n_matched": 1,
-  "n_stores": 6,
+  "n_stores": 10,
   "scope": "local",
   "stale_days": 0,
-  "store_id": "0907",
-  "total_to_buy": 1.19,
-  "total_used": 0.48,
+  "store_id": "1484",
+  "total_to_buy": 0.99,
+  "total_used": 0.4,
   "unit_confidence": "high"
  },
  "city": "Osijek",
  "comparison": [
+  {
+   "addresses": [
+    "Bednjanska Ulica 8",
+    "Franje Markovića 1"
+   ],
+   "chain": "studenac",
+   "complete": true,
+   "n_ingredients": 1,
+   "n_matched": 1,
+   "n_stores_city": 10,
+   "total_to_buy": 0.99,
+   "total_used": 0.4
+  },
   {
    "addresses": [
     "Ive Tijardovića 4A",
@@ -112,7 +90,7 @@
    "complete": true,
    "n_ingredients": 1,
    "n_matched": 1,
-   "n_stores_city": 7,
+   "n_stores_city": 12,
    "total_to_buy": 1.19,
    "total_used": 0.48
   },
@@ -143,14 +121,15 @@
   },
   {
    "addresses": [
-    "Svetog Leopolda Bogdana Mandića 33 A",
-    "Ulica J. J. Strossmayera 350"
+    "Zeleno Polje 8 A"
    ],
    "chain": "lidl",
    "complete": true,
+   "date_hr": "16.11.2026.",
    "n_ingredients": 1,
    "n_matched": 1,
    "n_stores_city": 3,
+   "stale_days": 1,
    "total_to_buy": 1.49,
    "total_used": 0.6
   },
@@ -165,23 +144,10 @@
    "n_stores_city": 2,
    "total_to_buy": 1.51,
    "total_used": 0.6
-  },
-  {
-   "addresses": [
-    "Ulica 3 gardijske brigade „Kune“ 30",
-    "Ulica Josipa Jurja Strossmayera 343A"
-   ],
-   "chain": "eurospin",
-   "complete": true,
-   "n_ingredients": 1,
-   "n_matched": 1,
-   "n_stores_city": 2,
-   "total_to_buy": 1.59,
-   "total_used": 0.64
   }
  ],
- "date": "2026-10-28",
- "date_hr": "28.10.2026.",
+ "date": "2026-11-17",
+ "date_hr": "17.11.2026.",
  "incomplete": [],
  "ingredients": [
   {
@@ -204,6 +170,25 @@
  "more_chains": [
   {
    "addresses": [
+    "Ulica 3 gardijske brigade „Kune“ 30",
+    "Ulica Josipa Jurja Strossmayera 343A"
+   ],
+   "chain": "eurospin",
+   "n_matched": 1,
+   "n_stores_city": 2,
+   "total_to_buy": 1.59
+  },
+  {
+   "addresses": [
+    "Ulica Jablanova 27"
+   ],
+   "chain": "roto",
+   "n_matched": 1,
+   "n_stores_city": 1,
+   "total_to_buy": 2.16
+  },
+  {
+   "addresses": [
     "A.KANIZLICA 31",
     "Anina 83, Osijek"
    ],
@@ -216,11 +201,10 @@
  "note": "Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists (cijene.dev); in-store prices may differ, a price list is not stock, and promotions change. Podaci: cijene.dev (DobarKod), prema uvjetima korištenja (https://cijene.dev/uvjeti-koristenja). / Data: cijene.dev (DobarKod), under its terms of use (https://cijene.dev/uvjeti-koristenja).",
  "price_spread": {
   "cheapest": [
-   "konzum",
-   "spar"
+   "studenac"
   ],
-  "cheapest_total": 1.19,
-  "difference_eur": 1.1,
+  "cheapest_total": 0.99,
+  "difference_eur": 1.3,
   "most_expensive": [
    "ntl"
   ],
@@ -228,6 +212,70 @@
   "small": true
  },
  "stores": [
+  {
+   "address": "Bednjanska Ulica 8",
+   "addresses": [
+    "Bednjanska Ulica 8",
+    "Franje Markovića 1",
+    "Josipa Jurja Strossmayera 1"
+   ],
+   "chain": "studenac",
+   "city": "Osijek",
+   "data_quality": "ok",
+   "date": "2026-11-17",
+   "date_hr": "17.11.2026.",
+   "flagged_items": 0,
+   "from_stock_value": 0,
+   "items": [
+    {
+     "alternatives": [],
+     "attributes": {
+      "oblik": "suho",
+      "vrsta": "sareni"
+     },
+     "brand": null,
+     "by_weight_fallback": false,
+     "cost_pack": 0.99,
+     "cost_used": 0.4,
+     "date": "2026-11-17",
+     "date_hr": "17.11.2026.",
+     "ean": "3858893733690",
+     "fallback": false,
+     "flags": [],
+     "food_unverified": false,
+     "have": false,
+     "ingredient": "grah",
+     "is_special": false,
+     "match_quality": "strong",
+     "n_packs": 1,
+     "name": "GRAH ŠARENI VERDEAMO 500 g",
+     "need": 200.0,
+     "need_unit": "g",
+     "notes": [],
+     "pack_qty": 500.0,
+     "pack_size": "500 g",
+     "pack_source": "name",
+     "pantry": false,
+     "per_unit": "kg",
+     "price_eff": 0.99,
+     "price_per_unit": 1.98,
+     "product_id": "118390",
+     "stale_days": 0,
+     "staple": "grah",
+     "unit_confidence": "high"
+    }
+   ],
+   "missing": [],
+   "n_ingredients": 1,
+   "n_matched": 1,
+   "n_stores": 10,
+   "scope": "local",
+   "stale_days": 0,
+   "store_id": "1484",
+   "total_to_buy": 0.99,
+   "total_used": 0.4,
+   "unit_confidence": "high"
+  },
   {
    "address": "Ive Tijardovića 4A",
    "addresses": [
@@ -238,48 +286,12 @@
    "chain": "konzum",
    "city": "Osijek",
    "data_quality": "ok",
-   "date": "2026-10-28",
-   "date_hr": "28.10.2026.",
+   "date": "2026-11-17",
+   "date_hr": "17.11.2026.",
    "flagged_items": 0,
    "from_stock_value": 0,
    "items": [
     {
-     "alternatives": [
-      {
-       "brand": "Garden Good",
-       "cheaper": true,
-       "cost_pack": 1.89,
-       "cost_used": 0.38,
-       "delta_eur": -0.1,
-       "ean": "3838900957035",
-       "match_quality": "strong",
-       "n_packs": 1,
-       "name": "GRAH GARDEN GOOD PINTO 1000g",
-       "pack_size": "1 kg",
-       "per_unit": "kg",
-       "price_eff": 1.89,
-       "price_per_unit": 1.89,
-       "product_id": "90363735",
-       "size_note": "usporedba za 200 g: pakiranje 1 kg, odabrano 500 g"
-      },
-      {
-       "brand": "Garden Good",
-       "cheaper": true,
-       "cost_pack": 1.99,
-       "cost_used": 0.4,
-       "delta_eur": -0.08,
-       "ean": "3838900957011",
-       "match_quality": "strong",
-       "n_packs": 1,
-       "name": "GRAH GARDEN GOOD ŠARENI 1000g",
-       "pack_size": "1 kg",
-       "per_unit": "kg",
-       "price_eff": 1.99,
-       "price_per_unit": 1.99,
-       "product_id": "90363728",
-       "size_note": "usporedba za 200 g: pakiranje 1 kg, odabrano 500 g"
-      }
-     ],
      "attributes": {
       "oblik": "suho",
       "vrsta": "sareni"
@@ -288,8 +300,8 @@
      "by_weight_fallback": false,
      "cost_pack": 1.19,
      "cost_used": 0.48,
-     "date": "2026-10-28",
-     "date_hr": "28.10.2026.",
+     "date": "2026-11-17",
+     "date_hr": "17.11.2026.",
      "ean": "3858889334269",
      "fallback": false,
      "flags": [],
@@ -337,8 +349,8 @@
    "chain": "spar",
    "city": "Osijek",
    "data_quality": "ok",
-   "date": "2026-10-28",
-   "date_hr": "28.10.2026.",
+   "date": "2026-11-17",
+   "date_hr": "17.11.2026.",
    "flagged_items": 0,
    "from_stock_value": 0,
    "items": [
@@ -351,8 +363,8 @@
      "by_weight_fallback": false,
      "cost_pack": 1.19,
      "cost_used": 0.48,
-     "date": "2026-10-28",
-     "date_hr": "28.10.2026.",
+     "date": "2026-11-17",
+     "date_hr": "17.11.2026.",
      "ean": "3859893124938",
      "fallback": false,
      "flags": [],
@@ -389,70 +401,9 @@
    "total_to_buy": 1.19,
    "total_used": 0.48,
    "unit_confidence": "high"
-  },
-  {
-   "address": "Ulica Hrvatske Republike 21",
-   "addresses": [
-    "Ulica Hrvatske Republike 21"
-   ],
-   "chain": "konzum",
-   "city": "Osijek",
-   "data_quality": "ok",
-   "date": "2026-10-28",
-   "date_hr": "28.10.2026.",
-   "flagged_items": 0,
-   "from_stock_value": 0,
-   "items": [
-    {
-     "attributes": {
-      "oblik": "suho",
-      "vrsta": "bijeli"
-     },
-     "brand": "Garden Good",
-     "by_weight_fallback": false,
-     "cost_pack": 1.29,
-     "cost_used": 0.52,
-     "date": "2026-10-28",
-     "date_hr": "28.10.2026.",
-     "ean": "3838900957004",
-     "fallback": false,
-     "flags": [],
-     "food_unverified": false,
-     "have": false,
-     "ingredient": "grah",
-     "is_special": false,
-     "match_quality": "strong",
-     "n_packs": 1,
-     "name": "GRAH GARDEN GOOD BIJELI 500g",
-     "need": 200.0,
-     "need_unit": "g",
-     "notes": [],
-     "pack_qty": 500.0,
-     "pack_size": "500 g",
-     "pack_source": "name",
-     "pantry": false,
-     "per_unit": "kg",
-     "price_eff": 1.29,
-     "price_per_unit": 2.58,
-     "product_id": "90363725",
-     "stale_days": 0,
-     "staple": "grah",
-     "unit_confidence": "high"
-    }
-   ],
-   "missing": [],
-   "n_ingredients": 1,
-   "n_matched": 1,
-   "n_stores": 1,
-   "scope": "local",
-   "stale_days": 0,
-   "store_id": "1830",
-   "total_to_buy": 1.29,
-   "total_used": 0.52,
-   "unit_confidence": "high"
   }
  ],
- "summary_hr": "Za kupiti: 1,19 €. Stvarno utrošeno: 0,48 €.",
+ "summary_hr": "Za kupiti: 0,99 €. Stvarno utrošeno: 0,40 €.",
  "unmatched": [],
  "warnings": [
   "500 g gotovog ≈ 200 g u obliku 'suho' (procjena, prinos 2.5x)"
