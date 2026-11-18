@@ -1,7 +1,8 @@
 """Dnevno ažuriranje: najnovija arhiva cijene.dev -> provjera -> nova baza -> atomarna zamjena.
 
 Izlazni kodovi: 0 = uspjeh ili arhiva već učitana, 1 = greška, 2 = provjera nije prošla
-(broj čistih cijena nakon carry-forwarda pao je više od dopuštenog).
+(broj čistih cijena nakon carry-forwarda pao je više od dopuštenog, ili lanac ima više od
+build.MAX_BAD_PRICE_SHARE redaka s neparsabilnom cijenom). Pojedini neparsabilni retci se preskaču uz upozorenje.
 Izvor ne blokira (Korak 8): izostali ili prepolovljeni lanac nasljeđuje prethodne cijene (carry-forward, najviše
 CARRY_DAYS dana), a on i ukupni pad sirovih cijena javljaju se kao upozorenja.
 """
@@ -20,7 +21,7 @@ from pathlib import Path
 
 import duckdb
 
-from mealmeter.build import build_clean, load_raw
+from mealmeter.build import CSV_OPTS, BadPriceError, build_clean, describe_bad_prices, load_raw
 from mealmeter.normalize import PRICE_REF_UNIT_RX
 
 LIST_URL = "https://api.cijene.dev/v0/list"
@@ -231,11 +232,16 @@ def describe_chain(r: dict, max_days: int = CARRY_DAYS) -> str:
             f"(carry-forward najviše {max_days} dana), vraća se kad se pojavi u arhivi")
 
 
-def github_report(report: list[dict], error: str | None = None, total: dict | None = None) -> None:
-    """U GitHub Actionsu: ::warning:: za ukupni pad sirovih cijena (total_drop) i po lancu, ::error:: kad provjera
-    nije prošla, i sažetak u GITHUB_STEP_SUMMARY. Izvan Actionsa ne radi ništa."""
+def github_report(report: list[dict], error: str | None = None, total: dict | None = None,
+                  bad_prices: list[dict] | None = None) -> None:
+    """U GitHub Actionsu: ::warning:: za ukupni pad sirovih cijena (total_drop), po lancu i za preskočene retke s
+    neparsabilnom cijenom (bad_prices, Korak 18), ::error:: kad provjera nije prošla, i sažetak u
+    GITHUB_STEP_SUMMARY. Izvan Actionsa ne radi ništa."""
     if os.environ.get("GITHUB_ACTIONS") != "true":
         return
+    for b in bad_prices or []:
+        print(f"::warning title=Neparsabilne cijene {b['chain']}::{describe_bad_prices(b)}; retci preskočeni",
+              flush=True)
     if total:
         print(f"::warning title=Ukupno sirovih cijena -{total['pct']} %::{describe_total(total)}", flush=True)
     for r in report:
@@ -243,11 +249,15 @@ def github_report(report: list[dict], error: str | None = None, total: dict | No
     if error:
         print(f"::error title=update.py::{error}; baza nije promijenjena, ne deployam", flush=True)
     path = os.environ.get("GITHUB_STEP_SUMMARY")
-    if not path or not (report or error or total):
+    if not path or not (report or error or total or bad_prices):
         return
     lines = ["### update.py: lanci", ""]
     if error:
         lines += [f"**Provjera nije prošla:** {error}. Baza nije promijenjena, nema deploya.", ""]
+    for b in bad_prices or []:
+        examples = "; ".join(f"`{e}`" for e in b["examples"])
+        lines += [f"**Neparsabilne cijene, {b['chain']}:** preskočeno {b['bad']} od {b['total']} redaka "
+                  f"({b['pct']:.2f} %); primjeri: {examples}", ""]
     if total:
         chains = ", ".join(f"{c} ({n:+d})" for c, n in total["chains"])
         lines += [f"**Ukupno sirovih cijena -{total['pct']} %** ({total['before']} -> {total['after']}); "
@@ -367,7 +377,7 @@ def remember_fields(con, old_db: Path | None, date: str, seed_root: Path | None 
                 for chain_dir in sorted(p for p in Path(seed_root).iterdir() if (p / "products.csv").exists()):
                     con.execute(f"""INSERT INTO mem SELECT '{chain_dir.name}', product_id, barcode, category, unit,
                                     quantity, DATE '{date}', 1
-                                    FROM read_csv('{chain_dir / "products.csv"}', header=true, all_varchar=true)""")
+                                    FROM read_csv('{chain_dir / "products.csv"}', {CSV_OPTS})""")
     finally:
         if attached:
             con.execute("DETACH fprev")
@@ -498,7 +508,8 @@ def build_database(root: Path, date: str, db_path: Path, keep_days: int = KEEP_D
     tmp.unlink(missing_ok=True)
     try:
         con = duckdb.connect(str(tmp))
-        load_raw(con, root, date)
+        bad_prices: list[dict] = []
+        load_raw(con, root, date, bad_prices)
         stats = archive_stats(con)
         warnings = validate(stats, prev_stats if prev_date != date else [])
         total = total_drop(stats, prev_stats if prev_date != date else [], max_drop)
@@ -557,7 +568,7 @@ def build_database(root: Path, date: str, db_path: Path, keep_days: int = KEEP_D
             "price_rows": sum(r[3] for r in stats),
             "price_rows_previous": sum(r[3] for r in prev_stats) if prev_stats else None,
             "diff": compare_stats(stats, prev_stats) if prev_stats and prev_date != date else [],
-            "carried": carried, "fields_filled": filled, "nonfood_stores": (build_stats or {}).get("nonfood_stores", []),
+            "carried": carried, "fields_filled": filled, "bad_prices": bad_prices, "nonfood_stores": (build_stats or {}).get("nonfood_stores", []),
             "clean_prices": n_clean, "clean_prices_previous": prev_clean,
             "history_days": [d.isoformat() for (d,) in con.execute(
                 "SELECT DISTINCT date FROM clean.price_history ORDER BY date").fetchall()],
@@ -651,7 +662,7 @@ def run(argv: list[str] | None = None) -> int:
         seed_root = _seed(db_path, date, args.seed_date, data_dir, args.list_url)
         log(f"gradim bazu za {date} (prethodna: {prev_date or '-'})")
         summary = build_database(root, date, db_path, args.keep_days, args.max_drop, info, seed_root)
-    except ValidationError as e:
+    except (ValidationError, BadPriceError) as e:
         log(f"PROVJERA NIJE PROŠLA: {e}; baza nije promijenjena")
         github_report([], str(e))
         return 2
@@ -674,6 +685,8 @@ def run(argv: list[str] | None = None) -> int:
         print(f"  ! {describe_total(summary['total_drop'])}")
     for w in summary["warnings"]:
         print(f"  ! {w}")
+    for b in summary["bad_prices"]:
+        print(f"  ! {describe_bad_prices(b)}; retci preskočeni")
     for r in summary["chain_report"]:
         print(f"  ~ {describe_chain(r)}")
     if summary["carried"]:
@@ -694,7 +707,7 @@ def run(argv: list[str] | None = None) -> int:
         print(f"  {'lanac':<28}{'trgovina':>9}{'Δ':>6}{'proizvoda':>11}{'Δ':>8}{'cijena':>11}{'Δ':>9}")
         for chain, st, dst, pr, dpr, pc, dpc in summary["diff"]:
             print(f"  {chain:<28}{st:>9}{dst:>+6}{pr:>11}{dpr:>+8}{pc:>11}{dpc:>+9}")
-    github_report(summary["chain_report"], total=summary["total_drop"])
+    github_report(summary["chain_report"], total=summary["total_drop"], bad_prices=summary["bad_prices"])
     return 0
 
 

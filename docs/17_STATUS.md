@@ -110,3 +110,46 @@ privremeno maknute iz `data/`. U CI-ju ih nema.
 - `golden.py --write` (puna) pa `--check` (sažeta, 300 MB): 28/28
 - upute: 6776 znakova (granica 6798, test_step7)
 - ručni deploy nije rađen; sljedeće zakazano pokretanje workflowa ide s ovim promjenama
+
+# Korak 18: neparsabilna cijena ne blokira bazu (arhiva 18.11.2026.)
+
+Workflow update pao je na arhivi 18.11. (objava 15:53): `GREŠKA: ValueError: vrutak: 1 redaka s neparsabilnom
+cijenom; baza nije promijenjena`.
+
+## Uzrok
+
+Sirovi redak u `vrutak/prices.csv` (redak 63058, CRLF):
+
+```
+vodovodna,"219602,",7.99,15.98,,,,,,
+```
+
+Šifra proizvoda je u navodnicima sa zarezom na kraju; isti `"219602,"` je u products.csv (9005800388922, "N-NIVEA HAIR
+ŠAMPON 500ML ANTIGREAS -6/1-", NIVEA-BEIERSDORF, KOM, "0,5 L"). U prices.csv je to **jedini navodnik u datoteci**, pa
+sniffer DuckDB-a nije prepoznao navodnik kao quote i pročitao je redak pomaknuto: product_id `"219602`, price `"`,
+unit_price 7.99, best_price_30 15.98. Cijena nije bila loša, nego je CSV pogrešno pročitan.
+
+## Izmjene
+
+1. **Navodnik zadan izričito** (`build.CSV_OPTS`: `quote='"', escape='"'`) za stores/products/prices u `load_raw` i za
+   products.csv memorije polja (`update.remember_fields`). Redak se sada čita ispravno: šifra `219602,`, cijena 7,99 €,
+   cijena po jedinici 15,98 €/l. Na cijeloj arhivi 18.11. (19 lanaca) ostali lanci daju iste retke i vrijednosti kao
+   prije (hash po lancu za prices, products i stores); razlikuje se samo taj redak vrutka.
+2. **Decimalni zarez** se čita (`build.price_sql`: `"7,99"` -> 7.99), praznina oko vrijednosti se zanemaruje, prazno je
+   NULL.
+3. **Neparsabilni retci se preskaču** uz upozorenje: `::warning title=Neparsabilne cijene <lanac>::...` i redak u
+   `GITHUB_STEP_SUMMARY` (lanac, broj redaka od ukupno, postotak, do 3 primjera `trgovina/šifra stupac='sirova
+   vrijednost'`), lokalno `  ! ...` u ispisu update.py. Retci ne ulaze u sirovu tablicu prices.
+4. **Blokada** tek kad je neparsabilno više od `build.MAX_BAD_PRICE_SHARE` (0,01 = 1 %, jedino mjesto) redaka cijena
+   jednog lanca: `BadPriceError`, izlazni kod **2** (provjera nije prošla), `::error::` i sažetak s primjerima; baza se
+   ne mijenja, nema deploya. Točno 1 % prolazi.
+
+Ostaje greška (izlazni kod 1): stvarno neispravan CSV (npr. nezatvoreni navodnik), jer ga DuckDB ne može pročitati.
+
+## Provjera
+
+- `uv run pytest -q`: 1501 passed, 7 skipped (novo: `tests/test_step18.py`, 7 testova: stvarni redak vrutka 18.11.,
+  decimalni zarez, jedan loš redak preskočen uz upozorenje, 1 % prolazi / 2 % blokira, update.py s jednim lošim retkom
+  exit 0 + ::warning:: + sažetak, update.py iznad praga exit 2 + ::error:: i baza nepromijenjena)
+- `MM_GOLDEN=1 uv run pytest -q`: 1508 passed
+- ručni deploy nije rađen; sljedeće zakazano pokretanje workflowa (arhiva 18.11.) ide s ovim promjenama

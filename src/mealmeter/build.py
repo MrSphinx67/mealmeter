@@ -55,33 +55,85 @@ def nonfood_store_type(store_type: str | None) -> bool:
     return any(w in t for w in NONFOOD_STORE_TYPES)
 
 
-def load_raw(con: duckdb.DuckDBPyConnection, root: Path, archive_date: str) -> list[str]:
+# CSV arhive (Korak 18): navodnik zadan izričito. Sniffer DuckDB-a ga inače ne prepozna kad u datoteci postoji samo
+# jedan polje u navodnicima (vrutak 18.11.2026.: `vodovodna,"219602,",7.99,15.98`), pa pomakne stupce: šifra '"219602',
+# cijena '"'. S navodnikom je to šifra "219602," (ista kao u products.csv) i cijena 7.99.
+CSV_OPTS = "header=true, all_varchar=true, quote='\"', escape='\"'"
+
+# Neparsabilne cijene (Korak 18): redak s cijenom koja se ne da pročitati preskače se uz upozorenje; baza se odbija
+# tek kad je takvih više od MAX_BAD_PRICE_SHARE redaka cijena nekog lanca (kvar izvoza, a ne jedan loš redak).
+MAX_BAD_PRICE_SHARE = 0.01
+BAD_PRICE_EXAMPLES = 3
+# decimalni zarez ("7,99") je ispravna cijena u drugom zapisu: čita se kao 7.99
+DECIMAL_COMMA_RX = r"[+-]?[0-9]+,[0-9]+"
+
+
+class BadPriceError(ValueError):
+    """Lanac ima više od MAX_BAD_PRICE_SHARE redaka s neparsabilnom cijenom."""
+
+
+def price_sql(col: str) -> str:
+    """SQL: sirova cijena (tekst) u DECIMAL(10,2); prazno je NULL, decimalni zarez se prihvaća, ostalo NULL."""
+    t = f"trim({col})"
+    return (f"TRY_CAST(CASE WHEN regexp_full_match({t}, '{DECIMAL_COMMA_RX}') THEN replace({t}, ',', '.') "
+            f"ELSE NULLIF({t}, '') END AS DECIMAL(10,2))")
+
+
+def bad_price_sql(col: str) -> str:
+    """SQL: sirova cijena nije prazna, a ne da se pročitati."""
+    return f"(NULLIF(trim({col}), '') IS NOT NULL AND {price_sql(col)} IS NULL)"
+
+
+def describe_bad_prices(b: dict) -> str:
+    """Jedan redak za lanac s neparsabilnim cijenama (iz load_raw)."""
+    return (f"{b['chain']}: {b['bad']} od {b['total']} redaka cijena s neparsabilnom cijenom ({b['pct']:.2f} %); "
+            f"primjeri: {'; '.join(b['examples'])}")
+
+
+def load_raw(con: duckdb.DuckDBPyConnection, root: Path, archive_date: str,
+             bad_prices: list[dict] | None = None) -> list[str]:
     """Sirovi CSV-ovi u tablice stores/products/prices, bez normalizacije.
 
-    Dodaje stupac `chain` (naziv mape) i `date` (dan iz naziva arhive) u prices.
+    Dodaje stupac `chain` (naziv mape) i `date` (dan iz naziva arhive) u prices. Retci s neparsabilnom cijenom se
+    preskaču i dodaju u `bad_prices` ({chain, bad, total, pct, examples}); više od MAX_BAD_PRICE_SHARE takvih redaka
+    jednog lanca diže BadPriceError.
     """
 
     def raw(chain: str, name: str) -> str:
         # Sve kao tekst: šifre imaju vodeće nule
-        return f"read_csv('{root / chain / name}', header=true, all_varchar=true)"
+        return f"read_csv('{root / chain / name}', {CSV_OPTS})"
 
     chains = sorted(p.name for p in Path(root).iterdir() if p.is_dir())
     con.execute("DROP TABLE IF EXISTS stores; DROP TABLE IF EXISTS products; DROP TABLE IF EXISTS prices")
-    casts = ", ".join(f"TRY_CAST({c} AS DECIMAL(10,2)) AS {c}" for c in PRICE_COLS)
+    casts = ", ".join(f"{price_sql(c)} AS {c}" for c in PRICE_COLS)
+    bad = " OR ".join(bad_price_sql(c) for c in PRICE_COLS)
     for i, chain in enumerate(chains):
+        n_total, n_bad = con.execute(
+            f"SELECT count(*), count(*) FILTER (WHERE {bad}) FROM {raw(chain, 'prices.csv')}").fetchone()
+        if n_bad:
+            # primjer: trgovina/šifra i sirove vrijednosti samo neparsabilnih stupaca
+            flags = ", ".join(f"{bad_price_sql(c)}" for c in PRICE_COLS)
+            rows = con.execute(
+                f"SELECT store_id, product_id, {', '.join(PRICE_COLS)}, {flags} FROM {raw(chain, 'prices.csv')} "
+                f"WHERE {bad} ORDER BY store_id, product_id LIMIT {BAD_PRICE_EXAMPLES}").fetchall()
+            k = len(PRICE_COLS)
+            examples = [f"{r[0]}/{r[1]} " + ", ".join(f"{c}={v!r}" for c, v, f in zip(PRICE_COLS, r[2:2 + k], r[2 + k:])
+                                                    if f)
+                        for r in rows]
+            info = {"chain": chain, "bad": n_bad, "total": n_total, "pct": 100 * n_bad / n_total,
+                    "examples": examples}
+            if n_bad > n_total * MAX_BAD_PRICE_SHARE:
+                raise BadPriceError(f"{describe_bad_prices(info)}; više od {100 * MAX_BAD_PRICE_SHARE:g} % redaka "
+                                    f"lanca, baza odbijena")
+            if bad_prices is not None:
+                bad_prices.append(info)
         verb = "CREATE TABLE {} AS" if i == 0 else "INSERT INTO {}"
         con.execute(f"{verb.format('stores')} SELECT '{chain}' AS chain, * FROM {raw(chain, 'stores.csv')}")
         con.execute(f"{verb.format('products')} SELECT '{chain}' AS chain, * FROM {raw(chain, 'products.csv')}")
         con.execute(
             f"{verb.format('prices')} SELECT '{chain}' AS chain, store_id, product_id, {casts}, "
-            f"DATE '{archive_date}' AS date FROM {raw(chain, 'prices.csv')}"
+            f"DATE '{archive_date}' AS date FROM {raw(chain, 'prices.csv')} WHERE NOT ({bad})"
         )
-        bad = con.execute(
-            f"SELECT count(*) FROM {raw(chain, 'prices.csv')} WHERE "
-            + " OR ".join(f"({c} IS NOT NULL AND TRY_CAST({c} AS DECIMAL(10,2)) IS NULL)" for c in PRICE_COLS)
-        ).fetchone()[0]
-        if bad:
-            raise ValueError(f"{chain}: {bad} redaka s neparsabilnom cijenom")
     return chains
 
 
