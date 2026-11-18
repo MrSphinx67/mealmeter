@@ -91,7 +91,7 @@ def test_update_workflow():
     on = wf[True] if True in wf else wf["on"]  # PyYAML čita ključ "on" kao True
     assert len(on["schedule"]) == 1 and len(on["schedule"][0]["cron"].split()[1].split(",")) == 2  # 2x dnevno
     runs = "\n".join(s.get("run", "") for s in wf["jobs"]["update"]["steps"])
-    assert "--max-mb 220 --max-file-mb 95 --warn-mb 190 --warn-file-mb 65" in runs  # Korak 12
+    assert "--max-mb 220 --max-file-mb 95 --warn-mb 200 --warn-file-mb 65" in runs  # Korak 12, 16 (upozorenje 200)
     order = ["scripts/update.py", "scripts/build_compact.py", "golden.py --check", "vercel build",
              "vercel deploy --prebuilt --prod"]
     assert [runs.index(x) for x in order] == sorted(runs.index(x) for x in order)

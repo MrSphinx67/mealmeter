@@ -43,7 +43,7 @@ objavljuju sve trgovine i sav asortiman.
   RSS ~1,6 GB. `clean.product_fields` se ne kopira (13 MB, samo za update.py).
 - **Bez proizvoda s `is_food = false`** i njihovih cijena (275 tis. proizvoda, 8,25 M cijena, 29 %); `is_food` NULL
   ostaje. Uvjet je `search.STORE_PRODUCTS_SQL`.
-- **`anchor_price` se ne čuva**: view `clean.prices` vraća NULL (`build_compact.NULL_PRICE_COLS`). Sidrena cijena
+- **`anchor_price` se ne čuva**: view `clean.prices` vraća NULL (`build_compact.NO_ANCHOR_COLS`; Korak 16: `MM_COMPACT_ANCHOR=1` ga zadržava). Sidrena cijena
   (2.5.2025.) razlikuje se po trgovini u 24 % redaka hrane (studenac 2,46 M, konzum 0,94 M, plodine 0,44 M) i
   stvarala je iznimke. Puna baza je zadržava.
 - Provjera view-ova prema punoj bazi uspoređuje iste proizvode i stupce bez `anchor_price` i traži da je on NULL.

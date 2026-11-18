@@ -193,3 +193,59 @@ def test_extract_products_only(tmp_path):
         zz.writestr("../evil/products.csv", "x\n")
     out = extract_products(z, tmp_path / "out")
     assert [p.relative_to(out).as_posix() for p in sorted(out.rglob("*.csv"))] == ["konzum/products.csv"]
+
+
+# --- sažeta baza: zadano bez anchor_price, uz MM_COMPACT_ANCHOR=1 po trgovini (Korak 16) ---------------------
+
+def _compact_outputs(tmp_path, monkeypatch, anchor: bool):
+    import importlib.util
+    import json
+    from pathlib import Path
+
+    full = tmp_path / "full.duckdb"
+    c = duckdb.connect(str(full))
+    load_raw(c, FIXTURE, "2026-10-19")
+    # druga Konzumova trgovina s drukčijom sidrenom cijenom (inače isti redak): iznimka samo zbog anchor_price
+    c.execute("""INSERT INTO stores SELECT chain, '0908', type, 'Vukovarska 1', city, zipcode FROM stores
+                 WHERE chain = 'konzum' AND store_id = '0907'""")
+    c.execute("""INSERT INTO prices SELECT chain, '0908', product_id, price, unit_price, best_price_30,
+                 anchor_price + 0.05, special_price, date FROM prices WHERE chain = 'konzum' AND store_id = '0907'""")
+    build_clean(c)
+    c.close()
+    if anchor:
+        monkeypatch.setenv("MM_COMPACT_ANCHOR", "1")
+    else:
+        monkeypatch.delenv("MM_COMPACT_ANCHOR", raising=False)
+    spec = importlib.util.spec_from_file_location("bc", Path(__file__).parents[1] / "scripts" / "build_compact.py")
+    bc = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(bc)
+    counts = bc.build(full, tmp_path / "compact.duckdb")
+    calls = [("get_prices", dict(product_id="3850104223624", city="Osijek")),
+             ("plan_basket", dict(ingredients=[{"name": "brašno glatko", "amount": 250, "unit": "g"}], city="Osijek",
+                                  detail=True))]
+    state = (srv._shared_con, srv._fixed_con, srv._db_path, srv._db_key)
+    try:
+        outs = []
+        for db in (full, tmp_path / "compact.duckdb"):
+            srv.create_server(db_path=str(db))
+            outs.append([json.loads(srv._dumps(getattr(srv, name)(**args))) for name, args in calls])
+    finally:
+        srv._shared_con, srv._fixed_con, srv._db_path, srv._db_key = state
+    return counts, outs
+
+
+def test_compact_anchor_option_keeps_price_per_store(tmp_path, monkeypatch):
+    counts, (full, compact) = _compact_outputs(tmp_path, monkeypatch, anchor=True)
+    assert full == compact
+    anchors = {(r["chain"], r["store_id"]): r["anchor_price"] for r in compact[0]["stores"]}
+    assert anchors[("konzum", "0908")] is not None and anchors[("konzum", "0908")] != anchors[("konzum", "0907")]
+
+
+def test_compact_default_without_anchor(tmp_path, monkeypatch):
+    counts, (full, compact) = _compact_outputs(tmp_path, monkeypatch, anchor=False)
+    assert all(r["anchor_price"] is None for r in compact[0]["stores"])
+    assert any(r["anchor_price"] is not None for r in full[0]["stores"])
+    for res in (full[0], compact[0]):
+        for r in res["stores"]:
+            r.pop("anchor_price")
+    assert full == compact

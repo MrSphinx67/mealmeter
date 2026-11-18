@@ -3,11 +3,14 @@
 `.vercel/output/functions/*.func` sadrži samo pokretač; ostale datoteke funkcije su navedene u `.vc-config.json`
 (`filePathMap`) i čitaju se s izvornih putanja, pa `du` na izlaznoj mapi pokazuje ~1 MB. Ova skripta zbraja sve.
 
-    python scripts/vercel_bundle_size.py [--max-mb 220] [--max-file-mb 95] [--warn-mb 190] [--warn-file-mb 65]
+    python scripts/vercel_bundle_size.py [--max-mb 220] [--max-file-mb 95] [--warn-mb 200] [--warn-file-mb 65]
 
 Izlazni kod 1 ako je neka funkcija veća od --max-mb ili ako je neka datoteka u njoj veća od --max-file-mb
 (`vercel deploy` na Hobby planu odbija datoteke veće od 100 MB: "File size limit exceeded (100 MB)").
-Iznad --warn-mb / --warn-file-mb (Korak 12: rezerva od 30 MB) samo `::warning::` (GitHub Actions) i izlazni kod 0.
+Iznad --warn-mb / --warn-file-mb samo `::warning::` (GitHub Actions) i izlazni kod 0.
+Granice (Korak 16): Vercelov Python builder (CLI 65.11.0 i 66.0.0) ne prima paket veći od 225 MB, iako dokumentacija
+za Python navodi 500 MB (vidi docs/16_STATUS.md); blokada 220 MB, upozorenje 200 MB. Iznad 225 MB Vercel ionako odbija
+deploy, a produkcija ostaje na zadnjoj verziji.
 """
 
 import argparse
@@ -45,8 +48,8 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--max-mb", type=float, default=220.0, help="granica (Vercel builder: 225 MB)")
     ap.add_argument("--max-file-mb", type=float, default=95.0, help="najveća datoteka (Hobby upload: 100 MB)")
-    ap.add_argument("--warn-mb", type=float, default=None, help="upozorenje iznad (rezerva do --max-mb)")
-    ap.add_argument("--warn-file-mb", type=float, default=None, help="upozorenje za datoteku iznad")
+    ap.add_argument("--warn-mb", type=float, default=200.0, help="upozorenje iznad (rezerva do --max-mb)")
+    ap.add_argument("--warn-file-mb", type=float, default=65.0, help="upozorenje za datoteku iznad")
     ap.add_argument("--root", default=".vercel/output/functions")
     args = ap.parse_args()
     bad = 0

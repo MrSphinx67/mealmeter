@@ -114,10 +114,11 @@ def run(db: str | None) -> dict:
         fn = getattr(srv, tool)
         res = fn(**args, detail=True) if tool == "plan_basket" else fn(**args)
         out[name] = json.loads(srv._dumps(res))
-        # sažeta baza ne čuva anchor_price (build_compact.NULL_PRICE_COLS, Korak 15): zapis s pune i provjera na
-        # sažetoj usporeduju get_prices bez njega
-        for row in out[name].get("stores", []) if tool == "get_prices" else []:
-            row.pop("anchor_price", None)
+        # sažeta baza zadano ne čuva anchor_price (build_compact.NO_ANCHOR_COLS, Korak 15/16): zapis s pune i provjera
+        # na sažetoj usporeduju get_prices bez njega, osim uz MM_COMPACT_ANCHOR=1
+        if os.environ.get("MM_COMPACT_ANCHOR") != "1":
+            for row in out[name].get("stores", []) if tool == "get_prices" else []:
+                row.pop("anchor_price", None)
     return out
 
 

@@ -30,9 +30,11 @@ Korak 15 (od 17.11.2026. ~30 M cijena, sve trgovine lanaca; paket bi bio 256 MB)
 - bez proizvoda koji sigurno nisu hrana (is_food = false, KEEP_PRODUCTS) i njihovih cijena; alati ih ionako ne
   vraćaju (MCP alati ne prosljeđuju include_nonfood), pa search.find_products/get_prices(include_nonfood=True)
   nad sažetom bazom ne nalaze ništa neprehrambeno; puna baza ih zadržava. is_food NULL ostaje;
-- anchor_price (sidrena cijena 2.5.2025., NN 75/2025) se ne sprema (NULL_PRICE_COLS): po trgovini se razlikuje u
-  ~24 % redaka hrane i stvarala je iznimke; view vraća NULL, pa get_prices nad sažetom bazom ima anchor_price null.
-Provjera prema punoj bazi uspoređuje iste proizvode (KEEP_PRODUCTS) i stupce bez NULL_PRICE_COLS.
+- anchor_price (sidrena cijena 2.5.2025., NN 75/2025) se zadano ne sprema (NO_ANCHOR_COLS): po trgovini se razlikuje
+  u ~24 % redaka hrane i stvara iznimke (+17 MB datoteke cijena); view vraća NULL, pa get_prices nad sažetom bazom
+  ima anchor_price null. Uz env MM_COMPACT_ANCHOR=1 se sprema po trgovini (Korak 16: paket 217 MB, a Vercelov Python
+  builder ne prima više od 225 MB, docs/16_STATUS.md).
+Provjera prema punoj bazi uspoređuje iste proizvode (KEEP_PRODUCTS) i stupce bez izostavljenih (null_price_cols).
 DuckDB je ograničen na 1,5 GB memorije (env MM_COMPACT_MEMORY; privremene datoteke u data/compact_tmp).
 """
 
@@ -57,8 +59,13 @@ SKIP = {"prices", "price_history", "staple_prices", "staple_items", "products", 
         "product_fields"}  # memorija polja proizvoda (Korak 15): samo za update.py
 # stupci koje alati (search.py, basket.py, server.py) ne čitaju; koristi ih samo build pune baze
 DROP_PRICE_COLS = ("price", "unit_price", "price_date")
-# stupci koje alati čitaju, ali ih sažeta baza ne čuva: view ih vraća kao NULL (Korak 15)
-NULL_PRICE_COLS = {"anchor_price": "DECIMAL(10,2)"}
+# stupci koje alati čitaju, a sažeta baza ih zadano ne čuva (bez MM_COMPACT_ANCHOR=1): view ih vraća kao NULL
+NO_ANCHOR_COLS = {"anchor_price": "DECIMAL(10,2)"}
+
+
+def null_price_cols() -> dict[str, str]:
+    """Stupci cijena koje view vraća kao NULL: NO_ANCHOR_COLS, osim uz env MM_COMPACT_ANCHOR=1 (Korak 16)."""
+    return {} if os.environ.get("MM_COMPACT_ANCHOR") == "1" else NO_ANCHOR_COLS
 # proizvodi u sažetoj bazi (Korak 15): bez sigurno neprehrambenih
 KEEP_PRODUCTS = STORE_PRODUCTS_SQL
 # stupci cijena koje čita upit kandidata za namirnicu (search._candidates, STAPLE_PPU_SQL)
@@ -143,7 +150,8 @@ def build(SRC: Path, OUT: Path) -> dict:
         ORDER BY s.chain, s.store_id""")
 
     cols = [col for col in _cols(c, "prices") if col not in DROP_PRICE_COLS]
-    vals = [col for col in cols if col not in KEYS + DATE_COLS + tuple(NULL_PRICE_COLS)]
+    nulls = null_price_cols()
+    vals = [col for col in cols if col not in KEYS + DATE_COLS + tuple(nulls)]
     v = ", ".join(vals)
     # osnovni redak para: najčešći redak (bez izostavljenih stupaca i datuma); pri jednakom broju najniža cijena
     c.execute(f"""CREATE TEMP TABLE base AS
@@ -169,7 +177,7 @@ def build(SRC: Path, OUT: Path) -> dict:
     def out(src: str, exc: bool) -> str:
         """Stupci view-a redom kao u punoj bazi; datum iz trgovine, u iznimci njezin ako ga ima."""
         expr = {"chain": "s.chain", "store_id": "s.store_id", "product_id": "p.product_id",
-                **{col: f"NULL::{typ}" for col, typ in NULL_PRICE_COLS.items()},
+                **{col: f"NULL::{typ}" for col, typ in nulls.items()},
                 "date": f"coalesce({src}.date, s.sk_date)" if exc else "s.sk_date",
                 "stale_days": f"coalesce({snap} - {src}.date, s.sk_stale_days)" if exc else "s.sk_stale_days"}
         return ", ".join(f"{expr[col]} AS {col}" if col in expr else f"{src}.{col}" for col in cols)
@@ -214,10 +222,10 @@ def build(SRC: Path, OUT: Path) -> dict:
         JOIN dst.clean.products p USING (pk) ORDER BY k.staple, p.chain, p.product_id""")
 
     # provjera: view-ovi vraćaju točno iste retke kao puna baza (za stupce koji su ostali)
-    kept = [col for col in cols if col not in NULL_PRICE_COLS]
-    if c.execute(f"""SELECT count(*) FROM dst.clean.prices
-                     WHERE {" OR ".join(f"{col} IS NOT NULL" for col in NULL_PRICE_COLS)}""").fetchone()[0]:
-        raise SystemExit(f"{', '.join(NULL_PRICE_COLS)}: view nije NULL")
+    kept = [col for col in cols if col not in nulls]
+    if nulls and c.execute(f"""SELECT count(*) FROM dst.clean.prices
+                     WHERE {" OR ".join(f"{col} IS NOT NULL" for col in nulls)}""").fetchone()[0]:
+        raise SystemExit(f"{', '.join(nulls)}: view nije NULL")
     checks = {
         "prices": (f"SELECT {', '.join(kept)} FROM src_prices", f"SELECT {', '.join(kept)} FROM dst.clean.prices", kept),
         "staple_prices": (f"SELECT staple, {', '.join(STAPLE_PRICE_COLS)} FROM staple_src",
