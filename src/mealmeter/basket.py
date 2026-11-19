@@ -14,7 +14,7 @@ from mealmeter import units
 from mealmeter.brands import BRANDS_PATH, display_brand, load_brands  # noqa: F401 (load_brands, BRANDS_PATH: javno)
 from mealmeter.build import NATIONAL_NOTE
 from mealmeter.build import SUSPECT_CHAINS, WHOLESALE_CHAINS
-from mealmeter.normalize import date_hr, norm_text, parse_multipack_unit
+from mealmeter.normalize import date_hr, load_yaml, norm_text, parse_multipack_unit
 from mealmeter.search import (_candidates, _city_filter, _food_filter, connect, find_products, format_pack,
                               has_staple_prices, resolve_city)
 from mealmeter.staples import Staple, extract_attributes_detail, load_staples, resolve_ingredient
@@ -53,11 +53,9 @@ NO_AMOUNT_UNITS = {"po ukusu", "po zelji", "malo", "za posipanje", ""}
 @lru_cache(maxsize=2)
 def load_assumptions(path: Path = ASSUMPTIONS_PATH) -> dict[str, dict]:
     """Pretpostavljene količine za sastojke bez količine (data/assumptions.yaml, procjene)."""
-    import yaml
-
     if not Path(path).exists():
         return {}
-    return yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+    return load_yaml(path) or {}
 
 
 def assume_amount(item: dict, staple: Staple) -> tuple[dict, dict | None]:
@@ -76,11 +74,9 @@ def assume_amount(item: dict, staple: Staple) -> tuple[dict, dict | None]:
 @lru_cache(maxsize=2)
 def load_synonyms(path: Path = SYNONYMS_PATH) -> dict[str, tuple[str, ...]]:
     """Sinonimi za slobodnu pretragu (data/synonyms.yaml): normalizirani naziv -> drugi nazivi."""
-    import yaml
-
     if not Path(path).exists():
         return {}
-    raw = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+    raw = load_yaml(path) or {}
     return {norm_text(k): tuple(v) for k, v in raw.items()}
 
 

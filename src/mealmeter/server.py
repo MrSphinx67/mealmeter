@@ -16,10 +16,9 @@ import inspect
 import json
 import logging
 import os
-import re
 import threading
 import time
-from collections import Counter, defaultdict, deque
+from collections import Counter
 from typing import Annotated, Any
 
 import duckdb
@@ -28,15 +27,12 @@ from mcp.server.transport_security import TransportSecuritySettings
 from mcp.types import CallToolResult, TextContent, ToolAnnotations
 from pydantic import Field
 
-from mealmeter import basket, search
+from mealmeter import basket, search, web
 from mealmeter.normalize import date_hr, norm_text
 from mealmeter.staples import load_staples
+from mealmeter.web import MAX_REQUEST_BYTES, RATE_GLOBAL, RATE_LIMIT, RATE_SESSION  # noqa: F401
 
 MAX_RESPONSE_BYTES = 20_000
-RATE_LIMIT = 60  # upita po IP-u u minuti (HTTP), MM_RATE_IP
-RATE_SESSION = 30  # upita po MCP sesiji (Mcp-Session-Id) u minuti, MM_RATE_SESSION
-RATE_GLOBAL = 1000  # upita ukupno u minuti, MM_RATE_GLOBAL
-MAX_REQUEST_BYTES = 64_000
 PRICE_NOTE = ("Cijene su iz službenih cjenika trgovina (cijene.dev); u trgovini se mogu razlikovati, cjenik "
               "nije zaliha, a akcije se mijenjaju. / Prices come from the stores' official price lists "
               "(cijene.dev); in-store prices may differ, a price list is not stock, and promotions change.")
@@ -157,6 +153,23 @@ def _open(path) -> duckdb.DuckDBPyConnection:
     return con
 
 
+def _check_meta(con, path) -> dict | None:
+    """Metapodaci uz sažetu bazu (web.read_meta) ako su iz iste izgradnje kao otvorena baza, inače None; kad se
+    oznake ne slažu, metapodaci se odbacuju (web.reject_meta) i datum se dalje čita iz baze."""
+    meta = web.read_meta(path)
+    if meta is None:
+        return None
+    try:
+        build_id = con.execute("SELECT build_id FROM clean.compact_build").fetchone()[0]
+    except Exception:  # noqa: BLE001  (puna baza ili fixture: nema clean.compact_build)
+        build_id = None
+    if build_id != meta["build_id"]:
+        log.warning("compact_meta: izgradnja %s, a baza %s; datum iz baze", meta["build_id"], build_id)
+        web.reject_meta(meta["build_id"])
+        return None
+    return meta
+
+
 _DB_ALIAS = "mm"
 
 
@@ -174,6 +187,9 @@ def _con() -> duckdb.DuckDBPyConnection:
         if _shared_con is None or (key is not None and key[0] is not None and key != _db_key):
             _shared_con = _open(path)
             _db_key = key
+            # datum cjenika iz metapodataka iste izgradnje (Korak 18): bez max(date) nad view-om (~0,3 s CPU-a)
+            if meta := _check_meta(_shared_con, path):
+                _date_cache.update(owner=_shared_con, value={"date": meta["date"], "date_hr": meta["date_hr"]})
         shared, attached = _shared_con, not _fixed_con
     cur = getattr(_local, "cur", None)
     if cur is None or getattr(_local, "owner", None) is not shared:
@@ -187,9 +203,15 @@ def _con() -> duckdb.DuckDBPyConnection:
 _date_cache: dict = {"owner": None, "value": None}
 
 
-def _price_list_date(con) -> dict:
+def _price_list_date(con=None) -> dict:
     """Datum cjenika (max date). Pamti se po vezi baze: mijenja se tek kad se datoteka zamijeni (nova veza), a
-    na sažetoj bazi max(date) preko view-a clean.prices traje ~0,3 s (Korak 5P)."""
+    na sažetoj bazi max(date) preko view-a clean.prices traje ~0,3 s (Korak 5P); uz metapodatke iste izgradnje
+    (compact_meta.json) se ne računa (_con). Bez `con` (alati kojima baza ne treba: convert_units, list_staples)
+    datum je iz metapodataka, bez otvaranja baze; bez njih se baza otvara."""
+    if con is None:
+        if meta := web.current_meta():
+            return {"date": meta["date"], "date_hr": meta["date_hr"]}
+        con = _con()
     owner = getattr(_local, "owner", None) if getattr(_local, "cur", None) is con else con
     if _date_cache["owner"] is not owner or owner is None:
         d = con.execute("SELECT max(date) FROM clean.prices").fetchone()[0]
@@ -387,21 +409,19 @@ def convert_units(
     unit: Annotated[str, Field(description="Mjera: žlica, žličica, šalica, prstohvat, kom, češanj, g, ml... / unit")],
     staple: Annotated[str, Field(description="Namirnica (ključ ili sinonim) / staple")],
 ) -> dict:
-    con = _con()
     try:
         st, _ = basket.resolve_name(staple)
         value, base, notes = basket.to_base(amount, unit, st)
     except (ValueError, basket.IngredientError) as e:
-        return {**_price_list_date(con), **_error(e)}
-    return {**_price_list_date(con), "staple": st.key, "amount": round(value, 2), "unit": base, "notes": notes}
+        return {**_price_list_date(), **_error(e)}
+    return {**_price_list_date(), "staple": st.key, "amount": round(value, 2), "unit": base, "notes": notes}
 
 
 def list_staples() -> dict:
-    con = _con()
     staples = [{"key": s.key, "name": s.name, "unit": s.unit, "synonyms": list(s.synonyms[:6]),
                 "attributes": {a: list(v) for a, v in s.attributes.items()}}
                for s in load_staples().values()]
-    return _fit({**_price_list_date(con), "staples": staples}, ("staples",))
+    return _fit({**_price_list_date(), "staples": staples}, ("staples",))
 
 
 DESCRIPTIONS = {
@@ -483,7 +503,7 @@ def _as_result(fn):
     Zapisuje samo naziv alata, status, trajanje i veličinu odgovora, nikad argumente (sadržaj upita)."""
     @functools.wraps(fn)
     def wrapper(*args, **kwargs) -> CallToolResult:
-        start, status = time.perf_counter(), "exception"
+        start, cpu0, status = time.perf_counter(), time.process_time(), "exception"
         try:
             out = fn(*args, **kwargs)
             status = "error" if "error" in out else "ok"
@@ -491,7 +511,8 @@ def _as_result(fn):
             return CallToolResult(content=[TextContent(type="text", text=text)], is_error="error" in out)
         finally:
             TOOL_CALLS[(fn.__name__, status)] += 1
-            log.info("tool=%s status=%s ms=%d calls=%d", fn.__name__, status, (time.perf_counter() - start) * 1000,
+            log.info("tool=%s status=%s ms=%d cpu_ms=%d calls=%d", fn.__name__, status,
+                     (time.perf_counter() - start) * 1000, (time.process_time() - cpu0) * 1000,
                      sum(n for (t, _), n in TOOL_CALLS.items() if t == fn.__name__))
 
     wrapper.__signature__ = inspect.signature(fn).replace(return_annotation=CallToolResult)
@@ -514,309 +535,15 @@ def create_server(con: duckdb.DuckDBPyConnection | None = None, db_path: str | N
     return server
 
 
-def _env_int(name: str, default: int) -> int:
-    try:
-        return int(os.environ.get(name, default))
-    except ValueError:
-        return default
+# HTTP omotači, /healthz i / su u laganom modulu web (Korak 18: Vercel ih koristi bez učitavanja SDK-a)
+from mealmeter.web import (HEALTH_MAX_AGE_HOURS, HOME_HTML, LOCAL_HOSTS, LOCAL_ORIGINS,  # noqa: E402,F401
+                           HostGuard, McpPostOnly, RateLimit, RequestLog, _env_int, _match, _split_env, _text,
+                           anon_ip, health, home, version)
 
 
-class RateLimit:
-    """ASGI: ograničenja HTTP zahtjeva u `window` sekundi (429) i veličina tijela (413).
-
-    - po IP-u (`limit`, MM_RATE_IP): IP klijenta iz veze; uz TRUSTED_PROXY=vercel iz x-vercel-forwarded-for /
-      x-real-ip / x-forwarded-for (Vercel ih postavlja sam); samo uz TRUSTED_PROXY=1 (poslužitelj iza vlastitog
-      proxyja) iz CF-Connecting-IP, inače iz zadnjeg unosa X-Forwarded-For (adresa koju je vidio naš proxy;
-      raniji unosi dolaze od klijenta i mogu se krivotvoriti);
-    - po MCP sesiji (`session_limit`, MM_RATE_SESSION), kad zahtjev nosi Mcp-Session-Id;
-    - ukupno (`global_limit`, MM_RATE_GLOBAL), visoko, kao zaštita poslužitelja.
-    """
-
-    def __init__(self, app, limit: int | None = None, window: float = 60.0, max_body: int = MAX_REQUEST_BYTES,
-                 session_limit: int | None = None, global_limit: int | None = None,
-                 trusted_proxy: bool | None = None):
-        self.app, self.window, self.max_body = app, window, max_body
-        self.limit = limit if limit is not None else _env_int("MM_RATE_IP", RATE_LIMIT)
-        self.session_limit = session_limit if session_limit is not None else _env_int("MM_RATE_SESSION", RATE_SESSION)
-        self.global_limit = global_limit if global_limit is not None else _env_int("MM_RATE_GLOBAL", RATE_GLOBAL)
-        if trusted_proxy is None:  # "1": vlastiti proxy (CF-Connecting-IP / X-Forwarded-For); "vercel": Vercelova zaglavlja
-            env = os.environ.get("TRUSTED_PROXY", "")
-            trusted_proxy = "vercel" if env == "vercel" else env == "1"
-        self.trusted_proxy = trusted_proxy
-        self.hits: dict[str, deque] = defaultdict(deque)  # "ip:..." / "session:..." / "global"
-        self._last_prune = time.monotonic()
-
-    def client_ip(self, scope, headers: dict[bytes, bytes]) -> str:
-        if self.trusted_proxy == "vercel":
-            # Vercel prepisuje X-Forwarded-For IP-om klijenta (ne prosljeđuje vanjske IP-ove); x-vercel-forwarded-for i
-            # x-real-ip su isti. CF-Connecting-IP bi klijent na Vercelu mogao sam poslati, pa se ne čita.
-            for name in (b"x-vercel-forwarded-for", b"x-real-ip", b"x-forwarded-for"):
-                if ip := headers.get(name, b"").decode("latin-1").split(",")[0].strip():
-                    return ip
-        elif self.trusted_proxy:
-            if cf := headers.get(b"cf-connecting-ip", b"").decode("latin-1").strip():
-                return cf
-            if xff := [p.strip() for p in headers.get(b"x-forwarded-for", b"").decode("latin-1").split(",") if p.strip()]:
-                return xff[-1]
-        return (scope.get("client") or ("?", 0))[0]
-
-    def _over(self, key: str, limit: int, now: float) -> bool:
-        q = self.hits[key]
-        while q and now - q[0] > self.window:
-            q.popleft()
-        return len(q) >= limit
-
-    def _prune(self, now: float) -> None:
-        """Ključevi bez zahtjeva u prozoru se brišu (sesije i IP-ovi ne rastu bez granice)."""
-        if now - self._last_prune < self.window:
-            return
-        self._last_prune = now
-        for key in [k for k, q in self.hits.items() if not q or now - q[-1] > self.window]:
-            del self.hits[key]
-
-    async def __call__(self, scope, receive, send):
-        if scope["type"] != "http":
-            return await self.app(scope, receive, send)
-        headers = {k.lower(): v for k, v in scope.get("headers") or []}
-        length = headers.get(b"content-length")
-        if length and int(length) > self.max_body:
-            return await self._reply(send, 413, "zahtjev je prevelik / request too large")
-        now = time.monotonic()
-        self._prune(now)
-        keys = [("global", self.global_limit, "poslužitelj je zauzet / server is busy"),
-                ("ip:" + self.client_ip(scope, headers), self.limit, "previše upita s ove adrese / too many requests")]
-        if session := headers.get(b"mcp-session-id", b"").decode("latin-1").strip():
-            keys.append(("session:" + session[:128], self.session_limit,
-                         "previše upita u ovoj sesiji / too many requests in this session"))
-        for key, limit, text in keys:
-            if self._over(key, limit, now):
-                return await self._reply(send, 429, f"{text}, pokušaj za minutu / retry in a minute")
-        for key, _, _ in keys:
-            self.hits[key].append(now)
-        return await self.app(scope, receive, send)
-
-    @staticmethod
-    async def _reply(send, status: int, text: str):
-        body = json.dumps({"error": text}, ensure_ascii=False).encode()
-        await send({"type": "http.response.start", "status": status,
-                    "headers": [(b"content-type", b"application/json"), (b"retry-after", b"60")]})
-        await send({"type": "http.response.body", "body": body})
-
-
-# --- HTTP: Host/Origin (DNS rebinding) ----------------------------------------------------------------------
-
-LOCAL_HOSTS = ("127.0.0.1", "localhost", "[::1]", "::1")
-LOCAL_ORIGINS = ("http://127.0.0.1:*", "http://localhost:*", "http://[::1]:*")
-
-
-def _match(value: str, pattern: str) -> bool:
-    """Obrazac s * (bilo koji niz znakova); sve ostalo doslovno ("[::1]" nije skup znakova kao u fnmatch)."""
-    return re.fullmatch(".*".join(re.escape(part) for part in pattern.split("*")), value) is not None
-
-
-def _split_env(name: str) -> list[str]:
-    return [p.strip() for p in os.environ.get(name, "").split(",") if p.strip()]
-
-
-class HostGuard:
-    """ASGI: zaštita od DNS rebindinga s obrascima hostova. SDK (TransportSecuritySettings) zna samo točne
-    vrijednosti i "host:*" (bilo koji port), pa za tunel ("*.trycloudflare.com") njegovu provjeru gasimo i
-    provjeravamo ovdje: Host bez porta mora pogoditi lokalni host ili obrazac iz MM_ALLOWED_HOSTS (* je bilo koji
-    niz, "*.trycloudflare.com"), inače 421; Origin, ako ga ima, lokalni ili iz MM_ALLOWED_ORIGINS, inače 403."""
-
-    def __init__(self, app, allowed_hosts: list[str] | None = None, allowed_origins: list[str] | None = None):
-        self.app = app
-        hosts = allowed_hosts if allowed_hosts is not None else _split_env("MM_ALLOWED_HOSTS")
-        origins = allowed_origins if allowed_origins is not None else _split_env("MM_ALLOWED_ORIGINS")
-        self.hosts = [h.lower() for h in (*LOCAL_HOSTS, *hosts)]
-        self.origins = [o.lower().rstrip("/") for o in (*LOCAL_ORIGINS, *origins)]
-
-    @staticmethod
-    def _hostname(host: str) -> str:
-        host = host.strip().lower()
-        if host.startswith("["):  # [::1]:8000
-            return host.split("]")[0] + "]"
-        return host.rsplit(":", 1)[0] if host.count(":") == 1 else host
-
-    def host_ok(self, host: str | None) -> bool:
-        if not host:
-            return False
-        name = self._hostname(host)
-        return any(_match(name, p) or _match(host.strip().lower(), p) for p in self.hosts)
-
-    def origin_ok(self, origin: str | None) -> bool:
-        if not origin:  # klijenti izvan preglednika ne šalju Origin
-            return True
-        origin = origin.lower().rstrip("/")
-        return any(_match(origin, p) or (p.endswith(":*") and _match(origin, p[:-2])) for p in self.origins)
-
-    async def __call__(self, scope, receive, send):
-        if scope["type"] != "http":
-            return await self.app(scope, receive, send)
-        headers = {k.lower(): v.decode("latin-1") for k, v in scope.get("headers") or []}
-        if not self.host_ok(headers.get(b"host")):
-            return await _text(send, 421, "Invalid Host header (MM_ALLOWED_HOSTS)")
-        if not self.origin_ok(headers.get(b"origin")):
-            return await _text(send, 403, "Invalid Origin header (MM_ALLOWED_ORIGINS)")
-        return await self.app(scope, receive, send)
-
-
-async def _text(send, status: int, text: str, content_type: bytes = b"text/plain; charset=utf-8"):
-    body = text.encode("utf-8")
-    await send({"type": "http.response.start", "status": status,
-                "headers": [(b"content-type", content_type), (b"content-length", str(len(body)).encode())]})
-    await send({"type": "http.response.body", "body": body})
-
-
-HEALTH_MAX_AGE_HOURS = 48  # starija baza: status "stale" (ažuriranje dvaput dnevno, vidi update.py)
-
-
-def version() -> str:
-    try:
-        from importlib.metadata import version as _v
-        return _v("mealmeter")
-    except Exception:  # noqa: BLE001
-        return "dev"
-
-
-def health() -> tuple[int, dict]:
-    """GET /healthz: {status, db_date, db_age_hours, version}. Starost je od objave učitanog cjenika
-    (clean.archive_info.updated), inače od izgradnje baze; "stale" iznad HEALTH_MAX_AGE_HOURS, "error" (503)
-    kad baza nije čitljiva."""
-    import datetime as dt
-
-    try:
-        con = _con()
-        db_date = _price_list_date(con)["date"]
-        ts = None
-        try:
-            updated, loaded = con.execute(
-                "SELECT updated, loaded_at FROM clean.archive_info ORDER BY date DESC LIMIT 1").fetchone()
-            ts = dt.datetime.fromisoformat(updated) if updated else loaded.astimezone()
-        except Exception:  # noqa: BLE001  (baza bez archive_info, npr. testovi)
-            pass
-        age = round((dt.datetime.now(dt.timezone.utc) - ts).total_seconds() / 3600, 1) if ts else None
-    except Exception:  # noqa: BLE001
-        return 503, {"status": "error", "db_date": None, "db_age_hours": None, "version": version()}
-    status = "ok" if age is None or age <= HEALTH_MAX_AGE_HOURS else "stale"
-    return 200, {"status": status, "db_date": db_date, "db_age_hours": age,
-                 "version": version()}
-
-
-HOME_HTML = """<!doctype html>
-<html lang="hr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mealmeter</title>
-<style>body{{font-family:system-ui,sans-serif;max-width:42rem;margin:2rem auto;padding:0 1rem;line-height:1.5}}
-code{{background:#eee;padding:.1rem .3rem;border-radius:3px}}</style></head><body>
-<h1>Mealmeter</h1>
-<p><strong>Hrvatski.</strong> MCP konektor koji za jelo ili popis namirnica i grad pronalazi cijene u hrvatskim
-trgovinama i najjeftiniju trgovinu. Besplatan, otvorenog koda, bez prijave.</p>
-<p><strong>Dodavanje u Claude:</strong> Postavke &rarr; Konektori &rarr; Dodaj prilagođeni konektor, URL
-<code>{url}</code>.</p>
-<p><strong>Izvor podataka:</strong> službeni dnevni cjenici trgovina, preuzeti s
-<a href="https://cijene.dev">cijene.dev</a> (DobarKod). Učitani cjenik: {db_date}.</p>
-<p><strong>Podaci:</strong> cijene.dev (DobarKod), prema <a href="https://cijene.dev/uvjeti-koristenja">uvjetima
-korištenja</a> cijene.dev. <strong>Kod:</strong> licenca MIT.</p>
-<p><strong>Napomena:</strong> cijene su iz cjenika; u trgovini se mogu razlikovati, cjenik nije zaliha, a akcije se
-mijenjaju.</p>
-<p><strong>Privatnost:</strong> nema računa ni kolačića. Sadržaj upita se ne sprema; zapisuje se samo broj poziva
-po alatu, status i trajanje, bez punih IP adresa.</p>
-<hr>
-<p><strong>English.</strong> An MCP connector that finds grocery prices in Croatian stores for a dish or a shopping
-list in a given city, and the cheapest store. Free, open source, no login.</p>
-<p><strong>Add to Claude:</strong> Settings &rarr; Connectors &rarr; Add custom connector, URL <code>{url}</code>.</p>
-<p><strong>Data source:</strong> the stores' official daily price lists via <a href="https://cijene.dev">cijene.dev</a>
-(DobarKod). Loaded price list: {db_date}.</p>
-<p><strong>Data:</strong> cijene.dev (DobarKod), under the cijene.dev
-<a href="https://cijene.dev/uvjeti-koristenja">terms of use</a>. <strong>Code:</strong> MIT license.</p>
-<p><strong>Note:</strong> prices come from price lists; in-store prices may differ, a price list is not stock, and
-promotions change.</p>
-<p><strong>Privacy:</strong> no accounts or cookies. Query content is not stored; only the number of calls per tool,
-status and duration are logged, without full IP addresses.</p>
-<p><small>Mealmeter {version} · <a href="/healthz">/healthz</a></small></p>
-</body></html>
-"""
-
-
-def home(host: str | None, proto: str | None = None) -> str:
-    """GET /: kratka stranica (hr i en) s URL-om MCP endpointa za ovaj Host."""
-    import html
-
-    host = host or "localhost:8000"
-    local = HostGuard._hostname(host) in LOCAL_HOSTS
-    scheme = proto or ("http" if local else "https")
-    _, h = health()
-    return HOME_HTML.format(url=html.escape(f"{scheme}://{host}/mcp"), db_date=html.escape(h["db_date"] or "-"),
-                            version=html.escape(h["version"]))
-
-
-def anon_ip(ip: str | None) -> str:
-    """IP bez zadnjeg dijela: IPv4 /24 ("203.0.113.x"), IPv6 /48 ("2001:db8:1::x")."""
-    if not ip:
-        return "?"
-    if ":" in ip:
-        return ":".join(ip.split(":")[:3]) + "::x"
-    parts = ip.split(".")
-    return ".".join(parts[:3]) + ".x" if len(parts) == 4 else "?"
-
-
-class RequestLog:
-    """ASGI: jedan redak po HTTP zahtjevu (metoda, putanja bez upita, status, trajanje, skraćeni IP).
-    Tijelo zahtjeva (sadržaj upita) i query string se ne zapisuju; zamjenjuje uvicornov access log."""
-
-    def __init__(self, app, trusted_proxy: bool | None = None):
-        self.app = app
-        self.ip = RateLimit(None, trusted_proxy=trusted_proxy).client_ip
-
-    async def __call__(self, scope, receive, send):
-        if scope["type"] != "http":
-            return await self.app(scope, receive, send)
-        start, status = time.perf_counter(), 500
-
-        async def send_status(msg):
-            nonlocal status
-            if msg["type"] == "http.response.start":
-                status = msg["status"]
-            await send(msg)
-
-        try:
-            await self.app(scope, receive, send_status)
-        finally:
-            headers = {k.lower(): v for k, v in scope.get("headers") or []}
-            log.info("http %s %s status=%d ms=%d ip=%s", scope.get("method"), scope.get("path"), status,
-                     (time.perf_counter() - start) * 1000, anon_ip(self.ip(scope, headers)))
-
-
-class McpPostOnly:
-    """ASGI: GET, HEAD i DELETE na /mcp odmah dobivaju 405 (JSON, Allow: POST); POST ide dalje.
-
-    Poslužitelj je stateless: nema sesija (DELETE) ni poruka koje bi slao SSE tokom (GET). MCP Streamable HTTP tada
-    dopušta 405. SDK bi na GET s `Accept: text/event-stream` otvorio tok i držao vezu, što na Vercelu troši trajanje
-    funkcije (do 300 s) i može se zlorabiti (Korak 5V4)."""
-
-    METHODS = {"GET", "HEAD", "DELETE"}
-
-    def __init__(self, app, path: str = "/mcp"):
-        self.app, self.path = app, path
-
-    async def __call__(self, scope, receive, send):
-        if (scope["type"] == "http" and scope.get("method") in self.METHODS
-                and scope.get("path", "").rstrip("/") == self.path):
-            body = json.dumps({"jsonrpc": "2.0", "id": None, "error": {
-                "code": -32000, "message": "Method not allowed: koristi POST / use POST"}}).encode()
-            await send({"type": "http.response.start", "status": 405,
-                        "headers": [(b"content-type", b"application/json"), (b"allow", b"POST"),
-                                    (b"content-length", str(len(body)).encode())]})
-            await send({"type": "http.response.body",
-                        "body": b"" if scope["method"] == "HEAD" else body})
-            return
-        await self.app(scope, receive, send)
-
-
-def http_app(server: MCPServer, host: str = "127.0.0.1", allowed_hosts: list[str] | None = None,
-             allowed_origins: list[str] | None = None):
-    """ASGI aplikacija za HTTP način: MCP na /mcp (streamable HTTP, bez sesija, JSON odgovori), zatim
-    HostGuard (Host/Origin) i RateLimit. SDK-ova provjera Hosta je ugašena jer je zamjenjuje HostGuard."""
+def sdk_app(server: MCPServer, host: str = "127.0.0.1"):
+    """Starlette aplikacija SDK-a: MCP na /mcp (streamable HTTP, bez sesija, JSON odgovori), GET /healthz i /, JSON
+    404/405. SDK-ova provjera Hosta je ugašena jer je zamjenjuje HostGuard (http_app, web.VercelApp)."""
     from starlette.requests import Request
     from starlette.responses import HTMLResponse, JSONResponse
     from starlette.routing import Route
@@ -845,7 +572,77 @@ def http_app(server: MCPServer, host: str = "127.0.0.1", allowed_hosts: list[str
     from starlette.exceptions import HTTPException as StarletteHTTPException
 
     app.add_exception_handler(StarletteHTTPException, http_error)
-    return RequestLog(HostGuard(RateLimit(McpPostOnly(app)), allowed_hosts, allowed_origins))
+    return app
+
+
+def http_app(server: MCPServer, host: str = "127.0.0.1", allowed_hosts: list[str] | None = None,
+             allowed_origins: list[str] | None = None):
+    """ASGI aplikacija za lokalni HTTP način: sdk_app iza RequestLog, HostGuard (Host/Origin), RateLimit i
+    McpPostOnly. Vercel koristi web.VercelApp (isti omotači, SDK tek kad zatreba)."""
+    return RequestLog(HostGuard(RateLimit(McpPostOnly(sdk_app(server, host))), allowed_hosts, allowed_origins))
+
+
+# --- snimka jeftinih MCP odgovora za web.fast_reply (Korak 18) -------------------------------------------------
+
+async def _post(app, body: dict, headers: dict | None = None) -> tuple[int, bytes]:
+    data = json.dumps(body).encode()
+    sent, out = False, {"status": None, "body": b""}
+
+    async def receive():
+        nonlocal sent
+        if not sent:
+            sent = True
+            return {"type": "http.request", "body": data, "more_body": False}
+        return {"type": "http.disconnect"}
+
+    async def send(msg):
+        if msg["type"] == "http.response.start":
+            out["status"] = msg["status"]
+        elif msg["type"] == "http.response.body":
+            out["body"] += msg.get("body", b"")
+    hdrs = {"host": "localhost", "content-type": "application/json", "accept": "application/json, text/event-stream",
+            **(headers or {})}
+    await app({"type": "http", "asgi": {"version": "3.0"}, "http_version": "1.1", "method": "POST", "path": "/mcp",
+               "raw_path": b"/mcp", "query_string": b"", "root_path": "", "scheme": "http",
+               "headers": [(k.encode(), v.encode()) for k, v in hdrs.items()], "client": ("127.0.0.1", 1),
+               "server": ("localhost", 80)}, receive, send)
+    return out["status"], out["body"]
+
+
+def static_snapshot() -> dict:
+    """Odgovori SDK-a (ovog poslužitelja) na initialize i tools/list, za web.fast_reply: rezultat initialize jednak je
+    za sve verzije handshakea osim protocolVersion (tražena verzija, inače fallback_version)."""
+    import asyncio
+
+    from mcp_types.version import HANDSHAKE_PROTOCOL_VERSIONS
+
+    def init(v):
+        return {"jsonrpc": "2.0", "id": 1, "method": "initialize",
+                "params": {"protocolVersion": v, "capabilities": {}, "clientInfo": {"name": "snapshot", "version": "1"}}}
+
+    async def go():
+        app = sdk_app(create_server())  # bez con i db_path: zadana baza se ne mijenja ni ne otvara
+        async with app.router.lifespan_context(app):
+            inits = {v: await _post(app, init(v)) for v in (*HANDSHAKE_PROTOCOL_VERSIONS, "0000-00-00")}
+            tools = await _post(app, {"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
+        return inits, tools
+    inits, tools = asyncio.run(go())
+    results = {}
+    for v, (status, body) in inits.items():
+        assert status == 200, (v, status, body[:200])
+        results[v] = json.loads(body)["result"]
+    base = dict(results[HANDSHAKE_PROTOCOL_VERSIONS[0]], protocolVersion=None)
+    for v in HANDSHAKE_PROTOCOL_VERSIONS:
+        assert results[v]["protocolVersion"] == v and dict(results[v], protocolVersion=None) == base, v
+    assert tools[0] == 200
+    return {"_comment": "Snimka odgovora MCP SDK-a za web.fast_reply; python -m mealmeter.server --write-static",
+            "handshake_versions": list(HANDSHAKE_PROTOCOL_VERSIONS),
+            "fallback_version": results["0000-00-00"]["protocolVersion"],
+            "initialize": base, "tools_list": json.loads(tools[1])["result"]}
+
+
+def write_static() -> None:
+    web.STATIC_PATH.write_text(json.dumps(static_snapshot(), ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -854,7 +651,13 @@ def main(argv: list[str] | None = None) -> None:
     ap.add_argument("--host", default="127.0.0.1", help="adresa slušanja (zadano 127.0.0.1; tunel spaja lokalno)")
     ap.add_argument("--port", type=int, default=8000)
     ap.add_argument("--db", default=None, help="putanja baze (inače MM_DB, MEALMETER_DB ili data/mealmeter.duckdb)")
+    ap.add_argument("--write-static", action="store_true",
+                    help="zapiši snimku odgovora initialize i tools/list (src/mealmeter/mcp_static.json) i izađi")
     args = ap.parse_args(argv)
+    if args.write_static:
+        write_static()
+        print(f"zapisano: {web.STATIC_PATH}")
+        return
     server = create_server(db_path=args.db)
     if not args.http:
         server.run("stdio")

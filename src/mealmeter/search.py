@@ -1,6 +1,5 @@
 """Pretraga proizvoda i cijena nad čistim tablicama (schema `clean`)."""
 
-import os
 from datetime import date
 from decimal import Decimal
 from pathlib import Path
@@ -11,10 +10,10 @@ from mealmeter.brands import display_brand, group_brand
 from mealmeter.build import NATIONAL_NOTE
 from mealmeter.normalize import canonical_city, date_hr, norm_text, normalize_ean
 from mealmeter.staples import BKEY_SQL, STAPLE_PPU_SQL, load_staples, resolve_ingredient, staple_suspect_sql
+from mealmeter.web import default_db
 
 # MM_DB (npr. data/compact.duckdb, scripts/build_compact.py), inače MEALMETER_DB, inače puna baza
-DEFAULT_DB = Path(os.environ.get("MM_DB") or os.environ.get("MEALMETER_DB")
-                  or Path(__file__).resolve().parents[2] / "data" / "mealmeter.duckdb")
+DEFAULT_DB = default_db()
 
 
 # sažeta baza u dvije datoteke (Korak 12): view-ovi cijena u glavnoj datoteci čitaju tablice iz datoteke cijena,

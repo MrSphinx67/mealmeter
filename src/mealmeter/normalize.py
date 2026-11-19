@@ -22,6 +22,17 @@ def date_hr(d: date) -> str:
     return f"{d.day:02d}.{d.month:02d}.{d.year}."
 
 
+def load_yaml(path):
+    """YAML datoteka (safe). S libyaml (yaml.CSafeLoader) kad postoji: isti rezultat kao yaml.safe_load (test
+    test_step18_cpu), a ~10 puta brže; pri hladnom startu je čitanje yaml-ova bilo ~1 s CPU-a (Korak 18)."""
+    import yaml
+
+    from pathlib import Path
+
+    loader = getattr(yaml, "CSafeLoader", None) or yaml.SafeLoader
+    return yaml.load(Path(path).read_text(encoding="utf-8"), Loader=loader)
+
+
 # --- EAN / GTIN ---------------------------------------------------------------
 
 

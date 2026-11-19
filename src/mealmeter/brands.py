@@ -10,7 +10,7 @@ import re
 from functools import lru_cache
 from pathlib import Path
 
-from mealmeter.normalize import norm_text
+from mealmeter.normalize import load_yaml, norm_text
 
 BRANDS_PATH = Path(__file__).resolve().parents[2] / "data" / "brands.yaml"
 
@@ -18,11 +18,9 @@ BRANDS_PATH = Path(__file__).resolve().parents[2] / "data" / "brands.yaml"
 @lru_cache(maxsize=2)
 def load_brands(path: Path = BRANDS_PATH) -> tuple[tuple[str, str], ...]:
     """Marke iz data/brands.yaml kao (naziv, regex na početku riječi normaliziranog teksta)."""
-    import yaml
-
     if not Path(path).exists():
         return ()
-    raw = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+    raw = load_yaml(path) or {}
     return tuple((name, "(^| )(?:" + "|".join(pats) + ")") for name, pats in raw.items())
 
 

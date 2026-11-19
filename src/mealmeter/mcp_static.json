@@ -1,0 +1,341 @@
+{
+ "_comment": "Snimka odgovora MCP SDK-a za web.fast_reply; python -m mealmeter.server --write-static",
+ "handshake_versions": [
+  "2024-11-05",
+  "2025-03-26",
+  "2025-06-18",
+  "2025-11-25"
+ ],
+ "fallback_version": "2025-11-25",
+ "initialize": {
+  "capabilities": {
+   "prompts": {
+    "listChanged": false
+   },
+   "resources": {
+    "listChanged": false,
+    "subscribe": false
+   },
+   "tools": {
+    "listChanged": false
+   }
+  },
+  "instructions": "Mealmeter: cijene namirnica u hrvatskim trgovinama iz službenih dnevnih cjenika (cijene.dev).\nMealmeter: grocery prices in Croatian stores from the official daily price lists (cijene.dev).\n\nPravila / rules:\n1. Kad korisnik traži samo recept, bez pitanja o cijeni ili kupnji: daj recept i na kraju jednu kratku rečenicu s\n   ponudom da izračunaš koliko košta i gdje to može kupiti u svom gradu. Ne zovi plan_basket dok ne pristane.\n   / Recipe only, no question about price or shopping: give the recipe and end with one short sentence offering to\n   work out the cost and where to buy it in their city. Do not call plan_basket until they agree.\n2. Kad pita koliko košta ili gdje kupiti, prije plan_basket u JEDNOJ poruci pitaj samo ono što još ne znaš: grad;\n   što već ima doma (already_have); \"U koju trgovinu ideš (može i adresa ili kvart), ili da usporedim sve u\n   gradu?\" (store; list_stores daje adrese); nadjev ili dodatke kad je relevantno. Ne pretpostavljaj što korisnik\n   ima doma. Samo ako izričito traži brz odgovor bez pitanja, smiješ pretpostaviti, ali tada na kraju jasno navedi\n   pretpostavke i ponudi ponovni izračun.\n   / Asked the cost or where to buy: before plan_basket ask in ONE message only what is unknown: city, what they\n   have at home, which store (address or neighbourhood) or all stores, extras. Never assume what is at home unless\n   they explicitly want a quick answer; then list the assumptions and offer to recalculate.\n3. Za svako novo jelo, promjenu broja osoba, sastojaka, grada ili trgovine ponovno pozovi plan_basket; nikad ne\n   procjenjuj cijene niti ih prenosi iz ranijeg odgovora. Kad korisnik kaže stvarnu cijenu, pozovi ga s\n   price_overrides. Nikad ne zbrajaj cijene sam. / Every new dish or change of servings, ingredients, city or\n   store: call plan_basket again; never estimate, reuse or add up prices yourself (real price: price_overrides).\n4. Ne dodaji sastojke koje korisnik nije potvrdio. Sastojak kojeg nema u list_staples šalji kao {\"name\", \"amount\",\n   \"unit\", \"free_text\": true}. / Do not add unconfirmed ingredients; items outside list_staples use free_text.\n5. Količine šalji u g, ml ili kom (convert_units za žlice i šalice); kod mahunarki je količina gotov proizvod.\n   Bez količine (posipanje, začini) plan_basket uzima pretpostavku: navedi korisniku assumptions. Uvijek navedi\n   u kojem je obliku količina iz recepta (suho, kuhano, smrznuto) i pitaj kad je to dvosmisleno.\n   / Amounts in g, ml or kom (convert_units for spoons, cups); legumes: the ready amount. Tell the user the\n   assumptions; state which form the recipe amount is in (dry, cooked, frozen) and ask when it is ambiguous.\n6. Ne izmišljaj cijene ni proizvode: koristi samo ono što alati vrate. Sastojak iz unmatched nije uračunat: reci\n   to i nikad mu ne procjenjuj cijenu (ni \"otprilike X €\"); odmah pokušaj find_products ili free_text (i drugi\n   naziv) i ponudi candidates. Ne zaključuj da proizvoda nema nakon\n   jedne pretrage. / Never invent prices or products. An unmatched ingredient is not counted: say so, never\n   estimate its price; at once try find_products or free_text and offer candidates.\n7. Trgovina poznata: plan_basket zovi sa store, a odgovor je točan popis za tu trgovinu. Ostale lance ne\n   nabrajaj, osim jedne rečenice ako je neki drugi lanac u gradu jeftiniji za više od 2 € (cheaper_elsewhere).\n   Ako joj nešto nedostaje, uz ukupnu cijenu navedi što. / Known store: call with store, answer with its exact\n   list (and what it lacks); other chains only in one sentence if one is cheaper by more than 2 €.\n8. Trgovina nije zadana ili korisnik kaže \"svejedno\": odgovor počinje s \"Sve možeš kupiti u:\" i popisom lanaca koji\n   imaju sve sastojke (comparison, pa more_chains) s cijenom za kupiti, poredanih po cijeni; po lancu najviše 2\n   SVOJE adrese i broj trgovina (lance iste cijene ne spajaj). Zatim jedna rečenica (price_spread): koji je\n   najjeftiniji i kolika je razlika do najskupljeg u popisu; ako je razlika najviše 2 € (small), reci\n   da su razlike male i da može ići gdje mu je najpraktičnije. Lanci kojima nešto nedostaje (incomplete) idu na\n   kraj, s \"nedostaje: ...\", i uz cijenu takvog lanca to uvijek navedi, gdje god je spomeneš (\"Lidl oko 26 €,\n   nedostaje: pancetta\"); nije najjeftiniji. Na kraju ponudi točan popis za trgovinu koju odabere.\n   / No store or \"any\": start with \"Sve možeš kupiti u:\", complete chains by price to buy (max 2 own addresses,\n   number of stores; never merge chains); one sentence on cheapest vs dearest (price_spread; small: go where it is\n   convenient); incomplete chains last, always with what is missing next to their price; offer the exact list.\n9. Stavke prikaži kao popis: proizvod, marka (brand) kad je poznata, veličina pakiranja (pack_size), cijena\n   pakiranja (cost_pack), npr. \"Brašno glatko T-550, Mlineta, 1 kg\"; kad je brand null, marku izostavi i ne\n   izmišljaj je. Tablicu koristi samo ako je korisnik traži. Usporedbu lanaca također kao popis, jedan lanac po retku.\n   / Items and chains as lists (product, brand when known, pack size, pack price; brand null: omit it, never guess\n   one; one chain per line); a table only if asked.\n10. Piši prirodnim jezikom, bez internih naziva polja (stale_days, total_to_buy, total_used, match_quality,\n   cheaper, delta_eur); utrošak (total_used) i from_stock_value su samo informativni. Datum piši kao \"cijene iz\n   cjenika od 20.10.2026.\" (date_hr); ako je cijena iz starijeg cjenika (stale_days > 0, i kod lanca u\n   usporedbi), reci od kojeg datuma.\n   / Natural language, no internal field names; date as \"cijene iz cjenika od 20.10.2026.\".\n11. Alternativu zovi \"jeftinijom\" ili uštedom samo kad je cheaper = true (za istu potrebnu količinu; uz size_note\n   je pakiranje drukčije i na blagajni može biti skuplje); cheaper = false nikad nije ušteda. Kad proizvoda nema\n   na polici, ponudi alternatives iz iste trgovine. / An alternative is \"cheaper\" or a saving only when\n   cheaper = true (same needed amount); cheaper = false never is.\n12. Kod nesigurnog izbora pitaj: ask_user (oblik, cijene po obliku su za traženu količinu), needs_confirmation\n   (free_text, kobasica bez dimljene), substitution (druga marka ili Grana Padano). Prenesi i warnings,\n   assumed_form i slabije podudaranje (match_quality = 'weak'), običnim riječima; unit_uncertain: cijena je\n   možda po komadu, neka je provjeri na polici. / When a choice is uncertain,\n   ask: ask_user / ambiguity, needs_confirmation, substitution; pass on warnings, assumed_form, weaker matches.\n13. Uz cijene uvijek dodaj: cijene su iz cjenika, u trgovini se mogu razlikovati, cjenik nije zaliha,\n   a akcije se mijenjaju. / Always add: prices come from price lists, may differ in store, a price list is not\n   stock, and promotions change.\n",
+  "protocolVersion": null,
+  "serverInfo": {
+   "description": "Cijene namirnica u hrvatskim trgovinama / grocery prices in Croatian stores",
+   "name": "mealmeter",
+   "title": "Mealmeter",
+   "version": ""
+  }
+ },
+ "tools_list": {
+  "tools": [
+   {
+    "annotations": {
+     "destructiveHint": false,
+     "idempotentHint": true,
+     "openWorldHint": false,
+     "readOnlyHint": true
+    },
+    "description": "Traži proizvode po nazivu ili po namirnici; vraća grupe (isti EAN u više lanaca) s rasponom cijena.\nSearches products by name or by staple ingredient; returns groups (same EAN across chains) with price ranges.\nKada / when: korisnik pita što postoji i koliko košta / the user asks what exists and what it costs.\nParametri / parameters: query (slobodan tekst / free text), city (grad / city), ingredient (ključ ili\nsinonim iz list_staples / staple key or synonym), attributes (npr. {\"tip\": \"glatko\"}), include_weak\n(slabija podudaranja / weaker matches, zadano false), limit (1-30).\nVraća / returns: results (id, name, brand: marka ili null / brand or null, pack, raspon cijena / price range).\nPrimjer / example: {\"ingredient\": \"brašno\", \"attributes\": {\"tip\": \"glatko\"}, \"city\": \"Osijek\"}",
+    "inputSchema": {
+     "properties": {
+      "query": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "description": "Slobodan tekst naziva / free-text product name",
+       "title": "Query"
+      },
+      "city": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "description": "Grad, npr. 'Osijek' (uz nacionalne cijene) / city, e.g. 'Osijek'",
+       "title": "City"
+      },
+      "ingredient": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "description": "Namirnica: ključ ili sinonim iz list_staples / staple key or synonym",
+       "title": "Ingredient"
+      },
+      "attributes": {
+       "anyOf": [
+        {
+         "additionalProperties": {
+          "type": "string"
+         },
+         "type": "object"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "description": "Atributi namirnice, npr. {\"tip\": \"glatko\"} (list_staples) / staple attributes",
+       "title": "Attributes"
+      },
+      "include_weak": {
+       "default": false,
+       "description": "Uključi slabija podudaranja / include weaker matches",
+       "title": "Include Weak",
+       "type": "boolean"
+      },
+      "limit": {
+       "default": 10,
+       "description": "Najviše grupa (1-30) / max groups",
+       "maximum": 30,
+       "minimum": 1,
+       "title": "Limit",
+       "type": "integer"
+      }
+     },
+     "type": "object",
+     "title": "find_productsArguments"
+    },
+    "name": "find_products"
+   },
+   {
+    "annotations": {
+     "destructiveHint": false,
+     "idempotentHint": true,
+     "openWorldHint": false,
+     "readOnlyHint": true
+    },
+    "description": "Cijene jednog proizvoda po trgovinama, od najjeftinije. / Prices of one product per store, cheapest first.\nKada / when: nakon find_products, za detalje / after find_products, for details.\nParametri / parameters: product_id = EAN, \"lanac:product_id\" ili id klase (npr. \"jaja:m\"); city.\nVraća / returns: stores (lanac, adresa, name, brand: marka ili null / brand or null, price_eff).\nPrimjer / example: {\"product_id\": \"3850104223624\", \"city\": \"Osijek\"}",
+    "inputSchema": {
+     "properties": {
+      "product_id": {
+       "description": "EAN, \"lanac:product_id\" ili id klase (\"jaja:m\") iz find_products",
+       "title": "Product Id",
+       "type": "string"
+      },
+      "city": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "description": "Grad, npr. 'Osijek' (uz nacionalne cijene) / city, e.g. 'Osijek'",
+       "title": "City"
+      }
+     },
+     "required": [
+      "product_id"
+     ],
+     "type": "object",
+     "title": "get_pricesArguments"
+    },
+    "name": "get_prices"
+   },
+   {
+    "annotations": {
+     "destructiveHint": false,
+     "idempotentHint": true,
+     "openWorldHint": false,
+     "readOnlyHint": true
+    },
+    "description": "Košarica za recept: cijena svih sastojaka po trgovini u gradu i najbolja trgovina.\nBasket for a recipe: cost of all ingredients per store in the city, and the best store.\nKada / when: korisnik želi znati koliko košta jelo ili popis / the user wants the cost of a dish or list.\nSamo recept: ne zovi dok korisnik ne pristane. Prije poziva u jednoj poruci pitaj samo što nedostaje: grad,\nalready_have, store ili usporedba svih, nadjev ili dodaci. Svaka promjena: novi poziv. / Recipe only: do not call\nuntil the user agrees. Before calling, ask in one message only for what is missing (city, already_have, store or\nall, extras). Any change: call again.\nParametri / parameters: ingredients [{\"name\", \"amount\", \"unit\" (g|ml|kom), \"form\"?, \"attributes\"?,\n\"free_text\"?}] (free_text: true za sastojak izvan list_staples, npr. \"nutella\" / for an ingredient outside\nlist_staples), city, store? {\"chain\", \"address_contains\"} (jedna trgovina; nacionalne cijene lanca vrijede /\none store; the chain's national prices still apply), already_have? [\"sol\", \"papar\"], price_overrides?\n[{\"name\", \"cost_pack\"}] (stvarna cijena pakiranja, samo za ovaj poziv / real pack price, this call only),\nalternatives (zadano true: do 2 druga proizvoda po stavci s delta_eur i cheaper / up to 2 other products\nper item with delta_eur and cheaper).\nbest_store: najviše sastojaka, pa najmanji total_to_buy; total_used i from_stock_value (already_have) su\ninformativni. / best_store: most ingredients, then lowest total_to_buy; total_used, from_stock_value informative.\nVraća / returns (sažeto / compact): summary_hr (zbroj za best_store / totals of best_store), best_store (items s brand\n(marka ili null / brand or null), pack_size, cost_pack, cost_used, alternatives; trgovine istog lanca s istim proizvodima spojene: n_stores, addresses),\ncomparison (lanci sa svim sastojcima, po lancu jedan redak, do 6 / chains with every ingredient, one row per\nchain, up to 6: chain, addresses, n_stores_city, total_to_buy, total_used), more_chains (ostali potpuni lanci /\nfurther complete chains), price_spread (najjeftiniji i najskuplji potpuni lanac, difference_eur, small: <= 2 € / cheapest\nand dearest complete chain), incomplete (lanci kojima nešto nedostaje: missing / chains missing ingredients),\ncheaper_elsewhere (uz store: drugi lanac u gradu jeftiniji za > 2 € / with store: another chain in the\ncity cheaper by > 2 €), assumptions (pretpostavljene količine i vrijednosti / assumed amounts and values), ask_user\n(oblik ili atribut, npr. celer: stabljika ili korijen / form or attribute), warnings, unmatched (nije uračunato, bez\ncijene; s prijedlozima / not counted, no price; with suggestions), date_hr. detail=true: sve trgovine i sva polja /\nall stores and fields.\nPrimjer / example: {\"ingredients\": [{\"name\": \"brašno glatko\", \"amount\": 250, \"unit\": \"g\"},\n{\"name\": \"mlijeko\", \"amount\": 500, \"unit\": \"ml\"}, {\"name\": \"jaja\", \"amount\": 3, \"unit\": \"kom\"},\n{\"name\": \"nutella\", \"amount\": 300, \"unit\": \"g\", \"free_text\": true}], \"city\": \"Osijek\", \"already_have\": [\"sol\"]}",
+    "inputSchema": {
+     "properties": {
+      "ingredients": {
+       "description": "[{\"name\": \"brašno glatko\", \"amount\": 250, \"unit\": \"g\"|\"ml\"|\"kom\", \"form\"?: \"...\", \"attributes\"?: {...}, \"free_text\"?: true}]; mjere pretvori u g/ml/kom ili convert_units; free_text: sastojak izvan list_staples, traži se po nazivu / ingredient outside list_staples, searched by name",
+       "items": {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       "title": "Ingredients",
+       "type": "array"
+      },
+      "city": {
+       "description": "Grad / city, npr. 'Osijek'",
+       "title": "City",
+       "type": "string"
+      },
+      "store": {
+       "anyOf": [
+        {
+         "additionalProperties": {
+          "type": "string"
+         },
+         "type": "object"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "description": "Jedna trgovina / one store: {\"chain\": \"konzum\", \"address_contains\": \"Starčevića\"} (list_stores)",
+       "title": "Store"
+      },
+      "already_have": {
+       "anyOf": [
+        {
+         "items": {
+          "type": "string"
+         },
+         "type": "array"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "description": "Što korisnik već ima / what the user already has: [\"sol\", \"papar\"]",
+       "title": "Already Have"
+      },
+      "price_overrides": {
+       "anyOf": [
+        {
+         "items": {
+          "additionalProperties": true,
+          "type": "object"
+         },
+         "type": "array"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "description": "Stvarne cijene pakiranja / real pack prices: [{\"name\": \"brašno\", \"cost_pack\": 1.2}]",
+       "title": "Price Overrides"
+      },
+      "alternatives": {
+       "default": true,
+       "description": "Do 2 jeftinije alternative po stavci (cheaper = true) i iznimno jedna iste cijene i bolje kvalitete (cheaper = false), s delta_eur / up to 2 cheaper alternatives per item (cheaper = true) and at most one of the same price and better quality (cheaper = false), with delta_eur",
+       "title": "Alternatives",
+       "type": "boolean"
+      },
+      "detail": {
+       "default": false,
+       "description": "Puni odgovor (sve trgovine i sva polja) umjesto sažetog / full response instead of the compact one",
+       "title": "Detail",
+       "type": "boolean"
+      }
+     },
+     "required": [
+      "ingredients",
+      "city"
+     ],
+     "type": "object",
+     "title": "plan_basketArguments"
+    },
+    "name": "plan_basket"
+   },
+   {
+    "annotations": {
+     "destructiveHint": false,
+     "idempotentHint": true,
+     "openWorldHint": false,
+     "readOnlyHint": true
+    },
+    "description": "Trgovine u gradu s adresama i datumom cjenika. / Stores in a city with addresses and price-list date.\nKada / when: korisnik ide u određenu trgovinu (za store u plan_basket) / the user shops at a specific store.\nParametri / parameters: city, chain? (npr. \"konzum\").\nPrimjer / example: {\"city\": \"Osijek\", \"chain\": \"konzum\"}",
+    "inputSchema": {
+     "properties": {
+      "city": {
+       "description": "Grad / city",
+       "title": "City",
+       "type": "string"
+      },
+      "chain": {
+       "anyOf": [
+        {
+         "type": "string"
+        },
+        {
+         "type": "null"
+        }
+       ],
+       "default": null,
+       "description": "Lanac, npr. 'konzum', 'lidl' / chain",
+       "title": "Chain"
+      }
+     },
+     "required": [
+      "city"
+     ],
+     "type": "object",
+     "title": "list_storesArguments"
+    },
+    "name": "list_stores"
+   },
+   {
+    "annotations": {
+     "destructiveHint": false,
+     "idempotentHint": true,
+     "openWorldHint": false,
+     "readOnlyHint": true
+    },
+    "description": "Pretvara kuhinjsku mjeru ili komade u g/ml za namirnicu (procjena). / Converts a kitchen measure or\npieces to g/ml for a staple (estimate).\nKada / when: recept ima žlice, šalice, prstohvat, češnjeve... / the recipe uses spoons, cups, cloves...\nParametri / parameters: amount, unit (žlica, šalica, prstohvat, kom, češanj...), staple.\nPrimjer / example: {\"amount\": 2, \"unit\": \"žlica\", \"staple\": \"šećer\"}",
+    "inputSchema": {
+     "properties": {
+      "amount": {
+       "description": "Količina / amount",
+       "title": "Amount",
+       "type": "number"
+      },
+      "unit": {
+       "description": "Mjera: žlica, žličica, šalica, prstohvat, kom, češanj, g, ml... / unit",
+       "title": "Unit",
+       "type": "string"
+      },
+      "staple": {
+       "description": "Namirnica (ključ ili sinonim) / staple",
+       "title": "Staple",
+       "type": "string"
+      }
+     },
+     "required": [
+      "amount",
+      "unit",
+      "staple"
+     ],
+     "type": "object",
+     "title": "convert_unitsArguments"
+    },
+    "name": "convert_units"
+   },
+   {
+    "annotations": {
+     "destructiveHint": false,
+     "idempotentHint": true,
+     "openWorldHint": false,
+     "readOnlyHint": true
+    },
+    "description": "Popis podržanih namirnica s jedinicom, sinonimima i atributima. / List of supported staples with unit,\nsynonyms and attributes.\nKada / when: provjera je li sastojak podržan i koji atributi postoje / to check support and attributes.\nPrimjer / example: {}",
+    "inputSchema": {
+     "properties": {},
+     "type": "object",
+     "title": "list_staplesArguments"
+    },
+    "name": "list_staples"
+   }
+  ]
+ }
+}

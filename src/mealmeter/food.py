@@ -18,9 +18,9 @@ from functools import lru_cache
 from pathlib import Path
 
 import duckdb
-import yaml
 
-from mealmeter.normalize import FOOD_GROUP_VALUES, FOOD_GROUPS, NONFOOD_GROUPS, category_group, norm_text
+from mealmeter.normalize import (FOOD_GROUP_VALUES, FOOD_GROUPS, NONFOOD_GROUPS, category_group, load_yaml,
+                                 norm_text)
 from mealmeter.staples import attr_text
 
 CATEGORY_MAP_PATH = Path(__file__).resolve().parents[2] / "data" / "category_map.yaml"
@@ -103,7 +103,7 @@ def load_category_map(path: Path = CATEGORY_MAP_PATH) -> dict[str, str]:
     """{norm_text(kategorija): food_group}; prazno ako mapa ne postoji (tada vrijede pravila)."""
     if not Path(path).exists():
         return {}
-    raw = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}
+    raw = load_yaml(path) or {}
     raw.pop("_chain_verify", None)
     bad = {k: v for k, v in raw.items() if v not in FOOD_GROUP_VALUES}
     if bad:
@@ -117,7 +117,7 @@ def load_chain_verify(path: Path = CATEGORY_MAP_PATH) -> dict[str, set[str]]:
     neprehrambenih riječi (category_map.yaml, _chain_verify)."""
     if not Path(path).exists():
         return {}
-    raw = (yaml.safe_load(Path(path).read_text(encoding="utf-8")) or {}).get("_chain_verify") or {}
+    raw = (load_yaml(path) or {}).get("_chain_verify") or {}
     return {chain: {norm_text(c) if c != "ean_inherited" else c for c in cats} for chain, cats in raw.items()}
 
 

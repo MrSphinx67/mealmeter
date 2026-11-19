@@ -7,9 +7,8 @@ from functools import lru_cache
 from pathlib import Path
 
 import duckdb
-import yaml
 
-from mealmeter.normalize import norm_text, parse_multipack_unit
+from mealmeter.normalize import load_yaml, norm_text, parse_multipack_unit
 from mealmeter.units import piece_weight, product_piece_weight
 
 STAPLES_PATH = Path(__file__).with_name("staples.yaml")
@@ -203,7 +202,7 @@ def attr_text(name: str) -> str:
 @lru_cache(maxsize=4)
 def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> dict[str, Staple]:
     """Namirnice iz staples.yaml; one s `disabled: true` samo uz include_disabled=True."""
-    raw = yaml.safe_load(Path(path).read_text(encoding="utf-8"))
+    raw = load_yaml(path)
     defaults = raw.pop("_defaults", {}) or {}
     default_not = [_fold(p) for p in defaults.get("must_not_match", [])]
     out = {}
@@ -335,19 +334,28 @@ def load_staples(path: Path = STAPLES_PATH, include_disabled: bool = False) -> d
             raise ValueError(f"{key}: plausible_per_pack vrijedi samo uz compare_by: pack i bez plausible_per_unit")
         if st.compare_by not in ("unit", "pack", "count") or (st.compare_by == "pack" and not st.sachet_g):
             raise ValueError(f"{key}: compare_by mora biti unit, pack (uz sachet_g) ili count")
-        # Svi regexi se moraju dati kompilirati (Python re je nadskup RE2 za ove uzorke)
-        re.compile(st.match_regex)
-        if st.exclude_regex:
-            re.compile(st.exclude_regex)
-        for values in attrs.values():
-            for rx in values.values():
-                re.compile(rx)
         out[key] = st
     for st in out.values():
         for form, key in st.form_staples.items():
             if key not in out:
                 raise ValueError(f"{st.key}: form_staples {form} -> {key} ne postoji")
     return out
+
+
+def check_regexes(staples: dict[str, Staple]) -> None:
+    """Svi regexi namirnica se moraju dati kompilirati (Python re je nadskup RE2 za ove uzorke). Provjerava je
+    pytest (test_step18_cpu), a ne load_staples: ~550 regexa je pri svakom hladnom startu poslužitelja trošilo ~0,6 s
+    CPU-a (Korak 18). Neispravan uzorak bi inače pao tek u DuckDB-u (regexp_matches), pri prvom upitu te namirnice."""
+    for st in staples.values():
+        try:
+            re.compile(st.match_regex)
+            if st.exclude_regex:
+                re.compile(st.exclude_regex)
+            for values in st.attributes.values():
+                for rx in values.values():
+                    re.compile(rx)
+        except re.error as e:
+            raise ValueError(f"{st.key}: regex se ne da kompilirati: {e}") from e
 
 
 def resolve_ingredient(text: str | None, staples: dict[str, Staple] | None = None) -> Staple | None:
@@ -369,7 +377,7 @@ def load_abbrev(path: Path = ABBREV_PATH) -> tuple[tuple[re.Pattern, str], ...]:
     """Kratice iz data/abbrev.yaml kao (regex, zamjena), redom."""
     if not Path(path).exists():
         return ()
-    raw = yaml.safe_load(Path(path).read_text(encoding="utf-8")) or []
+    raw = load_yaml(path) or []
     return tuple((re.compile(e["pattern"]), e["replace"]) for e in raw)
 
 

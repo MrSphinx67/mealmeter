@@ -83,9 +83,17 @@ Ako POST /mcp vrati `405` s `server: Vercel` i `allow: GET, HEAD`, zahtjev ne st
 ## 4. Postavke (po želji: Project Settings → Environment Variables)
 
 Zadane vrijednosti su u `api/index.py`: `MM_ALLOWED_HOSTS=*.vercel.app`, `TRUSTED_PROXY=vercel`,
-`MM_RATE_IP=60`, `MM_RATE_SESSION=30`, `MM_RATE_GLOBAL=600` (u minuti, po instanci funkcije). Za vlastitu domenu
+`MM_RATE_IP=60`, `MM_RATE_SESSION=30`, `MM_RATE_GLOBAL=600` (u minuti, po instanci funkcije),
+`MM_DUCKDB_THREADS=1` (Korak 18: 1 vCPU). Za vlastitu domenu
 postavi npr. `MM_ALLOWED_HOSTS=*.vercel.app,cijene.example.hr`. Za strogo ograničenje upita koristi Vercel Firewall
 (brojači u poslužitelju vrijede za jednu instancu).
+
+## 4a. Potrošnja CPU-a u logovima (Korak 18)
+
+Svaki zahtjev ima redak `http <metoda> <putanja> status=... ms=... cpu_ms=... ip=...`; prvi zahtjev instance
+(hladni start) i `cold=1 boot_cpu_ms=...` (CPU prije prvog zahtjeva). Alati: `tool=<alat> status=... ms=... cpu_ms=...`.
+Prvi zahtjev koji treba MCP SDK (tools/call) zapiše `sdk loaded ms=... cpu_ms=...`. Jeftini zahtjevi (initialize,
+tools/list, notifications, ping, GET /, /healthz, 404, 405) ne učitavaju SDK ni bazu, vidi `docs/18_STATUS.md`.
 
 ## 5. Dodavanje u Claude
 

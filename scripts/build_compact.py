@@ -36,8 +36,13 @@ Korak 15 (od 17.11.2026. ~30 M cijena, sve trgovine lanaca; paket bi bio 256 MB)
   builder ne prima više od 225 MB, docs/16_STATUS.md).
 Provjera prema punoj bazi uspoređuje iste proizvode (KEEP_PRODUCTS) i stupce bez izostavljenih (null_price_cols).
 DuckDB je ograničen na 1,5 GB memorije (env MM_COMPACT_MEMORY; privremene datoteke u data/compact_tmp).
+
+Korak 18: uz bazu se zapisuje data/compact_meta.json (oznaka izgradnje, datum cjenika, vrijeme objave/učitavanja
+arhive, compact_meta); poslužitelj iz njega odgovara na GET /, /healthz, convert_units i list_staples bez otvaranja
+baze, a datum za ostale alate uzima tek kad otvori bazu iste izgradnje. Na Vercel ide s bazom (vercel.json).
 """
 
+import json
 import os
 import shutil
 import sys
@@ -50,7 +55,9 @@ import duckdb
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+from mealmeter.normalize import date_hr  # noqa: E402
 from mealmeter.search import PRICES_ALIAS, STORE_PRODUCTS_SQL, prices_part  # noqa: E402
+from mealmeter.web import meta_path  # noqa: E402
 from mealmeter.staples import BKEY_SQL  # noqa: E402
 
 KEYS = ("chain", "store_id", "product_id")
@@ -243,6 +250,7 @@ def build(SRC: Path, OUT: Path) -> dict:
                               ("dst.clean", ("staple_prices_k", "staple_items"))) for t in tbs}
     counts.update(store_products=counts["store_products_k"], price_exceptions=counts["price_exceptions_k"],
                   exceptions_with_date=c.execute(f"SELECT count(date) FROM {P}.price_exceptions_k").fetchone()[0])
+    meta = compact_meta(c, build_id)
     c.execute("CHECKPOINT dst")
     c.execute(f"CHECKPOINT {PRICES_ALIAS}")
     c.close()
@@ -251,9 +259,30 @@ def build(SRC: Path, OUT: Path) -> dict:
     # CompactMismatch (ne tuđe cijene), a nova glavna datoteka promijeni ključ i otvori se nova veza
     os.replace(tmp_part, part)
     os.replace(tmp, OUT)
+    # metapodaci (Korak 18) zadnji: dok su stari, poslužitelj ih pri otvaranju nove baze odbije (druga oznaka izgradnje)
+    meta_file = meta_path(OUT)
+    meta_tmp = meta_file.with_name(meta_file.name + ".tmp")
+    meta_tmp.write_text(json.dumps(meta, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    os.replace(meta_tmp, meta_file)
     print(f"{OUT}: {OUT.stat().st_size / 2**20:.1f} MB, {part.name}: {part.stat().st_size / 2**20:.1f} MB; "
           f"izgradnja {build_id}; {counts}; provjera view-ova OK; {time.time() - t0:.0f} s")
     return counts
+
+
+def compact_meta(c, build_id: str) -> dict:
+    """Metapodaci sažete baze (data/compact_meta.json, Korak 18): oznaka izgradnje, datum cjenika (max(date) iz
+    view-a clean.prices, kao server._price_list_date) i vrijeme objave/učitavanja arhive (kao /healthz). Poslužitelj
+    iz njih odgovara na GET /, /healthz, convert_units i list_staples bez otvaranja baze; datum za ostale alate
+    uzima tek kad je otvorena baza iste izgradnje."""
+    d = c.execute("SELECT max(date) FROM dst.clean.prices").fetchone()[0]
+    updated = loaded = None
+    if c.execute("""SELECT count(*) FROM duckdb_tables() WHERE database_name = 'dst' AND schema_name = 'clean'
+                    AND table_name = 'archive_info'""").fetchone()[0]:
+        row = c.execute("SELECT updated, loaded_at FROM dst.clean.archive_info ORDER BY date DESC LIMIT 1").fetchone()
+        if row:
+            updated, loaded = row
+    return {"build_id": build_id, "date": d.isoformat() if d else None, "date_hr": date_hr(d) if d else None,
+            "updated": updated or None, "loaded_at": loaded.astimezone().isoformat() if loaded else None}
 
 
 def main() -> None:

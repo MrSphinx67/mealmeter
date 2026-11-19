@@ -10,6 +10,11 @@ platforma ipak pošalje lifespan, omotač ga obrađuje isto.
 
 Baza: MM_DB (zadano data/compact.duckdb uz kod, uz nju data/compact_prices.duckdb, Korak 12), samo za čitanje
 (ATTACH ... READ_ONLY); privremene datoteke DuckDB-a u /tmp (MM_DUCKDB_TEMP), jer je na Vercelu samo /tmp zapisiv.
+
+Korak 18 (Active CPU): ovdje se uvozi samo lagani mealmeter.web. initialize, tools/list, ping, notifications, GET /,
+/healthz, 405 i 404 odgovaraju bez MCP SDK-a, duckdb-a i otvaranja baze (datum iz data/compact_meta.json); SDK
+(i LifespanOnDemand oko njega) se učitava pri prvom zahtjevu koji ga treba (tools/call), a baza u prvom alatu.
+MM_DUCKDB_THREADS=1: Vercel Hobby ima 1 vCPU, a s jednom dretvom isti upiti troše manje CPU-a i nisu sporiji.
 """
 
 import os
@@ -21,6 +26,7 @@ sys.path.insert(0, str(ROOT / "src"))  # paket mealmeter iz repozitorija, i kad 
 
 os.environ.setdefault("MM_DB", str(ROOT / "data" / "compact.duckdb"))
 os.environ.setdefault("MM_DUCKDB_TEMP", "/tmp")
+os.environ.setdefault("MM_DUCKDB_THREADS", "1")
 # Vercel (Korak 5V.4); svaka se može promijeniti u Project Settings -> Environment Variables (npr. vlastita domena)
 os.environ.setdefault("MM_ALLOWED_HOSTS", "*.vercel.app")
 os.environ.setdefault("MM_ALLOWED_ORIGINS", "https://claude.ai,https://*.claude.ai,https://*.vercel.app")
@@ -29,8 +35,16 @@ os.environ.setdefault("MM_RATE_IP", "60")  # po instanci funkcije: Fluid compute
 os.environ.setdefault("MM_RATE_SESSION", "30")
 os.environ.setdefault("MM_RATE_GLOBAL", "600")
 
-from mealmeter.asgi import LifespanOnDemand, inner_app  # noqa: E402
-from mealmeter.server import create_server, http_app  # noqa: E402
+from mealmeter.web import VercelApp, setup_logging  # noqa: E402
 
-_http = http_app(create_server(), host="0.0.0.0")
-app = LifespanOnDemand(_http, inner_app(_http))
+setup_logging()
+
+
+def _sdk():
+    """Unutarnja SDK aplikacija (MCP na /mcp, /healthz, /); poziva je web.Light kad zahtjev treba SDK."""
+    from mealmeter.server import create_server, sdk_app
+
+    return sdk_app(create_server(), host="0.0.0.0")
+
+
+app = VercelApp(_sdk)
