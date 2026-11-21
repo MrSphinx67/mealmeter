@@ -79,6 +79,9 @@ Ako POST /mcp vrati `405` s `server: Vercel` i `allow: GET, HEAD`, zahtjev ne st
    od 220 MB ili datoteka veća od 95 MB. Izvor ne prekida deploy (Korak 8): izostali ili prepolovljeni lanac
    zadržava cijene najviše 7 dana (`CARRY_DAYS`, uz `stale_days`), a on i ukupni pad sirovih cijena > 20 % javljaju
    se kao `::warning::` i u sažetku pokretanja.
+   Retci cijena i trgovine s praznim `store_id` (Korak 20) preskaču se uz `::warning::` i redak u sažetku (te
+   trgovine nasljeđuju jučerašnje cijene); lanac s više od 50 % takvih redaka cijena izostavlja se i ide kroz
+   carry-forward kao da nije objavio cjenik (`build.MAX_EMPTY_STORE_SHARE`), bez blokade baze.
 
 ## 4. Postavke (po želji: Project Settings → Environment Variables)
 

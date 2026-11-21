@@ -72,6 +72,24 @@ class BadPriceError(ValueError):
     """Lanac ima više od MAX_BAD_PRICE_SHARE redaka s neparsabilnom cijenom."""
 
 
+# Prazan store_id (Korak 20): arhiva 21.11.2026., jadranka_trgovina: 8 od 18 trgovina u stores.csv i 34.462 od 133.151
+# retka cijena (25,9 %) bez šifre trgovine (šifra u stupcu address, grad "Roba"); jučer su tih 8 trgovina (051, 508,
+# ...) imale 34.459 redaka. Takvi retci (i trgovine) se preskaču uz upozorenje, pa te trgovine idu kroz carry-forward
+# po trgovini (update.carry_forward). Kad ih je više od MAX_EMPTY_STORE_SHARE redaka cijena lanca, izostavlja se cijeli
+# lanac, kao da nije objavio cjenik (carry-forward lanca, chain_report); baza se zbog toga ne blokira.
+MAX_EMPTY_STORE_SHARE = 0.5
+EMPTY_STORE_SQL = "trim(coalesce(store_id, '')) = ''"
+
+
+def describe_empty_stores(e: dict) -> str:
+    """Jedan redak za lanac s praznim store_id (iz load_raw)."""
+    stores = f", trgovina bez šifre {e['stores']} od {e['stores_total']}" if e["stores"] else ""
+    what = (f"više od {100 * MAX_EMPTY_STORE_SHARE:g} % redaka lanca, lanac izostavljen (carry-forward kao da nije "
+            f"objavio cjenik)" if e["dropped"] else "retci preskočeni (carry-forward po trgovini)")
+    return (f"{e['chain']}: {e['prices']} od {e['total']} redaka cijena bez store_id ({e['pct']:.2f} %){stores}; "
+            f"{what}")
+
+
 def price_sql(col: str) -> str:
     """SQL: sirova cijena (tekst) u DECIMAL(10,2); prazno je NULL, decimalni zarez se prihvaća, ostalo NULL."""
     t = f"trim({col})"
@@ -91,12 +109,14 @@ def describe_bad_prices(b: dict) -> str:
 
 
 def load_raw(con: duckdb.DuckDBPyConnection, root: Path, archive_date: str,
-             bad_prices: list[dict] | None = None) -> list[str]:
+             bad_prices: list[dict] | None = None, empty_stores: list[dict] | None = None) -> list[str]:
     """Sirovi CSV-ovi u tablice stores/products/prices, bez normalizacije.
 
     Dodaje stupac `chain` (naziv mape) i `date` (dan iz naziva arhive) u prices. Retci s neparsabilnom cijenom se
     preskaču i dodaju u `bad_prices` ({chain, bad, total, pct, examples}); više od MAX_BAD_PRICE_SHARE takvih redaka
-    jednog lanca diže BadPriceError.
+    jednog lanca diže BadPriceError. Retci cijena i trgovine s praznim store_id se preskaču i dodaju u `empty_stores`
+    ({chain, prices, total, pct, stores, stores_total, dropped}); kad je takvih više od MAX_EMPTY_STORE_SHARE redaka
+    cijena lanca, lanac se ne učitava (dropped) i vraćeni popis ga nema.
     """
 
     def raw(chain: str, name: str) -> str:
@@ -107,15 +127,30 @@ def load_raw(con: duckdb.DuckDBPyConnection, root: Path, archive_date: str,
     con.execute("DROP TABLE IF EXISTS stores; DROP TABLE IF EXISTS products; DROP TABLE IF EXISTS prices")
     casts = ", ".join(f"{price_sql(c)} AS {c}" for c in PRICE_COLS)
     bad = " OR ".join(bad_price_sql(c) for c in PRICE_COLS)
-    for i, chain in enumerate(chains):
+    loaded = []
+    for chain in chains:
+        n_all, n_empty = con.execute(f"SELECT count(*), count(*) FILTER (WHERE {EMPTY_STORE_SQL}) "
+                                     f"FROM {raw(chain, 'prices.csv')}").fetchone()
+        s_all, s_empty = con.execute(f"SELECT count(*), count(*) FILTER (WHERE {EMPTY_STORE_SQL}) "
+                                     f"FROM {raw(chain, 'stores.csv')}").fetchone()
+        if n_empty or s_empty:
+            info = {"chain": chain, "prices": n_empty, "total": n_all,
+                    "pct": 100 * n_empty / n_all if n_all else 0.0, "stores": s_empty, "stores_total": s_all,
+                    "dropped": n_empty > n_all * MAX_EMPTY_STORE_SHARE}
+            if empty_stores is not None:
+                empty_stores.append(info)
+            if info["dropped"]:
+                continue
         n_total, n_bad = con.execute(
-            f"SELECT count(*), count(*) FILTER (WHERE {bad}) FROM {raw(chain, 'prices.csv')}").fetchone()
+            f"SELECT count(*), count(*) FILTER (WHERE {bad}) FROM {raw(chain, 'prices.csv')} "
+            f"WHERE NOT ({EMPTY_STORE_SQL})").fetchone()
         if n_bad:
             # primjer: trgovina/šifra i sirove vrijednosti samo neparsabilnih stupaca
             flags = ", ".join(f"{bad_price_sql(c)}" for c in PRICE_COLS)
             rows = con.execute(
                 f"SELECT store_id, product_id, {', '.join(PRICE_COLS)}, {flags} FROM {raw(chain, 'prices.csv')} "
-                f"WHERE {bad} ORDER BY store_id, product_id LIMIT {BAD_PRICE_EXAMPLES}").fetchall()
+                f"WHERE ({bad}) AND NOT ({EMPTY_STORE_SQL}) ORDER BY store_id, product_id "
+                f"LIMIT {BAD_PRICE_EXAMPLES}").fetchall()
             k = len(PRICE_COLS)
             examples = [f"{r[0]}/{r[1]} " + ", ".join(f"{c}={v!r}" for c, v, f in zip(PRICE_COLS, r[2:2 + k], r[2 + k:])
                                                     if f)
@@ -127,14 +162,19 @@ def load_raw(con: duckdb.DuckDBPyConnection, root: Path, archive_date: str,
                                     f"lanca, baza odbijena")
             if bad_prices is not None:
                 bad_prices.append(info)
-        verb = "CREATE TABLE {} AS" if i == 0 else "INSERT INTO {}"
-        con.execute(f"{verb.format('stores')} SELECT '{chain}' AS chain, * FROM {raw(chain, 'stores.csv')}")
+        verb = "CREATE TABLE {} AS" if not loaded else "INSERT INTO {}"
+        con.execute(f"{verb.format('stores')} SELECT '{chain}' AS chain, * FROM {raw(chain, 'stores.csv')} "
+                    f"WHERE NOT ({EMPTY_STORE_SQL})")
         con.execute(f"{verb.format('products')} SELECT '{chain}' AS chain, * FROM {raw(chain, 'products.csv')}")
         con.execute(
             f"{verb.format('prices')} SELECT '{chain}' AS chain, store_id, product_id, {casts}, "
-            f"DATE '{archive_date}' AS date FROM {raw(chain, 'prices.csv')} WHERE NOT ({bad})"
+            f"DATE '{archive_date}' AS date FROM {raw(chain, 'prices.csv')} WHERE NOT ({bad}) "
+            f"AND NOT ({EMPTY_STORE_SQL})"
         )
-    return chains
+        loaded.append(chain)
+    if not loaded:
+        raise ValueError(f"{root}: nijedan lanac nije učitan")
+    return loaded
 
 
 def _temp_table(con: duckdb.DuckDBPyConnection, name: str, columns: dict[str, str], rows) -> None:

@@ -5,7 +5,8 @@
 # ima s čime usporediti i odakle prenijeti cijene trgovina koje nedostaju (carry-forward, najviše 7 dana).
 # Deploy prekida samo izlazni kod update.py (2: čistih cijena nakon carry-forwarda > 20 % manje, ili lanac s više od
 # 1 % redaka s neparsabilnom cijenom); ukupni pad sirovih cijena > 20 %, izostali ili prepolovljeni lanac (Korak 8) i
-# preskočeni pojedini retci s neparsabilnom cijenom (Korak 18) su ::warning:: i redak u sažetku pokretanja.
+# preskočeni pojedini retci s neparsabilnom cijenom (Korak 18) su ::warning:: i redak u sažetku pokretanja; isto
+# retci i trgovine s praznim store_id (Korak 20), a lanac s > 50 % takvih redaka ide kroz carry-forward (bez blokade).
 #
 # Tajne (Settings -> Secrets and variables -> Actions): VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID.
 
