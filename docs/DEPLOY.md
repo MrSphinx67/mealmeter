@@ -84,7 +84,8 @@ Ako POST /mcp vrati `405` s `server: Vercel` i `allow: GET, HEAD`, zahtjev ne st
 
 Zadane vrijednosti su u `api/index.py`: `MM_ALLOWED_HOSTS=*.vercel.app`, `TRUSTED_PROXY=vercel`,
 `MM_RATE_IP=60`, `MM_RATE_SESSION=30`, `MM_RATE_GLOBAL=600` (u minuti, po instanci funkcije),
-`MM_DUCKDB_THREADS=1` (Korak 18: 1 vCPU). Za vlastitu domenu
+`MM_DUCKDB_THREADS=1` (Korak 18: 1 vCPU), `MM_REQUEST_TIMEOUT=50` (Korak 19: s, ispod `maxDuration` 60 s;
+`MM_BODY_TIMEOUT` zadano 10 s). Za vlastitu domenu
 postavi npr. `MM_ALLOWED_HOSTS=*.vercel.app,cijene.example.hr`. Za strogo ograničenje upita koristi Vercel Firewall
 (brojači u poslužitelju vrijede za jednu instancu).
 
@@ -94,6 +95,13 @@ Svaki zahtjev ima redak `http <metoda> <putanja> status=... ms=... cpu_ms=... ip
 (hladni start) i `cold=1 boot_cpu_ms=...` (CPU prije prvog zahtjeva). Alati: `tool=<alat> status=... ms=... cpu_ms=...`.
 Prvi zahtjev koji treba MCP SDK (tools/call) zapiše `sdk loaded ms=... cpu_ms=...`. Jeftini zahtjevi (initialize,
 tools/list, notifications, ping, GET /, /healthz, 404, 405) ne učitavaju SDK ni bazu, vidi `docs/18_STATUS.md`.
+
+Korak 19: redak `http POST /mcp` ima i `rpc=<JSON-RPC metoda>` (`name=<alat>` za tools/call), `id=<id>` (`-` za
+notifikaciju) i `path=fast|sdk` (je li odgovorio brzi put ili SDK). Zahtjev koji je visio ima `timeout=1 phase=<faza>
+body=<primljeno>/<content-length>` (faze: `body` čitanje tijela, `sdk_load`, `sdk`, `send`) i odgovor 504; tijelo
+koje ne stigne za 10 s: `status=408 phase=body_timeout`; klijent koji prekine vezu prije kraja tijela: `status=499
+phase=disconnect` (bez odgovora i bez SDK-a). prompts/list, resources/list i resources/templates/list (prazni popisi)
+i sve notifikacije odgovara brzi put; initialize najavljuje samo `tools`. Vidi `docs/19_STATUS.md`.
 
 ## 5. Dodavanje u Claude
 

@@ -34,6 +34,9 @@ os.environ.setdefault("TRUSTED_PROXY", "vercel")  # IP klijenta iz Vercelovih za
 os.environ.setdefault("MM_RATE_IP", "60")  # po instanci funkcije: Fluid compute ih može imati više
 os.environ.setdefault("MM_RATE_SESSION", "30")
 os.environ.setdefault("MM_RATE_GLOBAL", "600")
+# Korak 19: zahtjev koji visi prekida se prije maxDuration (60 s, vercel.json), uz zapis gdje je zapeo, pa instanca
+# ostaje živa; tijelo POST /mcp mora stići za 10 s (web.BODY_TIMEOUT)
+os.environ.setdefault("MM_REQUEST_TIMEOUT", "50")
 
 from mealmeter.web import VercelApp, setup_logging  # noqa: E402
 

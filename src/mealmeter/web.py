@@ -14,8 +14,15 @@ Vercel naplaćuje Active CPU, a Claude šalje nalete jeftinih POST /mcp zahtjeva
 
 Ovdje su i ASGI omotači koje koristi i lokalni HTTP način (server.http_app): RequestLog, HostGuard, RateLimit,
 McpPostOnly.
+
+Korak 19: brzi put odgovara i na prompts/list, resources/list, resources/templates/list (prazni popisi; initialize ih
+više ne najavljuje) i na svaku notifikaciju (202). Zapis zahtjeva ima JSON-RPC metodu (`rpc=`), id (`id=`, `-` za
+notifikaciju) i `path=fast|sdk`. Tijelo zahtjeva čita se najviše MM_BODY_TIMEOUT s (408), prekinuta veza se ne šalje
+SDK-u, a RequestLog uz MM_REQUEST_TIMEOUT prekida zahtjev prije Vercelovog maxDuration i zapisuje gdje je zapeo
+(`timeout=1 phase=...`), umjesto da platforma ubije instancu bez zapisa.
 """
 
+import asyncio
 import json
 import logging
 import os
@@ -35,6 +42,8 @@ RATE_SESSION = 30  # upita po MCP sesiji (Mcp-Session-Id) u minuti, MM_RATE_SESS
 RATE_GLOBAL = 1000  # upita ukupno u minuti, MM_RATE_GLOBAL
 HEALTH_MAX_AGE_HOURS = 48  # starija baza: status "stale" (ažuriranje dvaput dnevno, vidi update.py)
 STATIC_PATH = Path(__file__).with_name("mcp_static.json")
+BODY_TIMEOUT = 10.0  # s, najdulje čitanje tijela POST /mcp (MM_BODY_TIMEOUT); tijelo je najviše 64 KB
+INFO_KEY = "mealmeter.info"  # ključ u ASGI scopeu: podaci o zahtjevu za RequestLog (rpc, id, path, phase)
 
 
 # --- baza i metapodaci (bez duckdb-a) ---------------------------------------------------------------------
@@ -351,13 +360,28 @@ class RequestLog:
 
     cpu_ms je CPU vrijeme procesa za trajanja zahtjeva (time.process_time, sve dretve, i DuckDB-ove; zahtjevi koji
     se preklapaju dijele ga). Prvi zahtjev procesa (hladni start instance) ima cold=1 i boot_cpu_ms, CPU potrošen
-    prije njega (interpreter i import)."""
+    prije njega (interpreter i import).
+
+    Unutarnja aplikacija (web.Light) upisuje u scope[INFO_KEY] JSON-RPC metodu (`rpc=`, za tools/call i `name=`),
+    id (`id=`, `-` za notifikaciju), `path=fast|sdk` i fazu (`phase`); `default_path` je put kad ga nitko ne upiše
+    (VercelApp: "fast", jer 405/404/429 ne učitavaju SDK). Uz `timeout` (s, MM_REQUEST_TIMEOUT, 0 = bez) zahtjev
+    koji traje dulje prekida se, klijent dobiva 504 ako odgovor još nije počeo, a zapis ima `timeout=1 phase=...
+    body=<primljeno>/<content-length>`: na Vercelu tako zapis postoji i instanca ostaje živa, umjesto "Task timed
+    out" bez zapisa i hladnog starta sljedećeg zahtjeva."""
 
     _cold = True  # po procesu: prvi zahtjev bilo kojeg RequestLog-a
 
-    def __init__(self, app, trusted_proxy: bool | None = None):
+    def __init__(self, app, trusted_proxy: bool | None = None, timeout: float | None = None,
+                 default_path: str | None = None):
         self.app = app
         self.ip = RateLimit(None, trusted_proxy=trusted_proxy).client_ip
+        if timeout is None:
+            try:
+                timeout = float(os.environ.get("MM_REQUEST_TIMEOUT", "0"))
+            except ValueError:
+                timeout = 0.0
+        self.timeout = timeout if timeout > 0 else None
+        self.default_path = default_path
 
     async def __call__(self, scope, receive, send):
         if scope["type"] != "http":
@@ -367,20 +391,44 @@ class RequestLog:
         if RequestLog._cold:
             RequestLog._cold = False
             cold = f" cold=1 boot_cpu_ms={cpu0 * 1000:.0f}"
+        info: dict = {}
+        if self.default_path:
+            info["path"] = self.default_path
+        scope = {**scope, INFO_KEY: info}
+        started = timed_out = False
 
         async def send_status(msg):
-            nonlocal status
+            nonlocal status, started
             if msg["type"] == "http.response.start":
-                status = msg["status"]
+                status, started = msg["status"], True
             await send(msg)
 
         try:
-            await self.app(scope, receive, send_status)
+            async with asyncio.timeout(self.timeout):
+                await self.app(scope, receive, send_status)
+        except TimeoutError:
+            timed_out = True
+            if not started:
+                rid = info.get("rid")
+                body = _dumps({"jsonrpc": "2.0", "id": rid if _is_id(rid) else None,
+                               "error": {"code": -32603, "message": "timeout"}})
+                try:
+                    await send_status({"type": "http.response.start", "status": 504, "headers": _json_headers(body)})
+                    await send({"type": "http.response.body", "body": body, "more_body": False})
+                except Exception:  # noqa: BLE001  (veza možda više ne postoji)
+                    pass
         finally:
             headers = {k.lower(): v for k, v in scope.get("headers") or []}
-            log.info("http %s %s status=%d ms=%d cpu_ms=%d ip=%s%s", scope.get("method"), scope.get("path"), status,
-                     (time.perf_counter() - start) * 1000, (time.process_time() - cpu0) * 1000,
-                     anon_ip(self.ip(scope, headers)), cold)
+            extra = "".join(f" {k}={info[k]}" for k in ("rpc", "name", "id", "path") if k in info)
+            if timed_out:
+                extra += f" timeout=1 phase={info.get('phase', '?')} body={info.get('body_bytes', 0)}/" + \
+                         headers.get(b"content-length", b"-").decode("latin-1")[:12]
+            elif info.get("phase") in ("body_timeout", "disconnect"):
+                extra += f" phase={info['phase']} body={info.get('body_bytes', 0)}/" + \
+                         headers.get(b"content-length", b"-").decode("latin-1")[:12]
+            log.info("http %s %s status=%d ms=%d cpu_ms=%d ip=%s%s%s", scope.get("method"), scope.get("path"),
+                     info.get("status", status), (time.perf_counter() - start) * 1000,
+                     (time.process_time() - cpu0) * 1000, anon_ip(self.ip(scope, headers)), extra, cold)
 
 
 class McpPostOnly:
@@ -449,15 +497,50 @@ def _meta_only(params) -> bool:
 _CLIENT_INFO_KEYS = {"name", "version", "title", "description", "websiteUrl"}
 
 
+_LOG_TOKEN = re.compile(r"[^A-Za-z0-9_./:-]")
+
+
+def _token(value, limit: int = 40) -> str:
+    """Vrijednost za redak loga: bez razmaka i posebnih znakova, skraćena."""
+    return _LOG_TOKEN.sub("_", str(value))[:limit] or "_"
+
+
+def rpc_info(body: bytes) -> dict:
+    """JSON-RPC metoda, id i (za tools/call) naziv alata, za zapis zahtjeva; argumenti alata se ne zapisuju."""
+    try:
+        msg = json.loads(body)
+    except ValueError:
+        return {"rpc": "invalid-json"}
+    if isinstance(msg, list):
+        return {"rpc": f"batch{len(msg)}"}
+    if not isinstance(msg, dict):
+        return {"rpc": "invalid"}
+    method = msg.get("method")
+    if isinstance(method, str):
+        out = {"rpc": _token(method)}
+    else:
+        out = {"rpc": "response" if ("result" in msg or "error" in msg) else "invalid"}
+    out["id"] = _token(msg["id"], 32) if "id" in msg else "-"
+    if "id" in msg:
+        out["rid"] = msg["id"]
+    params = msg.get("params")
+    if method == "tools/call" and isinstance(params, dict) and isinstance(params.get("name"), str):
+        out["name"] = _token(params["name"])
+    return out
+
+
 def fast_reply(headers: dict[bytes, bytes], body: bytes) -> tuple[int, list, bytes] | None:
     """Odgovor na jeftin MCP zahtjev bez SDK-a, ili None (zahtjev ide SDK-u). Samo zahtjevi koje bi SDK (stateless,
-    JSON odgovori) prihvatio i odgovorio jednako; sve neobično (sesija, verzija protokola izvan handshakea, batch,
-    dodatna polja, nevaljani oblik) ide SDK-u, koji vraća i odgovarajuću grešku."""
+    JSON odgovori) prihvatio i odgovorio jednako; sve neobično (verzija protokola izvan handshakea, batch, dodatna
+    polja u zahtjevu, nevaljani oblik) ide SDK-u, koji vraća i odgovarajuću grešku.
+
+    Korak 19: SDK bez sesija zaglavlje Mcp-Session-Id zanemaruje (odgovor je isti), pa ono više ne šalje zahtjev
+    SDK-u; svaka notifikacija (i s dodatnim poljima, nepoznata notifications/*) i JSON-RPC odgovor klijenta dobivaju
+    202 kao od SDK-a; prompts/list, resources/list i resources/templates/list prazne popise iz snimke."""
     snap = static_mcp()
     versions = snap["handshake_versions"]
     h = {k.decode("latin-1").lower(): v.decode("latin-1") for k, v in headers.items()}
-    if h.get("mcp-session-id") or not _accepts_json(h.get("accept", "")) or not _content_type_json(
-            h.get("content-type", "")):
+    if not _accepts_json(h.get("accept", "")) or not _content_type_json(h.get("content-type", "")):
         return None
     pv = h.get("mcp-protocol-version")
     if pv is not None and pv not in versions:
@@ -466,12 +549,16 @@ def fast_reply(headers: dict[bytes, bytes], body: bytes) -> tuple[int, list, byt
         msg = json.loads(body)
     except ValueError:
         return None
-    if not isinstance(msg, dict) or msg.get("jsonrpc") != "2.0" or not isinstance(msg.get("method"), str):
+    if not isinstance(msg, dict) or msg.get("jsonrpc") != "2.0":
+        return None
+    if "method" not in msg and "id" in msg and _is_id(msg["id"]) and (
+            ("result" in msg) != ("error" in msg)) and set(msg) <= {"jsonrpc", "id", "result", "error"}:
+        return 202, _json_headers(b""), b""  # odgovor klijenta (SDK: 202, ovaj poslužitelj ne šalje zahtjeve)
+    if not isinstance(msg.get("method"), str):
         return None
     method, params = msg["method"], msg.get("params")
     if "id" not in msg:
-        if set(msg) <= {"jsonrpc", "method", "params"} and method.startswith("notifications/") and (
-                params is None or isinstance(params, dict)):
+        if method.startswith("notifications/") and (params is None or isinstance(params, dict)):
             return 202, _json_headers(b""), b""
         return None
     rid = msg["id"]
@@ -494,26 +581,36 @@ def fast_reply(headers: dict[bytes, bytes], body: bytes) -> tuple[int, list, byt
         result = snap["tools_list"]
     elif method == "ping" and _meta_only(params):
         result = {}
+    elif method in snap["empty_lists"] and _meta_only(params):
+        result = snap["empty_lists"][method]
     else:
         return None
     out = _dumps({"jsonrpc": "2.0", "id": rid, "result": result})
     return 200, _json_headers(out), out
 
 
-async def _read_body(receive, limit: int) -> tuple[bytes, list, bool]:
-    """Tijelo zahtjeva (do `limit` bajtova) i primljene poruke (za ponovno slanje SDK-u)."""
+async def _read_body(receive, limit: int, timeout: float | None = None,
+                     info: dict | None = None) -> tuple[bytes, list, str]:
+    """Tijelo zahtjeva (do `limit` bajtova), primljene poruke (za ponovno slanje SDK-u) i ishod: "ok", "too_large"
+    (SDK vraća 413), "disconnect" (klijent je otišao) ili "timeout" (tijelo nije stiglo u `timeout` s)."""
     chunks, msgs, size = [], [], 0
-    while True:
-        msg = await receive()
-        msgs.append(msg)
-        if msg["type"] != "http.request":
-            return b"", msgs, False
-        chunks.append(msg.get("body", b""))
-        size += len(chunks[-1])
-        if size > limit:
-            return b"", msgs, False
-        if not msg.get("more_body"):
-            return b"".join(chunks), msgs, True
+    try:
+        async with asyncio.timeout(timeout):
+            while True:
+                msg = await receive()
+                msgs.append(msg)
+                if msg["type"] != "http.request":
+                    return b"", msgs, "disconnect"
+                chunks.append(msg.get("body", b""))
+                size += len(chunks[-1])
+                if info is not None:
+                    info["body_bytes"] = size
+                if size > limit:
+                    return b"", msgs, "too_large"
+                if not msg.get("more_body"):
+                    return b"".join(chunks), msgs, "ok"
+    except TimeoutError:
+        return b"", msgs, "timeout"
 
 
 def _replay(msgs: list, receive):
@@ -526,7 +623,7 @@ def _replay(msgs: list, receive):
 
 async def _send(send, status: int, headers: list, body: bytes) -> None:
     await send({"type": "http.response.start", "status": status, "headers": headers})
-    await send({"type": "http.response.body", "body": body})
+    await send({"type": "http.response.body", "body": body, "more_body": False})
 
 
 class Light:
@@ -537,10 +634,22 @@ class Light:
 
     KNOWN = {"", "/healthz", "/mcp"}  # putanje SDK aplikacije (bez završne kose crte); ostalo je 404
 
-    def __init__(self, make_sdk):
+    def __init__(self, make_sdk, body_timeout: float | None = None):
         self.make_sdk = make_sdk
         self.sdk = None
         self.fast = 0  # broj zahtjeva odgovorenih bez SDK-a (testovi)
+        if body_timeout is None:
+            try:
+                body_timeout = float(os.environ.get("MM_BODY_TIMEOUT", BODY_TIMEOUT))
+            except ValueError:
+                body_timeout = BODY_TIMEOUT
+        self.body_timeout = body_timeout if body_timeout > 0 else None
+
+    async def _sdk(self, scope, receive, send, info: dict):
+        info["path"], info["phase"] = "sdk", "sdk_load"
+        app = self.load()
+        info["phase"] = "sdk"
+        return await app(scope, receive, send)
 
     def load(self):
         if self.sdk is None:
@@ -555,15 +664,31 @@ class Light:
     async def __call__(self, scope, receive, send):
         if scope["type"] != "http":
             return await self.load()(scope, receive, send)
+        info = scope.get(INFO_KEY)
+        if info is None:
+            info = {}
         method, path = scope.get("method"), scope.get("path", "")
         if method == "POST" and path == "/mcp":
             headers = {k.lower(): v for k, v in scope.get("headers") or []}
-            body, msgs, complete = await _read_body(receive, MAX_REQUEST_BYTES)
-            reply = fast_reply(headers, body) if complete else None
+            info["phase"] = "body"
+            body, msgs, outcome = await _read_body(receive, MAX_REQUEST_BYTES, self.body_timeout, info)
+            if outcome == "disconnect":
+                # klijent je otišao prije kraja tijela: nema kome odgovoriti (SDK bi ga čekao ili vratio 500)
+                info.update(path="fast", phase="disconnect", status=499)
+                return
+            if outcome == "timeout":
+                info.update(path="fast", phase="body_timeout")
+                out = _dumps({"jsonrpc": "2.0", "id": None,
+                              "error": {"code": -32600, "message": "request body timeout"}})
+                return await _send(send, 408, _json_headers(out), out)
+            if outcome == "ok":
+                info.update(rpc_info(body))
+            reply = fast_reply(headers, body) if outcome == "ok" else None
             if reply:
                 self.fast += 1
+                info.update(path="fast", phase="send")
                 return await _send(send, *reply)
-            return await self.load()(scope, _replay(msgs, receive), send)
+            return await self._sdk(scope, _replay(msgs, receive), send, info)
         if method == "GET" and path == "/healthz":
             status, body = health()
             out = _dumps(body)
@@ -581,7 +706,7 @@ class Light:
             self.fast += 1
             return await _send(send, 404, [(b"content-length", str(len(out)).encode()),
                                            (b"content-type", b"application/json")], out)
-        return await self.load()(scope, receive, send)
+        return await self._sdk(scope, receive, send, info)
 
     def shutdown(self):
         if self.sdk is not None and self.sdk._task:
@@ -590,11 +715,14 @@ class Light:
 
 class VercelApp:
     """ASGI ulaz za Vercel (api/index.py): /api/index... -> ostatak putanje, lifespan bez učitavanja SDK-a, pa
-    RequestLog -> HostGuard -> RateLimit -> McpPostOnly -> Light."""
+    RequestLog -> HostGuard -> RateLimit -> McpPostOnly -> Light. `request_timeout` / `body_timeout`: s, inače
+    MM_REQUEST_TIMEOUT / MM_BODY_TIMEOUT (api/index.py: 50 s, ispod maxDuration 60 s u vercel.json)."""
 
-    def __init__(self, make_sdk, allowed_hosts: list[str] | None = None, allowed_origins: list[str] | None = None):
-        self.light = Light(make_sdk)
-        self.app = RequestLog(HostGuard(RateLimit(McpPostOnly(self.light)), allowed_hosts, allowed_origins))
+    def __init__(self, make_sdk, allowed_hosts: list[str] | None = None, allowed_origins: list[str] | None = None,
+                 request_timeout: float | None = None, body_timeout: float | None = None):
+        self.light = Light(make_sdk, body_timeout=body_timeout)
+        self.app = RequestLog(HostGuard(RateLimit(McpPostOnly(self.light)), allowed_hosts, allowed_origins),
+                              timeout=request_timeout, default_path="fast")
 
     async def __call__(self, scope, receive, send):
         if scope["type"] == "lifespan":

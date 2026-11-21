@@ -532,7 +532,22 @@ def create_server(con: duckdb.DuckDBPyConnection | None = None, db_path: str | N
     ro = ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False)
     for fn in TOOLS:
         server.tool(name=fn.__name__, description=DESCRIPTIONS[fn.__name__], annotations=ro)(_as_result(fn))
+    _tools_only_capabilities(server)
     return server
+
+
+def _tools_only_capabilities(server: MCPServer) -> None:
+    """initialize (i server/discover) najavljuju samo alate, bez prompts i resources (Korak 19): nemamo ih, a klijenti
+    nakon najave šalju prompts/list i resources/list, što je na Vercelu učitavalo SDK (~2 s CPU-a po instanci).
+    Rukovatelji ostaju, pa klijent koji ih ipak pošalje dobiva prazan popis (isti kao web.fast_reply)."""
+    low = server._lowlevel_server
+    base = low.get_capabilities
+
+    def get_capabilities(*args, **kwargs):
+        caps = base(*args, **kwargs)
+        return caps.model_copy(update={"prompts": None, "resources": None})
+
+    low.get_capabilities = get_capabilities
 
 
 # HTTP omotači, /healthz i / su u laganom modulu web (Korak 18: Vercel ih koristi bez učitavanja SDK-a)
@@ -609,9 +624,13 @@ async def _post(app, body: dict, headers: dict | None = None) -> tuple[int, byte
     return out["status"], out["body"]
 
 
+EMPTY_LIST_METHODS = ("prompts/list", "resources/list", "resources/templates/list")
+
+
 def static_snapshot() -> dict:
-    """Odgovori SDK-a (ovog poslužitelja) na initialize i tools/list, za web.fast_reply: rezultat initialize jednak je
-    za sve verzije handshakea osim protocolVersion (tražena verzija, inače fallback_version)."""
+    """Odgovori SDK-a (ovog poslužitelja) na initialize, tools/list i prazne popise (EMPTY_LIST_METHODS), za
+    web.fast_reply: rezultat initialize jednak je za sve verzije handshakea osim protocolVersion (tražena verzija,
+    inače fallback_version)."""
     import asyncio
 
     from mcp_types.version import HANDSHAKE_PROTOCOL_VERSIONS
@@ -625,8 +644,11 @@ def static_snapshot() -> dict:
         async with app.router.lifespan_context(app):
             inits = {v: await _post(app, init(v)) for v in (*HANDSHAKE_PROTOCOL_VERSIONS, "0000-00-00")}
             tools = await _post(app, {"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
-        return inits, tools
-    inits, tools = asyncio.run(go())
+            lists = {m: await _post(app, {"jsonrpc": "2.0", "id": 3, "method": m}) for m in EMPTY_LIST_METHODS}
+        return inits, tools, lists
+    inits, tools, lists = asyncio.run(go())
+    for m, (status, body) in lists.items():
+        assert status == 200, (m, status, body[:200])
     results = {}
     for v, (status, body) in inits.items():
         assert status == 200, (v, status, body[:200])
@@ -638,7 +660,8 @@ def static_snapshot() -> dict:
     return {"_comment": "Snimka odgovora MCP SDK-a za web.fast_reply; python -m mealmeter.server --write-static",
             "handshake_versions": list(HANDSHAKE_PROTOCOL_VERSIONS),
             "fallback_version": results["0000-00-00"]["protocolVersion"],
-            "initialize": base, "tools_list": json.loads(tools[1])["result"]}
+            "initialize": base, "tools_list": json.loads(tools[1])["result"],
+            "empty_lists": {m: json.loads(body)["result"] for m, (_, body) in lists.items()}}
 
 
 def write_static() -> None:

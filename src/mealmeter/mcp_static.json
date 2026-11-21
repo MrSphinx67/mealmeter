@@ -9,13 +9,6 @@
  "fallback_version": "2025-11-25",
  "initialize": {
   "capabilities": {
-   "prompts": {
-    "listChanged": false
-   },
-   "resources": {
-    "listChanged": false,
-    "subscribe": false
-   },
    "tools": {
     "listChanged": false
    }
@@ -337,5 +330,16 @@
     "name": "list_staples"
    }
   ]
+ },
+ "empty_lists": {
+  "prompts/list": {
+   "prompts": []
+  },
+  "resources/list": {
+   "resources": []
+  },
+  "resources/templates/list": {
+   "resourceTemplates": []
+  }
  }
 }

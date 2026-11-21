@@ -66,9 +66,9 @@ CASES = [
     ("tools/list _meta", STD, {**LIST, "params": {"_meta": {"progressToken": 1}}}, True),
     ("tools/list cursor", STD, {**LIST, "params": {"cursor": "x"}}, False),
     ("tools/list 2026-07-28", {**STD, "mcp-protocol-version": "2026-07-28"}, LIST, False),
-    ("tools/list sesija", {**STD, "mcp-session-id": "abc"}, LIST, False),
+    ("tools/list sesija", {**STD, "mcp-session-id": "abc"}, LIST, True),  # Korak 19: SDK bez sesija je zanemaruje
     ("ping", {**STD, "mcp-protocol-version": "2025-06-18"}, {"jsonrpc": "2.0", "id": 9, "method": "ping"}, True),
-    ("resources/list", STD, {"jsonrpc": "2.0", "id": 3, "method": "resources/list"}, False),
+    ("resources/list", STD, {"jsonrpc": "2.0", "id": 3, "method": "resources/list"}, True),  # Korak 19: prazan popis
     ("tools/call", STD, {"jsonrpc": "2.0", "id": 4, "method": "tools/call",
                          "params": {"name": "list_staples", "arguments": {}}}, False),
 ]
