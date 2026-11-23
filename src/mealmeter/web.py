@@ -15,6 +15,11 @@ Vercel naplaćuje Active CPU, a Claude šalje nalete jeftinih POST /mcp zahtjeva
 Ovdje su i ASGI omotači koje koristi i lokalni HTTP način (server.http_app): RequestLog, HostGuard, RateLimit,
 McpPostOnly.
 
+Korak 21 (MCP 2026-07-28, bez handshakea): server/discover, tools/list i prazni popisi iz snimke moderne ere;
+subscriptions/listen odmah -32601 Method not found (HTTP 404), kao SDK sa subscriptions=False: poslužitelj nema
+obavijesti, pa pretplate ne najavljuje (tools.listChanged = false) i ne drži otvoren SSE tok (prije: 50 s do čuvara
+vremena i ponovni pokušaji klijenta). Zahtjev moderne ere koji ide SDK-u ima u zapisu `why=` (razlog, bez sadržaja).
+
 Korak 19: brzi put odgovara i na prompts/list, resources/list, resources/templates/list (prazni popisi; initialize ih
 više ne najavljuje) i na svaku notifikaciju (202). Zapis zahtjeva ima JSON-RPC metodu (`rpc=`), id (`id=`, `-` za
 notifikaciju) i `path=fast|sdk`. Tijelo zahtjeva čita se najviše MM_BODY_TIMEOUT s (408), prekinuta veza se ne šalje
@@ -419,7 +424,7 @@ class RequestLog:
                     pass
         finally:
             headers = {k.lower(): v for k, v in scope.get("headers") or []}
-            extra = "".join(f" {k}={info[k]}" for k in ("rpc", "name", "id", "path") if k in info)
+            extra = "".join(f" {k}={info[k]}" for k in ("rpc", "name", "id", "path", "why") if k in info)
             if timed_out:
                 extra += f" timeout=1 phase={info.get('phase', '?')} body={info.get('body_bytes', 0)}/" + \
                          headers.get(b"content-length", b"-").decode("latin-1")[:12]
@@ -529,22 +534,29 @@ def rpc_info(body: bytes) -> dict:
     return out
 
 
-def fast_reply(headers: dict[bytes, bytes], body: bytes) -> tuple[int, list, bytes] | None:
+def fast_reply(headers, body: bytes, why: dict | None = None) -> tuple[int, list, bytes] | None:
     """Odgovor na jeftin MCP zahtjev bez SDK-a, ili None (zahtjev ide SDK-u). Samo zahtjevi koje bi SDK (stateless,
     JSON odgovori) prihvatio i odgovorio jednako; sve neobično (verzija protokola izvan handshakea, batch, dodatna
     polja u zahtjevu, nevaljani oblik) ide SDK-u, koji vraća i odgovarajuću grešku.
 
     Korak 19: SDK bez sesija zaglavlje Mcp-Session-Id zanemaruje (odgovor je isti), pa ono više ne šalje zahtjev
     SDK-u; svaka notifikacija (i s dodatnim poljima, nepoznata notifications/*) i JSON-RPC odgovor klijenta dobivaju
-    202 kao od SDK-a; prompts/list, resources/list i resources/templates/list prazne popise iz snimke."""
+    202 kao od SDK-a; prompts/list, resources/list i resources/templates/list prazne popise iz snimke.
+
+    Korak 21: zaglavlje MCP-Protocol-Version moderne ere (2026-07-28, snap["modern"]) ide u _modern_reply.
+    `headers` je dict ili popis parova (ASGI, s ponovljenim zaglavljima); u `why["why"]` se upisuje zašto zahtjev
+    moderne ere ide SDK-u (za zapis zahtjeva, bez sadržaja)."""
     snap = static_mcp()
     versions = snap["handshake_versions"]
-    h = {k.decode("latin-1").lower(): v.decode("latin-1") for k, v in headers.items()}
+    pairs = list(headers.items() if isinstance(headers, dict) else headers)
+    h = {k.decode("latin-1").lower(): v.decode("latin-1") for k, v in pairs}
     if not _accepts_json(h.get("accept", "")) or not _content_type_json(h.get("content-type", "")):
-        return None
+        return _no(why, "accept")
     pv = h.get("mcp-protocol-version")
+    if pv is not None and pv in snap.get("modern", {}):
+        return _modern_reply(snap["modern"][pv], pv, h, pairs, body, why)
     if pv is not None and pv not in versions:
-        return None
+        return _no(why, "version")
     try:
         msg = json.loads(body)
     except ValueError:
@@ -587,6 +599,103 @@ def fast_reply(headers: dict[bytes, bytes], body: bytes) -> tuple[int, list, byt
         return None
     out = _dumps({"jsonrpc": "2.0", "id": rid, "result": result})
     return 200, _json_headers(out), out
+
+
+def _no(why: dict | None, reason: str) -> None:
+    if why is not None:
+        why["why"] = reason
+    return None
+
+
+PV_META = "io.modelcontextprotocol/protocolVersion"
+CAPS_META = "io.modelcontextprotocol/clientCapabilities"
+INFO_META = "io.modelcontextprotocol/clientInfo"
+_RESERVED_META = "io.modelcontextprotocol/"
+_ROUTING_HEADERS = {b"mcp-protocol-version", b"mcp-method", b"mcp-name"}
+_FILTER_FLAGS = {"toolsListChanged", "promptsListChanged", "resourcesListChanged"}
+
+
+def _accepts_sse(value: str) -> bool:
+    """Kao SDK (check_accept_headers): text/event-stream, text/* ili */*."""
+    types = [t.strip().split(";")[0].strip().lower() for t in value.split(",")]
+    return any(t in ("text/event-stream", "text/*", "*/*") for t in types)
+
+
+def _modern_meta_ok(meta, pv: str) -> str | None:
+    """None kad je _meta zahtjeva moderne ere u obliku koji SDK prihvaća jednako, inače razlog."""
+    if not isinstance(meta, dict) or meta.get(PV_META) != pv:
+        return "meta"
+    caps = meta.get(CAPS_META)
+    if not isinstance(caps, dict) or not all(isinstance(v, dict) for v in caps.values()):
+        return "caps"
+    if INFO_META in meta:
+        info = meta[INFO_META]
+        if not (isinstance(info, dict) and {"name", "version"} <= set(info) <= _CLIENT_INFO_KEYS
+                and all(isinstance(v, str) for v in info.values())):
+            return "client_info"
+    if any(k.startswith(_RESERVED_META) for k in set(meta) - {PV_META, CAPS_META, INFO_META}):
+        return "meta_key"  # npr. logLevel: SDK ga provjerava
+    return None
+
+
+def _filter_ok(value) -> bool:
+    """SubscriptionFilter iz subscriptions/listen: zastavice (bool) i resourceSubscriptions (popis URI-ja)."""
+    if not isinstance(value, dict) or not set(value) <= _FILTER_FLAGS | {"resourceSubscriptions"}:
+        return False
+    if not all(isinstance(value[k], bool) for k in set(value) & _FILTER_FLAGS):
+        return False
+    subs = value.get("resourceSubscriptions", [])
+    return isinstance(subs, list) and all(isinstance(u, str) for u in subs)
+
+
+def _modern_reply(snap: dict, pv: str, h: dict, pairs: list, body: bytes,
+                  why: dict | None) -> tuple[int, list, bytes] | None:
+    """Moderna era (Korak 21, MCP 2026-07-28: bez handshakea, svaki zahtjev nosi _meta s verzijom i sposobnostima):
+    server/discover, tools/list i prazni popisi iz snimke (snap["results"]); subscriptions/listen i metode kojih u toj
+    verziji nema (ping, initialize, ...) dobivaju -32601 Method not found s HTTP 404 kao od SDK-a (snap["errors"]):
+    poslužitelj nema obavijesti, pa pretplate ne poslužuje i ne najavljuje (tools.listChanged = false); notifikacije
+    202. Zapis kao SDK u ovoj eri (json.dumps, \\u-escape). Sve što SDK provjerava drukčije (zaglavlja Mcp-Method i
+    MCP-Protocol-Version različita od tijela ili ponovljena, nepoznati parametri, _meta izvan uobičajenog oblika,
+    listen bez text/event-stream u Accept) ide SDK-u."""
+    if sum(1 for k, _ in pairs if k.lower() in _ROUTING_HEADERS) != len(
+            {k.lower() for k, _ in pairs if k.lower() in _ROUTING_HEADERS}):
+        return _no(why, "dup_header")
+    try:
+        msg = json.loads(body)
+    except ValueError:
+        return _no(why, "json")
+    if not isinstance(msg, dict) or msg.get("jsonrpc") != "2.0" or not isinstance(msg.get("method"), str):
+        return _no(why, "shape")
+    method, params = msg["method"], msg.get("params")
+    if "id" not in msg:
+        if (params is None or isinstance(params, dict)) and set(msg) <= {"jsonrpc", "method", "params"}:
+            return 202, [(b"content-length", b"0")], b""  # SDK: potvrđuje i odbacuje, bez content-type
+        return _no(why, "shape")
+    rid = msg["id"]
+    if not _is_id(rid) or not set(msg) <= {"jsonrpc", "id", "method", "params"} or not isinstance(params, dict):
+        return _no(why, "shape")
+    if h.get("mcp-method") != method:
+        return _no(why, "mcp_method")
+    if reason := _modern_meta_ok(params.get("_meta"), pv):
+        return _no(why, reason)
+    allowed = {"_meta"}
+    if method == "subscriptions/listen":
+        if not _accepts_sse(h.get("accept", "")):
+            return _no(why, "accept_sse")  # SDK: 406
+        if not _filter_ok(params.get("notifications")):
+            return _no(why, "filter")
+        allowed.add("notifications")
+    if not set(params) <= allowed:
+        return _no(why, "params")
+    if method in snap["results"]:
+        status, payload = 200, {"jsonrpc": "2.0", "id": rid, "result": snap["results"][method]}
+    elif method in snap["errors"]:
+        status, error = snap["errors"][method]
+        payload = {"jsonrpc": "2.0", "id": rid, "error": error}
+    else:
+        return _no(why, "method")
+    out = json.dumps(payload, separators=(",", ":")).encode("utf-8")
+    return status, _json_headers(out), out
 
 
 async def _read_body(receive, limit: int, timeout: float | None = None,
@@ -669,7 +778,6 @@ class Light:
             info = {}
         method, path = scope.get("method"), scope.get("path", "")
         if method == "POST" and path == "/mcp":
-            headers = {k.lower(): v for k, v in scope.get("headers") or []}
             info["phase"] = "body"
             body, msgs, outcome = await _read_body(receive, MAX_REQUEST_BYTES, self.body_timeout, info)
             if outcome == "disconnect":
@@ -683,7 +791,9 @@ class Light:
                 return await _send(send, 408, _json_headers(out), out)
             if outcome == "ok":
                 info.update(rpc_info(body))
-            reply = fast_reply(headers, body) if outcome == "ok" else None
+            reply = fast_reply(scope.get("headers") or [], body, info) if outcome == "ok" else None
+            if info.get("rpc") == "tools/call":
+                info.pop("why", None)  # tools/call uvijek ide SDK-u; why= je za jeftine zahtjeve koji nisu na brzom putu
             if reply:
                 self.fast += 1
                 info.update(path="fast", phase="send")

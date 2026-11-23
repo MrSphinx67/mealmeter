@@ -106,6 +106,13 @@ koje ne stigne za 10 s: `status=408 phase=body_timeout`; klijent koji prekine ve
 phase=disconnect` (bez odgovora i bez SDK-a). prompts/list, resources/list i resources/templates/list (prazni popisi)
 i sve notifikacije odgovara brzi put; initialize najavljuje samo `tools`. Vidi `docs/19_STATUS.md`.
 
+Korak 21 (MCP 2026-07-28, bez handshakea): `server/discover`, `tools/list` i prazni popisi idu brzim putem iz snimke.
+`subscriptions/listen` odmah dobiva 404 `-32601 Method not found`. Poslužitelj nema obavijesti, pa pretplate ne
+najavljuje (`tools.listChanged: false`) i ne drži SSE tok otvorenim. Očekivani zapis je `rpc=subscriptions/listen
+status=404 ... path=fast`, a po razgovoru samo `id=listen:0`. Zahtjev nove ere koji ipak ide SDK-u ima `why=<razlog>`.
+Memorija funkcije ostaje 2 GB: Vercel ne nudi 1 GB (Hobby fiksno 2 GB, Pro 2 ili 4 GB), a `memory` u `vercel.json`
+se ne primjenjuje. Vidi `docs/21_STATUS.md`.
+
 ## 5. Dodavanje u Claude
 
 claude.ai (ili Claude Desktop) → **Settings → Connectors → Add custom connector**:

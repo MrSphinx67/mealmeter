@@ -592,6 +592,8 @@ def build_database(root: Path, date: str, db_path: Path, keep_days: int = KEEP_D
             pass
         tmp.unlink(missing_ok=True)
         tmp.with_name(tmp.name + ".wal").unlink(missing_ok=True)
+        # DuckDB-ova mapa za prelijevanje (<baza>.tmp-<datum>.tmp/), nakon OOM-a 21.11.2026. ostalo je ~1,3 GB
+        shutil.rmtree(tmp.with_name(tmp.name + ".tmp"), ignore_errors=True)
         raise
 
 

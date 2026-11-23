@@ -49,7 +49,7 @@ CASES = [
     ("notifications/roots/list_changed", V, {"jsonrpc": "2.0", "method": "notifications/roots/list_changed"}, True),
     ("notifications nepoznata", STD, {"jsonrpc": "2.0", "method": "notifications/nesto"}, True),
     ("notifications params lista", STD, {**NOTIF, "params": [1]}, False),
-    ("notifications 2026-07-28", {**STD, "mcp-protocol-version": "2026-07-28"}, NOTIF, False),
+    ("notifications 2026-07-28", {**STD, "mcp-protocol-version": "2026-07-28"}, NOTIF, True),  # Korak 21
     ("notifications bez accept", {k: v for k, v in STD.items() if k != "accept"}, NOTIF, False),
     ("notifications batch", STD, [NOTIF, NOTIF], False),
     ("odgovor klijenta result", STD, {"jsonrpc": "2.0", "id": 1, "result": {}}, True),

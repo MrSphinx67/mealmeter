@@ -11,6 +11,7 @@ truncated = true). Baza: MM_DB (npr. data/compact.duckdb), MEALMETER_DB ili data
 """
 
 import argparse
+import asyncio
 import functools
 import inspect
 import json
@@ -527,8 +528,13 @@ def create_server(con: duckdb.DuckDBPyConnection | None = None, db_path: str | N
         _shared_con, _fixed_con = con, True
     elif db_path:
         _db_path, _shared_con, _fixed_con = db_path, None, False
+    # subscriptions=False (Korak 21): poslužitelj ne šalje obavijesti (popis alata se ne mijenja), pa ne poslužuje
+    # subscriptions/listen (2026-07-28): SDK vraća -32601 Method not found (HTTP 404), a server/discover najavljuje
+    # tools.listChanged = false. S pretplatama bi SDK otvorio SSE tok koji na Vercelu visi do čuvara vremena (50 s)
+    # i klijent ga ponovno otvara (listen:0, :1, ...).
     server = MCPServer(name="mealmeter", title="Mealmeter", instructions=INSTRUCTIONS,
-                       description="Cijene namirnica u hrvatskim trgovinama / grocery prices in Croatian stores")
+                       description="Cijene namirnica u hrvatskim trgovinama / grocery prices in Croatian stores",
+                       subscriptions=False)
     ro = ToolAnnotations(readOnlyHint=True, destructiveHint=False, idempotentHint=True, openWorldHint=False)
     for fn in TOOLS:
         server.tool(name=fn.__name__, description=DESCRIPTIONS[fn.__name__], annotations=ro)(_as_result(fn))
@@ -608,7 +614,7 @@ async def _post(app, body: dict, headers: dict | None = None) -> tuple[int, byte
         if not sent:
             sent = True
             return {"type": "http.request", "body": data, "more_body": False}
-        return {"type": "http.disconnect"}
+        await asyncio.Event().wait()  # klijent ne odlazi (SSE put SDK-a bi inače prekinuo obradu, Korak 21)
 
     async def send(msg):
         if msg["type"] == "http.response.start":
@@ -625,28 +631,52 @@ async def _post(app, body: dict, headers: dict | None = None) -> tuple[int, byte
 
 
 EMPTY_LIST_METHODS = ("prompts/list", "resources/list", "resources/templates/list")
+# Korak 21: metode koje SDK u modernoj eri (2026-07-28) odbija s -32601 Method not found (HTTP 404) bez učitavanja
+# ičega: subscriptions/listen (subscriptions=False) i metode kojih u toj verziji više nema
+MODERN_NOT_FOUND = ("subscriptions/listen", "ping", "initialize", "logging/setLevel", "resources/subscribe",
+                    "resources/unsubscribe")
+MODERN_RESULTS = ("server/discover", "tools/list", *EMPTY_LIST_METHODS)
+# subscriptions/listen bez filtra SDK odbija s -32602 (parametri se provjeravaju prije "method not found")
+MODERN_PARAMS = {"subscriptions/listen": {"notifications": {"toolsListChanged": True}}}
+
+
+def modern_meta(version: str) -> dict:
+    """_meta zahtjeva moderne ere (2026-07-28): verzija, sposobnosti i podaci o klijentu."""
+    return {"io.modelcontextprotocol/protocolVersion": version, "io.modelcontextprotocol/clientCapabilities": {},
+            "io.modelcontextprotocol/clientInfo": {"name": "snapshot", "version": "1"}}
+
+
+def modern_headers(version: str, method: str) -> dict:
+    return {"mcp-protocol-version": version, "mcp-method": method}
 
 
 def static_snapshot() -> dict:
     """Odgovori SDK-a (ovog poslužitelja) na initialize, tools/list i prazne popise (EMPTY_LIST_METHODS), za
     web.fast_reply: rezultat initialize jednak je za sve verzije handshakea osim protocolVersion (tražena verzija,
-    inače fallback_version)."""
+    inače fallback_version). Korak 21, moderna era (MODERN_PROTOCOL_VERSIONS, bez handshakea, _meta u svakom
+    zahtjevu): rezultati MODERN_RESULTS i greške (status, error) za MODERN_NOT_FOUND, po verziji."""
     import asyncio
 
-    from mcp_types.version import HANDSHAKE_PROTOCOL_VERSIONS
+    from mcp_types.version import HANDSHAKE_PROTOCOL_VERSIONS, MODERN_PROTOCOL_VERSIONS
 
     def init(v):
         return {"jsonrpc": "2.0", "id": 1, "method": "initialize",
                 "params": {"protocolVersion": v, "capabilities": {}, "clientInfo": {"name": "snapshot", "version": "1"}}}
 
+    def modern(v, m):
+        return _post(app, {"jsonrpc": "2.0", "id": 4, "method": m, "params": {**MODERN_PARAMS.get(m, {}), "_meta": modern_meta(v)}},
+                     modern_headers(v, m))
+
     async def go():
-        app = sdk_app(create_server())  # bez con i db_path: zadana baza se ne mijenja ni ne otvara
         async with app.router.lifespan_context(app):
             inits = {v: await _post(app, init(v)) for v in (*HANDSHAKE_PROTOCOL_VERSIONS, "0000-00-00")}
             tools = await _post(app, {"jsonrpc": "2.0", "id": 2, "method": "tools/list"})
             lists = {m: await _post(app, {"jsonrpc": "2.0", "id": 3, "method": m}) for m in EMPTY_LIST_METHODS}
-        return inits, tools, lists
-    inits, tools, lists = asyncio.run(go())
+            mod = {v: {m: await modern(v, m) for m in (*MODERN_RESULTS, *MODERN_NOT_FOUND)}
+                   for v in MODERN_PROTOCOL_VERSIONS}
+        return inits, tools, lists, mod
+    app = sdk_app(create_server())  # bez con i db_path: zadana baza se ne mijenja ni ne otvara
+    inits, tools, lists, mod = asyncio.run(go())
     for m, (status, body) in lists.items():
         assert status == 200, (m, status, body[:200])
     results = {}
@@ -657,11 +687,25 @@ def static_snapshot() -> dict:
     for v in HANDSHAKE_PROTOCOL_VERSIONS:
         assert results[v]["protocolVersion"] == v and dict(results[v], protocolVersion=None) == base, v
     assert tools[0] == 200
+    modern_out = {}
+    for v, replies in mod.items():
+        res, err = {}, {}
+        for m, (status, body) in replies.items():
+            msg = json.loads(body)
+            if m in MODERN_RESULTS:
+                assert status == 200 and "result" in msg, (v, m, status, body[:200])
+                res[m] = msg["result"]
+            else:
+                assert status == 404 and msg["error"]["code"] == -32601, (v, m, status, body[:200])
+                err[m] = [status, msg["error"]]
+        assert res["server/discover"]["capabilities"] == {"tools": {"listChanged": False}}, res["server/discover"]
+        modern_out[v] = {"results": res, "errors": err}
     return {"_comment": "Snimka odgovora MCP SDK-a za web.fast_reply; python -m mealmeter.server --write-static",
             "handshake_versions": list(HANDSHAKE_PROTOCOL_VERSIONS),
             "fallback_version": results["0000-00-00"]["protocolVersion"],
             "initialize": base, "tools_list": json.loads(tools[1])["result"],
-            "empty_lists": {m: json.loads(body)["result"] for m, (_, body) in lists.items()}}
+            "empty_lists": {m: json.loads(body)["result"] for m, (_, body) in lists.items()},
+            "modern": modern_out}
 
 
 def write_static() -> None:
