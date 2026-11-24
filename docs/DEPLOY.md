@@ -82,6 +82,9 @@ Ako POST /mcp vrati `405` s `server: Vercel` i `allow: GET, HEAD`, zahtjev ne st
    Retci cijena i trgovine s praznim `store_id` (Korak 20) preskaču se uz `::warning::` i redak u sažetku (te
    trgovine nasljeđuju jučerašnje cijene); lanac s više od 50 % takvih redaka cijena izostavlja se i ide kroz
    carry-forward kao da nije objavio cjenik (`build.MAX_EMPTY_STORE_SHARE`), bez blokade baze.
+   Lanac kojem nedostaje, prazna je ili nečitljiva neka od datoteka `stores.csv`, `products.csv`, `prices.csv`
+   (Korak 22, `build.CHAIN_FILES`) izostavlja se uz `::warning title=Datoteke lanca …::` i redak u sažetku, a
+   cijeli lanac ide kroz carry-forward kao da nije objavio cjenik, bez blokade baze.
 
 ## 4. Postavke (po želji: Project Settings → Environment Variables)
 

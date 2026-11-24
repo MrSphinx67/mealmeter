@@ -90,6 +90,54 @@ def describe_empty_stores(e: dict) -> str:
             f"{what}")
 
 
+# Datoteke lanca (Korak 22): arhiva 24.11.2026., trgovina-krk ima samo stores.csv (nema products.csv ni prices.csv),
+# pa je provjera praznog store_id pala na "No files found". Lanac kojem bilo koja od ovih datoteka nedostaje, prazna
+# je (0 B ili samo zaglavlje), nema potrebnih stupaca ili se ne da pročitati ne učitava se: kao da taj dan nije objavio
+# cjenik (carry-forward lanca, chain_report), uz upozorenje; baza se zbog toga ne blokira. Stupci su oni koje
+# učitavanje i izgradnja čitaju; stores i products se učitavaju tim redom (dodatni stupci u CSV-u se ne učitavaju).
+CHAIN_FILES = {
+    "stores.csv": ["store_id", "type", "address", "city", "zipcode"],
+    "products.csv": ["product_id", "barcode", "name", "brand", "category", "unit", "quantity"],
+    "prices.csv": ["store_id", "product_id", *PRICE_COLS],
+}
+
+
+def _short_error(e: Exception) -> str:
+    msg = str(e).strip().splitlines()[0] if str(e).strip() else type(e).__name__
+    return msg if len(msg) <= 160 else msg[:157] + "..."
+
+
+def chain_file_problems(con: duckdb.DuckDBPyConnection, root: Path, chain: str) -> list[str]:
+    """Što ne valja s datotekama lanca (prazno: sve u redu): nedostaje, prazna, bez stupaca ili nečitljiva.
+
+    Jeftino: samo zaglavlje i prvi redak (sniffer); kvar dalje u datoteci hvata učitavanje (load_raw)."""
+    problems = []
+    for name, cols in CHAIN_FILES.items():
+        path = Path(root) / chain / name
+        if not path.is_file():
+            problems.append(f"nedostaje {name}")
+            continue
+        try:
+            if path.stat().st_size == 0:
+                problems.append(f"{name} prazna (0 B)")
+                continue
+            src = f"read_csv('{path}', {CSV_OPTS})"
+            have = {r[0] for r in con.execute(f"DESCRIBE SELECT * FROM {src}").fetchall()}
+            missing = [c for c in cols if c not in have]
+            if missing:
+                problems.append(f"{name} nečitljiva (nema stupaca {', '.join(missing)})")
+            elif con.execute(f"SELECT 1 FROM {src} LIMIT 1").fetchone() is None:
+                problems.append(f"{name} prazna (samo zaglavlje)")
+        except CSV_ERRORS as e:
+            problems.append(f"{name} nečitljiva ({_short_error(e)})")
+    return problems
+
+
+def describe_broken_chain(b: dict) -> str:
+    """Jedan redak za lanac s datotekom koja nedostaje, prazna je ili nečitljiva (iz load_raw)."""
+    return f"{b['chain']}: {'; '.join(b['problems'])}; lanac izostavljen (carry-forward kao da nije objavio cjenik)"
+
+
 def price_sql(col: str) -> str:
     """SQL: sirova cijena (tekst) u DECIMAL(10,2); prazno je NULL, decimalni zarez se prihvaća, ostalo NULL."""
     t = f"trim({col})"
@@ -108,15 +156,73 @@ def describe_bad_prices(b: dict) -> str:
             f"primjeri: {'; '.join(b['examples'])}")
 
 
+# greške čitanja CSV-a (nedostaje, kvar formata, nepoznat stupac); OutOfMemory i prekid nisu tu: oni ruše izgradnju
+CSV_ERRORS = (duckdb.IOException, duckdb.InvalidInputException, duckdb.ConversionException, duckdb.BinderException,
+              duckdb.ParserException, OSError)
+
+
+def _load_chain(con: duckdb.DuckDBPyConnection, raw, chain: str, archive_date: str, casts: str, bad: str,
+                create: bool) -> tuple[dict | None, dict | None]:
+    """Jedan lanac u sirove tablice (poziva load_raw u transakciji). Vraća (empty_info, bad_info); lanac s previše
+    praznih store_id (empty_info["dropped"]) se ne učitava."""
+    n_all, n_empty = con.execute(f"SELECT count(*), count(*) FILTER (WHERE {EMPTY_STORE_SQL}) "
+                                 f"FROM {raw(chain, 'prices.csv')}").fetchone()
+    s_all, s_empty = con.execute(f"SELECT count(*), count(*) FILTER (WHERE {EMPTY_STORE_SQL}) "
+                                 f"FROM {raw(chain, 'stores.csv')}").fetchone()
+    empty_info = None
+    if n_empty or s_empty:
+        empty_info = {"chain": chain, "prices": n_empty, "total": n_all,
+                      "pct": 100 * n_empty / n_all if n_all else 0.0, "stores": s_empty, "stores_total": s_all,
+                      "dropped": n_empty > n_all * MAX_EMPTY_STORE_SHARE}
+        if empty_info["dropped"]:
+            return empty_info, None
+    n_total, n_bad = con.execute(
+        f"SELECT count(*), count(*) FILTER (WHERE {bad}) FROM {raw(chain, 'prices.csv')} "
+        f"WHERE NOT ({EMPTY_STORE_SQL})").fetchone()
+    bad_info = None
+    if n_bad:
+        # primjer: trgovina/šifra i sirove vrijednosti samo neparsabilnih stupaca
+        flags = ", ".join(f"{bad_price_sql(c)}" for c in PRICE_COLS)
+        rows = con.execute(
+            f"SELECT store_id, product_id, {', '.join(PRICE_COLS)}, {flags} FROM {raw(chain, 'prices.csv')} "
+            f"WHERE ({bad}) AND NOT ({EMPTY_STORE_SQL}) ORDER BY store_id, product_id "
+            f"LIMIT {BAD_PRICE_EXAMPLES}").fetchall()
+        k = len(PRICE_COLS)
+        examples = [f"{r[0]}/{r[1]} " + ", ".join(f"{c}={v!r}" for c, v, f in zip(PRICE_COLS, r[2:2 + k], r[2 + k:])
+                                                if f)
+                    for r in rows]
+        bad_info = {"chain": chain, "bad": n_bad, "total": n_total, "pct": 100 * n_bad / n_total,
+                    "examples": examples}
+        if n_bad > n_total * MAX_BAD_PRICE_SHARE:
+            raise BadPriceError(f"{describe_bad_prices(bad_info)}; više od {100 * MAX_BAD_PRICE_SHARE:g} % redaka "
+                                f"lanca, baza odbijena")
+    verb = "CREATE TABLE {} AS" if create else "INSERT INTO {}"
+    store_cols = ", ".join(CHAIN_FILES["stores.csv"])
+    product_cols = ", ".join(CHAIN_FILES["products.csv"])
+    con.execute(f"{verb.format('stores')} SELECT '{chain}' AS chain, {store_cols} FROM {raw(chain, 'stores.csv')} "
+                f"WHERE NOT ({EMPTY_STORE_SQL})")
+    con.execute(f"{verb.format('products')} SELECT '{chain}' AS chain, {product_cols} "
+                f"FROM {raw(chain, 'products.csv')}")
+    con.execute(
+        f"{verb.format('prices')} SELECT '{chain}' AS chain, store_id, product_id, {casts}, "
+        f"DATE '{archive_date}' AS date FROM {raw(chain, 'prices.csv')} WHERE NOT ({bad}) "
+        f"AND NOT ({EMPTY_STORE_SQL})"
+    )
+    return empty_info, bad_info
+
+
 def load_raw(con: duckdb.DuckDBPyConnection, root: Path, archive_date: str,
-             bad_prices: list[dict] | None = None, empty_stores: list[dict] | None = None) -> list[str]:
+             bad_prices: list[dict] | None = None, empty_stores: list[dict] | None = None,
+             broken_chains: list[dict] | None = None) -> list[str]:
     """Sirovi CSV-ovi u tablice stores/products/prices, bez normalizacije.
 
     Dodaje stupac `chain` (naziv mape) i `date` (dan iz naziva arhive) u prices. Retci s neparsabilnom cijenom se
     preskaču i dodaju u `bad_prices` ({chain, bad, total, pct, examples}); više od MAX_BAD_PRICE_SHARE takvih redaka
     jednog lanca diže BadPriceError. Retci cijena i trgovine s praznim store_id se preskaču i dodaju u `empty_stores`
     ({chain, prices, total, pct, stores, stores_total, dropped}); kad je takvih više od MAX_EMPTY_STORE_SHARE redaka
-    cijena lanca, lanac se ne učitava (dropped) i vraćeni popis ga nema.
+    cijena lanca, lanac se ne učitava (dropped) i vraćeni popis ga nema. Lanac kojem neka od CHAIN_FILES
+    nedostaje, prazna je ili nečitljiva (i kad se kvar pokaže tek pri čitanju cijele datoteke) ne učitava se i dodaje se
+    u `broken_chains` ({chain, problems}).
     """
 
     def raw(chain: str, name: str) -> str:
@@ -128,50 +234,36 @@ def load_raw(con: duckdb.DuckDBPyConnection, root: Path, archive_date: str,
     casts = ", ".join(f"{price_sql(c)} AS {c}" for c in PRICE_COLS)
     bad = " OR ".join(bad_price_sql(c) for c in PRICE_COLS)
     loaded = []
+
+    def broken(chain: str, problems: list[str]) -> None:
+        if broken_chains is not None:
+            broken_chains.append({"chain": chain, "problems": problems})
+
     for chain in chains:
-        n_all, n_empty = con.execute(f"SELECT count(*), count(*) FILTER (WHERE {EMPTY_STORE_SQL}) "
-                                     f"FROM {raw(chain, 'prices.csv')}").fetchone()
-        s_all, s_empty = con.execute(f"SELECT count(*), count(*) FILTER (WHERE {EMPTY_STORE_SQL}) "
-                                     f"FROM {raw(chain, 'stores.csv')}").fetchone()
-        if n_empty or s_empty:
-            info = {"chain": chain, "prices": n_empty, "total": n_all,
-                    "pct": 100 * n_empty / n_all if n_all else 0.0, "stores": s_empty, "stores_total": s_all,
-                    "dropped": n_empty > n_all * MAX_EMPTY_STORE_SHARE}
-            if empty_stores is not None:
-                empty_stores.append(info)
-            if info["dropped"]:
-                continue
-        n_total, n_bad = con.execute(
-            f"SELECT count(*), count(*) FILTER (WHERE {bad}) FROM {raw(chain, 'prices.csv')} "
-            f"WHERE NOT ({EMPTY_STORE_SQL})").fetchone()
-        if n_bad:
-            # primjer: trgovina/šifra i sirove vrijednosti samo neparsabilnih stupaca
-            flags = ", ".join(f"{bad_price_sql(c)}" for c in PRICE_COLS)
-            rows = con.execute(
-                f"SELECT store_id, product_id, {', '.join(PRICE_COLS)}, {flags} FROM {raw(chain, 'prices.csv')} "
-                f"WHERE ({bad}) AND NOT ({EMPTY_STORE_SQL}) ORDER BY store_id, product_id "
-                f"LIMIT {BAD_PRICE_EXAMPLES}").fetchall()
-            k = len(PRICE_COLS)
-            examples = [f"{r[0]}/{r[1]} " + ", ".join(f"{c}={v!r}" for c, v, f in zip(PRICE_COLS, r[2:2 + k], r[2 + k:])
-                                                    if f)
-                        for r in rows]
-            info = {"chain": chain, "bad": n_bad, "total": n_total, "pct": 100 * n_bad / n_total,
-                    "examples": examples}
-            if n_bad > n_total * MAX_BAD_PRICE_SHARE:
-                raise BadPriceError(f"{describe_bad_prices(info)}; više od {100 * MAX_BAD_PRICE_SHARE:g} % redaka "
-                                    f"lanca, baza odbijena")
-            if bad_prices is not None:
-                bad_prices.append(info)
-        verb = "CREATE TABLE {} AS" if not loaded else "INSERT INTO {}"
-        con.execute(f"{verb.format('stores')} SELECT '{chain}' AS chain, * FROM {raw(chain, 'stores.csv')} "
-                    f"WHERE NOT ({EMPTY_STORE_SQL})")
-        con.execute(f"{verb.format('products')} SELECT '{chain}' AS chain, * FROM {raw(chain, 'products.csv')}")
-        con.execute(
-            f"{verb.format('prices')} SELECT '{chain}' AS chain, store_id, product_id, {casts}, "
-            f"DATE '{archive_date}' AS date FROM {raw(chain, 'prices.csv')} WHERE NOT ({bad}) "
-            f"AND NOT ({EMPTY_STORE_SQL})"
-        )
-        loaded.append(chain)
+        problems = chain_file_problems(con, root, chain)
+        if problems:
+            broken(chain, problems)
+            continue
+        # cijeli lanac u jednoj transakciji: kvar usred datoteke (CSV greška tek u kasnijem retku) ne ostavlja
+        # pola lanca u tablicama, a lanac se tretira kao da nije objavio cjenik
+        con.execute("BEGIN TRANSACTION")
+        try:
+            result = _load_chain(con, raw, chain, archive_date, casts, bad, create=not loaded)
+        except CSV_ERRORS as e:
+            con.execute("ROLLBACK")
+            broken(chain, [f"nečitljiva datoteka ({_short_error(e)})"])
+            continue
+        except BaseException:
+            con.execute("ROLLBACK")
+            raise
+        con.execute("COMMIT")
+        empty_info, bad_info = result
+        if empty_info and empty_stores is not None:
+            empty_stores.append(empty_info)
+        if bad_info and bad_prices is not None:
+            bad_prices.append(bad_info)
+        if not (empty_info and empty_info["dropped"]):
+            loaded.append(chain)
     if not loaded:
         raise ValueError(f"{root}: nijedan lanac nije učitan")
     return loaded

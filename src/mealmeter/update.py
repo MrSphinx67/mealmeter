@@ -5,6 +5,8 @@ Izlazni kodovi: 0 = uspjeh ili arhiva već učitana, 1 = greška, 2 = provjera n
 build.MAX_BAD_PRICE_SHARE redaka s neparsabilnom cijenom). Pojedini neparsabilni retci se preskaču uz upozorenje.
 Retci i trgovine s praznim store_id (Korak 20) se preskaču uz upozorenje; lanac s više od build.MAX_EMPTY_STORE_SHARE
 takvih redaka cijena izostavlja se (carry-forward kao da nije objavio cjenik), baza se ne blokira.
+Lanac kojem nedostaje, prazna je ili nečitljiva neka od datoteka stores/products/prices.csv (Korak 22) izostavlja se
+uz upozorenje (carry-forward kao da nije objavio cjenik), baza se ne blokira.
 Izvor ne blokira (Korak 8): izostali ili prepolovljeni lanac nasljeđuje prethodne cijene (carry-forward, najviše
 CARRY_DAYS dana), a on i ukupni pad sirovih cijena javljaju se kao upozorenja.
 """
@@ -23,7 +25,8 @@ from pathlib import Path
 
 import duckdb
 
-from mealmeter.build import CSV_OPTS, BadPriceError, build_clean, describe_bad_prices, describe_empty_stores, load_raw
+from mealmeter.build import (CHAIN_FILES, CSV_ERRORS, CSV_OPTS, BadPriceError, build_clean, chain_file_problems,
+                             describe_bad_prices, describe_broken_chain, describe_empty_stores, load_raw)
 from mealmeter.normalize import PRICE_REF_UNIT_RX
 
 LIST_URL = "https://api.cijene.dev/v0/list"
@@ -139,7 +142,8 @@ def extract(zip_path: Path, dest: Path) -> Path:
                 raise RuntimeError(f"sumnjiva putanja u arhivi: {member}")
         z.extractall(dest)
     chains = [p for p in dest.iterdir() if p.is_dir()]
-    if len(chains) == 1 and not (chains[0] / "prices.csv").exists():
+    # jedna korijenska mapa bez ijedne datoteke lanca; lanac s nekom od njih je lanac (i kad mu prices.csv nedostaje)
+    if len(chains) == 1 and not any((chains[0] / name).exists() for name in CHAIN_FILES):
         return chains[0]  # arhiva s jednom korijenskom mapom
     return dest
 
@@ -235,15 +239,19 @@ def describe_chain(r: dict, max_days: int = CARRY_DAYS) -> str:
 
 
 def github_report(report: list[dict], error: str | None = None, total: dict | None = None,
-                  bad_prices: list[dict] | None = None, empty_stores: list[dict] | None = None) -> None:
+                  bad_prices: list[dict] | None = None, empty_stores: list[dict] | None = None,
+                  broken_chains: list[dict] | None = None) -> None:
     """U GitHub Actionsu: ::warning:: za ukupni pad sirovih cijena (total_drop), po lancu, za preskočene retke s
-    neparsabilnom cijenom (bad_prices, Korak 18) i s praznim store_id (empty_stores, Korak 20), ::error:: kad
+    neparsabilnom cijenom (bad_prices, Korak 18), s praznim store_id (empty_stores, Korak 20), za lance s datotekom
+    koja nedostaje, prazna je ili nečitljiva (broken_chains, Korak 22), ::error:: kad
     provjera nije prošla, i sažetak u GITHUB_STEP_SUMMARY. Izvan Actionsa ne radi ništa."""
     if os.environ.get("GITHUB_ACTIONS") != "true":
         return
     for b in bad_prices or []:
         print(f"::warning title=Neparsabilne cijene {b['chain']}::{describe_bad_prices(b)}; retci preskočeni",
               flush=True)
+    for c in broken_chains or []:
+        print(f"::warning title=Datoteke lanca {c['chain']}::{describe_broken_chain(c)}", flush=True)
     for e in empty_stores or []:
         print(f"::warning title=Prazan store_id {e['chain']}::{describe_empty_stores(e)}", flush=True)
     if total:
@@ -253,7 +261,7 @@ def github_report(report: list[dict], error: str | None = None, total: dict | No
     if error:
         print(f"::error title=update.py::{error}; baza nije promijenjena, ne deployam", flush=True)
     path = os.environ.get("GITHUB_STEP_SUMMARY")
-    if not path or not (report or error or total or bad_prices or empty_stores):
+    if not path or not (report or error or total or bad_prices or empty_stores or broken_chains):
         return
     lines = ["### update.py: lanci", ""]
     if error:
@@ -262,6 +270,8 @@ def github_report(report: list[dict], error: str | None = None, total: dict | No
         examples = "; ".join(f"`{e}`" for e in b["examples"])
         lines += [f"**Neparsabilne cijene, {b['chain']}:** preskočeno {b['bad']} od {b['total']} redaka "
                   f"({b['pct']:.2f} %); primjeri: {examples}", ""]
+    for c in broken_chains or []:
+        lines += [f"**Datoteke lanca, {c['chain']}:** {describe_broken_chain(c)}", ""]
     for e in empty_stores or []:
         lines += [f"**Prazan store_id, {e['chain']}:** {describe_empty_stores(e)}", ""]
     if total:
@@ -381,9 +391,17 @@ def remember_fields(con, old_db: Path | None, date: str, seed_root: Path | None 
                                 {f"DATE '{prev}'" if prev else f"DATE '{date}'"}, 0 FROM fprev.main.products""")
             if seed_root is not None:
                 for chain_dir in sorted(p for p in Path(seed_root).iterdir() if (p / "products.csv").exists()):
-                    con.execute(f"""INSERT INTO mem SELECT '{chain_dir.name}', product_id, barcode, category, unit,
-                                    quantity, DATE '{date}', 1
-                                    FROM read_csv('{chain_dir / "products.csv"}', {CSV_OPTS})""")
+                    # prazna ili nečitljiva datoteka (Korak 22): lanac se preskače, memorija se puni iz ostalih
+                    problems = [m for m in chain_file_problems(con, seed_root, chain_dir.name) if "products.csv" in m]
+                    if problems:
+                        log(f"memorija polja proizvoda: {chain_dir.name} preskočen ({'; '.join(problems)})")
+                        continue
+                    try:
+                        con.execute(f"""INSERT INTO mem SELECT '{chain_dir.name}', product_id, barcode, category,
+                                        unit, quantity, DATE '{date}', 1
+                                        FROM read_csv('{chain_dir / "products.csv"}', {CSV_OPTS})""")
+                    except CSV_ERRORS as e:
+                        log(f"memorija polja proizvoda: {chain_dir.name} preskočen (nečitljiva products.csv: {e})")
     finally:
         if attached:
             con.execute("DETACH fprev")
@@ -516,7 +534,8 @@ def build_database(root: Path, date: str, db_path: Path, keep_days: int = KEEP_D
         con = duckdb.connect(str(tmp))
         bad_prices: list[dict] = []
         empty_stores: list[dict] = []
-        load_raw(con, root, date, bad_prices, empty_stores)
+        broken_chains: list[dict] = []
+        load_raw(con, root, date, bad_prices, empty_stores, broken_chains)
         stats = archive_stats(con)
         warnings = validate(stats, prev_stats if prev_date != date else [])
         total = total_drop(stats, prev_stats if prev_date != date else [], max_drop)
@@ -576,6 +595,7 @@ def build_database(root: Path, date: str, db_path: Path, keep_days: int = KEEP_D
             "price_rows_previous": sum(r[3] for r in prev_stats) if prev_stats else None,
             "diff": compare_stats(stats, prev_stats) if prev_stats and prev_date != date else [],
             "carried": carried, "fields_filled": filled, "bad_prices": bad_prices, "empty_stores": empty_stores,
+            "broken_chains": broken_chains,
             "nonfood_stores": (build_stats or {}).get("nonfood_stores", []),
             "clean_prices": n_clean, "clean_prices_previous": prev_clean,
             "history_days": [d.isoformat() for (d,) in con.execute(
@@ -697,6 +717,8 @@ def run(argv: list[str] | None = None) -> int:
         print(f"  ! {w}")
     for b in summary["bad_prices"]:
         print(f"  ! {describe_bad_prices(b)}; retci preskočeni")
+    for c in summary["broken_chains"]:
+        print(f"  ! {describe_broken_chain(c)}")
     for e in summary["empty_stores"]:
         print(f"  ! {describe_empty_stores(e)}")
     for r in summary["chain_report"]:
@@ -720,7 +742,7 @@ def run(argv: list[str] | None = None) -> int:
         for chain, st, dst, pr, dpr, pc, dpc in summary["diff"]:
             print(f"  {chain:<28}{st:>9}{dst:>+6}{pr:>11}{dpr:>+8}{pc:>11}{dpc:>+9}")
     github_report(summary["chain_report"], total=summary["total_drop"], bad_prices=summary["bad_prices"],
-                  empty_stores=summary["empty_stores"])
+                  empty_stores=summary["empty_stores"], broken_chains=summary["broken_chains"])
     return 0
 
 
